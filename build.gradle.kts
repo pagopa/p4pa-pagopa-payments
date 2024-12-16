@@ -10,7 +10,7 @@ plugins {
 
 group = "it.gov.pagopa.payhub"
 version = "0.0.1"
-description = "template-payments-java-repository"
+description = "p4pa-pagopa-payments"
 
 java {
 	toolchain {
@@ -92,15 +92,15 @@ configure<SourceSetContainer> {
 }
 
 springBoot {
-	mainClass.value("it.gov.pagopa.template.TemplateApplication")
+	mainClass.value("it.gov.pagopa.pu.pagopapayments.PagoPaPaymentsApplication")
 }
 
 openApiGenerate {
   generatorName.set("spring")
-  inputSpec.set("$rootDir/openapi/template-payments-java-repository.openapi.yaml")
+  inputSpec.set("$rootDir/openapi/p4pa-pagopa-payments.openapi.yaml")
   outputDir.set("$projectDir/build/generated")
-  apiPackage.set("it.gov.pagopa.template.controller.generated")
-  modelPackage.set("it.gov.pagopa.template.dto.generated")
+  apiPackage.set("it.gov.pagopa.pu.pagopapayments.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.pagopapayments.dto.generated")
   configOptions.set(mapOf(
     "dateLibrary" to "java8",
     "requestMappingMode" to "api_interface",

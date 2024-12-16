@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: Fake API
+  title: p4pa-pagopa-payments
   description: "Sample API"
-  version: "1.0.0"
+  version: Api and Models
 paths:
   /api/v1/greet:
     get:

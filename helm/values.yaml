@@ -29,7 +29,7 @@ microservice-chart:
 
   ingress:
     create: true
-    path: /templatepaymentsjavarepository/(.*)
+    path: /p4papagopapayments/(.*)
 
   serviceAccount:
     create: false
@@ -55,7 +55,7 @@ microservice-chart:
         key: applicationinsights.json
 
   envConfig:
-    APPLICATIONINSIGHTS_ROLE_NAME: "templatepaymentsjavarepository"
+    APPLICATIONINSIGHTS_ROLE_NAME: "p4pa-pagopa-payments"
     APPLICATIONINSIGHTS_INSTRUMENTATION_LOGGING_LEVEL: "OFF"
     APPLICATIONINSIGHTS_INSTRUMENTATION_MICROMETER_ENABLED: "false"
     APPLICATIONINSIGHTS_PREVIEW_PROFILER_ENABLED: "false"

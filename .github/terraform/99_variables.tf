@@ -48,6 +48,6 @@ variable "github_repository_environment" {
   default = {
     protected_branches     = false
     custom_branch_policies = true
-    reviewers_teams        = ["CHANGE_ME"]
+    reviewers_teams        = ["p4pa-admins"]
   }
 }

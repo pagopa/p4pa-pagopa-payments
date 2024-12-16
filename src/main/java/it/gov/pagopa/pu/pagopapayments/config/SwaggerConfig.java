@@ -1,4 +1,4 @@
-package it.gov.pagopa.template.config;
+package it.gov.pagopa.pu.pagopapayments.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

@@ -1,0 +1,49 @@
+name: TEMPLATE-PAYMENTS - Code Review
+
+on:
+  push:
+    branches:
+      - main
+      - uat
+      - develop
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 #v4.2.1
+        with:
+          distribution: 'corretto'
+          java-version: 21
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        working-directory: ./
+        run: ./gradlew clean build jacocoTestReport
+
+      - name: Sonar Scan
+        working-directory: ./
+        run: >
+          ./gradlew sonar
+          -Dorg.gradle.jvmargs=-Xmx4096M
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.organization=${{ vars.SONARCLOUD_ORG }}
+          -Dsonar.projectKey=${{ vars.SONARCLOUD_PROJECT_KEY }}
+          -Dsonar.projectName="${{ vars.SONARCLOUD_PROJECT_NAME }}"
+          -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.sources=src/main
+          -Dsonar.tests=src/test
+          -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+          -Dsonar.exclusions='**/enums/**, **/model/**, **/dto/**, **/*Constant*, **/*Config.java, **/*Scheduler.java, **/*Application.java, **/src/test/**, **/Dummy*.java'

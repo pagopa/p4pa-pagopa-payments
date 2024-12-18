@@ -18,15 +18,12 @@ import org.springframework.web.client.RestTemplate;
 public class OrganizationClientImpl implements OrganizationClient{
 
   private final OrganizationEntityControllerApi organizationEntityControllerApi;
-  private final OrganizationSearchControllerApi organizationSearchControllerApi;
   private final BrokerEntityControllerApi brokerEntityControllerApi;
 
   public OrganizationClientImpl(@Value("${app.organization.base-url}") String organizationBaseUrl,
                                 RestTemplateBuilder restTemplateBuilder){
     RestTemplate restTemplate = restTemplateBuilder.build();
     this.organizationEntityControllerApi = new OrganizationEntityControllerApi(
-      new ApiClient(restTemplate).setBasePath(organizationBaseUrl) );
-    this.organizationSearchControllerApi = new OrganizationSearchControllerApi(
       new ApiClient(restTemplate).setBasePath(organizationBaseUrl) );
     this.brokerEntityControllerApi = new BrokerEntityControllerApi(
       new ApiClient(restTemplate).setBasePath(organizationBaseUrl) );
@@ -39,6 +36,7 @@ public class OrganizationClientImpl implements OrganizationClient{
       () -> brokerEntityControllerApi.getItemResourceBrokerGet(String.valueOf(brokerId)),
       () -> "getBrokerById[%s]".formatted(brokerId)
     );
+    //TODO invoke method returing decrypted ACA key
     return broker.getAcaKey().toString();
   }
 

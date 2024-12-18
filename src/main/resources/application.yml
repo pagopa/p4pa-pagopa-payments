@@ -23,3 +23,5 @@ app:
     base-url: "\${AUTH_SERVER_BASE_URL:}"
   organization:
     base-url: "\${ORGANIZATION_BASE_URL:}"
+  aca:
+    base-url: "\${ACA_BASE_URL:}"

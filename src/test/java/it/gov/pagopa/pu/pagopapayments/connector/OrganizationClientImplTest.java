@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
+import it.gov.pagopa.pu.p4pa_organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.p4pa_organization.dto.generated.EntityModelBroker;
 import it.gov.pagopa.pu.p4pa_organization.dto.generated.EntityModelOrganization;
 import org.junit.jupiter.api.Assertions;
@@ -42,10 +43,8 @@ public class OrganizationClientImplTest {
     .organizationId(VALID_ORG_ID)
     .brokerId(VALID_BROKER_ID)
     .applicationCode("01");
-  private static final EntityModelBroker VALID_BROKER = new EntityModelBroker()
-    .organizationId(VALID_ORG_ID)
-    .brokerId(VALID_BROKER_ID)
-    .acaKey(VALID_ACA_KEY.getBytes(StandardCharsets.UTF_8));
+  private static final BrokerApiKeys VALID_BROKER_API_KEYS = new BrokerApiKeys()
+    .acaKey(VALID_ACA_KEY);
 
   @BeforeEach
   void setUp() {
@@ -113,10 +112,10 @@ public class OrganizationClientImplTest {
   @Test
   void givenValidBrokerWhenGetAcaApiKeyByBrokerIdThenOk(){
     //given
-    ResponseEntity<EntityModelBroker> responseEntity = new ResponseEntity<>(VALID_BROKER, HttpStatus.OK);
+    ResponseEntity<BrokerApiKeys> responseEntity = new ResponseEntity<>(VALID_BROKER_API_KEYS, HttpStatus.OK);
     Mockito.when(restTemplateMock.exchange(
       Mockito.any(RequestEntity.class),
-      Mockito.eq(new ParameterizedTypeReference<EntityModelBroker>() {})
+      Mockito.eq(new ParameterizedTypeReference<BrokerApiKeys>() {})
     )).thenReturn(responseEntity);
 
     //when
@@ -125,6 +124,6 @@ public class OrganizationClientImplTest {
     //verify
     Assertions.assertEquals(VALID_ACA_KEY, response);
     Mockito.verify(restTemplateMock, Mockito.times(1))
-      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<EntityModelBroker>() {}));
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<BrokerApiKeys>() {}));
   }
 }

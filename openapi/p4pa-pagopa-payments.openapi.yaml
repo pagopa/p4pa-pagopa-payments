@@ -29,3 +29,10 @@ paths:
                   error:
                     type: string
                     example: "Internal Server Error"
+security:
+  - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

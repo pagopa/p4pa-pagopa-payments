@@ -34,21 +34,21 @@ public class AcaService {
     this.brokerService = brokerService;
   }
 
-  public void create(DebtPositionDTO debtPosition) {
-    invokePaCreatePositionImpl(debtPosition, OPERATION.CREATE);
+  public void create(DebtPositionDTO debtPosition, String accessToken) {
+    invokePaCreatePositionImpl(debtPosition, OPERATION.CREATE, accessToken);
   }
 
-  public void update(DebtPositionDTO debtPosition) {
-    invokePaCreatePositionImpl(debtPosition, OPERATION.UPDATE);
+  public void update(DebtPositionDTO debtPosition, String accessToken) {
+    invokePaCreatePositionImpl(debtPosition, OPERATION.UPDATE, accessToken);
   }
 
-  public void delete(DebtPositionDTO debtPosition) {
-    invokePaCreatePositionImpl(debtPosition, OPERATION.DELETE);
+  public void delete(DebtPositionDTO debtPosition, String accessToken) {
+    invokePaCreatePositionImpl(debtPosition, OPERATION.DELETE, accessToken);
   }
 
-  private void invokePaCreatePositionImpl(DebtPositionDTO debtPosition, OPERATION operation) {
-    List<NewDebtPositionRequest> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, STATUS_TO_SEND_ACA);
-    Pair<BrokerApiKeys, String> brokerData = brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId());
+  private void invokePaCreatePositionImpl(DebtPositionDTO debtPosition, OPERATION operation, String accessToken) {
+    List<NewDebtPositionRequest> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, STATUS_TO_SEND_ACA, accessToken);
+    Pair<BrokerApiKeys, String> brokerData = brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), accessToken);
     debtPostionToSendACA.forEach(newDebtPositionRequest -> {
       if (operation == OPERATION.DELETE) {
         //delete is defined calling the same paCreatePosition api, but having set amount=0

@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
 import it.gov.pagopa.pu.p4pa_debt_positions.dto.generated.DebtPositionTypeOrg;
+import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ public class DebtPositionClientImplTest {
     )).thenReturn(responseEntity);
 
     //when
-    DebtPositionTypeOrg response = debtPositionClient.getDebtPositionTypeOrgById(VALID_DEBT_POSITION_TYPE_ORG_ID);
+    DebtPositionTypeOrg response = debtPositionClient.getDebtPositionTypeOrgById(VALID_DEBT_POSITION_TYPE_ORG_ID, TestUtils.getFakeAccessToken());
 
     //verify
     Assertions.assertEquals(VALID_DEBT_POSITION_TYPE_ORG, response);
@@ -77,7 +78,7 @@ public class DebtPositionClientImplTest {
 
     //when
     RestClientException exception = Assertions.assertThrows(RestClientException.class,
-      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID));
+      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, TestUtils.getFakeAccessToken()));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))
@@ -94,7 +95,7 @@ public class DebtPositionClientImplTest {
 
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID));
+      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, TestUtils.getFakeAccessToken()));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());

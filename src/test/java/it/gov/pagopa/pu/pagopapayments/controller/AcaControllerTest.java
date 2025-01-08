@@ -4,6 +4,8 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentOptionDTO;
 import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
+import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +15,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -43,39 +46,47 @@ class AcaControllerTest {
       .build()))
     .build();
 
+  @AfterEach
+  void clear(){
+    SecurityContextHolder.clearContext();
+  }
+
   @Test
   void givenValidDebtPositionWhenCreateAcaThenOk() {
     //given
-    Mockito.doNothing().when(acaServiceMock).create(VALID_DEBT_POSITION);
+    Mockito.doNothing().when(acaServiceMock).create(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
+    TestUtils.setFakeAccessTokenInContext();
     //when
     ResponseEntity<Void> response = acaController.createAca(VALID_DEBT_POSITION);
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    Mockito.verify(acaServiceMock, Mockito.times(1)).create(VALID_DEBT_POSITION);
+    Mockito.verify(acaServiceMock, Mockito.times(1)).create(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
   }
 
   @Test
   void givenValidDebtPositionWhenUpdateAcaThenOk() {
     //given
-    Mockito.doNothing().when(acaServiceMock).update(VALID_DEBT_POSITION);
+    Mockito.doNothing().when(acaServiceMock).update(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
+    TestUtils.setFakeAccessTokenInContext();
     //when
     ResponseEntity<Void> response = acaController.updateAca(VALID_DEBT_POSITION);
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    Mockito.verify(acaServiceMock, Mockito.times(1)).update(VALID_DEBT_POSITION);
+    Mockito.verify(acaServiceMock, Mockito.times(1)).update(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
   }
 
   @Test
   void givenValidDebtPositionWhenDeleteAcaThenOk() {
     //given
-    Mockito.doNothing().when(acaServiceMock).delete(VALID_DEBT_POSITION);
+    Mockito.doNothing().when(acaServiceMock).delete(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
+    TestUtils.setFakeAccessTokenInContext();
     //when
     ResponseEntity<Void> response = acaController.deleteAca(VALID_DEBT_POSITION);
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    Mockito.verify(acaServiceMock, Mockito.times(1)).delete(VALID_DEBT_POSITION);
+    Mockito.verify(acaServiceMock, Mockito.times(1)).delete(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
   }
 }

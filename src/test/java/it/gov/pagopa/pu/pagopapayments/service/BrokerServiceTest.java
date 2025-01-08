@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.p4pa_organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.OrganizationClientImpl;
 import it.gov.pagopa.pu.pagopapayments.exception.NotFoundException;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
+import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,27 +38,27 @@ public class BrokerServiceTest {
   @Test
   void givenValidOrganizationWhenGetBrokerApiKeyAndSegregationCodesByOrganizationIdThenOk() {
     //given
-    Mockito.when(organizationClientMock.getOrganizationById(VALID_ORG_ID)).thenReturn(VALID_ORG);
-    Mockito.when(organizationClientMock.getApiKeyByBrokerId(VALID_BROKER_ID)).thenReturn(VALID_API_KEYS);
+    Mockito.when(organizationClientMock.getOrganizationById(VALID_ORG_ID, TestUtils.getFakeAccessToken())).thenReturn(VALID_ORG);
+    Mockito.when(organizationClientMock.getApiKeyByBrokerId(VALID_BROKER_ID, TestUtils.getFakeAccessToken())).thenReturn(VALID_API_KEYS);
     //when
-    Pair<BrokerApiKeys, String> response = brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID);
+    Pair<BrokerApiKeys, String> response = brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(VALID_API_KEYS, response.getLeft());
     Assertions.assertEquals(VALID_SEGREGATION_CODE, response.getRight());
-    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationById(VALID_ORG_ID);
-    Mockito.verify(organizationClientMock, Mockito.times(1)).getApiKeyByBrokerId(VALID_BROKER_ID);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationById(VALID_ORG_ID, TestUtils.getFakeAccessToken());
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getApiKeyByBrokerId(VALID_BROKER_ID, TestUtils.getFakeAccessToken());
   }
 
   @Test
   void givenNotFoundOrganizationWhenGetBrokerApiKeyAndSegregationCodesByOrganizationIdThenException() {
     //given
-    Mockito.when(organizationClientMock.getOrganizationById(INVALID_ORG_ID)).thenReturn(null);
+    Mockito.when(organizationClientMock.getOrganizationById(INVALID_ORG_ID, TestUtils.getFakeAccessToken())).thenReturn(null);
     //when
-    NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(INVALID_ORG_ID));
+    NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(INVALID_ORG_ID, TestUtils.getFakeAccessToken()));
     //verify
     Assertions.assertEquals("organization [%s]".formatted(INVALID_ORG_ID), exception.getMessage());
-    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationById(INVALID_ORG_ID);
-    Mockito.verify(organizationClientMock, Mockito.never()).getApiKeyByBrokerId(Mockito.any());
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationById(INVALID_ORG_ID, TestUtils.getFakeAccessToken());
+    Mockito.verify(organizationClientMock, Mockito.never()).getApiKeyByBrokerId(Mockito.any(), Mockito.eq(TestUtils.getFakeAccessToken()));
   }
 }

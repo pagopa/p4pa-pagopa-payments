@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.p4pa_organization.dto.generated.Organization;
 
 public interface OrganizationClient {
 
-  BrokerApiKeys getApiKeyByBrokerId(Long brokerId);
+  BrokerApiKeys getApiKeyByBrokerId(Long brokerId, String accessToken);
 
-  Organization getOrganizationById(Long organizationId);
+  Organization getOrganizationById(Long organizationId, String accessToken);
 }

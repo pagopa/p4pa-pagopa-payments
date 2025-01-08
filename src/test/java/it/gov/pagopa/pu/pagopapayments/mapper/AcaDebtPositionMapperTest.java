@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.p4pa_debt_positions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
+import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -105,32 +106,32 @@ public class AcaDebtPositionMapperTest {
   @Test
   void givenValidDebtPositionExpiringWhenMapToNewDebtPositionRequestThenOk() {
     //given
-    Mockito.when(debtPositionClientMock.getDebtPositionTypeOrgById(TYPE_ORG_ID_EXPIRING)).thenReturn(TYPE_ORG_EXPIRING);
+    Mockito.when(debtPositionClientMock.getDebtPositionTypeOrgById(TYPE_ORG_ID_EXPIRING, TestUtils.getFakeAccessToken())).thenReturn(TYPE_ORG_EXPIRING);
     //when
-    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, Set.of(AcaService.STATUS_INSTALLMENT_TO_SYNCH));
+    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, Set.of(AcaService.STATUS_INSTALLMENT_TO_SYNCH), TestUtils.getFakeAccessToken());
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(2, response.size());
     Assertions.assertEquals(1234, response.get(0).getAmount());
     Assertions.assertEquals(DUE_DATE, response.get(0).getExpirationDate());
     Assertions.assertEquals(DUE_DATE, response.get(1).getExpirationDate());
-    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionTypeOrgById(TYPE_ORG_ID_EXPIRING);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionTypeOrgById(TYPE_ORG_ID_EXPIRING, TestUtils.getFakeAccessToken());
   }
 
   @Test
   void givenValidDebtPositionNonExpiringWhenMapToNewDebtPositionRequestThenOk() {
     //given
     debtPosition.setDebtPositionTypeOrgId(TYPE_ORG_ID_NON_EXPIRING);
-    Mockito.when(debtPositionClientMock.getDebtPositionTypeOrgById(TYPE_ORG_ID_NON_EXPIRING)).thenReturn(TYPE_ORG_NON_EXPIRING);
+    Mockito.when(debtPositionClientMock.getDebtPositionTypeOrgById(TYPE_ORG_ID_NON_EXPIRING, TestUtils.getFakeAccessToken())).thenReturn(TYPE_ORG_NON_EXPIRING);
     //when
-    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, Set.of(AcaService.STATUS_INSTALLMENT_TO_SYNCH));
+    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, Set.of(AcaService.STATUS_INSTALLMENT_TO_SYNCH), TestUtils.getFakeAccessToken());
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(2, response.size());
     Assertions.assertEquals(1234, response.get(0).getAmount());
     Assertions.assertEquals(AcaDebtPositionMapper.MAX_DATE, response.get(0).getExpirationDate());
     Assertions.assertEquals(AcaDebtPositionMapper.MAX_DATE, response.get(1).getExpirationDate());
-    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionTypeOrgById(TYPE_ORG_ID_NON_EXPIRING);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionTypeOrgById(TYPE_ORG_ID_NON_EXPIRING, TestUtils.getFakeAccessToken());
   }
 
 }

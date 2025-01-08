@@ -18,19 +18,22 @@ public class OrganizationClientImpl implements OrganizationClient{
 
   private final OrganizationEntityControllerApi organizationEntityControllerApi;
   private final BrokerApi brokerApi;
+  private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
   public OrganizationClientImpl(@Value("${app.organization.base-url}") String organizationBaseUrl,
                                 RestTemplateBuilder restTemplateBuilder){
     RestTemplate restTemplate = restTemplateBuilder.build();
-    this.organizationEntityControllerApi = new OrganizationEntityControllerApi(
-      new ApiClient(restTemplate).setBasePath(organizationBaseUrl) );
-    this.brokerApi = new BrokerApi(
-      new ApiClient(restTemplate).setBasePath(organizationBaseUrl) );
+    ApiClient apiClient = new ApiClient(restTemplate)
+      .setBasePath(organizationBaseUrl);
+    apiClient.setBearerToken(bearerTokenHolder::get);
+    this.organizationEntityControllerApi = new OrganizationEntityControllerApi(apiClient);
+    this.brokerApi = new BrokerApi(apiClient);
   }
 
 
   @Override
-  public BrokerApiKeys getApiKeyByBrokerId(Long brokerId) {
+  public BrokerApiKeys getApiKeyByBrokerId(Long brokerId, String accessToken) {
+    bearerTokenHolder.set(accessToken);
     return RestUtil.handleRestException(
       () -> brokerApi.getBrokerApiKeys(brokerId),
       () -> "getBrokerApiKeys[%s]".formatted(brokerId)
@@ -38,7 +41,8 @@ public class OrganizationClientImpl implements OrganizationClient{
   }
 
   @Override
-  public Organization getOrganizationById(Long organizationId) {
+  public Organization getOrganizationById(Long organizationId, String accessToken) {
+    bearerTokenHolder.set(accessToken);
     return RestUtil.handleRestException(
       () -> organizationEntityControllerApi.getItemResourceOrganizationGet(String.valueOf(organizationId)),
       () -> "getOrganizationById[%s]".formatted(organizationId)

@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector;
 
 import it.gov.pagopa.pu.p4pa_organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.p4pa_organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +63,7 @@ public class OrganizationClientImplTest {
     )).thenReturn(responseEntity);
 
     //when
-    Organization response = organizationClient.getOrganizationById(VALID_ORG_ID);
+    Organization response = organizationClient.getOrganizationById(VALID_ORG_ID, TestUtils.getFakeAccessToken());
 
     //verify
     Assertions.assertEquals(VALID_ORG, response);
@@ -81,7 +82,7 @@ public class OrganizationClientImplTest {
 
     //when
     RestClientException exception = Assertions.assertThrows(RestClientException.class,
-      () -> organizationClient.getOrganizationById(INVALID_ORG_ID));
+      () -> organizationClient.getOrganizationById(INVALID_ORG_ID, TestUtils.getFakeAccessToken()));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))
@@ -98,7 +99,7 @@ public class OrganizationClientImplTest {
 
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> organizationClient.getOrganizationById(INVALID_ORG_ID));
+      () -> organizationClient.getOrganizationById(INVALID_ORG_ID, TestUtils.getFakeAccessToken()));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
@@ -116,7 +117,7 @@ public class OrganizationClientImplTest {
     )).thenReturn(responseEntity);
 
     //when
-    BrokerApiKeys response = organizationClient.getApiKeyByBrokerId(VALID_BROKER_ID);
+    BrokerApiKeys response = organizationClient.getApiKeyByBrokerId(VALID_BROKER_ID, TestUtils.getFakeAccessToken());
 
     //verify
     Assertions.assertNotNull(response);

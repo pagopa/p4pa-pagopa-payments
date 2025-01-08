@@ -20,13 +20,13 @@ public class BrokerService {
   }
 
   @Cacheable("brokerApiKey")
-  public Pair<BrokerApiKeys, String> getBrokerApiKeyAndSegregationCodesByOrganizationId(Long organizationId){
-    Organization organization = organizationClient.getOrganizationById(organizationId);
+  public Pair<BrokerApiKeys, String> getBrokerApiKeyAndSegregationCodesByOrganizationId(Long organizationId, String accessToken){
+    Organization organization = organizationClient.getOrganizationById(organizationId, accessToken);
     if(organization==null){
       log.error("organization not found [{}]",organizationId);
       throw new NotFoundException("organization [%s]".formatted(organizationId));
     }
-    BrokerApiKeys apiKeys = organizationClient.getApiKeyByBrokerId(organization.getBrokerId());
+    BrokerApiKeys apiKeys = organizationClient.getApiKeyByBrokerId(organization.getBrokerId(), accessToken);
     String segregationCodes = organization.getApplicationCode();
     return Pair.of(apiKeys, segregationCodes);
   }

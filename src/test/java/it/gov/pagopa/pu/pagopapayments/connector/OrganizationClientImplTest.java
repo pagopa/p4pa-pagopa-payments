@@ -1,8 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
 import it.gov.pagopa.pu.p4pa_organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.EntityModelBroker;
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.EntityModelOrganization;
+import it.gov.pagopa.pu.p4pa_organization.dto.generated.Organization;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +18,6 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-
-import java.nio.charset.StandardCharsets;
 
 @ExtendWith(MockitoExtension.class)
 public class OrganizationClientImplTest {
@@ -39,7 +36,7 @@ public class OrganizationClientImplTest {
   private static final Long INVALID_ORG_ID = 9L;
   private static final String VALID_ACA_KEY = "VALID_ACA_KEY";
 
-  private static final EntityModelOrganization VALID_ORG = new EntityModelOrganization()
+  private static final Organization VALID_ORG = new Organization()
     .organizationId(VALID_ORG_ID)
     .brokerId(VALID_BROKER_ID)
     .applicationCode("01");
@@ -58,28 +55,28 @@ public class OrganizationClientImplTest {
   @Test
   void givenValidOrganizationWhenGetOrganizationByIdThenOk(){
     //given
-    ResponseEntity<EntityModelOrganization> responseEntity = new ResponseEntity<>(VALID_ORG, HttpStatus.OK);
+    ResponseEntity<Organization> responseEntity = new ResponseEntity<>(VALID_ORG, HttpStatus.OK);
     Mockito.when(restTemplateMock.exchange(
       Mockito.any(RequestEntity.class),
-      Mockito.eq(new ParameterizedTypeReference<EntityModelOrganization>() {})
+      Mockito.eq(new ParameterizedTypeReference<Organization>() {})
     )).thenReturn(responseEntity);
 
     //when
-    EntityModelOrganization response = organizationClient.getOrganizationById(VALID_ORG_ID);
+    Organization response = organizationClient.getOrganizationById(VALID_ORG_ID);
 
     //verify
     Assertions.assertEquals(VALID_ORG, response);
     Mockito.verify(restTemplateMock, Mockito.times(1))
-      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<EntityModelOrganization>() {}));
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<Organization>() {}));
   }
 
   @Test
   void givenNotFoundOrganizationWhenGetOrganizationByIdThenRestClientException(){
     //given
-    ResponseEntity<EntityModelOrganization> responseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    ResponseEntity<Organization> responseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
     Mockito.when(restTemplateMock.exchange(
       Mockito.any(RequestEntity.class),
-      Mockito.eq(new ParameterizedTypeReference<EntityModelOrganization>() {})
+      Mockito.eq(new ParameterizedTypeReference<Organization>() {})
     )).thenReturn(responseEntity);
 
     //when
@@ -88,7 +85,7 @@ public class OrganizationClientImplTest {
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))
-      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<EntityModelOrganization>() {}));
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<Organization>() {}));
   }
 
   @Test
@@ -96,7 +93,7 @@ public class OrganizationClientImplTest {
     //given
     Mockito.when(restTemplateMock.exchange(
       Mockito.any(RequestEntity.class),
-      Mockito.eq(new ParameterizedTypeReference<EntityModelOrganization>() {})
+      Mockito.eq(new ParameterizedTypeReference<Organization>() {})
     )).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
     //when
@@ -106,7 +103,7 @@ public class OrganizationClientImplTest {
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
     Mockito.verify(restTemplateMock, Mockito.times(1))
-      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<EntityModelOrganization>() {}));
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<Organization>() {}));
   }
 
   @Test
@@ -119,10 +116,11 @@ public class OrganizationClientImplTest {
     )).thenReturn(responseEntity);
 
     //when
-    String response = organizationClient.getAcaApiKeyByBrokerId(VALID_BROKER_ID);
+    BrokerApiKeys response = organizationClient.getApiKeyByBrokerId(VALID_BROKER_ID);
 
     //verify
-    Assertions.assertEquals(VALID_ACA_KEY, response);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(VALID_ACA_KEY, response.getAcaKey());
     Mockito.verify(restTemplateMock, Mockito.times(1))
       .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<BrokerApiKeys>() {}));
   }

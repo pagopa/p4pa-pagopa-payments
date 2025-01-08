@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 
@@ -37,5 +38,18 @@ public class RestUtil {
   }
   public static <T> T handleRestException(Supplier<T> in) {
     return handleRestException(in, ()->"", false);
+  }
+
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> in, Supplier<String> logErrorDetail, boolean logElapsed) {
+    return handleRestException(in, logErrorDetail, logElapsed).getBody();
+  }
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> in, Supplier<String> logErrorDetail){
+    return handleRestExceptionWithResponseEntity(in, logErrorDetail, false);
+  }
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> in, boolean logElapsed) {
+    return handleRestExceptionWithResponseEntity(in, ()->"", logElapsed);
+  }
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> in) {
+    return handleRestExceptionWithResponseEntity(in, ()->"", false);
   }
 }

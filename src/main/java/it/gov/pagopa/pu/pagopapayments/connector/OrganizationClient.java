@@ -1,10 +1,11 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.EntityModelOrganization;
+import it.gov.pagopa.pu.p4pa_organization.dto.generated.BrokerApiKeys;
+import it.gov.pagopa.pu.p4pa_organization.dto.generated.Organization;
 
 public interface OrganizationClient {
 
-  String getAcaApiKeyByBrokerId(Long brokerId);
+  BrokerApiKeys getApiKeyByBrokerId(Long brokerId);
 
-  EntityModelOrganization getOrganizationById(Long organizationId);
+  Organization getOrganizationById(Long organizationId);
 }

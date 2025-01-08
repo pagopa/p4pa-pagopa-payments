@@ -25,6 +25,8 @@ paths:
           description: Segregation codes for which broker is authorized
       tags:
         - ACA
+      security:
+        - ApiKey: []
       operationId: newDebtPosition
       summary: Create a new debt position
       description: Create a new debt position.

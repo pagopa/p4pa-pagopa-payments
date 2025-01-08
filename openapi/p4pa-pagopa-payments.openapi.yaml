@@ -1,31 +1,329 @@
-openapi: 3.1.0
+openapi: 3.0.1
 info:
   title: p4pa-pagopa-payments
-  description: "Sample API"
-  version: Api and Models
+  description: Api and Models
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
 paths:
-  /api/v1/greet:
-    get:
-      summary: "Hello World"
-      description: "Sample endpoint that return greetings"
+  /aca/create:
+    post:
+      tags:
+        - aca
+      operationId: createAca
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebtPositionDTO"
+        required: true
       responses:
-        '200':
-          description: "Success"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Hello, World!"
-        '500':
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Internal Server Error"
+        "204":
+          description: No content
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+  /aca/update:
+    post:
+      tags:
+        - aca
+      operationId: updateAca
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebtPositionDTO"
+        required: true
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+  /aca/delete:
+    post:
+      tags:
+        - aca
+      operationId: deleteAca
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebtPositionDTO"
+        required: true
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+components:
+  schemas:
+    DebtPositionDTO:
+      required:
+        - debtPositionTypeOrgId
+        - organizationId
+      type: object
+      properties:
+        debtPositionId:
+          type: integer
+          format: int64
+        iupdOrg:
+          type: string
+        iupdPagopa:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        ingestionFlowFileId:
+          type: integer
+          format: int64
+        ingestionFlowFileLineNumber:
+          type: integer
+          format: int64
+        organizationId:
+          type: integer
+          format: int64
+        debtPositionTypeOrgId:
+          type: integer
+          format: int64
+        notificationDate:
+          type: string
+          format: date-time
+        validityDate:
+          type: string
+          format: date-time
+        flagIuvVolatile:
+          type: boolean
+        creationDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+        paymentOptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentOptionDTO"
+    PaymentOptionDTO:
+      required:
+        - installments
+        - totalAmountCents
+      type: object
+      properties:
+        paymentOptionId:
+          type: integer
+          format: int64
+        totalAmountCents:
+          type: integer
+          format: int64
+        status:
+          type: string
+        multiDebtor:
+          type: boolean
+        dueDate:
+          type: string
+          format: date-time
+        description:
+          type: string
+        paymentOptionType:
+          type: string
+          enum:
+            - SINGLE_INSTALLMENT
+            - INSTALMENTS
+            - DOWN_PAYMENT
+        installments:
+          type: array
+          items:
+            $ref: "#/components/schemas/InstallmentDTO"
+    InstallmentDTO:
+      required:
+        - amountCents
+        - debtor
+        - remittanceInformation
+        - transfers
+      type: object
+      properties:
+        installmentId:
+          type: integer
+          format: int64
+        paymentOptionId:
+          type: integer
+          format: int64
+        status:
+          type: string
+        iud:
+          type: string
+        iuv:
+          type: string
+        iur:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        paymentTypeCode:
+          type: string
+        amountCents:
+          type: integer
+          format: int64
+        notificationFeeCents:
+          type: integer
+          format: int64
+        remittanceInformation:
+          type: string
+        humanFriendlyRemittanceInformation:
+          type: string
+        balance:
+          type: string
+        legacyPaymentMetadata:
+          type: string
+        debtor:
+          $ref: "#/components/schemas/PersonDTO"
+        transfers:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransferDTO"
+        creationDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+    TransferDTO:
+      required:
+        - amountCents
+        - category
+        - orgFiscalCode
+        - orgName
+        - remittanceInformation
+      type: object
+      properties:
+        transferId:
+          type: integer
+          format: int64
+        orgFiscalCode:
+          type: string
+        orgName:
+          type: string
+        amountCents:
+          type: integer
+          format: int64
+        remittanceInformation:
+          type: string
+        stampType:
+          type: string
+        stampHashDocument:
+          type: string
+        stampProvincialResidence:
+          type: string
+        iban:
+          type: string
+        postalIban:
+          type: string
+        category:
+          type: string
+        transferIndex:
+          type: integer
+          format: int32
+    ReceiptDTO:
+      type: object
+      properties:
+        receiptId:
+          type: integer
+          format: int64
+        installmentId:
+          type: integer
+          format: int64
+        paymentReceiptId:
+          type: string
+        noticeNumber:
+          type: string
+        orgFiscalCode:
+          type: string
+        outcome:
+          type: string
+        creditorReferenceId:
+          type: string
+        paymentAmountCents:
+          type: integer
+          format: int64
+        description:
+          type: string
+        companyName:
+          type: string
+        officeName:
+          type: string
+        idPsp:
+          type: string
+        pspFiscalCode:
+          type: string
+        pspPartitaIva:
+          type: string
+        pspCompanyName:
+          type: string
+        idChannel:
+          type: string
+        channelDescription:
+          type: string
+        paymentMethod:
+          type: string
+        feeCents:
+          type: integer
+          format: int64
+        paymentDateTime:
+          type: string
+          format: date-time
+        applicationDate:
+          type: string
+          format: date-time
+        transferDate:
+          type: string
+          format: date-time
+        receiptBytes:
+          type: string
+          format: byte
+        standin:
+          type: boolean
+        debtor:
+          $ref: "#/components/schemas/PersonDTO"
+        payer:
+          $ref: "#/components/schemas/PersonDTO"
+        creationDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+    PersonDTO:
+      required:
+        - email
+        - fullName
+        - uniqueIdentifierCode
+        - uniqueIdentifierType
+      type: object
+      properties:
+        uniqueIdentifierType:
+          type: string
+        uniqueIdentifierCode:
+          type: string
+        fullName:
+          type: string
+        address:
+          type: string
+        civic:
+          type: string
+        postalCode:
+          type: string
+        location:
+          type: string
+        province:
+          type: string
+        nation:
+          type: string
+        email:
+          type: string

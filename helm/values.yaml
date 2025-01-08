@@ -64,6 +64,7 @@ microservice-chart:
 
   envSecret:
     APPLICATIONINSIGHTS_CONNECTION_STRING: appinsights-connection-string
+    JWT_TOKEN_PUBLIC_KEY: jwt-public-key
 
   # nodeSelector: {}
 

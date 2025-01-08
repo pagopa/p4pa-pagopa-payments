@@ -61,6 +61,8 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
+security:
+  - BearerAuth: []
 components:
   schemas:
     DebtPositionDTO:
@@ -327,3 +329,7 @@ components:
           type: string
         email:
           type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

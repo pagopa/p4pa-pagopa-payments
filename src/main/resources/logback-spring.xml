@@ -6,7 +6,7 @@
                     source="spring.application.name"/>
 
     <property name="CONSOLE_LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [${appName:-}] [%X{userId:-}] [%X{traceId:-}] %-5level [%15.15t] [%-40.40logger{39}] - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [${appName:-}] [%X{externalUserId:-}] [%X{traceId:-}] %-5level [%15.15t] [%-40.40logger{39}] - %msg%n"/>
     <property name="AUDIT_LOG_PATTERN"
               value="%msg"/>
 

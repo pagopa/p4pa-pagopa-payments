@@ -3,6 +3,10 @@ spring:
       name: ${artifactId}
       version: ${version}
     jmx.enabled: true
+    threads:
+      virtual:
+        enabled: "\${VIRTUAL_THREADS_ENABLED:true}"
+
 management:
     endpoint:
       health:

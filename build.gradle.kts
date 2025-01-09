@@ -7,6 +7,8 @@ plugins {
 	id("com.github.ben-manes.versions") version "0.51.0"
 	id("org.openapi.generator") version "7.10.0"
   id("org.ajoberstar.grgit") version "5.3.0"
+  //code generation for soap webservices classes (via jaxb)
+  id("com.intershop.gradle.jaxb") version "7.0.1"
 }
 
 group = "it.gov.pagopa.payhub"
@@ -25,6 +27,16 @@ configurations {
 	}
 }
 
+val xmlAdapterJarName = "${project.name}-XmlAdapter.jar"
+task("xmlAdapterJar", type = Jar::class) {
+  archiveFileName.set(xmlAdapterJarName)
+  from(sourceSets.main.get().output) {
+    include("**/TrimStringXmlAdapter.class")
+  }
+  includeEmptyDirs = false
+  destinationDirectory.set(file("libs"))
+}
+
 repositories {
 	mavenCentral()
 }
@@ -33,6 +45,11 @@ val springDocOpenApiVersion = "2.7.0"
 val openApiToolsVersion = "0.2.6"
 val micrometerVersion = "1.4.1"
 val bouncycastleVersion = "1.79"
+val jaxbVersion = "4.0.5"
+val jaxbApiVersion = "4.0.2"
+val activationVersion = "2.1.3"
+val wsdl4jVersion = "1.6.3"
+val xmlSchemaVersion = "2.3.1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -40,10 +57,27 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-cache")
+  implementation("org.springframework.boot:spring-boot-starter-web-services")
   implementation("io.micrometer:micrometer-tracing-bridge-otel:$micrometerVersion")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
+
+  //webservice soap
+  implementation("wsdl4j:wsdl4j:$wsdl4jVersion")
+  implementation("org.apache.ws.xmlschema:xmlschema-core:$xmlSchemaVersion")
+  runtimeOnly("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
+  //jaxb
+  jaxb("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
+  jaxb("com.sun.xml.bind:jaxb-xjc:$jaxbVersion")
+  jaxb("com.sun.xml.bind:jaxb-jxc:$jaxbVersion")
+  jaxb("com.sun.xml.bind:jaxb-core:$jaxbVersion")
+  jaxb("jakarta.xml.bind:jakarta.xml.bind-api:$jaxbApiVersion")
+  jaxb("jakarta.activation:jakarta.activation-api:$activationVersion")
+  // see remarks on source file TrimStringXmlAdapter.java
+  jaxbext(files("libs/$xmlAdapterJarName"))
+  jaxbext("org.jvnet.jaxb:jaxb-plugin-annotate:3.0.2")
+  jaxbext("org.slf4j:slf4j-simple:2.0.16") // see https://github.com/IntershopCommunicationsAG/jaxb-gradle-plugin/issues/37
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
@@ -93,7 +127,8 @@ tasks.compileJava {
     "openApiGenerate",
     "openApiGenerateOrganization",
     "openApiGenerateDebtPositions",
-    "openApiGeneratePaCreatePosition"
+    "openApiGeneratePaCreatePosition",
+    "jaxbJavaGenPaForNode"
   )
 }
 
@@ -192,5 +227,17 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "generateSupportingFiles" to "true"
   ))
   library.set("resttemplate")
+}
+
+jaxb {
+  javaGen {
+    register("paForNode") {
+      extension = true
+      args = listOf("-wsdl", "-Xannotate")
+      outputDir = file("$projectDir/build/generated/jaxb/java")
+      schema = file("$rootDir/src/main/resources/soap/paForNode.wsdl")
+      bindings = layout.files("$rootDir/src/main/resources/soap/paForNode.xjb")
+    }
+  }
 }
 

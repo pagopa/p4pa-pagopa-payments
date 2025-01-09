@@ -36,7 +36,6 @@ public class AcaClientImplTest {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
     acaClient = new AcaClientImpl(ORG_BASE_URL, restTemplateBuilderMock);
-    acaClient.init();
   }
 
 

@@ -61,6 +61,9 @@ microservice-chart:
     APPLICATIONINSIGHTS_PREVIEW_PROFILER_ENABLED: "false"
     ENABLE_AUDIT_APPENDER: "TRUE"
 
+    DEBT_POSITION_BASE_URL: "http://p4pa-debp-position-microservice-chart:8080"
+    ORGANIZATION_BASE_URL: "http://p4pa-organization-microservice-chart:8080"
+    NODE_ACA_BASE_URL: "https://api.uat.platform.pagopa.it"
 
   envSecret:
     APPLICATIONINSIGHTS_CONNECTION_STRING: appinsights-connection-string

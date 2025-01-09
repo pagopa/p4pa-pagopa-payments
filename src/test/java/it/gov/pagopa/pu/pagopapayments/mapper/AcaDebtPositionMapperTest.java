@@ -115,7 +115,7 @@ public class AcaDebtPositionMapperTest {
     Assertions.assertEquals(1234, response.get(0).getAmount());
     Assertions.assertEquals(DUE_DATE, response.get(0).getExpirationDate());
     Assertions.assertEquals(DUE_DATE, response.get(1).getExpirationDate());
-    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionTypeOrgById(TYPE_ORG_ID_EXPIRING, TestUtils.getFakeAccessToken());
+    Mockito.verify(debtPositionClientMock, Mockito.times(2)).getDebtPositionTypeOrgById(TYPE_ORG_ID_EXPIRING, TestUtils.getFakeAccessToken());
   }
 
   @Test
@@ -131,7 +131,7 @@ public class AcaDebtPositionMapperTest {
     Assertions.assertEquals(1234, response.get(0).getAmount());
     Assertions.assertEquals(AcaDebtPositionMapper.MAX_DATE, response.get(0).getExpirationDate());
     Assertions.assertEquals(AcaDebtPositionMapper.MAX_DATE, response.get(1).getExpirationDate());
-    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionTypeOrgById(TYPE_ORG_ID_NON_EXPIRING, TestUtils.getFakeAccessToken());
+    Mockito.verify(debtPositionClientMock, Mockito.times(2)).getDebtPositionTypeOrgById(TYPE_ORG_ID_NON_EXPIRING, TestUtils.getFakeAccessToken());
   }
 
 }

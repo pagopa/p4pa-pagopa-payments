@@ -305,8 +305,8 @@ components:
       required:
         - email
         - fullName
-        - uniqueIdentifierCode
-        - uniqueIdentifierType
+        - fiscalCode
+        - entityType
       type: object
       properties:
         entityType:

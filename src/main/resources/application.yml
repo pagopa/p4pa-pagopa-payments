@@ -20,6 +20,18 @@ management:
       web:
         exposure.include: info, health
 
+rest:
+  default-timeout:
+    connect-millis: "\${DEFAULT_REST_CONNECT_TIMEOUT_MILLIS:120000}"
+    read-millis: "\${DEFAULT_REST_READ_TIMEOUT_MILLIS:120000}"
+  debt-position:
+    base-url: "\${DEBT_POSITION_BASE_URL:}"
+  organization:
+    base-url: "\${ORGANIZATION_BASE_URL:}"
+  pagopa-node-services:
+    aca:
+      base-url: "\${PAGOPA_NODE_ACA_BASE_URL:}"
+
 springdoc:
   writer-with-default-pretty-printer: true
 

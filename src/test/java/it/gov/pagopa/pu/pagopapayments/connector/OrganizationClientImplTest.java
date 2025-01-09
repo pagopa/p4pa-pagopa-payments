@@ -21,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
-public class OrganizationClientImplTest {
+class OrganizationClientImplTest {
 
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
@@ -79,10 +79,11 @@ public class OrganizationClientImplTest {
       Mockito.any(RequestEntity.class),
       Mockito.eq(new ParameterizedTypeReference<Organization>() {})
     )).thenReturn(responseEntity);
+    String accessToken = TestUtils.getFakeAccessToken();
 
     //when
-    RestClientException exception = Assertions.assertThrows(RestClientException.class,
-      () -> organizationClient.getOrganizationById(INVALID_ORG_ID, TestUtils.getFakeAccessToken()));
+    Assertions.assertThrows(RestClientException.class,
+      () -> organizationClient.getOrganizationById(INVALID_ORG_ID, accessToken));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))

@@ -20,7 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
-public class DebtPositionClientImplTest {
+class DebtPositionClientImplTest {
 
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
@@ -75,10 +75,11 @@ public class DebtPositionClientImplTest {
       Mockito.any(RequestEntity.class),
       Mockito.eq(new ParameterizedTypeReference<DebtPositionTypeOrg>() {})
     )).thenReturn(responseEntity);
+    String accessToken = TestUtils.getFakeAccessToken();
 
     //when
-    RestClientException exception = Assertions.assertThrows(RestClientException.class,
-      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, TestUtils.getFakeAccessToken()));
+    Assertions.assertThrows(RestClientException.class,
+      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, accessToken));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))

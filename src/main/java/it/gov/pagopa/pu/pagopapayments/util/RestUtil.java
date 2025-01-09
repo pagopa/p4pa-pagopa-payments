@@ -11,6 +11,9 @@ import java.util.function.Supplier;
 
 @Slf4j
 public class RestUtil {
+
+  private RestUtil(){}
+
   public static <T> T handleRestException(Supplier<T> invoker, String operationId, boolean logElapsed) {
     long httpCallStart = 0;
     if(logElapsed)

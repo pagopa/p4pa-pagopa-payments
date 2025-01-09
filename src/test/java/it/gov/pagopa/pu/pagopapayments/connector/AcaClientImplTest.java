@@ -20,7 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
-public class AcaClientImplTest {
+class AcaClientImplTest {
 
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
@@ -66,10 +66,11 @@ public class AcaClientImplTest {
       Mockito.any(RequestEntity.class),
       Mockito.eq(new ParameterizedTypeReference<DebtPositionResponse>() {})
     )).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+    NewDebtPositionRequest newDebtPositionRequest = new NewDebtPositionRequest();
 
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> acaClient.paCreatePosition(new NewDebtPositionRequest(), "apiKey", "01"));
+      () -> acaClient.paCreatePosition(newDebtPositionRequest, "apiKey", "01"));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());

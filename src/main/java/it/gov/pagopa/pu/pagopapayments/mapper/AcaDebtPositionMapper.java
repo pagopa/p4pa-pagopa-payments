@@ -16,7 +16,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -47,7 +46,7 @@ public class AcaDebtPositionMapper {
     return true;
   }
 
-  public final static OffsetDateTime MAX_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59).atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime();
+  public static final OffsetDateTime MAX_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59).atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime();
 
   public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition, String accessToken) {
     return debtPosition.getPaymentOptions().stream()
@@ -73,6 +72,6 @@ public class AcaDebtPositionMapper {
           .expirationDate(expirationDate)
           .switchToExpired(debtPositionTypeOrg.getFlagMandatoryDueDate())
           .payStandIn(true); //TODO to verify
-      }).collect(Collectors.toList());
+      }).toList();
   }
 }

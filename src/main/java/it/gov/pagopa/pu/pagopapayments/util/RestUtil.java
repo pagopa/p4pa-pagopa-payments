@@ -9,12 +9,12 @@ import java.util.function.Supplier;
 
 @Slf4j
 public class RestUtil {
-  public static <T> T handleRestException(Supplier<T> in, Supplier<String> logErrorDetail, boolean logElapsed) {
+  public static <T> T handleRestException(Supplier<T> invoker, Supplier<String> logErrorDetail, boolean logElapsed) {
     long httpCallStart = 0;
     if(logElapsed)
       httpCallStart = System.currentTimeMillis();
     try{
-      return in.get();
+      return invoker.get();
     } catch (HttpServerErrorException he) {
       int statusCode = he.getStatusCode().value();
       String body = he.getResponseBodyAsString();
@@ -30,26 +30,26 @@ public class RestUtil {
       }
     }
   }
-  public static <T> T handleRestException(Supplier<T> in, Supplier<String> logErrorDetail){
-    return handleRestException(in, logErrorDetail, false);
+  public static <T> T handleRestException(Supplier<T> invoker, Supplier<String> logErrorDetail){
+    return handleRestException(invoker, logErrorDetail, false);
   }
-  public static <T> T handleRestException(Supplier<T> in, boolean logElapsed) {
-    return handleRestException(in, ()->"", logElapsed);
+  public static <T> T handleRestException(Supplier<T> invoker, boolean logElapsed) {
+    return handleRestException(invoker, ()->"", logElapsed);
   }
-  public static <T> T handleRestException(Supplier<T> in) {
-    return handleRestException(in, ()->"", false);
+  public static <T> T handleRestException(Supplier<T> invoker) {
+    return handleRestException(invoker, ()->"", false);
   }
 
-  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> in, Supplier<String> logErrorDetail, boolean logElapsed) {
-    return handleRestException(in, logErrorDetail, logElapsed).getBody();
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker, Supplier<String> logErrorDetail, boolean logElapsed) {
+    return handleRestException(invoker, logErrorDetail, logElapsed).getBody();
   }
-  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> in, Supplier<String> logErrorDetail){
-    return handleRestExceptionWithResponseEntity(in, logErrorDetail, false);
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker, Supplier<String> logErrorDetail){
+    return handleRestExceptionWithResponseEntity(invoker, logErrorDetail, false);
   }
-  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> in, boolean logElapsed) {
-    return handleRestExceptionWithResponseEntity(in, ()->"", logElapsed);
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker, boolean logElapsed) {
+    return handleRestExceptionWithResponseEntity(invoker, ()->"", logElapsed);
   }
-  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> in) {
-    return handleRestExceptionWithResponseEntity(in, ()->"", false);
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker) {
+    return handleRestExceptionWithResponseEntity(invoker, ()->"", false);
   }
 }

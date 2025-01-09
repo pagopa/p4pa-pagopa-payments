@@ -1,88 +1,52 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
 import it.gov.pagopa.nodo.pacreateposition.controller.ApiClient;
-import it.gov.pagopa.nodo.pacreateposition.controller.auth.ApiKeyAuth;
-import it.gov.pagopa.nodo.pacreateposition.controller.auth.Authentication;
 import it.gov.pagopa.nodo.pacreateposition.controller.generated.AcaApi;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.DebtPositionResponse;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.util.RestUtil;
-import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.function.Supplier;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
 public class AcaClientImpl implements AcaClient {
 
-  private final ThreadLocal<String> apiKeyHolder = new ThreadLocal<>();
-  private final AcaApi acaApi;
+  private final RestTemplateBuilder restTemplateBuilder;
+  private final String acaBaseUrl;
+  private final Map<String, AcaApi> acaApiMap = new ConcurrentHashMap<>();
 
   public AcaClientImpl(
     @Value("${app.aca.base-url}") String acaBaseUrl,
     RestTemplateBuilder restTemplateBuilder){
-    ApiClientWrapper apiClient = new ApiClientWrapper(restTemplateBuilder.build());
-    apiClient.setBasePath(acaBaseUrl);
-    apiClient.setApiKey(apiKeyHolder::get);
-    this.acaApi = new AcaApi(apiClient);
+    this.restTemplateBuilder = restTemplateBuilder;
+    this.acaBaseUrl = acaBaseUrl;
   }
 
-  @PreDestroy
-  public void unload(){
-    apiKeyHolder.remove();
+  private AcaApi getAcaApiClientByApiKey(String apiKey) {
+    return acaApiMap.computeIfAbsent(apiKey, key -> {
+      ApiClient apiClient = new ApiClient(restTemplateBuilder.build());
+      apiClient.setBasePath(acaBaseUrl);
+      apiClient.setApiKey(key);
+      return new AcaApi(apiClient);
+    });
   }
 
   @Override
-  public DebtPositionResponse paCreatePosition(NewDebtPositionRequest request, String apiKey, String segregationCodes){
-    apiKeyHolder.set(apiKey);
+  public DebtPositionResponse paCreatePosition(NewDebtPositionRequest request, String apiKey, String segregationCodes) {
+    //get the correct AcaApi linked to this apiKey
+    AcaApi acaApi = getAcaApiClientByApiKey(apiKey);
 
     return RestUtil.handleRestException(
       () -> acaApi.newDebtPosition(request, segregationCodes),
-      () -> "paCreatePosition [%s/%s]".formatted(request.getEntityFiscalCode(), request.getNav()) ,
+      () -> "paCreatePosition [%s/%s]".formatted(request.getEntityFiscalCode(), request.getNav()),
       true
     );
-  }
-
-}
-
-class ApiClientWrapper extends ApiClient{
-
-  private Supplier<String> apiKeySupplier;
-
-  public ApiClientWrapper(RestTemplate restTemplate) {
-    super(restTemplate);
-  }
-
-  public void setApiKey(Supplier<String> apiKeySupplier) {
-    this.apiKeySupplier = apiKeySupplier;
-  }
-
-  @Override
-  protected void updateParamsForAuth(String[] authNames, MultiValueMap<String, String> queryParams, HttpHeaders headerParams, MultiValueMap<String, String> cookieParams) {
-    if(this.apiKeySupplier != null) {
-      for (String authName : authNames) {
-        Authentication auth = getAuthentications().get(authName);
-        if (auth == null) {
-          throw new RestClientException("Authentication undefined: " + authName);
-        }
-        if(auth instanceof ApiKeyAuth) {
-          ApiKeyAuth apiKeyAuthLocal = new ApiKeyAuth(((ApiKeyAuth)auth).getLocation(), ((ApiKeyAuth)auth).getParamName());
-          apiKeyAuthLocal.setApiKey(apiKeySupplier.get());
-          auth = apiKeyAuthLocal;
-        }
-        auth.applyToParams(queryParams, headerParams, cookieParams);
-      }
-    } else {
-      super.updateParamsForAuth(authNames, queryParams, headerParams, cookieParams);
-    }
   }
 
 }

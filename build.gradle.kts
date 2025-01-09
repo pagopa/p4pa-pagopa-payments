@@ -180,8 +180,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   generatorName.set("java")
   inputSpec.set("$rootDir/openapi/paCreatePosition.yaml")
   outputDir.set("$projectDir/build/generated")
-  apiPackage.set("it.gov.pagopa.nodo.paCreatePosition.controller.generated")
-  modelPackage.set("it.gov.pagopa.nodo.paCreatePosition.dto.generated")
+  apiPackage.set("it.gov.pagopa.nodo.pacreateposition.controller.generated")
+  modelPackage.set("it.gov.pagopa.nodo.pacreateposition.dto.generated")
   configOptions.set(mapOf(
     "swaggerAnnotations" to "false",
     "openApiNullable" to "false",

@@ -1,10 +1,10 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
-import it.gov.pagopa.pu.p4pa_organization.controller.ApiClient;
-import it.gov.pagopa.pu.p4pa_organization.controller.generated.BrokerApi;
-import it.gov.pagopa.pu.p4pa_organization.controller.generated.OrganizationEntityControllerApi;
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.controller.ApiClient;
+import it.gov.pagopa.pu.organization.controller.generated.BrokerApi;
+import it.gov.pagopa.pu.organization.controller.generated.OrganizationEntityControllerApi;
+import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.util.RestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +44,7 @@ public class OrganizationClientImpl implements OrganizationClient{
   public Organization getOrganizationById(Long organizationId, String accessToken) {
     bearerTokenHolder.set(accessToken);
     return RestUtil.handleRestException(
-      () -> organizationEntityControllerApi.getItemResourceOrganizationGet(String.valueOf(organizationId)),
+      () -> organizationEntityControllerApi.crudGetOrganization(String.valueOf(organizationId)),
       () -> "getOrganizationById[%s]".formatted(organizationId)
     );
   }

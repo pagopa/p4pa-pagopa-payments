@@ -1,10 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
-import it.gov.pagopa.pu.p4pa_debt_positions.controller.ApiClient;
-import it.gov.pagopa.pu.p4pa_debt_positions.controller.generated.DebtPositionTypeOrgEntityControllerApi;
-import it.gov.pagopa.pu.p4pa_debt_positions.dto.generated.DebtPositionTypeOrg;
+import it.gov.pagopa.pu.debtpositions.controller.ApiClient;
+import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgEntityControllerApi;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.pagopapayments.util.RestUtil;
-import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -33,8 +32,8 @@ public class DebtPositionClientImpl implements DebtPositionClient {
   @Cacheable("debtPositionTypeOrg")
   public DebtPositionTypeOrg getDebtPositionTypeOrgById(Long debtPositionTypeOrgId, String accessToken) {
     bearerTokenHolder.set(accessToken);
-    return RestUtil.handleRestExceptionWithResponseEntity(
-      () -> debtPositionTypeOrgEntityControllerApi.getItemResourceDebtpositiontypeorgGetWithHttpInfo(String.valueOf(debtPositionTypeOrgId)),
+    return RestUtil.handleRestException(
+      () -> debtPositionTypeOrgEntityControllerApi.crudGetDebtpositiontypeorg(String.valueOf(debtPositionTypeOrgId)),
       () -> "getDebtPositionTypeOrgById[%s]".formatted(debtPositionTypeOrgId)
     );
   }

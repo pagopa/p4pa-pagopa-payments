@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
 
 public interface OrganizationClient {
 

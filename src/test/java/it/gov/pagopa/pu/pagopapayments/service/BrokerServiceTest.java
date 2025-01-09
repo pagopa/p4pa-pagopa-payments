@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.OrganizationClientImpl;
 import it.gov.pagopa.pu.pagopapayments.exception.NotFoundException;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;

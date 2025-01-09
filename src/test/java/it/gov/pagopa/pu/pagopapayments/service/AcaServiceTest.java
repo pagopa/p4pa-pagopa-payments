@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
-import it.gov.pagopa.nodo.paCreatePosition.dto.generated.NewDebtPositionRequest;
-import it.gov.pagopa.pu.p4pa_organization.dto.generated.BrokerApiKeys;
+import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
+import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.AcaClient;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.mapper.AcaDebtPositionMapper;

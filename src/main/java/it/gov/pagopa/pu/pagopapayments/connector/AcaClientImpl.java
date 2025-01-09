@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
-import it.gov.pagopa.nodo.paCreatePosition.controller.ApiClient;
-import it.gov.pagopa.nodo.paCreatePosition.controller.generated.AcaApi;
-import it.gov.pagopa.nodo.paCreatePosition.dto.generated.DebtPositionResponse;
-import it.gov.pagopa.nodo.paCreatePosition.dto.generated.NewDebtPositionRequest;
+import it.gov.pagopa.nodo.pacreateposition.controller.ApiClient;
+import it.gov.pagopa.nodo.pacreateposition.controller.generated.AcaApi;
+import it.gov.pagopa.nodo.pacreateposition.dto.generated.DebtPositionResponse;
+import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.util.RestUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;

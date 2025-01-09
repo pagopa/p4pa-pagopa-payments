@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.nodo.paCreatePosition.dto.generated.NewDebtPositionRequest;
-import it.gov.pagopa.pu.p4pa_debt_positions.dto.generated.DebtPositionTypeOrg;
+import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PersonDTO;

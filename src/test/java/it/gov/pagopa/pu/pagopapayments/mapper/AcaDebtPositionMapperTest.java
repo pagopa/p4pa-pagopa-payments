@@ -42,8 +42,8 @@ public class AcaDebtPositionMapperTest {
   @BeforeEach
   void setUp() {
     debtor = PersonDTO.builder()
-      .uniqueIdentifierCode("CF_DEBTOR")
-      .uniqueIdentifierType("F")
+      .fiscalCode("CF_DEBTOR")
+      .entityType("F")
       .fullName("Debtor name")
       .build();
     debtPosition = DebtPositionDTO.builder()

@@ -39,7 +39,7 @@ public class DebtPositionClientImpl implements DebtPositionClient {
     bearerTokenHolder.set(accessToken);
     return RestUtil.handleRestException(
       () -> debtPositionTypeOrgEntityControllerApi.crudGetDebtpositiontypeorg(String.valueOf(debtPositionTypeOrgId)),
-      () -> "getDebtPositionTypeOrgById[%s]".formatted(debtPositionTypeOrgId)
+      "getDebtPositionTypeOrgById[%s]".formatted(debtPositionTypeOrgId)
     );
   }
 

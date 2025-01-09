@@ -44,7 +44,7 @@ public class AcaClientImpl implements AcaClient {
 
     return RestUtil.handleRestException(
       () -> acaApi.newDebtPosition(request, segregationCodes),
-      () -> "paCreatePosition [%s/%s]".formatted(request.getEntityFiscalCode(), request.getNav()),
+      "paCreatePosition [%s/%s]".formatted(request.getEntityFiscalCode(), request.getNav()),
       true
     );
   }

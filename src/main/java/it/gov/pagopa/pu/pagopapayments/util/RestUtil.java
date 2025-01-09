@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 @Slf4j
 public class RestUtil {
-  public static <T> T handleRestException(Supplier<T> invoker, Supplier<String> logErrorDetail, boolean logElapsed) {
+  public static <T> T handleRestException(Supplier<T> invoker, String operationId, boolean logElapsed) {
     long httpCallStart = 0;
     if(logElapsed)
       httpCallStart = System.currentTimeMillis();
@@ -19,43 +19,43 @@ public class RestUtil {
     } catch (HttpClientErrorException.NotFound nfe) {
       int statusCode = nfe.getStatusCode().value();
       String body = nfe.getResponseBodyAsString();
-      log.warn("HttpClientErrorException.NotFound on {} - returned code[{}] body[{}]", logErrorDetail.get(), statusCode, body);
+      log.warn("HttpClientErrorException.NotFound on {} - returned code[{}] body[{}]", operationId, statusCode, body);
       return null;
     } catch (HttpServerErrorException he) {
       int statusCode = he.getStatusCode().value();
       String body = he.getResponseBodyAsString();
-      log.error("HttpServerErrorException on {} - returned code[{}] body[{}]", logErrorDetail.get(), statusCode, body);
+      log.error("HttpServerErrorException on {} - returned code[{}] body[{}]", operationId, statusCode, body);
       throw he;
     } catch (RestClientException e) {
-      log.error("error on {}", logErrorDetail.get(), e);
+      log.error("error on {}", operationId, e);
       throw e;
     } finally {
       if(logElapsed) {
         long elapsed = Math.max(0, System.currentTimeMillis() - httpCallStart);
-        log.info("elapsed time(ms) for {}: {}", logErrorDetail.get(), elapsed);
+        log.info("elapsed time(ms) for {}: {}", operationId, elapsed);
       }
     }
   }
-  public static <T> T handleRestException(Supplier<T> invoker, Supplier<String> logErrorDetail){
-    return handleRestException(invoker, logErrorDetail, false);
+  public static <T> T handleRestException(Supplier<T> invoker, String operationId){
+    return handleRestException(invoker, operationId, false);
   }
   public static <T> T handleRestException(Supplier<T> invoker, boolean logElapsed) {
-    return handleRestException(invoker, ()->"", logElapsed);
+    return handleRestException(invoker, "", logElapsed);
   }
   public static <T> T handleRestException(Supplier<T> invoker) {
-    return handleRestException(invoker, ()->"", false);
+    return handleRestException(invoker, "", false);
   }
 
-  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker, Supplier<String> logErrorDetail, boolean logElapsed) {
-    return handleRestException(invoker, logErrorDetail, logElapsed).getBody();
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker, String operationId, boolean logElapsed) {
+    return handleRestException(invoker, operationId, logElapsed).getBody();
   }
-  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker, Supplier<String> logErrorDetail){
-    return handleRestExceptionWithResponseEntity(invoker, logErrorDetail, false);
+  public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker, String operationId){
+    return handleRestExceptionWithResponseEntity(invoker, operationId, false);
   }
   public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker, boolean logElapsed) {
-    return handleRestExceptionWithResponseEntity(invoker, ()->"", logElapsed);
+    return handleRestExceptionWithResponseEntity(invoker, "", logElapsed);
   }
   public static <T> T handleRestExceptionWithResponseEntity(Supplier<ResponseEntity<T>> invoker) {
-    return handleRestExceptionWithResponseEntity(invoker, ()->"", false);
+    return handleRestExceptionWithResponseEntity(invoker, "", false);
   }
 }

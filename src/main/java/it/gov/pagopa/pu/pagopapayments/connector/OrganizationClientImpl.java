@@ -41,7 +41,7 @@ public class OrganizationClientImpl implements OrganizationClient{
     bearerTokenHolder.set(accessToken);
     return RestUtil.handleRestException(
       () -> brokerApi.getBrokerApiKeys(brokerId),
-      () -> "getBrokerApiKeys[%s]".formatted(brokerId)
+      "getBrokerApiKeys[%s]".formatted(brokerId)
     );
   }
 
@@ -50,7 +50,7 @@ public class OrganizationClientImpl implements OrganizationClient{
     bearerTokenHolder.set(accessToken);
     return RestUtil.handleRestException(
       () -> organizationEntityControllerApi.crudGetOrganization(String.valueOf(organizationId)),
-      () -> "getOrganizationById[%s]".formatted(organizationId)
+      "getOrganizationById[%s]".formatted(organizationId)
     );
   }
 }

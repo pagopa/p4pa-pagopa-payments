@@ -309,9 +309,9 @@ components:
         - uniqueIdentifierType
       type: object
       properties:
-        uniqueIdentifierType:
+        entityType:
           type: string
-        uniqueIdentifierCode:
+        fiscalCode:
           type: string
         fullName:
           type: string

@@ -23,7 +23,6 @@ public class BrokerService {
   public Pair<BrokerApiKeys, String> getBrokerApiKeyAndSegregationCodesByOrganizationId(Long organizationId, String accessToken){
     Organization organization = organizationClient.getOrganizationById(organizationId, accessToken);
     if(organization==null){
-      log.error("organization not found [{}]",organizationId);
       throw new NotFoundException("organization [%s]".formatted(organizationId));
     }
     BrokerApiKeys apiKeys = organizationClient.getApiKeyByBrokerId(organization.getBrokerId(), accessToken);

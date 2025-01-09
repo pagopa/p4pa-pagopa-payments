@@ -4,6 +4,7 @@ import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.TransferDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +14,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -28,33 +28,35 @@ public class AcaDebtPositionMapper {
     this.debtPositionClient = debtPositionClient;
   }
 
-  public final static OffsetDateTime MAX_DATE = LocalDateTime.of(2099,12,31,23,59,59).atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime();
+  private boolean installment2sendAca(InstallmentDTO installment, Long organizationId, Set<String> filterInstallmentStatus) {
+    if (!filterInstallmentStatus.contains(installment.getStatus())) {
+      //skip installment whose status is not in the filterInstallmentStatus
+      return false;
+    }
+
+    if (installment.getTransfers().size() != 1) {
+      //if installment has multiple transfer ("multibeneficiario"), is not supported on ACA due to ACA API limitations: ignore it
+      log.warn("ACA mapToNewDebtPositionRequest: ignoring installment [{}/{}] beacuse has multiple transfer[{}]",
+        organizationId, installment.getIuv(), installment.getTransfers().size());
+      return false;
+    }
+
+    return true;
+  }
+
+  public final static OffsetDateTime MAX_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59).atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime();
 
   public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition, Set<String> filterInstallmentStatus, String accessToken) {
-    List<NewDebtPositionRequest> response = new ArrayList<>();
-    final AtomicReference<DebtPositionTypeOrg> debtPositionTypeOrg = new AtomicReference<>();
-
-    debtPosition.getPaymentOptions().forEach(paymentOption ->
-      paymentOption.getInstallments().forEach(installment -> {
-        if(!filterInstallmentStatus.contains(installment.getStatus())){
-          //skip installment whose status is not in the filterInstallmentStatus
-          return;
-        }
-
-        if(installment.getTransfers().size()!=1) {
-          //if installment has multiple transfer ("multibeneficiario"), is not supported on ACA due to ACA API limitations: ignore it
-          log.warn("ACA mapToNewDebtPositionRequest: ignoring installment [{}/{}] beacuse has multiple transfer[{}]",
-            debtPosition.getOrganizationId(), installment.getIuv(), installment.getTransfers().size());
-          return;
-        }
+    return debtPosition.getPaymentOptions().stream()
+      .flatMap(paymentOption -> paymentOption.getInstallments().stream())
+      .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId(), filterInstallmentStatus))
+      .map(installment -> {
         TransferDTO transfer = installment.getTransfers().getFirst();
         PersonDTO debtor = installment.getDebtor();
-        if(debtPositionTypeOrg.get()==null) {
-          debtPositionTypeOrg.set(debtPositionClient.getDebtPositionTypeOrgById(debtPosition.getDebtPositionTypeOrgId(), accessToken));
-        }
-        OffsetDateTime expirationDate = BooleanUtils.isTrue(debtPositionTypeOrg.get().getFlagMandatoryDueDate()) ?
+        DebtPositionTypeOrg debtPositionTypeOrg = debtPositionClient.getDebtPositionTypeOrgById(debtPosition.getDebtPositionTypeOrgId(), accessToken);
+        OffsetDateTime expirationDate = BooleanUtils.isTrue(debtPositionTypeOrg.getFlagMandatoryDueDate()) ?
           installment.getDueDate() : MAX_DATE;
-        response.add(new NewDebtPositionRequest()
+        return new NewDebtPositionRequest()
           //.nav() TODO set nav from installment
           .iuv(installment.getIuv())
           .paFiscalCode(transfer.getOrgFiscalCode())
@@ -66,12 +68,8 @@ public class AcaDebtPositionMapper {
           .description(installment.getRemittanceInformation())
           .amount(installment.getAmountCents().intValue())
           .expirationDate(expirationDate)
-          .switchToExpired(debtPositionTypeOrg.get().getFlagMandatoryDueDate())
-          .payStandIn(true) //TODO to verify
-        );
-      })
-    );
-
-    return response;
+          .switchToExpired(debtPositionTypeOrg.getFlagMandatoryDueDate())
+          .payStandIn(true); //TODO to verify
+      }).collect(Collectors.toList());
   }
 }

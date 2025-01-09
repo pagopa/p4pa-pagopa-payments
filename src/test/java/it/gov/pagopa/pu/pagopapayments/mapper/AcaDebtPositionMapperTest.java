@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 public class AcaDebtPositionMapperTest {
@@ -108,7 +107,7 @@ public class AcaDebtPositionMapperTest {
     //given
     Mockito.when(debtPositionClientMock.getDebtPositionTypeOrgById(TYPE_ORG_ID_EXPIRING, TestUtils.getFakeAccessToken())).thenReturn(TYPE_ORG_EXPIRING);
     //when
-    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, Set.of(AcaService.STATUS_INSTALLMENT_TO_SYNCH), TestUtils.getFakeAccessToken());
+    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, TestUtils.getFakeAccessToken());
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(2, response.size());
@@ -124,7 +123,7 @@ public class AcaDebtPositionMapperTest {
     debtPosition.setDebtPositionTypeOrgId(TYPE_ORG_ID_NON_EXPIRING);
     Mockito.when(debtPositionClientMock.getDebtPositionTypeOrgById(TYPE_ORG_ID_NON_EXPIRING, TestUtils.getFakeAccessToken())).thenReturn(TYPE_ORG_NON_EXPIRING);
     //when
-    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, Set.of(AcaService.STATUS_INSTALLMENT_TO_SYNCH), TestUtils.getFakeAccessToken());
+    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, TestUtils.getFakeAccessToken());
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(2, response.size());

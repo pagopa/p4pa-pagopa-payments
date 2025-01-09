@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.TransferDTO;
+import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,6 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -28,8 +28,8 @@ public class AcaDebtPositionMapper {
     this.debtPositionClient = debtPositionClient;
   }
 
-  private boolean installment2sendAca(InstallmentDTO installment, Long organizationId, Set<String> filterInstallmentStatus) {
-    if (!filterInstallmentStatus.contains(installment.getStatus())) {
+  private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
+    if (!AcaService.STATUS_TO_SEND_ACA.contains(installment.getStatus())) {
       //skip installment whose status is not in the filterInstallmentStatus
       return false;
     }
@@ -46,10 +46,10 @@ public class AcaDebtPositionMapper {
 
   public final static OffsetDateTime MAX_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59).atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime();
 
-  public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition, Set<String> filterInstallmentStatus, String accessToken) {
+  public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition, String accessToken) {
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
-      .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId(), filterInstallmentStatus))
+      .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId()))
       .map(installment -> {
         TransferDTO transfer = installment.getTransfers().getFirst();
         PersonDTO debtor = installment.getDebtor();

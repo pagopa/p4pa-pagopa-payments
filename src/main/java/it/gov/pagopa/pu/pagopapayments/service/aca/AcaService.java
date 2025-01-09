@@ -47,7 +47,7 @@ public class AcaService {
   }
 
   private void invokePaCreatePositionImpl(DebtPositionDTO debtPosition, OPERATION operation, String accessToken) {
-    List<NewDebtPositionRequest> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, STATUS_TO_SEND_ACA, accessToken);
+    List<NewDebtPositionRequest> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition, accessToken);
     Pair<BrokerApiKeys, String> brokerData = brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), accessToken);
     debtPostionToSendACA.forEach(newDebtPositionRequest -> {
       if (operation == OPERATION.DELETE) {

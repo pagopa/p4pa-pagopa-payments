@@ -16,20 +16,22 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class AcaDebtPositionMapper {
 
+  public static final String STATUS_INSTALLMENT_TO_SYNCH = "TO_SYNCH";
+  public static final Set<String> STATUS_TO_SEND_ACA = Set.of(STATUS_INSTALLMENT_TO_SYNCH);
+  public static final String STATUS_INSTALLMENT_UNPAID = "UNPAID";
   private final DebtPositionClient debtPositionClient;
 
   public AcaDebtPositionMapper(DebtPositionClient debtPositionClient) {
     this.debtPositionClient = debtPositionClient;
   }
 
-  private boolean installment2sendAca(InstallmentDTO installment, Long organizationId, Set<String> filterInstallmentStatus) {
-    if (!filterInstallmentStatus.contains(installment.getStatus())) {
+  private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
+    if (!STATUS_TO_SEND_ACA.contains(installment.getStatus())) {
       //skip installment whose status is not in the filterInstallmentStatus
       return false;
     }
@@ -44,16 +46,17 @@ public class AcaDebtPositionMapper {
     return true;
   }
 
-  public final static OffsetDateTime MAX_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59).atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime();
+  public static final OffsetDateTime MAX_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59).atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime();
 
-  public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition, Set<String> filterInstallmentStatus, String accessToken) {
+  public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition, String accessToken) {
+    DebtPositionTypeOrg debtPositionTypeOrg = debtPositionClient.getDebtPositionTypeOrgById(debtPosition.getDebtPositionTypeOrgId(), accessToken);
+
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
-      .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId(), filterInstallmentStatus))
+      .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId()))
       .map(installment -> {
         TransferDTO transfer = installment.getTransfers().getFirst();
         PersonDTO debtor = installment.getDebtor();
-        DebtPositionTypeOrg debtPositionTypeOrg = debtPositionClient.getDebtPositionTypeOrgById(debtPosition.getDebtPositionTypeOrgId(), accessToken);
         OffsetDateTime expirationDate = BooleanUtils.isTrue(debtPositionTypeOrg.getFlagMandatoryDueDate()) ?
           installment.getDueDate() : MAX_DATE;
         return new NewDebtPositionRequest()
@@ -70,6 +73,6 @@ public class AcaDebtPositionMapper {
           .expirationDate(expirationDate)
           .switchToExpired(debtPositionTypeOrg.getFlagMandatoryDueDate())
           .payStandIn(true); //TODO to verify
-      }).collect(Collectors.toList());
+      }).toList();
   }
 }

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,20 +18,20 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class AcaClientImpl implements AcaClient {
 
-  private final RestTemplateBuilder restTemplateBuilder;
+  private final RestTemplate restTemplate;
   private final String acaBaseUrl;
   private final Map<String, AcaApi> acaApiMap = new ConcurrentHashMap<>();
 
   public AcaClientImpl(
-    @Value("${rest.node.aca.base-url}") String acaBaseUrl,
+    @Value("${rest.pagopa-node-services.aca.base-url}") String acaBaseUrl,
     RestTemplateBuilder restTemplateBuilder){
-    this.restTemplateBuilder = restTemplateBuilder;
+    this.restTemplate = restTemplateBuilder.build();
     this.acaBaseUrl = acaBaseUrl;
   }
 
   private AcaApi getAcaApiClientByApiKey(String apiKey) {
     return acaApiMap.computeIfAbsent(apiKey, key -> {
-      ApiClient apiClient = new ApiClient(restTemplateBuilder.build());
+      ApiClient apiClient = new ApiClient(restTemplate);
       apiClient.setBasePath(acaBaseUrl);
       apiClient.setApiKey(key);
       return new AcaApi(apiClient);

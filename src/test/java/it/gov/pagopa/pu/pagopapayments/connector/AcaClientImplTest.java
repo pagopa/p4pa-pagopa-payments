@@ -14,12 +14,13 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
-public class AcaClientImplTest {
+class AcaClientImplTest {
 
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
@@ -65,13 +66,31 @@ public class AcaClientImplTest {
       Mockito.any(RequestEntity.class),
       Mockito.eq(new ParameterizedTypeReference<DebtPositionResponse>() {})
     )).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+    NewDebtPositionRequest newDebtPositionRequest = new NewDebtPositionRequest();
 
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> acaClient.paCreatePosition(new NewDebtPositionRequest(), "apiKey", "01"));
+      () -> acaClient.paCreatePosition(newDebtPositionRequest, "apiKey", "01"));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+    Mockito.verify(restTemplateMock, Mockito.times(1))
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<DebtPositionResponse>() {}));
+  }
+
+  @Test
+  void givenApiInvocationNotFoundWhenPaCreatePositionThenRestClientException(){
+    //given
+    Mockito.when(restTemplateMock.exchange(
+      Mockito.any(RequestEntity.class),
+      Mockito.eq(new ParameterizedTypeReference<DebtPositionResponse>() {})
+    )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+    //when
+    DebtPositionResponse response = acaClient.paCreatePosition(new NewDebtPositionRequest(), "apiKey", "01");
+
+    //verify
+    Assertions.assertNull(response);
     Mockito.verify(restTemplateMock, Mockito.times(1))
       .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<DebtPositionResponse>() {}));
   }

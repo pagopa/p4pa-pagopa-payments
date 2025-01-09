@@ -31,9 +31,9 @@ rest:
     base-url: "\${DEBT_POSITION_BASE_URL:}"
   organization:
     base-url: "\${ORGANIZATION_BASE_URL:}"
-  node:
+  pagopa-node-services:
     aca:
-      base-url: "\${NODE_ACA_BASE_URL:}"
+      base-url: "\${PAGOPA_NODE_ACA_BASE_URL:}"
 
 springdoc:
   writer-with-default-pretty-printer: true

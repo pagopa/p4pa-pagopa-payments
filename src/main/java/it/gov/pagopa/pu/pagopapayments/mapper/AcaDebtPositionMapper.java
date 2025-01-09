@@ -49,13 +49,14 @@ public class AcaDebtPositionMapper {
   public static final OffsetDateTime MAX_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59).atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime();
 
   public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition, String accessToken) {
+    DebtPositionTypeOrg debtPositionTypeOrg = debtPositionClient.getDebtPositionTypeOrgById(debtPosition.getDebtPositionTypeOrgId(), accessToken);
+
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
       .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId()))
       .map(installment -> {
         TransferDTO transfer = installment.getTransfers().getFirst();
         PersonDTO debtor = installment.getDebtor();
-        DebtPositionTypeOrg debtPositionTypeOrg = debtPositionClient.getDebtPositionTypeOrgById(debtPosition.getDebtPositionTypeOrgId(), accessToken);
         OffsetDateTime expirationDate = BooleanUtils.isTrue(debtPositionTypeOrg.getFlagMandatoryDueDate()) ?
           installment.getDueDate() : MAX_DATE;
         return new NewDebtPositionRequest()

@@ -43,7 +43,7 @@ public class AcaDebtPositionMapper {
 
         if(installment.getTransfers().size()!=1) {
           //if installment has multiple transfer ("multibeneficiario"), is not supported on ACA due to ACA API limitations: ignore it
-          log.info("ACA mapToNewDebtPositionRequest: ignoring installment [{}/{}] beacuse has multiple transfer[{}]",
+          log.warn("ACA mapToNewDebtPositionRequest: ignoring installment [{}/{}] beacuse has multiple transfer[{}]",
             debtPosition.getOrganizationId(), installment.getIuv(), installment.getTransfers().size());
           return;
         }

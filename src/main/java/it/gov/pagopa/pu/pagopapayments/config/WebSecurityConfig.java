@@ -30,6 +30,8 @@ import static com.nimbusds.jose.JOSEObjectType.JWT;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
+  public static final String SOAP_WS_BASE_PATH = "/soap";
+
   @Bean
   public JwtDecoder jwtDecoder(
     @Value("${jwt.access-token.public-key}") String publicKey
@@ -74,6 +76,11 @@ public class WebSecurityConfig {
         // WebMVC
         .requestMatchers(
           "/favicon.ico", "/error"
+        ).permitAll()
+
+        // WsSoap
+        .requestMatchers(
+          SOAP_WS_BASE_PATH+"/**"
         ).permitAll()
 
         .anyRequest().authenticated()

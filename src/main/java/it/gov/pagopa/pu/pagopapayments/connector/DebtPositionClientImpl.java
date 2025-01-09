@@ -19,7 +19,7 @@ public class DebtPositionClientImpl implements DebtPositionClient {
   private final DebtPositionTypeOrgEntityControllerApi debtPositionTypeOrgEntityControllerApi;
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
-  public DebtPositionClientImpl(@Value("${app.debt-position.base-url}") String debtPositionBaseUrl,
+  public DebtPositionClientImpl(@Value("${rest.debt-position.base-url}") String debtPositionBaseUrl,
                                 RestTemplateBuilder restTemplateBuilder){
     RestTemplate restTemplate = restTemplateBuilder.build();
     ApiClient apiClient = new ApiClient(restTemplate)

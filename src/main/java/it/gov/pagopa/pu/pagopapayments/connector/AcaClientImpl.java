@@ -22,7 +22,7 @@ public class AcaClientImpl implements AcaClient {
   private final Map<String, AcaApi> acaApiMap = new ConcurrentHashMap<>();
 
   public AcaClientImpl(
-    @Value("${app.aca.base-url}") String acaBaseUrl,
+    @Value("${rest.node.aca.base-url}") String acaBaseUrl,
     RestTemplateBuilder restTemplateBuilder){
     this.restTemplateBuilder = restTemplateBuilder;
     this.acaBaseUrl = acaBaseUrl;

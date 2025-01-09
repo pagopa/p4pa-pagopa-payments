@@ -21,7 +21,7 @@ public class OrganizationClientImpl implements OrganizationClient{
   private final BrokerApi brokerApi;
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
-  public OrganizationClientImpl(@Value("${app.organization.base-url}") String organizationBaseUrl,
+  public OrganizationClientImpl(@Value("${rest.organization.base-url}") String organizationBaseUrl,
                                 RestTemplateBuilder restTemplateBuilder){
     RestTemplate restTemplate = restTemplateBuilder.build();
     ApiClient apiClient = new ApiClient(restTemplate)

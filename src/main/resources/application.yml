@@ -19,16 +19,18 @@ management:
         exposure.include: "*"
       web:
         exposure.include: info, health
-app:
-  rest-client:
-    connect.timeout.millis: "\${CONNECT_TIMEOUT_MILLIS:120000}"
-    read.timeout.millis: "\${READ_TIMEOUT_MILLIS:120000}"
-  auth:
-    base-url: "\${AUTH_SERVER_BASE_URL:}"
+
+rest:
+  default-timeout:
+    connect-millis: "\${DEFAULT_REST_CONNECT_TIMEOUT_MILLIS:120000}"
+    read-millis: "\${DEFAULT_REST_READ_TIMEOUT_MILLIS:120000}"
+  debt-position:
+    base-url: "\${DEBT_POSITION_BASE_URL:}"
   organization:
     base-url: "\${ORGANIZATION_BASE_URL:}"
-  aca:
-    base-url: "\${ACA_BASE_URL:}"
+  node:
+    aca:
+      base-url: "\${NODE_ACA_BASE_URL:}"
 
 springdoc:
   writer-with-default-pretty-printer: true

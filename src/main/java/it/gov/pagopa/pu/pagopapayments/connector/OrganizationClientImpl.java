@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.organization.controller.generated.OrganizationEntityCont
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.util.RestUtil;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -30,6 +31,10 @@ public class OrganizationClientImpl implements OrganizationClient{
     this.brokerApi = new BrokerApi(apiClient);
   }
 
+  @PreDestroy
+  public void unload(){
+    bearerTokenHolder.remove();
+  }
 
   @Override
   public BrokerApiKeys getApiKeyByBrokerId(Long brokerId, String accessToken) {

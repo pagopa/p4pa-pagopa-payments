@@ -7,6 +7,7 @@ import it.gov.pagopa.nodo.pacreateposition.controller.generated.AcaApi;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.DebtPositionResponse;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.util.RestUtil;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -32,6 +33,11 @@ public class AcaClientImpl implements AcaClient {
     apiClient.setBasePath(acaBaseUrl);
     apiClient.setApiKey(apiKeyHolder::get);
     this.acaApi = new AcaApi(apiClient);
+  }
+
+  @PreDestroy
+  public void unload(){
+    apiKeyHolder.remove();
   }
 
   @Override

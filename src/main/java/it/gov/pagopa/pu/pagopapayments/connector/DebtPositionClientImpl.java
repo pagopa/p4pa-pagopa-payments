@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.debtpositions.controller.ApiClient;
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgEntityControllerApi;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.pagopapayments.util.RestUtil;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -27,6 +28,10 @@ public class DebtPositionClientImpl implements DebtPositionClient {
     this.debtPositionTypeOrgEntityControllerApi = new DebtPositionTypeOrgEntityControllerApi(apiClient);
   }
 
+  @PreDestroy
+  public void unload(){
+    bearerTokenHolder.remove();
+  }
 
   @Override
   @Cacheable("debtPositionTypeOrg")

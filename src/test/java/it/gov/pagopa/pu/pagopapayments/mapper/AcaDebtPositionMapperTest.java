@@ -4,7 +4,6 @@ import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
-import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +54,7 @@ public class AcaDebtPositionMapperTest {
           .installments(List.of(
             InstallmentDTO.builder()
               .installmentId(100L)
-              .status(AcaService.STATUS_INSTALLMENT_TO_SYNCH)
+              .status(AcaDebtPositionMapper.STATUS_INSTALLMENT_TO_SYNCH)
               .amountCents(1234L)
               .debtor(debtor)
               .dueDate(DUE_DATE)
@@ -65,14 +64,14 @@ public class AcaDebtPositionMapperTest {
               .build()
             , InstallmentDTO.builder()
               .installmentId(101L)
-              .status(AcaService.STATUS_INSTALLMENT_UNPAID)
+              .status(AcaDebtPositionMapper.STATUS_INSTALLMENT_UNPAID)
               .amountCents(3456L)
               .debtor(debtor)
               .dueDate(DUE_DATE)
               .build()
             , InstallmentDTO.builder()
               .installmentId(102L)
-              .status(AcaService.STATUS_INSTALLMENT_TO_SYNCH)
+              .status(AcaDebtPositionMapper.STATUS_INSTALLMENT_TO_SYNCH)
               .amountCents(5678L)
               .debtor(debtor)
               .dueDate(DUE_DATE)
@@ -88,7 +87,7 @@ public class AcaDebtPositionMapperTest {
           .installments(List.of(
             InstallmentDTO.builder()
               .installmentId(104L)
-              .status(AcaService.STATUS_INSTALLMENT_TO_SYNCH)
+              .status(AcaDebtPositionMapper.STATUS_INSTALLMENT_TO_SYNCH)
               .amountCents(7890L)
               .debtor(debtor)
               .dueDate(DUE_DATE)

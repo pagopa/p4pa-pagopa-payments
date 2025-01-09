@@ -11,18 +11,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Slf4j
 public class AcaService {
 
   private enum OPERATION { CREATE, UPDATE, DELETE }
-
-  public static final String STATUS_INSTALLMENT_TO_SYNCH = "TO_SYNCH";
-  public static final String STATUS_INSTALLMENT_UNPAID = "UNPAID";
-
-  public static final Set<String> STATUS_TO_SEND_ACA = Set.of(STATUS_INSTALLMENT_TO_SYNCH);
 
   private final AcaClient acaClient;
   private final AcaDebtPositionMapper acaDebtPositionMapper;

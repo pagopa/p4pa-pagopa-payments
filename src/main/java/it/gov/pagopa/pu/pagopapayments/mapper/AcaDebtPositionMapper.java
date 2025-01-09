@@ -7,7 +7,6 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.TransferDTO;
-import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Component;
@@ -16,12 +15,16 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class AcaDebtPositionMapper {
 
+  public static final String STATUS_INSTALLMENT_TO_SYNCH = "TO_SYNCH";
+  public static final Set<String> STATUS_TO_SEND_ACA = Set.of(STATUS_INSTALLMENT_TO_SYNCH);
+  public static final String STATUS_INSTALLMENT_UNPAID = "UNPAID";
   private final DebtPositionClient debtPositionClient;
 
   public AcaDebtPositionMapper(DebtPositionClient debtPositionClient) {
@@ -29,7 +32,7 @@ public class AcaDebtPositionMapper {
   }
 
   private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
-    if (!AcaService.STATUS_TO_SEND_ACA.contains(installment.getStatus())) {
+    if (!STATUS_TO_SEND_ACA.contains(installment.getStatus())) {
       //skip installment whose status is not in the filterInstallmentStatus
       return false;
     }

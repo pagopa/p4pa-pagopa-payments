@@ -76,8 +76,6 @@ components:
           format: int64
         iupdOrg:
           type: string
-        iupdPagopa:
-          type: string
         description:
           type: string
         status:
@@ -159,11 +157,17 @@ components:
           format: int64
         status:
           type: string
+        iupdPagopa:
+          type: string
         iud:
           type: string
         iuv:
           type: string
         iur:
+          type: string
+        iuf:
+          type: string
+        nav:
           type: string
         dueDate:
           type: string

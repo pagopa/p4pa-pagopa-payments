@@ -22,12 +22,6 @@ class AcaDebtPositionMapperTest {
   private static final OffsetDateTime DUE_DATE = OffsetDateTime.now();
   private static final Long TYPE_ORG_ID_EXPIRING = 1L;
   private static final Long TYPE_ORG_ID_NON_EXPIRING = 2L;
-  private static final DebtPositionTypeOrg TYPE_ORG_EXPIRING = new DebtPositionTypeOrg()
-    .debtPositionTypeOrgId(TYPE_ORG_ID_EXPIRING)
-    .flagMandatoryDueDate(true);
-  private static final DebtPositionTypeOrg TYPE_ORG_NON_EXPIRING = new DebtPositionTypeOrg()
-    .debtPositionTypeOrgId(TYPE_ORG_ID_NON_EXPIRING)
-    .flagMandatoryDueDate(false);
 
   @BeforeEach
   void setUp() {

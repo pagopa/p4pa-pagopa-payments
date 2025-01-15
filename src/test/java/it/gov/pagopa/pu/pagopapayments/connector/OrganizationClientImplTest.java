@@ -40,7 +40,7 @@ class OrganizationClientImplTest {
   private static final Organization VALID_ORG = new Organization()
     .organizationId(VALID_ORG_ID)
     .brokerId(VALID_BROKER_ID)
-    .applicationCode("01");
+    .segregationCode("01");
   private static final BrokerApiKeys VALID_BROKER_API_KEYS = new BrokerApiKeys()
     .acaKey(VALID_ACA_KEY);
 

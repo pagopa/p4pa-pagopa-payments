@@ -64,12 +64,12 @@ class AcaServiceTest {
   @Test
   void givenValidDebtPositionWhenCreateThenOk() {
     //given
-    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition, TestUtils.getFakeAccessToken())).thenReturn(newDebtPositionRequestList);
+    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition)).thenReturn(newDebtPositionRequestList);
     Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));
     //when
     acaService.create(debtPosition, TestUtils.getFakeAccessToken());
     //verify
-    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition, TestUtils.getFakeAccessToken());
+    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition);
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
     newDebtPositionRequestList.forEach(newDebtPositionRequest ->
       Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequest, VALID_ACA_KEY, VALID_SEGREGATION_CODE)
@@ -79,12 +79,12 @@ class AcaServiceTest {
   @Test
   void givenValidDebtPositionWhenUpdateThenOk() {
     //given
-    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition, TestUtils.getFakeAccessToken())).thenReturn(newDebtPositionRequestList);
+    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition)).thenReturn(newDebtPositionRequestList);
     Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));
     //when
     acaService.update(debtPosition, TestUtils.getFakeAccessToken());
     //verify
-    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition, TestUtils.getFakeAccessToken());
+    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition);
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
     newDebtPositionRequestList.forEach(newDebtPositionRequest ->
       Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequest, VALID_ACA_KEY, VALID_SEGREGATION_CODE)
@@ -94,13 +94,13 @@ class AcaServiceTest {
   @Test
   void givenValidDebtPositionWhenDeleteThenOk() {
     //given
-    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition, TestUtils.getFakeAccessToken())).thenReturn(newDebtPositionRequestList);
+    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition)).thenReturn(newDebtPositionRequestList);
     Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));
     //when
     acaService.delete(debtPosition, TestUtils.getFakeAccessToken());
     //verify
 
-    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition, TestUtils.getFakeAccessToken());
+    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition);
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
     newDebtPositionRequestList.forEach(newDebtPositionRequest ->
       Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(

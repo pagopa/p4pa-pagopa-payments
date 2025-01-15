@@ -4,6 +4,7 @@ import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
+import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,6 @@ class AcaDebtPositionMapperTest {
   private AcaDebtPositionMapper acaDebtPositionMapper;
 
   private DebtPositionDTO debtPosition;
-  private PersonDTO debtor;
   private static final OffsetDateTime DUE_DATE = OffsetDateTime.now();
   private static final Long TYPE_ORG_ID_EXPIRING = 1L;
   private static final Long TYPE_ORG_ID_NON_EXPIRING = 2L;
@@ -39,7 +39,7 @@ class AcaDebtPositionMapperTest {
 
   @BeforeEach
   void setUp() {
-    debtor = PersonDTO.builder()
+    PersonDTO debtor = PersonDTO.builder()
       .fiscalCode("CF_DEBTOR")
       .entityType("F")
       .fullName("Debtor name")
@@ -101,6 +101,8 @@ class AcaDebtPositionMapperTest {
       .build();
   }
 
+  //region mapToNewDebtPositionRequest
+
   @Test
   void givenValidDebtPositionExpiringWhenMapToNewDebtPositionRequestThenOk() {
     //given
@@ -127,9 +129,11 @@ class AcaDebtPositionMapperTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(2, response.size());
     Assertions.assertEquals(1234, response.get(0).getAmount());
-    Assertions.assertEquals(AcaDebtPositionMapper.MAX_DATE, response.get(0).getExpirationDate());
-    Assertions.assertEquals(AcaDebtPositionMapper.MAX_DATE, response.get(1).getExpirationDate());
+    Assertions.assertEquals(Constants.MAX_EXPIRATION_DATE, response.get(0).getExpirationDate());
+    Assertions.assertEquals(Constants.MAX_EXPIRATION_DATE, response.get(1).getExpirationDate());
     Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionTypeOrgById(TYPE_ORG_ID_NON_EXPIRING, TestUtils.getFakeAccessToken());
   }
+
+  //endregion
 
 }

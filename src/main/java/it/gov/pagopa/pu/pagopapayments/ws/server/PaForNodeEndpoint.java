@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.ws.server;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.*;
+import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -13,6 +14,12 @@ public class PaForNodeEndpoint {
   public static final String NAMESPACE_URI = "http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd";
   public static final String NAME = "PaForNode";
 
+  private final PaymentService paymentService;
+
+  public PaForNodeEndpoint(PaymentService paymentService) {
+    this.paymentService = paymentService;
+  }
+
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaDemandPaymentNoticeRequest")
   @ResponsePayload
   public PaDemandPaymentNoticeResponse paDemandPaymentNotice(@RequestPayload PaDemandPaymentNoticeRequest request){
@@ -23,9 +30,8 @@ public class PaForNodeEndpoint {
   @ResponsePayload
   public PaVerifyPaymentNoticeRes paVerifyPaymentNotice(@RequestPayload PaVerifyPaymentNoticeReq request){
     long startTime = System.currentTimeMillis();
-    PaVerifyPaymentNoticeRes response = null;
     try {
-      return response;
+      return paymentService.paVerifyPaymentNotice(request);
     } finally {
       long elapsed = System.currentTimeMillis() - startTime;
       log.info("SOAP WS paVerifyPaymentNotice, elapsed time[{}]", elapsed);
@@ -36,9 +42,8 @@ public class PaForNodeEndpoint {
   @ResponsePayload
   public PaGetPaymentRes paGetPayment(@RequestPayload PaGetPaymentReq request) {
     long startTime = System.currentTimeMillis();
-    PaGetPaymentRes response = null;
     try {
-      return response;
+      return paymentService.paGetPayment(request);
     } finally {
       long elapsed = System.currentTimeMillis() - startTime;
       log.info("SOAP WS paGetPayment, elapsed time[{}]", elapsed);
@@ -49,9 +54,8 @@ public class PaForNodeEndpoint {
   @ResponsePayload
   public PaGetPaymentV2Response paGetPaymentV2(@RequestPayload PaGetPaymentV2Request request) {
     long startTime = System.currentTimeMillis();
-    PaGetPaymentV2Response response = null;
     try {
-      return response;
+      return paymentService.paGetPaymentV2(request);
     } finally {
       long elapsed = System.currentTimeMillis() - startTime;
       log.info("SOAP WS paGetPaymentV2, elapsed time[{}]", elapsed);

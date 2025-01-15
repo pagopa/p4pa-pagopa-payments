@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.util;
+package it.gov.pagopa.pu.pagopapayments.enums;
 
 public enum PagoPaNodeFaults {
 

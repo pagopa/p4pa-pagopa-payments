@@ -13,7 +13,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
-import it.gov.pagopa.pu.pagopapayments.util.PagoPaNodeFaults;
+import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

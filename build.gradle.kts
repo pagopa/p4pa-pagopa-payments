@@ -89,6 +89,8 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.mockito:mockito-core")
 	testImplementation ("org.projectlombok:lombok")
+  testImplementation("uk.co.jemos.podam:podam:8.0.2.RELEASE")
+
 }
 
 tasks.withType<Test> {

@@ -35,8 +35,8 @@ import java.util.Set;
 @Configuration(proxyBeanMethods = false)
 public class SoapWebServiceConfig extends WsConfigurerAdapter {
 
-  @Value("${app.absolute-base-url}")
-  private String appAbsolutePath;
+  @Value("${app.pagopa-payments-ws-base-url}")
+  private String pagopaPaymentsWsBaseUrl;
 
   @Autowired
   private ResourceLoader resourceLoader;
@@ -68,9 +68,9 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
   private void registerWsdlDefinition(String path){
     String contextRoot;
     try{
-      contextRoot = new URI(appAbsolutePath).getPath().replaceAll("/$", "");
+      contextRoot = new URI(pagopaPaymentsWsBaseUrl).getPath().replaceAll("/$", "");
     } catch(Exception e){
-      throw new ApplicationException("invalid app.absolute-base-url ["+ appAbsolutePath +"]", e);
+      throw new ApplicationException("invalid app.pagopa-payments-ws-base-url ["+ pagopaPaymentsWsBaseUrl +"]", e);
     }
     log.debug("register ws soap: {}",contextRoot + path);
     WS_PATH_NAME_SET.add(contextRoot + path);
@@ -128,7 +128,7 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
       @Override
       protected String transformLocation(String location, HttpServletRequest request) {
         //do not take url from request, because it may be changed by proxy / ingress. Use application property
-        StringBuilder url = new StringBuilder(appAbsolutePath);
+        StringBuilder url = new StringBuilder(pagopaPaymentsWsBaseUrl);
         if (location.startsWith("/")) {
           url.append(location);
           return url.toString();

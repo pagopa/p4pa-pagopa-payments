@@ -42,7 +42,7 @@ management:
         logback: true
 
 app:
-  absolute-base-url: "\${APP_ABSOLUTE_BASE_URL:}"
+  pagopa-payments-ws-base-url: "\${APP_PAGOPA_PAYMENTS_WS_BASE_URL:}"
 
 rest:
   default-timeout:

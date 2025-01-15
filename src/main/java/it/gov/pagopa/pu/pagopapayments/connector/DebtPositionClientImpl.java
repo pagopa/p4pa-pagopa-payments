@@ -51,6 +51,6 @@ public class DebtPositionClientImpl implements DebtPositionClient {
 
   @Override
   public List<InstallmentDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav, String accessToken) {
-    return List.of(); //TODO
+    return List.of(); //TODO blocked by P4ADEV-1779
   }
 }

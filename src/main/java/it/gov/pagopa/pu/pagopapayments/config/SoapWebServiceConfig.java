@@ -42,7 +42,6 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
   private ResourceLoader resourceLoader;
 
 
-  public static final String WS_PATH_SIL = WebSecurityConfig.SOAP_WS_BASE_PATH+"/sil/";
   public static final String WS_PATH_NODE = WebSecurityConfig.SOAP_WS_BASE_PATH+"/node/";
 
   public static final String XSD_PagInf_Dovuti_Pagati_6_2_0 = "PagInf_Dovuti_Pagati_6_2_0";
@@ -59,8 +58,6 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
 
 
   public static final Map<String, String> XSD_NAME_PATH_MAP = Map.of(
-      XSD_PagInf_Dovuti_Pagati_6_2_0, WS_PATH_SIL,
-      XSD_PagInf_RP_Esito_6_2_0, WS_PATH_SIL,
       XSD_PagInf_RPT_RT_6_2_0, WS_PATH_NODE,
       XSD_PaForNode, WS_PATH_NODE,
       XSD_SacCommonTypes, WS_PATH_NODE,

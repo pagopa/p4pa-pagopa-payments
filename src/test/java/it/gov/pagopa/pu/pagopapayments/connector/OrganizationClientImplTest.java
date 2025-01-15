@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
+import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -36,13 +37,17 @@ class OrganizationClientImplTest {
   private static final Long VALID_BROKER_ID = 1L;
   private static final Long INVALID_ORG_ID = 9L;
   private static final String VALID_ACA_KEY = "VALID_ACA_KEY";
+  private static final String VALID_FISCAL_CODE = "VALID_FISCAL_CODE";
 
   private static final Organization VALID_ORG = new Organization()
     .organizationId(VALID_ORG_ID)
     .brokerId(VALID_BROKER_ID)
-    .applicationCode("01");
+    .orgFiscalCode(VALID_FISCAL_CODE)
+    .segregationCode("01");
   private static final BrokerApiKeys VALID_BROKER_API_KEYS = new BrokerApiKeys()
     .acaKey(VALID_ACA_KEY);
+  private static final Broker VALID_BROKER = new Broker()
+    .brokerId(VALID_BROKER_ID);
 
   @BeforeEach
   void setUp() {
@@ -51,7 +56,7 @@ class OrganizationClientImplTest {
     organizationClient = new OrganizationClientImpl(ORG_BASE_URL, restTemplateBuilderMock);
   }
 
-
+  //region getOrganizationById
 
   @Test
   void givenValidOrganizationWhenGetOrganizationByIdThenOk(){
@@ -108,6 +113,10 @@ class OrganizationClientImplTest {
       .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<Organization>() {}));
   }
 
+  //endregion
+
+  //region getApiKeyByBrokerId
+
   @Test
   void givenValidBrokerWhenGetAcaApiKeyByBrokerIdThenOk(){
     //given
@@ -126,4 +135,51 @@ class OrganizationClientImplTest {
     Mockito.verify(restTemplateMock, Mockito.times(1))
       .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<BrokerApiKeys>() {}));
   }
+
+  //endregion
+
+  //region getBrokerById
+
+  @Test
+  void givenValidBrokerWhenGetBrokerByIdThenOk(){
+    //given
+    ResponseEntity<Broker> responseEntity = new ResponseEntity<>(VALID_BROKER, HttpStatus.OK);
+    Mockito.when(restTemplateMock.exchange(
+      Mockito.any(RequestEntity.class),
+      Mockito.eq(new ParameterizedTypeReference<Broker>() {})
+    )).thenReturn(responseEntity);
+
+    //when
+    Broker response = organizationClient.getBrokerById(VALID_BROKER_ID, TestUtils.getFakeAccessToken());
+
+    //verify
+    Assertions.assertEquals(VALID_BROKER, response);
+    Mockito.verify(restTemplateMock, Mockito.times(1))
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<Broker>() {}));
+  }
+
+  //endregion
+
+  //region getOrganizationByFiscalCode
+
+  @Test
+  void givenValidOrganizationWhenGetOrganizationByFiscalCodeThenOk(){
+    //given
+    ResponseEntity<Organization> responseEntity = new ResponseEntity<>(VALID_ORG, HttpStatus.OK);
+    Mockito.when(restTemplateMock.exchange(
+      Mockito.any(RequestEntity.class),
+      Mockito.eq(new ParameterizedTypeReference<Organization>() {})
+    )).thenReturn(responseEntity);
+
+    //when
+    Organization response = organizationClient.getOrganizationByFiscalCode(VALID_FISCAL_CODE, TestUtils.getFakeAccessToken());
+
+    //verify
+    Assertions.assertEquals(VALID_ORG, response);
+    Mockito.verify(restTemplateMock, Mockito.times(1))
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<Organization>() {}));
+  }
+
+  //endregion
+
 }

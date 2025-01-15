@@ -26,7 +26,7 @@ public class BrokerService {
       throw new NotFoundException("organization [%s]".formatted(organizationId));
     }
     BrokerApiKeys apiKeys = organizationClient.getApiKeyByBrokerId(organization.getBrokerId(), accessToken);
-    String segregationCodes = organization.getApplicationCode();
+    String segregationCodes = organization.getSegregationCode();
     return Pair.of(apiKeys, segregationCodes);
   }
 }

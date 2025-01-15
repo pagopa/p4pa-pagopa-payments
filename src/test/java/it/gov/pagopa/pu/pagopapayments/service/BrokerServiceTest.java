@@ -30,7 +30,7 @@ class BrokerServiceTest {
   private static final Organization VALID_ORG = new Organization()
     .organizationId(VALID_ORG_ID)
     .brokerId(VALID_BROKER_ID)
-    .applicationCode(VALID_SEGREGATION_CODE);
+    .segregationCode(VALID_SEGREGATION_CODE);
   private static final BrokerApiKeys VALID_API_KEYS = new BrokerApiKeys()
     .acaKey("validAcaKey")
     .syncKey("validSyncKey");

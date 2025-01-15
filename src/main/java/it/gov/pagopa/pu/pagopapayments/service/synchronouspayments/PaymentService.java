@@ -85,7 +85,7 @@ public class PaymentService {
   }
 
   public PaGetPaymentRes paGetPayment(@RequestPayload PaGetPaymentReq request) {
-    // paGetPayment is just supported for retro compatibility;
+    // this operation is just supported for retro compatibility and ideally the broker should be configured to use paGetPaymentV2;
     // it's implementation is similar to paGetPaymentV2, only differences are:
     // - marcadabollo is not supported
     // - metadata is not supported

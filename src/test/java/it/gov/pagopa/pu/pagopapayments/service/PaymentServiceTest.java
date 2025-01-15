@@ -178,7 +178,6 @@ class PaymentServiceTest {
     request.setIdPA(VALID_ORG_FISCAL_CODE);
     request.setIdStation(VALID_ID_STATION);
     request.setQrCode(getQrCode("INVALID_ORG_FISCAL_CODE", VALID_NOTICE_NUMBER));
-    PaVerifyPaymentNoticeRes expectedResponse = new PaVerifyPaymentNoticeRes();
 
     Mockito.when(organizationClientMock.getOrganizationByFiscalCode("INVALID_ORG_FISCAL_CODE", VALID_ACCEESS_TOKEN)).thenReturn(null);
 
@@ -550,7 +549,6 @@ class PaymentServiceTest {
     request.setIdPA(VALID_ORG_FISCAL_CODE);
     request.setIdStation(VALID_ID_STATION);
     request.setQrCode(getQrCode("INVALID_ORG_FISCAL_CODE", VALID_NOTICE_NUMBER));
-    PaVerifyPaymentNoticeRes expectedResponse = new PaVerifyPaymentNoticeRes();
 
     Mockito.when(organizationClientMock.getOrganizationByFiscalCode("INVALID_ORG_FISCAL_CODE", VALID_ACCEESS_TOKEN)).thenReturn(null);
 

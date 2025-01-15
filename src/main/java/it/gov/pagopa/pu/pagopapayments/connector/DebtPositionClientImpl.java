@@ -51,6 +51,6 @@ public class DebtPositionClientImpl implements DebtPositionClient {
 
   @Override
   public List<InstallmentDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav, String accessToken) {
-    return null; //TODO
+    return List.of(); //TODO
   }
 }

@@ -18,7 +18,7 @@ public class ConversionUtils {
     try {
       DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR = DatatypeFactory.newInstance();
     } catch (DatatypeConfigurationException e) {
-      throw new RuntimeException(e);
+      throw new UnsupportedOperationException(e);
     }
   }
 

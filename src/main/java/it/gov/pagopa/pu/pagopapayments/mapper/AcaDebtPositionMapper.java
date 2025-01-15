@@ -1,19 +1,17 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
-import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.TransferDTO;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -23,11 +21,6 @@ public class AcaDebtPositionMapper {
   public static final String STATUS_INSTALLMENT_TO_SYNCH = "TO_SYNCH";
   public static final Set<String> STATUS_TO_SEND_ACA = Set.of(STATUS_INSTALLMENT_TO_SYNCH);
   public static final String STATUS_INSTALLMENT_UNPAID = "UNPAID";
-  private final DebtPositionClient debtPositionClient;
-
-  public AcaDebtPositionMapper(DebtPositionClient debtPositionClient) {
-    this.debtPositionClient = debtPositionClient;
-  }
 
   private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
     if (!STATUS_TO_SEND_ACA.contains(installment.getStatus())) {
@@ -45,8 +38,7 @@ public class AcaDebtPositionMapper {
     return true;
   }
 
-  public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition, String accessToken) {
-    DebtPositionTypeOrg debtPositionTypeOrg = debtPositionClient.getDebtPositionTypeOrgById(debtPosition.getDebtPositionTypeOrgId(), accessToken);
+  public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition) {
 
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
@@ -54,10 +46,8 @@ public class AcaDebtPositionMapper {
       .map(installment -> {
         TransferDTO transfer = installment.getTransfers().getFirst();
         PersonDTO debtor = installment.getDebtor();
-        OffsetDateTime expirationDate = BooleanUtils.isTrue(debtPositionTypeOrg.getFlagMandatoryDueDate()) ?
-          installment.getDueDate() : Constants.MAX_EXPIRATION_DATE;
         return new NewDebtPositionRequest()
-          //.nav() TODO set nav from installment
+          .nav(installment.getNav())
           .iuv(installment.getIuv())
           .paFiscalCode(transfer.getOrgFiscalCode())
           .iban(transfer.getIban())
@@ -67,9 +57,9 @@ public class AcaDebtPositionMapper {
           .entityFullName(debtor.getFullName())
           .description(installment.getRemittanceInformation())
           .amount(installment.getAmountCents().intValue())
-          .expirationDate(expirationDate)
-          .switchToExpired(debtPositionTypeOrg.getFlagMandatoryDueDate())
-          .payStandIn(true); //TODO to verify
+          .expirationDate(Optional.ofNullable(installment.getDueDate()).orElse(Constants.MAX_EXPIRATION_DATE))
+          .switchToExpired(installment.getDueDate()!=null)
+          .payStandIn(true);
       }).toList();
   }
 }

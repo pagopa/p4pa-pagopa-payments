@@ -59,6 +59,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("org.springframework.boot:spring-boot-starter-web-services")
   implementation("io.micrometer:micrometer-tracing-bridge-otel:$micrometerVersion")
+  implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
@@ -125,11 +126,18 @@ configurations {
 }
 
 tasks.compileJava {
-	dependsOn(
+  dependsOn("dependenciesBuild")
+}
+
+tasks.register("dependenciesBuild") {
+  group = "AutomaticallyGeneratedCode"
+  description = "grouping all together automatically generate code tasks"
+
+  dependsOn(
     "openApiGenerateP4PAAUTH",
     "openApiGenerate",
-    "openApiGenerateOrganization",
-    "openApiGenerateDebtPositions",
+    "openApiGenerateDEBTPOSITIONS",
+    "openApiGenerateORGANIZATION",
     "openApiGeneratePaCreatePosition",
     "jaxbJavaGenPaForNode"
   )
@@ -163,9 +171,10 @@ openApiGenerate {
     "useSpringBoot3" to "true",
     "interfaceOnly" to "true",
     "useTags" to "true",
-    "generateConstructorWithAllArgs" to "false",
+    "useBeanValidation" to "true",
+    "generateConstructorWithAllArgs" to "true",
     "generatedConstructorWithRequiredArgs" to "true",
-    "additionalModelTypeAnnotations" to "@lombok.Data @lombok.Builder @lombok.AllArgsConstructor"
+    "additionalModelTypeAnnotations" to "@lombok.Builder"
   ))
 }
 
@@ -195,7 +204,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   library.set("resttemplate")
 }
 
-tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateDebtPositions") {
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateDEBTPOSITIONS") {
   group = "openapi"
   description = "description"
 
@@ -216,7 +225,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   library.set("resttemplate")
 }
 
-tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateOrganization") {
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateORGANIZATION") {
   group = "openapi"
   description = "description"
 

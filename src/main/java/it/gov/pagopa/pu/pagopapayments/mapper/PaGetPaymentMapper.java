@@ -90,12 +90,14 @@ public class PaGetPaymentMapper {
     debtor.setPostalCode(installmentDTO.getDebtor().getPostalCode());
     debtor.setStreetName(installmentDTO.getDebtor().getAddress());
     debtor.setCivicNumber(installmentDTO.getDebtor().getCivic());
+    debtor.setEMail(installmentDTO.getDebtor().getEmail());
     payment.setDebtor(debtor);
     CtTransferListPAV2 transferList = new CtTransferListPAV2();
     installmentDTO.getTransfers().forEach(transferDTO -> {
       CtTransferPAV2 transfer = new CtTransferPAV2();
       transfer.setIdTransfer(transferDTO.getTransferIndex() != null ? transferDTO.getTransferIndex().intValue() : 0);
       transfer.setFiscalCodePA(transferDTO.getOrgFiscalCode());
+      transfer.setCompanyName(transferDTO.getOrgName());
       transfer.setTransferAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(transferDTO.getAmountCents()));
       transfer.setTransferCategory(transferDTO.getCategory());
       transfer.setRemittanceInformation(transferDTO.getRemittanceInformation());

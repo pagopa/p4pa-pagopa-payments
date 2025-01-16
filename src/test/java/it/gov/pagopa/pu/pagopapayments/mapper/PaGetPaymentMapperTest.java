@@ -41,6 +41,7 @@ class PaGetPaymentMapperTest {
     Assertions.assertEquals(requestV1.getPaymentNote(), requestV2.getPaymentNote());
     Assertions.assertEquals(requestV1.getQrCode(), requestV2.getQrCode());
     Assertions.assertEquals(requestV1.getTransferType(), requestV2.getTransferType());
+    TestUtils.checkNotNullFields(requestV2);
   }
 
   //endregion
@@ -68,6 +69,7 @@ class PaGetPaymentMapperTest {
     Assertions.assertEquals(responseV1.getData().getDebtor(), responseV2.getData().getDebtor());
     Assertions.assertEquals(responseV1.getData().getMetadata(), responseV2.getData().getMetadata());
     Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().size(), responseV2.getData().getTransferList().getTransfers().size());
+    TestUtils.checkNotNullFields(responseV2);
     for (int i = 0; i < responseV1.getData().getTransferList().getTransfers().size(); i++) {
       Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getIdTransfer(), responseV2.getData().getTransferList().getTransfers().get(i).getIdTransfer());
       Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getFiscalCodePA(), responseV2.getData().getTransferList().getTransfers().get(i).getFiscalCodePA());
@@ -75,6 +77,7 @@ class PaGetPaymentMapperTest {
       Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getTransferCategory(), responseV2.getData().getTransferList().getTransfers().get(i).getTransferCategory());
       Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getRemittanceInformation(), responseV2.getData().getTransferList().getTransfers().get(i).getRemittanceInformation());
       Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getIBAN(), responseV2.getData().getTransferList().getTransfers().get(i).getIBAN());
+      TestUtils.checkNotNullFields(responseV2.getData().getTransferList().getTransfers().get(i), "iban");
     }
   }
 
@@ -104,6 +107,7 @@ class PaGetPaymentMapperTest {
     Assertions.assertEquals(installmentDTO.getHumanFriendlyRemittanceInformation(), responseV2.getData().getDescription());
     Assertions.assertEquals(organization.getOrgName(), responseV2.getData().getCompanyName());
     Assertions.assertNull(responseV2.getData().getOfficeName());
+    TestUtils.checkNotNullFields(responseV2.getData(),"officeName");
     Assertions.assertNotNull(responseV2.getData().getDebtor());
     Assertions.assertEquals(installmentDTO.getDebtor().getLocation(), responseV2.getData().getDebtor().getCity());
     Assertions.assertEquals(installmentDTO.getDebtor().getAddress(), responseV2.getData().getDebtor().getStreetName());
@@ -112,8 +116,10 @@ class PaGetPaymentMapperTest {
     Assertions.assertEquals(installmentDTO.getDebtor().getProvince(), responseV2.getData().getDebtor().getStateProvinceRegion());
     Assertions.assertEquals(installmentDTO.getDebtor().getNation(), responseV2.getData().getDebtor().getCountry());
     Assertions.assertEquals(installmentDTO.getDebtor().getFullName(), responseV2.getData().getDebtor().getFullName());
+    Assertions.assertEquals(installmentDTO.getDebtor().getEmail(), responseV2.getData().getDebtor().getEMail());
     Assertions.assertEquals(installmentDTO.getDebtor().getFiscalCode(), responseV2.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierValue());
     Assertions.assertEquals(installmentDTO.getDebtor().getEntityType(), responseV2.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierType().value());
+    TestUtils.checkNotNullFields(responseV2.getData().getDebtor());
     Assertions.assertNotNull(responseV2.getData().getMetadata());
     Assertions.assertNotNull(responseV2.getData().getMetadata().getMapEntries());
     Assertions.assertTrue(responseV2.getData().getMetadata().getMapEntries().stream().anyMatch(e -> e.getKey().equals("datiSpecificiRiscossione")));
@@ -123,6 +129,7 @@ class PaGetPaymentMapperTest {
     for (int i = 0; i < responseV2.getData().getTransferList().getTransfers().size(); i++) {
       Assertions.assertEquals(installmentDTO.getTransfers().get(i).getTransferIndex(), responseV2.getData().getTransferList().getTransfers().get(i).getIdTransfer());
       Assertions.assertEquals(installmentDTO.getTransfers().get(i).getOrgFiscalCode(), responseV2.getData().getTransferList().getTransfers().get(i).getFiscalCodePA());
+      Assertions.assertEquals(installmentDTO.getTransfers().get(i).getOrgName(), responseV2.getData().getTransferList().getTransfers().get(i).getCompanyName());
       Assertions.assertEquals(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getTransfers().get(i).getAmountCents()), responseV2.getData().getTransferList().getTransfers().get(i).getTransferAmount());
       Assertions.assertEquals(installmentDTO.getTransfers().get(i).getCategory(), responseV2.getData().getTransferList().getTransfers().get(i).getTransferCategory());
       Assertions.assertEquals(installmentDTO.getTransfers().get(i).getRemittanceInformation(), responseV2.getData().getTransferList().getTransfers().get(i).getRemittanceInformation());
@@ -131,6 +138,7 @@ class PaGetPaymentMapperTest {
       Assertions.assertEquals(installmentDTO.getTransfers().get(i).getStampHashDocument(),
         new String(responseV2.getData().getTransferList().getTransfers().get(i).getRichiestaMarcaDaBollo().getHashDocumento(), StandardCharsets.UTF_8));
       Assertions.assertEquals(installmentDTO.getTransfers().get(i).getStampProvincialResidence(), responseV2.getData().getTransferList().getTransfers().get(i).getRichiestaMarcaDaBollo().getProvinciaResidenza());
+      TestUtils.checkNotNullFields(responseV2.getData().getTransferList().getTransfers().get(i), "metadata");
     }
   }
 
@@ -149,9 +157,12 @@ class PaGetPaymentMapperTest {
     //verify
     Assertions.assertNotNull(responseV2);
     Assertions.assertNotNull(responseV2.getData());
+    TestUtils.checkNotNullFields(responseV2.getData(),"officeName");
+    TestUtils.checkNotNullFields(responseV2.getData().getDebtor());
     Assertions.assertEquals(installmentDTO.getTransfers().size(), responseV2.getData().getTransferList().getTransfers().size());
     for (int i = 0; i < responseV2.getData().getTransferList().getTransfers().size(); i++) {
       Assertions.assertEquals(installmentDTO.getTransfers().get(i).getPostalIban(), responseV2.getData().getTransferList().getTransfers().get(i).getIBAN());
+      TestUtils.checkNotNullFields(responseV2.getData().getTransferList().getTransfers().get(i), "metadata");
     }
   }
 

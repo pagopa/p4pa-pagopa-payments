@@ -1,7 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.*;
-import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtRichiestaMarcaDaBollo;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
@@ -10,10 +9,10 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.connector.OrganizationClient;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
+import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
-import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,8 +24,10 @@ import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -700,122 +701,4 @@ class PaymentServiceTest {
 
   //endregion
 
-  //region paGetPayment
-
-  @Test
-  void givenValidInstallmentTransferPagoPAWhenPaGetPaymentThenOk() {
-    // Given
-    PaGetPaymentReq requestV1 = new PaGetPaymentReq();
-    PaGetPaymentV2Request request = new PaGetPaymentV2Request();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setTransferType(StTransferType.PAGOPA);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(validInstallmentDTO) );
-
-    PaGetPaymentV2Response expectedResponse = new PaGetPaymentV2Response();
-    expectedResponse.setData(new CtPaymentPAV2());
-    expectedResponse.getData().setTransferList(new CtTransferListPAV2());
-    expectedResponse.getData().getTransferList().getTransfers().add(new CtTransferPAV2());
-    PaGetPaymentRes expectedResponseV1 = new PaGetPaymentRes();
-
-    try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
-      mapperMock.when(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-        Mockito.eq(validInstallmentDTO), Mockito.argThat(org -> Objects.equals(org.getOrganizationId(), VALID_ORG_ID)), Mockito.eq(request.getTransferType()))).thenReturn(expectedResponse);
-      mapperMock.when(() -> PaGetPaymentMapper.paGetPaymentReq2V2(Mockito.eq(requestV1))).thenReturn(request);
-      mapperMock.when(() -> PaGetPaymentMapper.paGetPaymentV2Response2V1(Mockito.eq(expectedResponse))).thenReturn(expectedResponseV1);
-
-      // When
-      PaGetPaymentRes response = paymentService.paGetPayment(requestV1);
-
-      // Then
-      Assertions.assertTrue(new ReflectionEquals(expectedResponseV1).matches(response));
-      Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN);
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN);
-      mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-        Mockito.eq(validInstallmentDTO), Mockito.argThat(org -> Objects.equals(org.getOrganizationId(), VALID_ORG_ID)), Mockito.eq(request.getTransferType())), Mockito.times(1));
-      mapperMock.verify(() -> PaGetPaymentMapper.paGetPaymentReq2V2(Mockito.eq(requestV1)), Mockito.times(1));
-      mapperMock.verify(() -> PaGetPaymentMapper.paGetPaymentV2Response2V1(Mockito.eq(expectedResponse)), Mockito.times(1));
-    }
-  }
-
-  @Test
-  void givenMarcaBolloInstallmentTransferPagoPAWhenPaGetPaymentThenFault() {
-    // Given
-    PaGetPaymentReq requestV1 = new PaGetPaymentReq();
-    requestV1.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-    PaGetPaymentV2Request request = new PaGetPaymentV2Request();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setTransferType(StTransferType.PAGOPA);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    validInstallmentDTO.setTransfers(new ArrayList<>(validInstallmentDTO.getTransfers()));
-    validInstallmentDTO.getTransfers().add(new TransferDTO().transferIndex(2L).stampHashDocument("STAMP_HASH"));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(validInstallmentDTO) );
-
-    PaGetPaymentV2Response expectedResponse = new PaGetPaymentV2Response();
-    expectedResponse.setData(new CtPaymentPAV2());
-    expectedResponse.getData().setTransferList(new CtTransferListPAV2());
-    expectedResponse.getData().getTransferList().getTransfers().add(new CtTransferPAV2());
-    CtTransferPAV2 transfer = new CtTransferPAV2();
-    transfer.setRichiestaMarcaDaBollo(new CtRichiestaMarcaDaBollo());
-    transfer.getRichiestaMarcaDaBollo().setHashDocumento("STAMP_HASH".getBytes(StandardCharsets.UTF_8));
-    expectedResponse.getData().getTransferList().getTransfers().add(transfer);
-
-    try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
-      mapperMock.when(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-        Mockito.eq(validInstallmentDTO), Mockito.argThat(org -> Objects.equals(org.getOrganizationId(), VALID_ORG_ID)), Mockito.eq(request.getTransferType()))).thenReturn(expectedResponse);
-      mapperMock.when(() -> PaGetPaymentMapper.paGetPaymentReq2V2(Mockito.eq(requestV1))).thenReturn(request);
-      mapperMock.when(() -> PaGetPaymentMapper.paGetPaymentV2Response2V1(Mockito.any())).thenAnswer(arg -> {
-        PaGetPaymentV2Response resV2 = arg.getArgument(0);
-        PaGetPaymentRes res = new PaGetPaymentRes();
-        res.setFault(resV2.getFault());
-        res.setOutcome(resV2.getOutcome());
-        return res;
-      });
-
-      // When
-      PaGetPaymentRes response = paymentService.paGetPayment(requestV1);
-
-      // Then
-      Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-      Assertions.assertEquals(PagoPaNodeFaults.PAA_SEMANTICA.code(), response.getFault().getFaultCode());
-
-      Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN);
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN);
-      mapperMock.verify(() -> PaGetPaymentMapper.paGetPaymentReq2V2(Mockito.eq(requestV1)), Mockito.times(1));
-    }
-  }
-
-  //endregion
 }

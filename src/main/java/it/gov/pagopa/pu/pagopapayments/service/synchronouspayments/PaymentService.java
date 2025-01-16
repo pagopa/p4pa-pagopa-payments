@@ -85,20 +85,6 @@ public class PaymentService {
     return response;
   }
 
-  public PaGetPaymentRes paGetPayment(@RequestPayload PaGetPaymentReq request) {
-    // this operation is just supported for retro compatibility and ideally the broker should be configured to use paGetPaymentV2;
-    // it's implementation is similar to paGetPaymentV2, only differences are:
-    // - marcadabollo is not supported
-    // - metadata is not supported
-    PaGetPaymentV2Request requestV2 = PaGetPaymentMapper.paGetPaymentReq2V2(request);
-    PaGetPaymentV2Response responseV2 = paGetPaymentImpl(requestV2);
-    if(responseV2.getData()!=null && responseV2.getData().getTransferList().getTransfers().stream().anyMatch(transfer -> transfer.getRichiestaMarcaDaBollo()!=null)) {
-      log.warn("paGetPaymentV1 [{}/{}]: marcadabollo is not supported", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
-      return handleFault(PagoPaNodeFaults.PAA_SEMANTICA, request.getIdPA(), new PaGetPaymentRes());
-    }
-    return PaGetPaymentMapper.paGetPaymentV2Response2V1(responseV2);
-  }
-
   public PaGetPaymentV2Response paGetPaymentV2(@RequestPayload PaGetPaymentV2Request request) {
     return paGetPaymentImpl(request);
   }

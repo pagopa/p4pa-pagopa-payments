@@ -31,7 +31,8 @@ public class PaymentService {
     EXPIRED,
     PAID,
     CANCELLED,
-    DRAFT
+    DRAFT,
+    TO_SYNCH
   }
 
   private final DebtPositionClient debtPositionClient;
@@ -165,7 +166,7 @@ public class PaymentService {
      * Any other case -> KO PAA_PAGAMENTO_SCONOSCIUTO
      */
 
-    List<InstallmentDTO> payableInstallmentDTOList = installmentDTOList.stream().filter(i -> i.getStatus().equals(PaymentStatus.UNPAID.name())).toList();
+    List<InstallmentDTO> payableInstallmentDTOList = installmentDTOList.stream().filter(i -> Objects.equals(i.getStatus(), PaymentStatus.UNPAID.name())).toList();
     if(payableInstallmentDTOList.size()>1){
       log.warn("getPayableDebtPositionByOrganizationIdAndNav [{}/{}]: multiple payable debt positions found", organizationId, noticeNumber);
       return Pair.of(null, PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO);

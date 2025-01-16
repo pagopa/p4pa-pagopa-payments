@@ -40,12 +40,15 @@ class PaVerifyPaymentNoticeMapperTest {
     PaVerifyPaymentNoticeRes response = PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(installmentDTO, organization);
     //verify
     Assertions.assertNotNull(response);
+    Assertions.assertNull(response.getFault());
     Assertions.assertEquals(organization.getOrgFiscalCode(), response.getFiscalCodePA());
     Assertions.assertEquals(organization.getOrgName(), response.getCompanyName());
     Assertions.assertEquals(installmentDTO.getHumanFriendlyRemittanceInformation(), response.getPaymentDescription());
     Assertions.assertEquals(StOutcome.OK, response.getOutcome());
+    TestUtils.checkNotNullFields(response,"fault", "officeName");
     Assertions.assertNotNull(response.getPaymentList());
     Assertions.assertNotNull(response.getPaymentList().getPaymentOptionDescription());
+    TestUtils.checkNotNullFields(response.getPaymentList().getPaymentOptionDescription(),"detailDescription");
     Assertions.assertEquals(StAmountOption.EQ, response.getPaymentList().getPaymentOptionDescription().getOptions());
     Assertions.assertEquals(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()), response.getPaymentList().getPaymentOptionDescription().getAmount());
     Assertions.assertEquals(ConversionUtils.toXMLGregorianCalendar(installmentDTO.getDueDate()), response.getPaymentList().getPaymentOptionDescription().getDueDate());

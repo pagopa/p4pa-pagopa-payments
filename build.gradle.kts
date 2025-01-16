@@ -27,16 +27,6 @@ configurations {
 	}
 }
 
-val xmlAdapterJarName = "${project.name}-XmlAdapter.jar"
-task("xmlAdapterJar", type = Jar::class) {
-  archiveFileName.set(xmlAdapterJarName)
-  from(sourceSets.main.get().output) {
-    include("**/TrimStringXmlAdapter.class")
-  }
-  includeEmptyDirs = false
-  destinationDirectory.set(file("libs"))
-}
-
 repositories {
 	mavenCentral()
 }
@@ -75,8 +65,6 @@ dependencies {
   jaxb("com.sun.xml.bind:jaxb-core:$jaxbVersion")
   jaxb("jakarta.xml.bind:jakarta.xml.bind-api:$jaxbApiVersion")
   jaxb("jakarta.activation:jakarta.activation-api:$activationVersion")
-  // see remarks on source file TrimStringXmlAdapter.java
-  jaxbext(files("libs/$xmlAdapterJarName"))
   jaxbext("org.jvnet.jaxb:jaxb-plugin-annotate:3.0.2")
   jaxbext("org.slf4j:slf4j-simple:2.0.16") // see https://github.com/IntershopCommunicationsAG/jaxb-gradle-plugin/issues/37
 

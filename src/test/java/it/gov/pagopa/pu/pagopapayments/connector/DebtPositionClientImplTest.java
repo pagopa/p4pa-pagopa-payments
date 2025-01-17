@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
+import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,7 @@ class DebtPositionClientImplTest {
   private static final InstallmentDTO VALID_INSTALLMENT_DTO = new InstallmentDTO()
     .installmentId(1L)
     .iuv("IUV")
-    .status(PaymentService.PaymentStatus.UNPAID.name());
+    .status(SynchronousPaymentService.PaymentStatus.UNPAID.name());
 
   @BeforeEach
   void setUp() {

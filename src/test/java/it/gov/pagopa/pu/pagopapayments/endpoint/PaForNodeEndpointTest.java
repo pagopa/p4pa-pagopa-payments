@@ -8,7 +8,7 @@ import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.SynchronousPaymentException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
-import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
+import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +25,7 @@ import uk.co.jemos.podam.api.PodamFactory;
 class PaForNodeEndpointTest {
 
   @Mock
-  private PaymentService paymentServiceMock;
+  private SynchronousPaymentService synchronousPaymentServiceMock;
 
   @InjectMocks
   private PaForNodeEndpoint paForNodeEndpoint;
@@ -66,7 +66,7 @@ class PaForNodeEndpointTest {
       PaVerifyPaymentNoticeRes paVerifyPaymentNoticeRes = podamFactory.manufacturePojo(PaVerifyPaymentNoticeRes.class);
 
       mapperMock.when(() -> PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(paVerifyPaymentNoticeReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(paymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
+      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
       mapperMock.when(() -> PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(installmentDTO, organization)).thenReturn(paVerifyPaymentNoticeRes);
 
       // when
@@ -74,7 +74,7 @@ class PaForNodeEndpointTest {
 
       // verify
       Assertions.assertEquals(paVerifyPaymentNoticeRes, response);
-      Mockito.verify(paymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
+      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
       mapperMock.verify(() -> PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(paVerifyPaymentNoticeReq), Mockito.times(1));
       mapperMock.verify(() -> PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(installmentDTO, organization), Mockito.times(1));
     }
@@ -88,7 +88,7 @@ class PaForNodeEndpointTest {
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
 
       mapperMock.when(() -> PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(paVerifyPaymentNoticeReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(paymentServiceMock.retrievePayment(retrievePaymentDTO)).thenThrow(new SynchronousPaymentException(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), "EMITTER"));
+      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenThrow(new SynchronousPaymentException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "EMITTER"));
 
       // when
       PaVerifyPaymentNoticeRes response = paForNodeEndpoint.paVerifyPaymentNotice(paVerifyPaymentNoticeReq);
@@ -98,7 +98,7 @@ class PaForNodeEndpointTest {
       Assertions.assertNotNull(response.getFault());
       Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
       Assertions.assertEquals("EMITTER", response.getFault().getId());
-      Mockito.verify(paymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
+      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
       mapperMock.verify(() -> PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(paVerifyPaymentNoticeReq), Mockito.times(1));
     }
   }
@@ -126,7 +126,7 @@ class PaForNodeEndpointTest {
       });
 
       mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(paymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
+      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
       mapperMock.when(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, paGetPaymentReq.getTransferType())).thenReturn(paGetPaymentRes);
 
       // when
@@ -134,7 +134,7 @@ class PaForNodeEndpointTest {
 
       // verify
       Assertions.assertEquals(paGetPaymentRes, response);
-      Mockito.verify(paymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
+      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
       mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
       mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, paGetPaymentReq.getTransferType()), Mockito.times(1));
     }
@@ -159,7 +159,7 @@ class PaForNodeEndpointTest {
       });
 
       mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(paymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
+      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
       mapperMock.when(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, paGetPaymentReq.getTransferType())).thenReturn(paGetPaymentRes);
 
       // when
@@ -167,7 +167,7 @@ class PaForNodeEndpointTest {
 
       // verify
       Assertions.assertEquals(paGetPaymentRes, response);
-      Mockito.verify(paymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
+      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
       mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
       mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, paGetPaymentReq.getTransferType()), Mockito.times(1));
     }
@@ -181,7 +181,7 @@ class PaForNodeEndpointTest {
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
 
       mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(paymentServiceMock.retrievePayment(retrievePaymentDTO)).thenThrow(new SynchronousPaymentException(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), "EMITTER"));
+      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenThrow(new SynchronousPaymentException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "EMITTER"));
 
       // when
       PaGetPaymentRes response = paForNodeEndpoint.paGetPayment(paGetPaymentReq);
@@ -191,7 +191,7 @@ class PaForNodeEndpointTest {
       Assertions.assertNotNull(response.getFault());
       Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
       Assertions.assertEquals("EMITTER", response.getFault().getId());
-      Mockito.verify(paymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
+      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
       mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
     }
   }
@@ -209,7 +209,7 @@ class PaForNodeEndpointTest {
       installmentDTO.getTransfers().getFirst().setPostalIban(null);
 
       mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(paymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
+      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
 
       // when
       PaGetPaymentRes response = paForNodeEndpoint.paGetPayment(paGetPaymentReq);
@@ -219,7 +219,7 @@ class PaForNodeEndpointTest {
       Assertions.assertNotNull(response.getFault());
       Assertions.assertEquals(PagoPaNodeFaults.PAA_SEMANTICA.code(), response.getFault().getFaultCode());
       Assertions.assertEquals(retrievePaymentDTO.getIdPA(), response.getFault().getId());
-      Mockito.verify(paymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
+      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
       mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
     }
   }
@@ -247,7 +247,7 @@ class PaForNodeEndpointTest {
       });
 
       mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request)).thenReturn(retrievePaymentDTO);
-      Mockito.when(paymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
+      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
       mapperMock.when(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, paGetPaymentV2Request.getTransferType())).thenReturn(paGetPaymentV2Response);
 
       // when
@@ -255,7 +255,7 @@ class PaForNodeEndpointTest {
 
       // verify
       Assertions.assertEquals(paGetPaymentV2Response, response);
-      Mockito.verify(paymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
+      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
       mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request), Mockito.times(1));
       mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, paGetPaymentV2Request.getTransferType()), Mockito.times(1));
     }

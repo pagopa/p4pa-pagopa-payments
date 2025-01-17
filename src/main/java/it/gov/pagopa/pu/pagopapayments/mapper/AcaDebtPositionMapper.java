@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.TransferDTO;
-import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
+import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import java.util.Set;
 @Slf4j
 public class AcaDebtPositionMapper {
 
-  public static final Set<String> STATUS_TO_SEND_ACA = Set.of(PaymentService.PaymentStatus.TO_SYNCH.name());
+  public static final Set<String> STATUS_TO_SEND_ACA = Set.of(SynchronousPaymentService.PaymentStatus.TO_SYNCH.name());
 
   private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
     if (!STATUS_TO_SEND_ACA.contains(installment.getStatus())) {

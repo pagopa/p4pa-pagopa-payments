@@ -11,7 +11,7 @@ import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.SynchronousPaymentException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
-import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
+import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -25,10 +25,10 @@ public class PaForNodeEndpoint {
   public static final String NAMESPACE_URI = "http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd";
   public static final String NAME = "PaForNode";
 
-  private final PaymentService paymentService;
+  private final SynchronousPaymentService synchronousPaymentService;
 
-  public PaForNodeEndpoint(PaymentService paymentService) {
-    this.paymentService = paymentService;
+  public PaForNodeEndpoint(SynchronousPaymentService synchronousPaymentService) {
+    this.synchronousPaymentService = synchronousPaymentService;
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaDemandPaymentNoticeRequest")
@@ -43,7 +43,7 @@ public class PaForNodeEndpoint {
     long startTime = System.currentTimeMillis();
     try {
       RetrievePaymentDTO retrievePaymentDTO = PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(request);
-      Pair<InstallmentDTO, Organization> installmentAndOrganization = paymentService.retrievePayment(retrievePaymentDTO);
+      Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
       return PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
         installmentAndOrganization.getLeft(), installmentAndOrganization.getRight());
     } catch(SynchronousPaymentException spe){
@@ -65,11 +65,11 @@ public class PaForNodeEndpoint {
     try {
       RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(request);
       //invoke V2 service
-      Pair<InstallmentDTO, Organization> installmentAndOrganization = paymentService.retrievePayment(retrievePaymentDTO);
+      Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
       //verify response is compatible with V1
       if(installmentAndOrganization.getLeft().getTransfers().stream().anyMatch(transfer -> transfer.getStampHashDocument() != null)) {
         log.warn("paGetPaymentV1 [{}/{}]: marcadabollo is not supported", retrievePaymentDTO.getFiscalCode(), retrievePaymentDTO.getNoticeNumber());
-        return handleFault(PagoPaNodeFaults.PAA_SEMANTICA.code(), retrievePaymentDTO.getIdPA(), new PaGetPaymentRes());
+        return handleFault(PagoPaNodeFaults.PAA_SEMANTICA, retrievePaymentDTO.getIdPA(), new PaGetPaymentRes());
       }
       return PaGetPaymentMapper.installmentDto2PaGetPaymentRes(
         installmentAndOrganization.getLeft(), installmentAndOrganization.getRight(), request.getTransferType());
@@ -87,7 +87,7 @@ public class PaForNodeEndpoint {
     long startTime = System.currentTimeMillis();
     try {
       RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(request);
-      Pair<InstallmentDTO, Organization> installmentAndOrganization = paymentService.retrievePayment(retrievePaymentDTO);
+      Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
       return PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
         installmentAndOrganization.getLeft(), installmentAndOrganization.getRight(), request.getTransferType());
     } finally {
@@ -96,13 +96,7 @@ public class PaForNodeEndpoint {
     }
   }
 
-  private <T extends CtResponse> T handleFault(String faultCode, String idFaultEmitter, T responseObj){
-    PagoPaNodeFaults fault;
-    try{
-      fault = PagoPaNodeFaults.valueOf(faultCode);
-    }catch(Exception e){
-      fault = PagoPaNodeFaults.PAA_SYSTEM_ERROR;
-    }
+  private <T extends CtResponse> T handleFault(PagoPaNodeFaults fault, String idFaultEmitter, T responseObj){
     responseObj.setFault(new CtFaultBean());
     responseObj.getFault().setFaultCode(fault.code());
     responseObj.getFault().setDescription(fault.description());

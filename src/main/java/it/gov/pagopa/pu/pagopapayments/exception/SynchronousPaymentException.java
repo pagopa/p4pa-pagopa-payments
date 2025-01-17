@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.exception;
 
+import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Data
 public class SynchronousPaymentException extends ApplicationException {
-  private final String errorCode;
+  private final PagoPaNodeFaults errorCode;
   private final String errorEmitter;
 }

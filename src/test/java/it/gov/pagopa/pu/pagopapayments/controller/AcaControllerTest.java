@@ -4,7 +4,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentOptionDTO;
 import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
-import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
+import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -37,11 +37,11 @@ class AcaControllerTest {
       .paymentOptionId(3L)
       .installments(List.of(InstallmentDTO.builder()
         .installmentId(4L)
-        .status(PaymentService.PaymentStatus.TO_SYNCH.name())
+        .status(SynchronousPaymentService.PaymentStatus.TO_SYNCH.name())
         .iuv("444444")
         .build(), InstallmentDTO.builder()
         .installmentId(5L)
-        .status(PaymentService.PaymentStatus.UNPAID.name())
+        .status(SynchronousPaymentService.PaymentStatus.UNPAID.name())
         .iuv("555555")
         .build()))
       .build()))

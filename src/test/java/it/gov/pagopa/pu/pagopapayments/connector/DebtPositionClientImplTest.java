@@ -124,7 +124,7 @@ class DebtPositionClientImplTest {
 
   //region getDebtPositionsByOrganizationIdAndNav
 
-  //@Test //TODO
+  //@Test //TODO blocked by P4ADEV-1779
   void givenValidOrganizationIdAndNavWhenGetDebtPositionsByOrganizationIdAndNavThenOk() {
     //given
     List<InstallmentDTO> expectedResponse = List.of(VALID_INSTALLMENT_DTO);

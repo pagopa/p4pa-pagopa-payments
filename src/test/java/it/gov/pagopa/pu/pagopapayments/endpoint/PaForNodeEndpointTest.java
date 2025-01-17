@@ -204,7 +204,6 @@ class PaForNodeEndpointTest {
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
       InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
       Organization organization = podamFactory.manufacturePojo(Organization.class);
-      PaGetPaymentRes paGetPaymentRes = podamFactory.manufacturePojo(PaGetPaymentRes.class);
       //set specific values for this test
       installmentDTO.getTransfers().getFirst().setIban(null);
       installmentDTO.getTransfers().getFirst().setPostalIban(null);

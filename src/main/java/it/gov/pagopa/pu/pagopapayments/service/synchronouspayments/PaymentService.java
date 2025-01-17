@@ -104,7 +104,6 @@ public class PaymentService {
       log.warn("getPayableDebtPositionByOrganizationAndNav [{}/{}]: multiple payable debt positions found", organization.getOrgFiscalCode(), noticeNumber);
       throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO.code(), organization.getOrgFiscalCode());
     } else if (payableInstallmentDTOList.size() == 1) {
-      InstallmentDTO payableInstallment = payableInstallmentDTOList.getFirst();
       return payableInstallmentDTOList.getFirst();
     } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), PaymentStatus.EXPIRED.name()))) {
       throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO.code(), organization.getOrgFiscalCode());

@@ -94,6 +94,7 @@ WORKDIR /build
 COPY --chown=${APP_USER}:${APP_GROUP} build.gradle.kts settings.gradle.kts ./
 COPY --chown=${APP_USER}:${APP_GROUP} gradle.lockfile ./
 COPY --chown=${APP_USER}:${APP_GROUP} openapi openapi/
+COPY --chown=${APP_USER}:${APP_GROUP} src/main/resources/soap src/main/resources/soap/
 COPY .git .git
 
 # Generate OpenAPI stubs and download dependencies

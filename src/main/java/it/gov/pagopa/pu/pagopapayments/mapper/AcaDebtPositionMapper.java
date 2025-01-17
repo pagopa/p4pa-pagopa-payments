@@ -5,12 +5,11 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.TransferDTO;
+import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
+import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -19,9 +18,7 @@ import java.util.Set;
 @Slf4j
 public class AcaDebtPositionMapper {
 
-  public static final String STATUS_INSTALLMENT_TO_SYNCH = "TO_SYNCH";
-  public static final Set<String> STATUS_TO_SEND_ACA = Set.of(STATUS_INSTALLMENT_TO_SYNCH);
-  public static final String STATUS_INSTALLMENT_UNPAID = "UNPAID";
+  public static final Set<String> STATUS_TO_SEND_ACA = Set.of(SynchronousPaymentService.PaymentStatus.TO_SYNCH.name());
 
   private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
     if (!STATUS_TO_SEND_ACA.contains(installment.getStatus())) {
@@ -38,8 +35,6 @@ public class AcaDebtPositionMapper {
 
     return true;
   }
-
-  public static final OffsetDateTime MAX_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59).atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime();
 
   public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition) {
 
@@ -60,7 +55,7 @@ public class AcaDebtPositionMapper {
           .entityFullName(debtor.getFullName())
           .description(installment.getRemittanceInformation())
           .amount(installment.getAmountCents().intValue())
-          .expirationDate(Optional.ofNullable(installment.getDueDate()).orElse(MAX_DATE))
+          .expirationDate(Optional.ofNullable(installment.getDueDate()).orElse(Constants.MAX_EXPIRATION_DATE))
           .switchToExpired(installment.getDueDate()!=null)
           .payStandIn(true);
       }).toList();

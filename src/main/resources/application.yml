@@ -41,10 +41,15 @@ management:
         http: true
         logback: true
 
+app:
+  pagopa-payments-ws-base-url: "\${APP_PAGOPA_PAYMENTS_WS_BASE_URL:}"
+
 rest:
   default-timeout:
     connect-millis: "\${DEFAULT_REST_CONNECT_TIMEOUT_MILLIS:120000}"
     read-millis: "\${DEFAULT_REST_READ_TIMEOUT_MILLIS:120000}"
+  auth:
+    base-url: "\${AUTH_SERVER_BASE_URL:}"
   debt-position:
     base-url: "\${DEBT_POSITION_BASE_URL:}"
   organization:

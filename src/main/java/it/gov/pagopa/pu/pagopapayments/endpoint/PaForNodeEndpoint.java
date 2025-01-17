@@ -1,13 +1,19 @@
-package it.gov.pagopa.pu.pagopapayments.ws.server;
+package it.gov.pagopa.pu.pagopapayments.endpoint;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.*;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtFaultBean;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtResponse;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
+import it.gov.pagopa.pu.pagopapayments.exception.SynchronousPaymentException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
@@ -36,7 +42,12 @@ public class PaForNodeEndpoint {
   public PaVerifyPaymentNoticeRes paVerifyPaymentNotice(@RequestPayload PaVerifyPaymentNoticeReq request){
     long startTime = System.currentTimeMillis();
     try {
-      return paymentService.paVerifyPaymentNotice(request);
+      RetrievePaymentDTO retrievePaymentDTO = PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(request);
+      Pair<InstallmentDTO, Organization> installmentAndOrganization = paymentService.retrievePayment(retrievePaymentDTO);
+      return PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
+        installmentAndOrganization.getLeft(), installmentAndOrganization.getRight());
+    } catch(SynchronousPaymentException spe){
+      return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaVerifyPaymentNoticeRes());
     } finally {
       long elapsed = System.currentTimeMillis() - startTime;
       log.info("SOAP WS paVerifyPaymentNotice, elapsed time[{}]", elapsed);
@@ -52,18 +63,19 @@ public class PaForNodeEndpoint {
     // - metadata is not supported
     long startTime = System.currentTimeMillis();
     try {
-      //convert V1 request to V2
-      PaGetPaymentV2Request requestV2 = PaGetPaymentMapper.paGetPaymentReq2V2(request);
+      RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(request);
       //invoke V2 service
-      PaGetPaymentV2Response responseV2 = paymentService.paGetPaymentV2(requestV2);
-      //verify response is compatbile with V1
-      if(responseV2.getData()!=null && responseV2.getData().getTransferList().getTransfers().stream().anyMatch(transfer -> transfer.getRichiestaMarcaDaBollo()!=null)) {
-        log.warn("paGetPaymentV1 [{}/{}]: marcadabollo is not supported", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
-        return handleFault(PagoPaNodeFaults.PAA_SEMANTICA, request.getIdPA(), new PaGetPaymentRes());
+      Pair<InstallmentDTO, Organization> installmentAndOrganization = paymentService.retrievePayment(retrievePaymentDTO);
+      //verify response is compatible with V1
+      if(installmentAndOrganization.getLeft().getTransfers().stream().anyMatch(transfer -> transfer.getStampHashDocument() != null)) {
+        log.warn("paGetPaymentV1 [{}/{}]: marcadabollo is not supported", retrievePaymentDTO.getFiscalCode(), retrievePaymentDTO.getNoticeNumber());
+        return handleFault(PagoPaNodeFaults.PAA_SEMANTICA.code(), retrievePaymentDTO.getIdPA(), new PaGetPaymentRes());
       }
-      //convert V2 response to V1
-      return PaGetPaymentMapper.paGetPaymentV2Response2V1(responseV2);
-    } finally {
+      return PaGetPaymentMapper.installmentDto2PaGetPaymentRes(
+        installmentAndOrganization.getLeft(), installmentAndOrganization.getRight(), request.getTransferType());
+    } catch(SynchronousPaymentException spe){
+      return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaGetPaymentRes());
+    }finally {
       long elapsed = System.currentTimeMillis() - startTime;
       log.info("SOAP WS paGetPayment, elapsed time[{}]", elapsed);
     }
@@ -74,14 +86,23 @@ public class PaForNodeEndpoint {
   public PaGetPaymentV2Response paGetPaymentV2(@RequestPayload PaGetPaymentV2Request request) {
     long startTime = System.currentTimeMillis();
     try {
-      return paymentService.paGetPaymentV2(request);
+      RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(request);
+      Pair<InstallmentDTO, Organization> installmentAndOrganization = paymentService.retrievePayment(retrievePaymentDTO);
+      return PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+        installmentAndOrganization.getLeft(), installmentAndOrganization.getRight(), request.getTransferType());
     } finally {
       long elapsed = System.currentTimeMillis() - startTime;
       log.info("SOAP WS paGetPaymentV2, elapsed time[{}]", elapsed);
     }
   }
 
-  private <T extends CtResponse> T handleFault(PagoPaNodeFaults fault, String idFaultEmitter, T responseObj){
+  private <T extends CtResponse> T handleFault(String faultCode, String idFaultEmitter, T responseObj){
+    PagoPaNodeFaults fault;
+    try{
+      fault = PagoPaNodeFaults.valueOf(faultCode);
+    }catch(Exception e){
+      fault = PagoPaNodeFaults.PAA_SYSTEM_ERROR;
+    }
     responseObj.setFault(new CtFaultBean());
     responseObj.getFault().setFaultCode(fault.code());
     responseObj.getFault().setDescription(fault.description());

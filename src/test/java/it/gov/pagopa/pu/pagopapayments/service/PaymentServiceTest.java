@@ -1,33 +1,29 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
-import it.gov.pagopa.pagopa_api.pa.pafornode.*;
-import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.connector.OrganizationClient;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
+import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
-import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
-import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
+import it.gov.pagopa.pu.pagopapayments.exception.SynchronousPaymentException;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.PaymentService;
+import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.co.jemos.podam.api.PodamFactory;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -42,661 +38,384 @@ class PaymentServiceTest {
   @InjectMocks
   private PaymentService paymentService;
 
-  private static final String VALID_BROKER_FISCAL_CODE = "VALID_BROKER";
-  private static final Long VALID_BROKER_ID = 101L;
-  private static final String VALID_ORG_FISCAL_CODE = "VALID_PA";
-  private static final Long VALID_ORG_ID = 1L;
-  private static final String VALID_ID_STATION = "VALID_STATION";
-  private static final String VALID_NOTICE_NUMBER = "VALID_NOTICE_NUMBER";
-  private static final String VALID_ACCEESS_TOKEN = "VALID_ACCESS_TOKEN";
-  private static final Long VALID_INSTALLMENT_ID = 1001L;
+  private final PodamFactory podamFactory;
 
-
-  private InstallmentDTO validInstallmentDTO;
-
-  private final Map<String, CtQrCode> ctQrCodeMap = new HashMap<>();
-  private CtQrCode getQrCode(String fiscalCode, String noticeNumber) {
-    return ctQrCodeMap.computeIfAbsent(fiscalCode + noticeNumber, k -> {
-      CtQrCode qrCode = new CtQrCode();
-      qrCode.setFiscalCode(fiscalCode);
-      qrCode.setNoticeNumber(noticeNumber);
-      return qrCode;
-    });
+  PaymentServiceTest() {
+    podamFactory = TestUtils.getPodamFactory();
   }
 
-  @BeforeEach
-  void setup(){
-    validInstallmentDTO = new InstallmentDTO()
-      .installmentId(VALID_INSTALLMENT_ID)
-      .iuv("VALID_IUV")
-      .remittanceInformation("VALID_REMITTANCE_INFORMATION")
-      .amountCents(1234L)
-      .status(PaymentService.PaymentStatus.UNPAID.name())
-      .transfers(
-        List.of(
-          new TransferDTO()
-            .amountCents(1234L)
-            .orgFiscalCode(VALID_ORG_FISCAL_CODE)
-            .category("CATEGORY")
-            .iban("VALID_IBAN")
-        )
-      );
+  private static final String VALID_ACCEESS_TOKEN = "VALID_ACCESS_TOKEN";
 
+
+  @BeforeEach
+  void setup() {
     Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
   }
 
-  //region paVerifyPaymentNotice
+  //region retrievePayment
 
   @Test
-  void givenValidInstallmentWhenPaVerifyPaymentNoticeThenOk() {
+  void givenValidInstallmentWhenRetrievePaymentThenOk() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    organization.setBrokerId(broker.getBrokerId());
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setStatus(PaymentService.PaymentStatus.UNPAID.name());
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(validInstallmentDTO) );
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), installmentDTO.getNav(), VALID_ACCEESS_TOKEN))
+      .thenReturn(List.of(installmentDTO));
 
-    PaVerifyPaymentNoticeRes expectedResponse = new PaVerifyPaymentNoticeRes();
-
-    try (MockedStatic<PaVerifyPaymentNoticeMapper> mapperMock = Mockito.mockStatic(PaVerifyPaymentNoticeMapper.class)) {
-      mapperMock.when(() -> PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
-        Mockito.eq(validInstallmentDTO), Mockito.argThat(org -> Objects.equals(org.getOrganizationId(), VALID_ORG_ID)))).thenReturn(expectedResponse);
-
-      // When
-      PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
-
-      // Then
-      Assertions.assertTrue(new ReflectionEquals(expectedResponse).matches(response));
-      Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN);
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN);
-      mapperMock.verify(() -> PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
-        Mockito.eq(validInstallmentDTO), Mockito.argThat(org -> Objects.equals(org.getOrganizationId(), VALID_ORG_ID))), Mockito.times(1));
-    }
-  }
-
-  @Test
-  void givenValidInstallmentAndOtherInstallmentWhenPaVerifyPaymentNoticeThenOk() {
-    // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(validInstallmentDTO, new InstallmentDTO().status(PaymentService.PaymentStatus.CANCELLED.name())) );
-
-    PaVerifyPaymentNoticeRes expectedResponse = new PaVerifyPaymentNoticeRes();
-
-    try (MockedStatic<PaVerifyPaymentNoticeMapper> mapperMock = Mockito.mockStatic(PaVerifyPaymentNoticeMapper.class)) {
-      mapperMock.when(() -> PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
-        Mockito.eq(validInstallmentDTO), Mockito.argThat(org -> Objects.equals(org.getOrganizationId(), VALID_ORG_ID)))).thenReturn(expectedResponse);
-
-      // When
-      PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
-
-      // Then
-      Assertions.assertTrue(new ReflectionEquals(expectedResponse).matches(response));
-      Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN);
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN);
-      mapperMock.verify(() -> PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
-        Mockito.eq(validInstallmentDTO), Mockito.argThat(org -> Objects.equals(org.getOrganizationId(), VALID_ORG_ID))), Mockito.times(1));
-    }
-  }
-
-  @Test
-  void givenNotFoundOrgWhenPaVerifyPaymentNoticeThenFault() {
-    // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode("INVALID_ORG_FISCAL_CODE", VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode("INVALID_ORG_FISCAL_CODE", VALID_ACCEESS_TOKEN)).thenReturn(null);
+    RetrievePaymentDTO retrievePaymentDTO = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .fiscalCode(organization.getOrgFiscalCode())
+      .idPA(organization.getOrgFiscalCode())
+      .noticeNumber(installmentDTO.getNav())
+      .idBrokerPA(broker.getBrokerFiscalCode())
+      .build();
+    Pair<InstallmentDTO, Organization> expectedResponse = Pair.of(installmentDTO, organization);
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    Pair<InstallmentDTO, Organization> response = paymentService.retrievePayment(retrievePaymentDTO);
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), response.getFault().getFaultCode());
+    Assertions.assertTrue(new ReflectionEquals(expectedResponse).matches(response));
+    Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), installmentDTO.getNav(), VALID_ACCEESS_TOKEN);
   }
 
   @Test
-  void givenNotActiveOrgWhenPaVerifyPaymentNoticeThenFault() {
+  void givenValidInstallmentAndOtherInstallmentWhenRetrievePaymentThenOk() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    organization.setBrokerId(broker.getBrokerId());
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setStatus(PaymentService.PaymentStatus.UNPAID.name());
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.DRAFT)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), installmentDTO.getNav(), VALID_ACCEESS_TOKEN))
+      .thenReturn(List.of(installmentDTO, new InstallmentDTO().status(PaymentService.PaymentStatus.CANCELLED.name())));
+
+    RetrievePaymentDTO retrievePaymentDTO = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .fiscalCode(organization.getOrgFiscalCode())
+      .idPA(organization.getOrgFiscalCode())
+      .noticeNumber(installmentDTO.getNav())
+      .idBrokerPA(broker.getBrokerFiscalCode())
+      .build();
+    Pair<InstallmentDTO, Organization> expectedResponse = Pair.of(installmentDTO, organization);
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    Pair<InstallmentDTO, Organization> response = paymentService.retrievePayment(retrievePaymentDTO);
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), response.getFault().getFaultCode());
+    Assertions.assertTrue(new ReflectionEquals(expectedResponse).matches(response));
+    Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), installmentDTO.getNav(), VALID_ACCEESS_TOKEN);
   }
 
   @Test
-  void givenNotFoundBrokerWhenPaVerifyPaymentNoticeThenFault() {
+  void givenNotFoundOrgWhenRetrievePaymentThenFault() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(102L)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(102L, VALID_ACCEESS_TOKEN)).thenReturn(null);
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(retrievePaymentDTO.getFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(null);
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), response.getErrorCode());
+    Assertions.assertEquals(retrievePaymentDTO.getIdBrokerPA(), response.getErrorEmitter());
   }
 
   @Test
-  void givenInvalidBrokerWhenPaVerifyPaymentNoticeThenFault() {
+  void givenNotActiveOrgWhenRetrievePaymentThenFault() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setStatus(Organization.StatusEnum.DRAFT);
+    RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    retrievePaymentDTO.setIdPA(organization.getOrgFiscalCode());
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(102L)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(102L, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(102L)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode("INVALID_BROKER_FISCAL_CODE"));
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(retrievePaymentDTO.getFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), response.getErrorCode());
+    Assertions.assertEquals(organization.getOrgFiscalCode(), response.getErrorEmitter());
   }
 
   @Test
-  void givenInvalidStationWhenPaVerifyPaymentNoticeThenFault() {
+  void givenInvalidBrokerWhenRetrievePaymentThenFault() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    retrievePaymentDTO.setIdPA(organization.getOrgFiscalCode());
+    retrievePaymentDTO.setIdBrokerPA(broker.getBrokerFiscalCode()+"xxx");
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId("INVALID_STATION")
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(retrievePaymentDTO.getFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(organization.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO.code(), response.getErrorCode());
+    Assertions.assertEquals(broker.getBrokerFiscalCode(), response.getErrorEmitter());
   }
 
   @Test
-  void givenNotFoundInstallmentWhenPaVerifyPaymentNoticeThenFault() {
+  void givenInvalidStationWhenRetrievePaymentThenFault() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    retrievePaymentDTO.setIdPA(organization.getOrgFiscalCode());
+    retrievePaymentDTO.setIdBrokerPA(broker.getBrokerFiscalCode());
+    retrievePaymentDTO.setIdStation(broker.getStationId()+"xxx");
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of() );
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(retrievePaymentDTO.getFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(organization.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_STAZIONE_INT_ERRATA.code(), response.getErrorCode());
+    Assertions.assertEquals(broker.getBrokerFiscalCode(), response.getErrorEmitter());
   }
 
   @Test
-  void givenDuplicatedInstallmentWhenPaVerifyPaymentNoticeThenFault() {
+  void givenNotFoundInstallmentWhenRetrievePaymentThenFault() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    organization.setBrokerId(broker.getBrokerId());
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    String nav = "NAV";
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(validInstallmentDTO, validInstallmentDTO) );
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN))
+      .thenReturn(List.of());
+
+    RetrievePaymentDTO retrievePaymentDTO = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .fiscalCode(organization.getOrgFiscalCode())
+      .idPA(organization.getOrgFiscalCode())
+      .noticeNumber(nav)
+      .idBrokerPA(broker.getBrokerFiscalCode())
+      .build();
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), response.getErrorCode());
+    Assertions.assertEquals(organization.getOrgFiscalCode(), response.getErrorEmitter());
+    Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN);
   }
 
   @Test
-  void givenExpiredInstallmentWhenPaVerifyPaymentNoticeThenFault() {
+  void givenDuplicatedInstallmentWhenRetrievePaymentThenFault() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    organization.setBrokerId(broker.getBrokerId());
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setStatus(PaymentService.PaymentStatus.UNPAID.name());
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), installmentDTO.getNav(), VALID_ACCEESS_TOKEN))
+      .thenReturn(List.of(installmentDTO, installmentDTO));
+
+    RetrievePaymentDTO retrievePaymentDTO = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .fiscalCode(organization.getOrgFiscalCode())
+      .idPA(organization.getOrgFiscalCode())
+      .noticeNumber(installmentDTO.getNav())
+      .idBrokerPA(broker.getBrokerFiscalCode())
+      .build();
+
+    // When
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
+
+    // Then
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO.code(), response.getErrorCode());
+    Assertions.assertEquals(organization.getOrgFiscalCode(), response.getErrorEmitter());
+    Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), installmentDTO.getNav(), VALID_ACCEESS_TOKEN);
+  }
+
+  @Test
+  void givenExpiredInstallmentWhenRetrievePaymentThenFault() {
+    // Given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    organization.setBrokerId(broker.getBrokerId());
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    String nav = "NAV";
+
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN))
+      .thenReturn(List.of(
         new InstallmentDTO().status(PaymentService.PaymentStatus.CANCELLED.name())
         , new InstallmentDTO().status(PaymentService.PaymentStatus.EXPIRED.name())
         , new InstallmentDTO().status(PaymentService.PaymentStatus.PAID.name())
-      ) );
+      ));
+
+    RetrievePaymentDTO retrievePaymentDTO = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .fiscalCode(organization.getOrgFiscalCode())
+      .idPA(organization.getOrgFiscalCode())
+      .noticeNumber(nav)
+      .idBrokerPA(broker.getBrokerFiscalCode())
+      .build();
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO.code(), response.getErrorCode());
+    Assertions.assertEquals(organization.getOrgFiscalCode(), response.getErrorEmitter());
+    Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN);
   }
 
   @Test
-  void givenPaidInstallmentWhenPaVerifyPaymentNoticeThenFault() {
+  void givenPaidInstallmentWhenRetrievePaymentThenFault() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    organization.setBrokerId(broker.getBrokerId());
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    String nav = "NAV";
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN))
+      .thenReturn(List.of(
         new InstallmentDTO().status(PaymentService.PaymentStatus.CANCELLED.name())
         , new InstallmentDTO().status(PaymentService.PaymentStatus.PAID.name())
-      ) );
+      ));
+
+    RetrievePaymentDTO retrievePaymentDTO = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .fiscalCode(organization.getOrgFiscalCode())
+      .idPA(organization.getOrgFiscalCode())
+      .noticeNumber(nav)
+      .idBrokerPA(broker.getBrokerFiscalCode())
+      .build();
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), response.getErrorCode());
+    Assertions.assertEquals(organization.getOrgFiscalCode(), response.getErrorEmitter());
+    Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN);
   }
 
   @Test
-  void givenCancelledInstallmentWhenPaVerifyPaymentNoticeThenFault() {
+  void givenCancelledInstallmentWhenRetrievePaymentThenFault() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    organization.setBrokerId(broker.getBrokerId());
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    String nav = "NAV";
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN))
+      .thenReturn(List.of(
         new InstallmentDTO().status(PaymentService.PaymentStatus.CANCELLED.name())
         , new InstallmentDTO().status(PaymentService.PaymentStatus.DRAFT.name())
-      ) );
+      ));
+
+    RetrievePaymentDTO retrievePaymentDTO = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .fiscalCode(organization.getOrgFiscalCode())
+      .idPA(organization.getOrgFiscalCode())
+      .noticeNumber(nav)
+      .idBrokerPA(broker.getBrokerFiscalCode())
+      .build();
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_ANNULLATO.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_ANNULLATO.code(), response.getErrorCode());
+    Assertions.assertEquals(organization.getOrgFiscalCode(), response.getErrorEmitter());
+    Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN);
   }
 
   @Test
-  void givenFallbackGenericStatusInstallmentWhenPaVerifyPaymentNoticeThenFault() {
+  void givenFallbackGenericStatusInstallmentWhenRetrievePaymentThenFault() {
     // Given
-    PaVerifyPaymentNoticeReq request = new PaVerifyPaymentNoticeReq();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    organization.setBrokerId(broker.getBrokerId());
+    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    String nav = "NAV";
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN))
+      .thenReturn(List.of(
         new InstallmentDTO().status(PaymentService.PaymentStatus.DRAFT.name())
-      ) );
+        , new InstallmentDTO().status(PaymentService.PaymentStatus.DRAFT.name())
+      ));
+
+    RetrievePaymentDTO retrievePaymentDTO = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .fiscalCode(organization.getOrgFiscalCode())
+      .idPA(organization.getOrgFiscalCode())
+      .noticeNumber(nav)
+      .idBrokerPA(broker.getBrokerFiscalCode())
+      .build();
 
     // When
-    PaVerifyPaymentNoticeRes response = paymentService.paVerifyPaymentNotice(request);
+    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> paymentService.retrievePayment(retrievePaymentDTO));
 
     // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), response.getFault().getFaultCode());
-  }
-
-  //endregion
-
-  //region paGetPaymentV2
-
-  @Test
-  void givenValidInstallmentTransferPagoPAWhenPaGetPaymentV2ThenOk() {
-    // Given
-    PaGetPaymentV2Request request = new PaGetPaymentV2Request();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setTransferType(StTransferType.PAGOPA);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of(validInstallmentDTO) );
-
-    PaGetPaymentV2Response expectedResponse = new PaGetPaymentV2Response();
-
-    try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
-      mapperMock.when(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-        Mockito.eq(validInstallmentDTO), Mockito.argThat(org -> Objects.equals(org.getOrganizationId(), VALID_ORG_ID)), Mockito.eq(request.getTransferType()))).thenReturn(expectedResponse);
-
-      // When
-      PaGetPaymentV2Response response = paymentService.paGetPaymentV2(request);
-
-      // Then
-      Assertions.assertTrue(new ReflectionEquals(expectedResponse).matches(response));
-      Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN);
-      Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN);
-      mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-        Mockito.eq(validInstallmentDTO), Mockito.argThat(org -> Objects.equals(org.getOrganizationId(), VALID_ORG_ID)), Mockito.eq(request.getTransferType())), Mockito.times(1));
-    }
-  }
-
-  @Test
-  void givenNotFoundOrgWhenPaGetPaymentV2ThenFault() {
-    // Given
-    PaGetPaymentV2Request request = new PaGetPaymentV2Request();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode("INVALID_ORG_FISCAL_CODE", VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode("INVALID_ORG_FISCAL_CODE", VALID_ACCEESS_TOKEN)).thenReturn(null);
-
-    // When
-    PaGetPaymentV2Response response = paymentService.paGetPaymentV2(request);
-
-    // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), response.getFault().getFaultCode());
-  }
-
-  @Test
-  void givenNotActiveOrgWhenPaGetPaymentV2ThenFault() {
-    // Given
-    PaGetPaymentV2Request request = new PaGetPaymentV2Request();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.DRAFT)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-
-    // When
-    PaGetPaymentV2Response response = paymentService.paGetPaymentV2(request);
-
-    // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), response.getFault().getFaultCode());
-  }
-
-  @Test
-  void givenNotFoundBrokerWhenPaGetPaymentV2ThenFault() {
-    // Given
-    PaGetPaymentV2Request request = new PaGetPaymentV2Request();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(102L)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(102L, VALID_ACCEESS_TOKEN)).thenReturn(null);
-
-    // When
-    PaGetPaymentV2Response response = paymentService.paGetPaymentV2(request);
-
-    // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO.code(), response.getFault().getFaultCode());
-  }
-
-  @Test
-  void givenInvalidBrokerWhenPaGetPaymentV2ThenFault() {
-    // Given
-    PaGetPaymentV2Request request = new PaGetPaymentV2Request();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(102L)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(102L, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(102L)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode("INVALID_BROKER_FISCAL_CODE"));
-
-    // When
-    PaGetPaymentV2Response response = paymentService.paGetPaymentV2(request);
-
-    // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO.code(), response.getFault().getFaultCode());
-  }
-
-  @Test
-  void givenInvalidStationWhenPaGetPaymentV2ThenFault() {
-    // Given
-    PaGetPaymentV2Request request = new PaGetPaymentV2Request();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId("INVALID_STATION")
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-
-    // When
-    PaGetPaymentV2Response response = paymentService.paGetPaymentV2(request);
-
-    // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), response.getFault().getFaultCode());
-  }
-
-  @Test
-  void givenNotFoundInstallmentWhenPaGetPaymentV2ThenFault() {
-    // Given
-    PaGetPaymentV2Request request = new PaGetPaymentV2Request();
-    request.setIdBrokerPA(VALID_BROKER_FISCAL_CODE);
-    request.setIdPA(VALID_ORG_FISCAL_CODE);
-    request.setIdStation(VALID_ID_STATION);
-    request.setQrCode(getQrCode(VALID_ORG_FISCAL_CODE, VALID_NOTICE_NUMBER));
-
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(VALID_ORG_FISCAL_CODE, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Organization()
-        .status(Organization.StatusEnum.ACTIVE)
-        .organizationId(VALID_ORG_ID)
-        .brokerId(VALID_BROKER_ID)
-        .orgFiscalCode(VALID_ORG_FISCAL_CODE));
-    Mockito.when(organizationClientMock.getBrokerById(VALID_BROKER_ID, VALID_ACCEESS_TOKEN)).thenReturn(
-      new Broker()
-        .brokerId(VALID_BROKER_ID)
-        .stationId(VALID_ID_STATION)
-        .brokerFiscalCode(VALID_BROKER_FISCAL_CODE));
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(VALID_ORG_ID, VALID_NOTICE_NUMBER, VALID_ACCEESS_TOKEN))
-      .thenReturn( List.of() );
-
-    // When
-    PaGetPaymentV2Response response = paymentService.paGetPaymentV2(request);
-
-    // Then
-    Assertions.assertEquals(StOutcome.KO, response.getOutcome());
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), response.getErrorCode());
+    Assertions.assertEquals(organization.getOrgFiscalCode(), response.getErrorEmitter());
+    Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN);
   }
 
   //endregion

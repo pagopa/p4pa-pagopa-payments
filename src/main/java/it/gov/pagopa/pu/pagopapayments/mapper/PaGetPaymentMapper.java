@@ -7,6 +7,7 @@ import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtRichiestaMarcaDaBollo;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,20 +21,30 @@ public class PaGetPaymentMapper {
   private PaGetPaymentMapper() {
   }
 
-  public static PaGetPaymentV2Request paGetPaymentReq2V2(PaGetPaymentReq paGetPaymentReq) {
-    PaGetPaymentV2Request requestV2 = new PaGetPaymentV2Request();
-    requestV2.setAmount(paGetPaymentReq.getAmount());
-    requestV2.setDueDate(paGetPaymentReq.getDueDate());
-    requestV2.setIdBrokerPA(paGetPaymentReq.getIdBrokerPA());
-    requestV2.setIdPA(paGetPaymentReq.getIdPA());
-    requestV2.setIdStation(paGetPaymentReq.getIdStation());
-    requestV2.setPaymentNote(paGetPaymentReq.getPaymentNote());
-    requestV2.setQrCode(paGetPaymentReq.getQrCode());
-    requestV2.setTransferType(paGetPaymentReq.getTransferType());
-    return requestV2;
+  public static RetrievePaymentDTO paPaGetPaymentV2Request2RetrievePaymentDTO(PaGetPaymentV2Request request) {
+    return RetrievePaymentDTO.builder()
+      .idPA(request.getIdPA())
+      .idBrokerPA(request.getIdBrokerPA())
+      .idStation(request.getIdStation())
+      .fiscalCode(request.getQrCode().getFiscalCode())
+      .noticeNumber(request.getQrCode().getNoticeNumber())
+      .postalTransfer(request.getTransferType().equals(StTransferType.POSTAL))
+      .build();
   }
 
-  public static PaGetPaymentRes paGetPaymentV2Response2V1(PaGetPaymentV2Response paGetPaymentV2Response) {
+  public static RetrievePaymentDTO paPaGetPaymentReq2RetrievePaymentDTO(PaGetPaymentReq request) {
+    return RetrievePaymentDTO.builder()
+      .idPA(request.getIdPA())
+      .idBrokerPA(request.getIdBrokerPA())
+      .idStation(request.getIdStation())
+      .fiscalCode(request.getQrCode().getFiscalCode())
+      .noticeNumber(request.getQrCode().getNoticeNumber())
+      .postalTransfer(request.getTransferType().equals(StTransferType.POSTAL))
+      .build();
+  }
+
+  public static PaGetPaymentRes installmentDto2PaGetPaymentRes(InstallmentDTO installmentDTO, Organization organization, StTransferType transferType) {
+    PaGetPaymentV2Response paGetPaymentV2Response = installmentDto2PaGetPaymentV2Response(installmentDTO, organization, transferType);
     PaGetPaymentRes response = new PaGetPaymentRes();
     response.setOutcome(paGetPaymentV2Response.getOutcome());
     response.setFault(paGetPaymentV2Response.getFault());

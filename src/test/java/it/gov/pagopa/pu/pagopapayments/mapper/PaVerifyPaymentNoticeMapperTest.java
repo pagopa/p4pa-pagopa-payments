@@ -1,11 +1,13 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
+import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeReq;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeRes;
 import it.gov.pagopa.pagopa_api.pa.pafornode.StAmountOption;
 import it.gov.pagopa.pagopa_api.pa.pafornode.StEntityUniqueIdentifierType;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +25,28 @@ class PaVerifyPaymentNoticeMapperTest {
   PaVerifyPaymentNoticeMapperTest() {
     podamFactory = TestUtils.getPodamFactory();
   }
+
+  //region paVerifyPaymentNoticeReq2PaForNodeRequestDTO
+
+  @Test
+  void givenValidPaVerifyPaymentNoticeReqWhenPaVerifyPaymentNoticeReq2RetrievePaymentDTOThenOk() {
+    //given
+    PaVerifyPaymentNoticeReq paVerifyPaymentNoticeReq = podamFactory.manufacturePojo(PaVerifyPaymentNoticeReq.class);
+
+    //when
+    RetrievePaymentDTO response = PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(paVerifyPaymentNoticeReq);
+    //verify
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(paVerifyPaymentNoticeReq.getIdPA(), response.getIdPA());
+    Assertions.assertEquals(paVerifyPaymentNoticeReq.getIdBrokerPA(), response.getIdBrokerPA());
+    Assertions.assertEquals(paVerifyPaymentNoticeReq.getIdStation(), response.getIdStation());
+    Assertions.assertEquals(paVerifyPaymentNoticeReq.getQrCode().getFiscalCode(), response.getFiscalCode());
+    Assertions.assertEquals(paVerifyPaymentNoticeReq.getQrCode().getNoticeNumber(), response.getNoticeNumber());
+    TestUtils.checkNotNullFields(response,"postalTransfer");
+  }
+
+  //endregion
+
 
   //region installmentDto2PaVerifyPaymentNoticeRes
 

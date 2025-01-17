@@ -1,26 +1,21 @@
 package it.gov.pagopa.pu.pagopapayments.service.synchronouspayments;
 
-import it.gov.pagopa.pagopa_api.pa.pafornode.*;
-import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtFaultBean;
-import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtResponse;
-import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.connector.OrganizationClient;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
-import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
+import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
+import it.gov.pagopa.pu.pagopapayments.exception.SynchronousPaymentException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
-import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -45,100 +40,41 @@ public class PaymentService {
     this.authnService = authnService;
   }
 
-  public PaVerifyPaymentNoticeRes paVerifyPaymentNotice(@RequestPayload PaVerifyPaymentNoticeReq request) {
-    PaVerifyPaymentNoticeRes response = new PaVerifyPaymentNoticeRes();
-
+  public Pair<InstallmentDTO, Organization> retrievePayment(RetrievePaymentDTO request) {
     String accessToken = authnService.getAccessToken();
-    Organization organization = organizationClient.getOrganizationByFiscalCode(request.getQrCode().getFiscalCode(), accessToken);
-    if(organization==null) {
-      log.warn("paVerifyPaymentNotice [{}/{}]: organization is not found",
-        request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
-      return handleFault(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdBrokerPA(), response);
+    Organization organization = organizationClient.getOrganizationByFiscalCode(request.getFiscalCode(), accessToken);
+    if (organization == null) {
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), request.getIdBrokerPA());
     }
-    if(!Objects.equals(Organization.StatusEnum.ACTIVE, organization.getStatus())){
-      log.warn("paVerifyPaymentNotice [{}/{}]: organization is not active [{}]",
-        request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(),
-        organization.getStatus());
-      return handleFault(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, organization.getOrgFiscalCode(), response);
+    if (!Objects.equals(organization.getStatus(), Organization.StatusEnum.ACTIVE)) {
+      log.warn("retrievePayment [{}/{}]: organization is not active", request.getFiscalCode(), request.getNoticeNumber());
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO.code(), organization.getOrgFiscalCode());
     }
+    //broker cannot be null if organization is found
     Broker broker = organizationClient.getBrokerById(organization.getBrokerId(), accessToken);
-    if(broker==null || !Objects.equals(request.getIdBrokerPA(), broker.getBrokerFiscalCode())) {
-      log.warn("paVerifyPaymentNotice [{}/{}]: invalid broken for organization expected/actual[{}/{}]",
-        request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(),
-        request.getIdBrokerPA(), broker!=null?broker.getBrokerFiscalCode():null);
-      return handleFault(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO,
-        Optional.ofNullable(broker).map(Broker::getBrokerFiscalCode).orElse(request.getIdBrokerPA()), response);
+    if (!Objects.equals(request.getIdBrokerPA(), broker.getBrokerFiscalCode())) {
+      log.warn("retrievePayment [{}/{}]: invalid broken for organization expected/actual[{}/{}]",
+        request.getFiscalCode(), request.getNoticeNumber(),
+        request.getIdBrokerPA(), broker.getBrokerFiscalCode());
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO.code(), broker.getBrokerFiscalCode());
     }
-    if(!Objects.equals(request.getIdStation(), broker.getStationId())) {
-      log.warn("paVerifyPaymentNotice [{}/{}]: invalid stationId for organization broker expected/actual[{}/{}]",
-        request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(),
+    if (!Objects.equals(request.getIdStation(), broker.getStationId())) {
+      log.warn("retrievePayment [{}/{}]: invalid stationId for organization broker expected/actual[{}/{}]",
+        request.getFiscalCode(), request.getNoticeNumber(),
         request.getIdStation(), broker.getStationId());
-      return handleFault(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, broker.getBrokerFiscalCode(), response);
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_STAZIONE_INT_ERRATA.code(), broker.getBrokerFiscalCode());
     }
 
-    Pair<InstallmentDTO, PagoPaNodeFaults> installmentOrFault = getPayableDebtPositionByOrganizationIdAndNav(organization.getOrganizationId(), request.getQrCode().getNoticeNumber(), accessToken);
-    if(installmentOrFault.getRight()!=null) {
-      return handleFault(installmentOrFault.getRight(), request.getIdBrokerPA(), response);
-    }
-    InstallmentDTO installment = installmentOrFault.getLeft();
-    response = PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(installment, organization);
-    return response;
+    InstallmentDTO installment = getPayableDebtPositionByOrganizationAndNav(organization, request.getNoticeNumber(), null, accessToken);
+    return Pair.of(installment, organization);
   }
 
-  public PaGetPaymentV2Response paGetPaymentV2(@RequestPayload PaGetPaymentV2Request request) {
-    return paGetPaymentImpl(request);
-  }
+  private InstallmentDTO getPayableDebtPositionByOrganizationAndNav(Organization organization, String noticeNumber, Boolean postalTransfer, String accessToken) {
+    List<InstallmentDTO> installmentDTOList = debtPositionClient.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), noticeNumber, accessToken);
 
-  private PaGetPaymentV2Response paGetPaymentImpl(PaGetPaymentV2Request request) {
-    PaGetPaymentV2Response response = new PaGetPaymentV2Response();
-
-    String accessToken = authnService.getAccessToken();
-    Organization organization = organizationClient.getOrganizationByFiscalCode(request.getQrCode().getFiscalCode(), accessToken);
-    if(organization==null) {
-      return handleFault(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdBrokerPA(), response);
-    }
-    if(!Objects.equals(organization.getStatus(), Organization.StatusEnum.ACTIVE)){
-      log.warn("paGetPayment [{}/{}]: organization is not active", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
-      return handleFault(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, organization.getOrgFiscalCode(), response);
-    }
-    Broker broker = organizationClient.getBrokerById(organization.getBrokerId(), accessToken);
-    if(broker==null || !Objects.equals(broker.getBrokerFiscalCode(), request.getIdBrokerPA())) {
-      return handleFault(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO,
-        Optional.ofNullable(broker).map(Broker::getBrokerFiscalCode).orElse(request.getIdBrokerPA()), response);
-    }
-    if(!Objects.equals(broker.getStationId(), request.getIdStation())) {
-      log.warn("paGetPayment [{}/{}]: invalid broker for organization", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
-      return handleFault(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, broker.getBrokerFiscalCode(), response);
-    }
-
-
-
-    Pair<InstallmentDTO, PagoPaNodeFaults> installmentOrFault = getPayableDebtPositionByOrganizationIdAndNav(organization.getOrganizationId(), request.getQrCode().getNoticeNumber(), accessToken);
-    if(installmentOrFault.getRight()!=null) {
-      return handleFault(installmentOrFault.getRight(), request.getIdBrokerPA(), response);
-    }
-    InstallmentDTO installmentDTO = installmentOrFault.getLeft();
-    response = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, request.getTransferType());
-    return response;
-  }
-
-  private <T extends CtResponse> T handleFault(PagoPaNodeFaults fault, String idFaultEmitter, T responseObj){
-    responseObj.setFault(new CtFaultBean());
-    responseObj.getFault().setFaultCode(fault.code());
-    responseObj.getFault().setDescription(fault.description());
-    responseObj.getFault().setFaultString(fault.description());
-    responseObj.getFault().setId(idFaultEmitter);
-    responseObj.getFault().setSerial(0);
-    responseObj.setOutcome(StOutcome.KO);
-    return responseObj;
-  }
-
-  private Pair<InstallmentDTO, PagoPaNodeFaults> getPayableDebtPositionByOrganizationIdAndNav(Long organizationId, String noticeNumber, String accessToken){
-    List<InstallmentDTO> installmentDTOList = debtPositionClient.getDebtPositionsByOrganizationIdAndNav(organizationId, noticeNumber, accessToken);
-
-    if(installmentDTOList.isEmpty()){
-      log.debug("getPayableDebtPositionByOrganizationIdAndNav [{}/{}]: no debt positions found", organizationId, noticeNumber);
-      return Pair.of(null, PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO);
+    if (installmentDTOList.isEmpty()) {
+      log.debug("getPayableDebtPositionByOrganizationAndNav [{}/{}]: no debt positions found", organization.getOrgFiscalCode(), noticeNumber);
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), organization.getOrgFiscalCode());
     }
 
     /*
@@ -152,20 +88,32 @@ public class PaymentService {
      * Any other case -> KO PAA_PAGAMENTO_SCONOSCIUTO
      */
 
-    List<InstallmentDTO> payableInstallmentDTOList = installmentDTOList.stream().filter(i -> Objects.equals(i.getStatus(), PaymentStatus.UNPAID.name())).toList();
-    if(payableInstallmentDTOList.size()>1){
-      log.warn("getPayableDebtPositionByOrganizationIdAndNav [{}/{}]: multiple payable debt positions found", organizationId, noticeNumber);
-      return Pair.of(null, PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO);
-    } else if(payableInstallmentDTOList.size()==1){
-      return Pair.of(payableInstallmentDTOList.getFirst(), null);
-    } else if(installmentDTOList.stream().anyMatch(i -> i.getStatus().equals(PaymentStatus.EXPIRED.name()))){
-      return Pair.of(null, PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO);
-    } else if(installmentDTOList.stream().anyMatch(i -> i.getStatus().equals(PaymentStatus.PAID.name()))){
-      return Pair.of(null, PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO);
-    } else if(installmentDTOList.stream().anyMatch(i -> i.getStatus().equals(PaymentStatus.CANCELLED.name()))){
-      return Pair.of(null, PagoPaNodeFaults.PAA_PAGAMENTO_ANNULLATO);
+    List<InstallmentDTO> payableInstallmentDTOList = installmentDTOList.stream().filter(i -> {
+      //if status is not UNPAID, the installment is not payable
+      if (!Objects.equals(i.getStatus(), PaymentStatus.UNPAID.name()))
+        return false;
+      //only for getPayment (for verifyPayment, postalTransfer is not set):
+      //if at least 1 transfer of the same organization that created the debt position
+      // does not have a suitable IBAN for payment type (postal/pagopa), the installment is not payable
+      return postalTransfer==null || i.getTransfers().stream()
+        .filter(t -> Objects.equals(t.getOrgFiscalCode(), organization.getOrgFiscalCode()))
+        .map(t -> postalTransfer ? t.getPostalIban() : t.getIban())
+        .noneMatch(StringUtils::isBlank);
+    }).toList();
+    if (payableInstallmentDTOList.size() > 1) {
+      log.warn("getPayableDebtPositionByOrganizationAndNav [{}/{}]: multiple payable debt positions found", organization.getOrgFiscalCode(), noticeNumber);
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO.code(), organization.getOrgFiscalCode());
+    } else if (payableInstallmentDTOList.size() == 1) {
+      InstallmentDTO payableInstallment = payableInstallmentDTOList.getFirst();
+      return payableInstallmentDTOList.getFirst();
+    } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), PaymentStatus.EXPIRED.name()))) {
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO.code(), organization.getOrgFiscalCode());
+    } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), PaymentStatus.PAID.name()))) {
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), organization.getOrgFiscalCode());
+    } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), PaymentStatus.CANCELLED.name()))) {
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_PAGAMENTO_ANNULLATO.code(), organization.getOrgFiscalCode());
     } else {
-      return Pair.of(null, PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO);
+      throw new SynchronousPaymentException(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO.code(), organization.getOrgFiscalCode());
     }
   }
 

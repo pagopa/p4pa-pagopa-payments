@@ -4,6 +4,7 @@ import it.gov.pagopa.pagopa_api.pa.pafornode.*;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtMapEntry;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
@@ -23,67 +24,131 @@ class PaGetPaymentMapperTest {
     podamFactory = TestUtils.getPodamFactory();
   }
 
-  //region mapToNewDebtPositionRequest
+  //region paPaGetPaymentV2Request2PaGetPaymentRequestDTO
 
   @Test
-  void givenValidPaGetPaymentReqWhenPaGetPaymentReq2V2ThenOk() {
+  void givenValidPaGetPaymentV2RequestWhenPaPaGetPaymentV2Request2RetrievePaymentDTOThenOk() {
     //given
-    PaGetPaymentReq requestV1 = podamFactory.manufacturePojo(PaGetPaymentReq.class);
+    PaGetPaymentV2Request paGetPaymentV2Request = podamFactory.manufacturePojo(PaGetPaymentV2Request.class);
+
     //when
-    PaGetPaymentV2Request requestV2 = PaGetPaymentMapper.paGetPaymentReq2V2(requestV1);
+    RetrievePaymentDTO response = PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request);
     //verify
-    Assertions.assertNotNull(requestV2);
-    Assertions.assertEquals(requestV1.getAmount(), requestV2.getAmount());
-    Assertions.assertEquals(requestV1.getDueDate(), requestV2.getDueDate());
-    Assertions.assertEquals(requestV1.getIdBrokerPA(), requestV2.getIdBrokerPA());
-    Assertions.assertEquals(requestV1.getIdPA(), requestV2.getIdPA());
-    Assertions.assertEquals(requestV1.getIdStation(), requestV2.getIdStation());
-    Assertions.assertEquals(requestV1.getPaymentNote(), requestV2.getPaymentNote());
-    Assertions.assertEquals(requestV1.getQrCode(), requestV2.getQrCode());
-    Assertions.assertEquals(requestV1.getTransferType(), requestV2.getTransferType());
-    TestUtils.checkNotNullFields(requestV2);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(paGetPaymentV2Request.getIdPA(), response.getIdPA());
+    Assertions.assertEquals(paGetPaymentV2Request.getIdBrokerPA(), response.getIdBrokerPA());
+    Assertions.assertEquals(paGetPaymentV2Request.getIdStation(), response.getIdStation());
+    Assertions.assertEquals(paGetPaymentV2Request.getQrCode().getFiscalCode(), response.getFiscalCode());
+    Assertions.assertEquals(paGetPaymentV2Request.getQrCode().getNoticeNumber(), response.getNoticeNumber());
+    Assertions.assertEquals(paGetPaymentV2Request.getTransferType().equals(StTransferType.POSTAL), response.getPostalTransfer());
+    TestUtils.checkNotNullFields(response);
   }
 
   //endregion
 
-  //region paGetPaymentV2Response2V1
+  //region paPaGetPaymentReq2RetrievePaymentDTO
 
   @Test
-  void givenValidPaGetPaymentV2ResponseWhenPaGetPaymentV2Response2V1ThenOk() {
+  void givenValidPaGetPaymentReqWhenPaPaGetPaymentReq2RetrievePaymentDTOThenOk() {
     //given
-    PaGetPaymentV2Response responseV2 = podamFactory.manufacturePojo(PaGetPaymentV2Response.class);
+    PaGetPaymentReq paGetPaymentReq = podamFactory.manufacturePojo(PaGetPaymentReq.class);
+
     //when
-    PaGetPaymentRes responseV1 = PaGetPaymentMapper.paGetPaymentV2Response2V1(responseV2);
+    RetrievePaymentDTO response = PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq);
+    //verify
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(paGetPaymentReq.getIdPA(), response.getIdPA());
+    Assertions.assertEquals(paGetPaymentReq.getIdBrokerPA(), response.getIdBrokerPA());
+    Assertions.assertEquals(paGetPaymentReq.getIdStation(), response.getIdStation());
+    Assertions.assertEquals(paGetPaymentReq.getQrCode().getFiscalCode(), response.getFiscalCode());
+    Assertions.assertEquals(paGetPaymentReq.getQrCode().getNoticeNumber(), response.getNoticeNumber());
+    Assertions.assertEquals(paGetPaymentReq.getTransferType().equals(StTransferType.POSTAL), response.getPostalTransfer());
+    TestUtils.checkNotNullFields(response);
+  }
+
+  //endregion
+
+  //region installmentDto2PaGetPaymentRes
+
+  @Test
+  void givenValidInstallmentDTOWhenInstallmentDto2PaGetPaymentResThenOk() {
+    //given
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+
+    installmentDTO.getDebtor().setEntityType(StEntityUniqueIdentifierType.F.name());
+    for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
+      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1L);
+    }
+    //when
+    PaGetPaymentRes responseV1 = PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, StTransferType.PAGOPA);
     //verify
     Assertions.assertNotNull(responseV1);
-    Assertions.assertEquals(responseV1.getOutcome(), responseV2.getOutcome());
-    Assertions.assertEquals(responseV1.getFault(), responseV2.getFault());
-    Assertions.assertEquals(responseV1.getData().getCreditorReferenceId(), responseV2.getData().getCreditorReferenceId());
-    Assertions.assertEquals(responseV1.getData().getPaymentAmount(), responseV2.getData().getPaymentAmount());
-    Assertions.assertEquals(responseV1.getData().getDueDate(), responseV2.getData().getDueDate());
-    Assertions.assertEquals(responseV1.getData().getRetentionDate(), responseV2.getData().getRetentionDate());
-    Assertions.assertEquals(responseV1.getData().isLastPayment(), responseV2.getData().isLastPayment());
-    Assertions.assertEquals(responseV1.getData().getDescription(), responseV2.getData().getDescription());
-    Assertions.assertEquals(responseV1.getData().getCompanyName(), responseV2.getData().getCompanyName());
-    Assertions.assertEquals(responseV1.getData().getOfficeName(), responseV2.getData().getOfficeName());
-    Assertions.assertEquals(responseV1.getData().getDebtor(), responseV2.getData().getDebtor());
-    Assertions.assertEquals(responseV1.getData().getMetadata(), responseV2.getData().getMetadata());
-    Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().size(), responseV2.getData().getTransferList().getTransfers().size());
-    TestUtils.checkNotNullFields(responseV2);
+    Assertions.assertNotNull(responseV1.getData());
+    Assertions.assertEquals(installmentDTO.getIuv(), responseV1.getData().getCreditorReferenceId());
+    Assertions.assertEquals(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()), responseV1.getData().getPaymentAmount());
+    Assertions.assertEquals(ConversionUtils.toXMLGregorianCalendar(installmentDTO.getDueDate()), responseV1.getData().getDueDate());
+    Assertions.assertTrue(responseV1.getData().isLastPayment());
+    Assertions.assertEquals(installmentDTO.getHumanFriendlyRemittanceInformation(), responseV1.getData().getDescription());
+    Assertions.assertEquals(organization.getOrgName(), responseV1.getData().getCompanyName());
+    Assertions.assertNull(responseV1.getData().getOfficeName());
+    TestUtils.checkNotNullFields(responseV1.getData(),"officeName");
+    Assertions.assertNotNull(responseV1.getData().getDebtor());
+    Assertions.assertEquals(installmentDTO.getDebtor().getLocation(), responseV1.getData().getDebtor().getCity());
+    Assertions.assertEquals(installmentDTO.getDebtor().getAddress(), responseV1.getData().getDebtor().getStreetName());
+    Assertions.assertEquals(installmentDTO.getDebtor().getCivic(), responseV1.getData().getDebtor().getCivicNumber());
+    Assertions.assertEquals(installmentDTO.getDebtor().getPostalCode(), responseV1.getData().getDebtor().getPostalCode());
+    Assertions.assertEquals(installmentDTO.getDebtor().getProvince(), responseV1.getData().getDebtor().getStateProvinceRegion());
+    Assertions.assertEquals(installmentDTO.getDebtor().getNation(), responseV1.getData().getDebtor().getCountry());
+    Assertions.assertEquals(installmentDTO.getDebtor().getFullName(), responseV1.getData().getDebtor().getFullName());
+    Assertions.assertEquals(installmentDTO.getDebtor().getEmail(), responseV1.getData().getDebtor().getEMail());
+    Assertions.assertEquals(installmentDTO.getDebtor().getFiscalCode(), responseV1.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierValue());
+    Assertions.assertEquals(installmentDTO.getDebtor().getEntityType(), responseV1.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierType().value());
+    TestUtils.checkNotNullFields(responseV1.getData().getDebtor());
+    Assertions.assertNotNull(responseV1.getData().getMetadata());
+    Assertions.assertNotNull(responseV1.getData().getMetadata().getMapEntries());
+    Assertions.assertTrue(responseV1.getData().getMetadata().getMapEntries().stream().anyMatch(e -> e.getKey().equals("datiSpecificiRiscossione")));
+    Assertions.assertEquals(installmentDTO.getLegacyPaymentMetadata(), responseV1.getData().getMetadata().getMapEntries()
+      .stream().filter(e -> e.getKey().equals("datiSpecificiRiscossione")).findFirst().map(CtMapEntry::getValue).orElse(null));
+    Assertions.assertEquals(installmentDTO.getTransfers().size(), responseV1.getData().getTransferList().getTransfers().size());
     for (int i = 0; i < responseV1.getData().getTransferList().getTransfers().size(); i++) {
-      Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getIdTransfer(), responseV2.getData().getTransferList().getTransfers().get(i).getIdTransfer());
-      Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getFiscalCodePA(), responseV2.getData().getTransferList().getTransfers().get(i).getFiscalCodePA());
-      Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getTransferAmount(), responseV2.getData().getTransferList().getTransfers().get(i).getTransferAmount());
-      Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getTransferCategory(), responseV2.getData().getTransferList().getTransfers().get(i).getTransferCategory());
-      Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getRemittanceInformation(), responseV2.getData().getTransferList().getTransfers().get(i).getRemittanceInformation());
-      Assertions.assertEquals(responseV1.getData().getTransferList().getTransfers().get(i).getIBAN(), responseV2.getData().getTransferList().getTransfers().get(i).getIBAN());
-      TestUtils.checkNotNullFields(responseV2.getData().getTransferList().getTransfers().get(i), "iban");
+      Assertions.assertEquals(installmentDTO.getTransfers().get(i).getTransferIndex(), responseV1.getData().getTransferList().getTransfers().get(i).getIdTransfer());
+      Assertions.assertEquals(installmentDTO.getTransfers().get(i).getOrgFiscalCode(), responseV1.getData().getTransferList().getTransfers().get(i).getFiscalCodePA());
+      Assertions.assertEquals(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getTransfers().get(i).getAmountCents()), responseV1.getData().getTransferList().getTransfers().get(i).getTransferAmount());
+      Assertions.assertEquals(installmentDTO.getTransfers().get(i).getCategory(), responseV1.getData().getTransferList().getTransfers().get(i).getTransferCategory());
+      Assertions.assertEquals(installmentDTO.getTransfers().get(i).getRemittanceInformation(), responseV1.getData().getTransferList().getTransfers().get(i).getRemittanceInformation());
+      Assertions.assertEquals(installmentDTO.getTransfers().get(i).getIban(), responseV1.getData().getTransferList().getTransfers().get(i).getIBAN());
+      TestUtils.checkNotNullFields(responseV1.getData().getTransferList().getTransfers().get(i), "metadata");
+    }
+  }
+
+  @Test
+  void givenValidInstallmentDTOPostalWhenInstallmentDto2PaGetPaymentResThenOk() {
+    //given
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+
+    installmentDTO.getDebtor().setEntityType(StEntityUniqueIdentifierType.F.name());
+    for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
+      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1L);
+    }
+    //when
+    PaGetPaymentRes responseV1 = PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, StTransferType.POSTAL);
+    //verify
+    Assertions.assertNotNull(responseV1);
+    Assertions.assertNotNull(responseV1.getData());
+    TestUtils.checkNotNullFields(responseV1.getData(),"officeName");
+    TestUtils.checkNotNullFields(responseV1.getData().getDebtor());
+    Assertions.assertEquals(installmentDTO.getTransfers().size(), responseV1.getData().getTransferList().getTransfers().size());
+    for (int i = 0; i < responseV1.getData().getTransferList().getTransfers().size(); i++) {
+      Assertions.assertEquals(installmentDTO.getTransfers().get(i).getPostalIban(), responseV1.getData().getTransferList().getTransfers().get(i).getIBAN());
+      TestUtils.checkNotNullFields(responseV1.getData().getTransferList().getTransfers().get(i), "metadata");
     }
   }
 
   //endregion
 
-  //region paGetPaymentV2Response2V1
+  //region installmentDto2PaGetPaymentV2Response
 
   @Test
   void givenValidInstallmentDTOWhenInstallmentDtoPagoPa2PaGetPaymentV2ResponseThenOk() {
@@ -143,7 +208,7 @@ class PaGetPaymentMapperTest {
   }
 
   @Test
-  void givenValidInstallmentDTOWhenInstallmentDtoPostal2PaGetPaymentV2ResponseThenOk() {
+  void givenValidInstallmentDTOPostalWhenInstallmentDto2PaGetPaymentV2ResponseThenOk() {
     //given
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);

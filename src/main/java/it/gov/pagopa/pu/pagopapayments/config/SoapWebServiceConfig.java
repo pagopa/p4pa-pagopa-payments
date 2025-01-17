@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.config;
 
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
-import it.gov.pagopa.pu.pagopapayments.ws.server.PaForNodeEndpoint;
+import it.gov.pagopa.pu.pagopapayments.endpoint.PaForNodeEndpoint;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

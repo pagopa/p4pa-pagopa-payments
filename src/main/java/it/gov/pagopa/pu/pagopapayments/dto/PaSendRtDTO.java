@@ -11,7 +11,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RetrievePaymentDTO extends PaForNodeDTO {
-    //only used by paGetPayment
-    private Boolean postalTransfer;
+public class PaSendRtDTO extends PaForNodeDTO {
+    private byte[] receiptBytes;
 }

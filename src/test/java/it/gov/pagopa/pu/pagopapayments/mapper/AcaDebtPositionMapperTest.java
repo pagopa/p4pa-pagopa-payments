@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
@@ -40,7 +40,7 @@ class AcaDebtPositionMapperTest {
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
         installment.getDebtor().setEntityType(NewDebtPositionRequest.EntityTypeEnum.F.name());
-        installment.setStatus(SynchronousPaymentService.PaymentStatus.UNPAID.name());
+        installment.setStatus(InstallmentStatus.UNPAID);
       }));
     // select 2 installments to send to ACA
     List<InstallmentDTO> installmentToMap = List.of(
@@ -49,11 +49,11 @@ class AcaDebtPositionMapperTest {
     );
     // fix some field values for the selected installments
     installmentToMap.forEach(installment -> {
-      installment.setStatus(SynchronousPaymentService.PaymentStatus.TO_SYNCH.name());
+      installment.setStatus(InstallmentStatus.TO_SYNC);
       installment.getTransfers().remove(1);
     });
     // fix some field values for the other installments
-    debtPosition.getPaymentOptions().get(1).getInstallments().get(0).setStatus(SynchronousPaymentService.PaymentStatus.TO_SYNCH.name());
+    debtPosition.getPaymentOptions().get(1).getInstallments().get(0).setStatus(InstallmentStatus.TO_SYNC);
 
 
     //when
@@ -77,7 +77,7 @@ class AcaDebtPositionMapperTest {
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
         installment.getDebtor().setEntityType(NewDebtPositionRequest.EntityTypeEnum.F.name());
-        installment.setStatus(SynchronousPaymentService.PaymentStatus.UNPAID.name());
+        installment.setStatus(InstallmentStatus.UNPAID);
       }));
     // select 2 installments to send to ACA
     List<InstallmentDTO> installmentToMap = List.of(
@@ -86,12 +86,12 @@ class AcaDebtPositionMapperTest {
     );
     // fix some field values for the selected installments
     installmentToMap.forEach(installment -> {
-      installment.setStatus(SynchronousPaymentService.PaymentStatus.TO_SYNCH.name());
+      installment.setStatus(InstallmentStatus.TO_SYNC);
       installment.getTransfers().remove(1);
       installment.setDueDate(null);
     });
     // fix some field values for the other installments
-    debtPosition.getPaymentOptions().get(1).getInstallments().get(0).setStatus(SynchronousPaymentService.PaymentStatus.TO_SYNCH.name());
+    debtPosition.getPaymentOptions().get(1).getInstallments().get(0).setStatus(InstallmentStatus.TO_SYNC);
 
     //when
     List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);

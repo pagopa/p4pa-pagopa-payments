@@ -126,6 +126,7 @@ tasks.register("dependenciesBuild") {
     "openApiGenerate",
     "openApiGenerateDEBTPOSITIONS",
     "openApiGenerateORGANIZATION",
+    "openApiGenerateFILESHARE",
     "openApiGeneratePaCreatePosition",
     "jaxbJavaGenPaForNode"
   )
@@ -230,6 +231,28 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "useJakartaEe" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true"
+  ))
+  library.set("resttemplate")
+}
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateFILESHARE") {
+  group = "openapi"
+  description = "description"
+
+  generatorName.set("java")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-fileshare/refs/heads/$targetEnv/openapi/p4pa-fileshare.openapi.yaml")
+  outputDir.set("$projectDir/build/generated")
+  apiPackage.set("it.gov.pagopa.pu.fileshare.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.fileshare.dto.generated")
+  configOptions.set(mapOf(
+    "swaggerAnnotations" to "false",
+    "openApiNullable" to "false",
+    "dateLibrary" to "java8",
+    "useSpringBoot3" to "true",
+    "useJakartaEe" to "true",
+    "serializationLibrary" to "jackson",
+    "generateSupportingFiles" to "true",
+    "useAbstractionForFiles" to "true"
   ))
   library.set("resttemplate")
 }

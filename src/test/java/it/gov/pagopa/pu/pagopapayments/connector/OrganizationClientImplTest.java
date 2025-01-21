@@ -32,7 +32,6 @@ class OrganizationClientImplTest {
 
   private OrganizationClientImpl organizationClient;
 
-  private static final String ORG_BASE_URL = "orgBaseUrl";
   private static final Long VALID_ORG_ID = 1L;
   private static final Long VALID_BROKER_ID = 1L;
   private static final Long INVALID_ORG_ID = 9L;
@@ -53,7 +52,7 @@ class OrganizationClientImplTest {
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    organizationClient = new OrganizationClientImpl(ORG_BASE_URL, restTemplateBuilderMock);
+    organizationClient = new OrganizationClientImpl("ORG_BASE_URL", restTemplateBuilderMock);
   }
 
   //region getOrganizationById
@@ -84,11 +83,10 @@ class OrganizationClientImplTest {
       Mockito.any(RequestEntity.class),
       Mockito.eq(new ParameterizedTypeReference<Organization>() {})
     )).thenReturn(responseEntity);
-    String accessToken = TestUtils.getFakeAccessToken();
 
     //when
     Assertions.assertThrows(RestClientException.class,
-      () -> organizationClient.getOrganizationById(INVALID_ORG_ID, accessToken));
+      () -> organizationClient.getOrganizationById(INVALID_ORG_ID, TestUtils.getFakeAccessToken()));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))

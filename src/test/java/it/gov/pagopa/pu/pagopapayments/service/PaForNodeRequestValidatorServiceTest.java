@@ -5,8 +5,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.OrganizationClient;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
-import it.gov.pagopa.pu.pagopapayments.exception.SynchronousPaymentException;
-import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentRequestValidatorService;
+import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,17 +18,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 
 @ExtendWith(MockitoExtension.class)
-class SynchronousPaymentRequestValidatorServiceTest {
+class PaForNodeRequestValidatorServiceTest {
 
   @Mock
   private OrganizationClient organizationClientMock;
 
   @InjectMocks
-  private SynchronousPaymentRequestValidatorService synchronousPaymentRequestValidatorService;
+  private PaForNodeRequestValidatorService paForNodeRequestValidatorService;
 
   private final PodamFactory podamFactory;
 
-  SynchronousPaymentRequestValidatorServiceTest() {
+  PaForNodeRequestValidatorServiceTest() {
     podamFactory = TestUtils.getPodamFactory();
   }
 
@@ -38,7 +37,7 @@ class SynchronousPaymentRequestValidatorServiceTest {
   //region paymentRequestValidate
 
   @Test
-  void givenValidRequestWhenPaymentRequestValidateThenOk() {
+  void givenValidRequestWhenPaForNodeRequestValidateThenOk() {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     Broker broker = podamFactory.manufacturePojo(Broker.class);
@@ -57,7 +56,7 @@ class SynchronousPaymentRequestValidatorServiceTest {
       .build();
 
     // When
-    Organization response = synchronousPaymentRequestValidatorService.paymentRequestValidate(request, VALID_ACCEESS_TOKEN);
+    Organization response = paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN);
 
     // Then
     Assertions.assertTrue(new ReflectionEquals(organization).matches(response));
@@ -66,14 +65,15 @@ class SynchronousPaymentRequestValidatorServiceTest {
   }
 
   @Test
-  void givenNotFoundOrgWhenPaymentRequestValidateThenFault() {
+  void givenNotFoundOrgWhenPaForNodeRequestValidateThenFault() {
     // Given
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    request.setIdPA(request.getFiscalCode());
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(request.getFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(null);
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN)).thenReturn(null);
 
     // When
-    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> synchronousPaymentRequestValidatorService.paymentRequestValidate(request, VALID_ACCEESS_TOKEN));
+    PagoPaNodeFaultException response = Assertions.assertThrows(PagoPaNodeFaultException.class, () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN));
 
     // Then
     Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, response.getErrorCode());
@@ -83,16 +83,18 @@ class SynchronousPaymentRequestValidatorServiceTest {
   }
 
   @Test
-  void givenNotActiveOrgWhenPaymentRequestValidateThenOk() {
+  void givenNotActiveOrgWhenPaForNodeRequestValidateThenOk() {
     // Given
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    request.setIdPA(request.getFiscalCode());
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     organization.setStatus(Organization.StatusEnum.DRAFT);
+    organization.setOrgFiscalCode(request.getFiscalCode());
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(request.getFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
 
     // When
-    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> synchronousPaymentRequestValidatorService.paymentRequestValidate(request, VALID_ACCEESS_TOKEN));
+    PagoPaNodeFaultException response = Assertions.assertThrows(PagoPaNodeFaultException.class, () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN));
 
     // Then
     Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, response.getErrorCode());
@@ -102,7 +104,7 @@ class SynchronousPaymentRequestValidatorServiceTest {
   }
 
   @Test
-  void givenInvalidBrokerWhenPaymentRequestValidateThenOk() {
+  void givenInvalidBrokerWhenPaForNodeRequestValidateThenOk() {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     organization.setStatus(Organization.StatusEnum.ACTIVE);
@@ -110,13 +112,14 @@ class SynchronousPaymentRequestValidatorServiceTest {
 
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
     request.setFiscalCode(organization.getOrgFiscalCode());
+    request.setIdPA(request.getFiscalCode());
     request.setIdBrokerPA(broker.getBrokerFiscalCode()+"xxx");
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(request.getFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
     Mockito.when(organizationClientMock.getBrokerById(organization.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
 
     // When
-    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> synchronousPaymentRequestValidatorService.paymentRequestValidate(request, VALID_ACCEESS_TOKEN));
+    PagoPaNodeFaultException response = Assertions.assertThrows(PagoPaNodeFaultException.class, () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN));
 
     // Then
     Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO, response.getErrorCode());
@@ -126,7 +129,7 @@ class SynchronousPaymentRequestValidatorServiceTest {
   }
 
   @Test
-  void givenInvalidStationWhenPaymentRequestValidateThenOk() {
+  void givenInvalidStationWhenPaForNodeRequestValidateThenOk() {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     organization.setStatus(Organization.StatusEnum.ACTIVE);
@@ -134,14 +137,15 @@ class SynchronousPaymentRequestValidatorServiceTest {
 
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
     request.setFiscalCode(organization.getOrgFiscalCode());
+    request.setIdPA(request.getFiscalCode());
     request.setIdBrokerPA(broker.getBrokerFiscalCode());
     request.setIdStation(broker.getStationId() + "xxx");
 
-    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(request.getFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(organizationClientMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
     Mockito.when(organizationClientMock.getBrokerById(organization.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
 
     // When
-    SynchronousPaymentException response = Assertions.assertThrows(SynchronousPaymentException.class, () -> synchronousPaymentRequestValidatorService.paymentRequestValidate(request, VALID_ACCEESS_TOKEN));
+    PagoPaNodeFaultException response = Assertions.assertThrows(PagoPaNodeFaultException.class, () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN));
 
     // Then
     Assertions.assertEquals(PagoPaNodeFaults.PAA_STAZIONE_INT_ERRATA, response.getErrorCode());

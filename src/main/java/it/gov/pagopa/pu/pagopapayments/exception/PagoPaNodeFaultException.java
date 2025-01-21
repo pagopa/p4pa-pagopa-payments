@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @RequiredArgsConstructor
 @Data
-public class SynchronousPaymentException extends ApplicationException {
+public class PagoPaNodeFaultException extends ApplicationException {
   private final PagoPaNodeFaults errorCode;
   private final String errorEmitter;
 }

@@ -52,6 +52,8 @@ rest:
     base-url: "\${AUTH_SERVER_BASE_URL:}"
   debt-position:
     base-url: "\${DEBT_POSITION_BASE_URL:}"
+  fileshare:
+    base-url: "\${FILESHARE_BASE_URL:}"
   organization:
     base-url: "\${ORGANIZATION_BASE_URL:}"
   pagopa-node-services:

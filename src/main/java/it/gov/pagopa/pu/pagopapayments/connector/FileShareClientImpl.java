@@ -23,7 +23,7 @@ public class FileShareClientImpl implements FileShareClient {
   private final IngestionFlowFileApi ingestionFlowFileApi;
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
-  public FileShareClientImpl(@Value("${rest.file-share.base-url}") String fileShareBaseUrl,
+  public FileShareClientImpl(@Value("${rest.fileshare.base-url}") String fileShareBaseUrl,
                              RestTemplateBuilder restTemplateBuilder){
     RestTemplate restTemplate = restTemplateBuilder.build();
     ApiClient apiClient = new ApiClient(restTemplate)

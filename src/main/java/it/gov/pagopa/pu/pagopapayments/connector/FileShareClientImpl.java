@@ -41,7 +41,7 @@ public class FileShareClientImpl implements FileShareClient {
   public String uploadRt(PaSendRtDTO paSendRtDTO, Organization organization, String accessToken) {
     bearerTokenHolder.set(accessToken);
     UploadIngestionFlowFileResponseDTO response = RestUtil.handleRestException(
-      () -> ingestionFlowFileApi.uploadIngestionFlowFile(organization.getOrganizationId(), IngestionFlowFileType.RECEIPT, FileOrigin.PAGOPA,
+      () -> ingestionFlowFileApi.uploadIngestionFlowFile(organization.getOrganizationId(), IngestionFlowFileType.RECEIPT_PAGOPA, FileOrigin.PAGOPA,
         new ByteArrayResource(paSendRtDTO.getReceiptBytes()) ),
       "upload receipt[%s/%s]".formatted(paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber()), true
     );

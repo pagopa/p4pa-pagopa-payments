@@ -86,10 +86,11 @@ class DebtPositionClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<DebtPositionTypeOrg>() {
       })
     )).thenReturn(responseEntity);
+    String accessToken = TestUtils.getFakeAccessToken();
 
     //when
     Assertions.assertThrows(RestClientException.class,
-      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, TestUtils.getFakeAccessToken()));
+      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, accessToken));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))
@@ -105,10 +106,11 @@ class DebtPositionClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<DebtPositionTypeOrg>() {
       })
     )).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+    String accessToken = TestUtils.getFakeAccessToken();
 
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, TestUtils.getFakeAccessToken()));
+      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, accessToken));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
@@ -130,9 +132,10 @@ class DebtPositionClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<List<InstallmentDTO>>() {
       })
     )).thenReturn(new ResponseEntity<>(expectedResponse, HttpStatus.OK));
+    String accessToken = TestUtils.getFakeAccessToken();
 
     //when
-    List<InstallmentDTO> response = debtPositionClient.getDebtPositionsByOrganizationIdAndNav(VALID_DEBT_POSITION_ORG_ID, VALID_NAV, TestUtils.getFakeAccessToken());
+    List<InstallmentDTO> response = debtPositionClient.getDebtPositionsByOrganizationIdAndNav(VALID_DEBT_POSITION_ORG_ID, VALID_NAV, accessToken);
 
     //verify
     Assertions.assertEquals(expectedResponse, response);

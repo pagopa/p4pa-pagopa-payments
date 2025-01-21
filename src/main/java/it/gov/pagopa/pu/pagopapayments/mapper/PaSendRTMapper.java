@@ -12,7 +12,7 @@ public class PaSendRTMapper {
 
   private final JAXBTransformService jaxbTransformService;
 
-  private PaSendRTMapper(JAXBTransformService jaxbTransformService) {
+  public PaSendRTMapper(JAXBTransformService jaxbTransformService) {
     this.jaxbTransformService = jaxbTransformService;
   }
 

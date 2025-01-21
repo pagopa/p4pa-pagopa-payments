@@ -113,19 +113,6 @@ class JaxbTransformServiceTest {
 
   //endregion
 
-//  @Test
-//  void xxx() {
-//    // given
-//    CtQrCode request = podamFactory.manufacturePojo(CtQrCode.class);
-//    String expectedResponse = "bla";
-//
-//    // when
-//    String response = new String(jaxbTransformService.marshallingAsBytes(request, CtQrCode.class, "qrcode"), StandardCharsets.UTF_8);
-//
-//    // then
-//    Assertions.assertEquals(expectedResponse, response);
-//  }
-
   //region Unmarshalling
 
   @Test

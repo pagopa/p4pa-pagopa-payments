@@ -61,8 +61,10 @@ class FileShareClientImplTest {
     PaSendRtDTO paSendRtDTO = podamFactory.manufacturePojo(PaSendRtDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
 
+    String accessToken = TestUtils.getFakeAccessToken();
+
     //when
-    String ingestionFlowId = fileShareClient.uploadRt(paSendRtDTO, organization, TestUtils.getFakeAccessToken());
+    String ingestionFlowId = fileShareClient.uploadRt(paSendRtDTO, organization, accessToken);
 
     //verify
     Assertions.assertEquals(expectedIngestionFlowId, ingestionFlowId);
@@ -84,9 +86,11 @@ class FileShareClientImplTest {
     PaSendRtDTO paSendRtDTO = podamFactory.manufacturePojo(PaSendRtDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
 
+    String accessToken = TestUtils.getFakeAccessToken();
+
     //when
     Assertions.assertThrows(RestClientException.class,
-      () -> fileShareClient.uploadRt(paSendRtDTO, organization, TestUtils.getFakeAccessToken()));
+      () -> fileShareClient.uploadRt(paSendRtDTO, organization, accessToken));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))
@@ -106,9 +110,11 @@ class FileShareClientImplTest {
     PaSendRtDTO paSendRtDTO = podamFactory.manufacturePojo(PaSendRtDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
 
+    String accessToken = TestUtils.getFakeAccessToken();
+
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> fileShareClient.uploadRt(paSendRtDTO, organization, TestUtils.getFakeAccessToken()));
+      () -> fileShareClient.uploadRt(paSendRtDTO, organization, accessToken));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());

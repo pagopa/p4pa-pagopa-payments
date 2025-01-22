@@ -5,7 +5,8 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
-import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentRequestValidatorService;
+import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
+import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentStatusVerifierService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -31,7 +32,7 @@ class SynchronousPaymentServiceTest {
   @Mock
   private AuthnService authnServiceMock;
   @Mock
-  private SynchronousPaymentRequestValidatorService synchronousPaymentRequestValidatorServiceMock;
+  private PaForNodeRequestValidatorService paForNodeRequestValidatorServiceMock;
   @Mock
   private SynchronousPaymentStatusVerifierService synchronousPaymentStatusVerifierServiceMock;
 
@@ -61,8 +62,9 @@ class SynchronousPaymentServiceTest {
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
     RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode());
 
-    Mockito.when(synchronousPaymentRequestValidatorServiceMock.paymentRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN)).thenReturn(organization);
     Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN))
       .thenReturn(installmentDTOList);
     Mockito.when(synchronousPaymentStatusVerifierServiceMock.verifyPaymentStatus(organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer())).thenReturn(installmentDTO);
@@ -75,10 +77,26 @@ class SynchronousPaymentServiceTest {
     // Then
     Assertions.assertTrue(new ReflectionEquals(expectedResponse).matches(response));
     Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
-    Mockito.verify(synchronousPaymentRequestValidatorServiceMock, Mockito.times(1)).paymentRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN);
+    Mockito.verify(paForNodeRequestValidatorServiceMock, Mockito.times(1)).paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN);
     Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN);
     Mockito.verify(synchronousPaymentStatusVerifierServiceMock, Mockito.times(1))
       .verifyPaymentStatus(organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer());
+  }
+
+  @Test
+  void givenInvalidInstallmentWhenRetrievePaymentThenFault() {
+    // Given
+    RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode()+"XXX");
+
+    // When
+    PagoPaNodeFaultException exception = Assertions.assertThrows(PagoPaNodeFaultException.class,()->synchronousPaymentService.retrievePayment(retrievePaymentDTO));
+
+    // Then
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, exception.getErrorCode());
+    Assertions.assertEquals(retrievePaymentDTO.getFiscalCode(), exception.getErrorEmitter());
+    Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
+    Mockito.verifyNoInteractions(paForNodeRequestValidatorServiceMock, debtPositionClientMock, synchronousPaymentStatusVerifierServiceMock);
   }
 
   //endregion

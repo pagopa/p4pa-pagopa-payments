@@ -79,7 +79,7 @@ components:
         description:
           type: string
         status:
-          type: string
+          $ref: "#/components/schemas/DebtPositionStatus"
         ingestionFlowFileId:
           type: integer
           format: int64
@@ -123,7 +123,7 @@ components:
           type: integer
           format: int64
         status:
-          type: string
+          $ref: "#/components/schemas/PaymentOptionStatus"
         multiDebtor:
           type: boolean
         dueDate:
@@ -156,7 +156,7 @@ components:
           type: integer
           format: int64
         status:
-          type: string
+          $ref: "#/components/schemas/InstallmentStatus"
         iupdPagopa:
           type: string
         iud:
@@ -305,6 +305,41 @@ components:
         updateDate:
           type: string
           format: date-time
+    DebtPositionStatus:
+      type: string
+      enum:
+        - TO_SYNC
+        - REPORTED
+        - PAID
+        - PARTIALLY_PAID
+        - CANCELLED
+        - INVALID
+        - EXPIRED
+        - UNPAID
+        - DRAFT
+    PaymentOptionStatus:
+      type: string
+      enum:
+        - TO_SYNC
+        - REPORTED
+        - PAID
+        - PARTIALLY_PAID
+        - CANCELLED
+        - INVALID
+        - EXPIRED
+        - UNPAID
+        - DRAFT
+    InstallmentStatus:
+      type: string
+      enum:
+        - TO_SYNC
+        - REPORTED
+        - PAID
+        - CANCELLED
+        - INVALID
+        - EXPIRED
+        - UNPAID
+        - DRAFT
     PersonDTO:
       required:
         - email

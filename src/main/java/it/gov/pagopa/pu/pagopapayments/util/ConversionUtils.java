@@ -29,4 +29,5 @@ public class ConversionUtils {
   public static XMLGregorianCalendar toXMLGregorianCalendar(OffsetDateTime offsetDateTime) {
     return offsetDateTime != null ? DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR.newXMLGregorianCalendar(offsetDateTime.toString()) : null;
   }
+
 }

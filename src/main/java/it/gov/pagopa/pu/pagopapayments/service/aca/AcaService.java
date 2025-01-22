@@ -44,7 +44,9 @@ public class AcaService {
   private List<String> invokePaCreatePositionImpl(DebtPositionDTO debtPosition, OPERATION operation, String accessToken) {
     List<Pair<String, NewDebtPositionRequest>> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
     Pair<BrokerApiKeys, String> brokerData = brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), accessToken);
-    debtPostionToSendACA.stream().map(Pair::getRight).forEach(newDebtPositionRequest -> {
+    List<String> iudList = new ArrayList<>();
+    debtPostionToSendACA.forEach(iudAndNewDebtPositionRequest -> {
+      NewDebtPositionRequest newDebtPositionRequest = iudAndNewDebtPositionRequest.getRight();
       if (operation == OPERATION.DELETE) {
         //delete is defined calling the same paCreatePosition api, but having set amount=0
         newDebtPositionRequest.amount(0);
@@ -52,8 +54,9 @@ public class AcaService {
       log.info("invoking ACA paCreatePosition for installment[{}/{}], operation[{}]",
         newDebtPositionRequest.getEntityFiscalCode(), newDebtPositionRequest.getIuv(), operation);
       acaClient.paCreatePosition(newDebtPositionRequest, brokerData.getLeft().getAcaKey(), brokerData.getRight());
+      iudList.add(iudAndNewDebtPositionRequest.getLeft());
     });
-    return debtPostionToSendACA.stream().map(Pair::getLeft).toList();
+    return iudList;
   }
 
 }

@@ -2,7 +2,6 @@ package it.gov.pagopa.pu.pagopapayments.connector;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +33,6 @@ class DebtPositionClientImplTest {
 
   private DebtPositionClientImpl debtPositionClient;
 
-  private static final String ORG_BASE_URL = "orgBaseUrl";
   private static final Long VALID_DEBT_POSITION_ORG_ID = 1L;
   private static final Long VALID_DEBT_POSITION_TYPE_ORG_ID = 1L;
   private static final String VALID_DEBT_POSITION_TYPE_ORG_DESCR = "description";
@@ -48,13 +46,13 @@ class DebtPositionClientImplTest {
   private static final InstallmentDTO VALID_INSTALLMENT_DTO = new InstallmentDTO()
     .installmentId(1L)
     .iuv("IUV")
-    .status(SynchronousPaymentService.PaymentStatus.UNPAID.name());
+    .status(InstallmentDTO.StatusEnum.UNPAID);
 
   @BeforeEach
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    debtPositionClient = new DebtPositionClientImpl(ORG_BASE_URL, restTemplateBuilderMock);
+    debtPositionClient = new DebtPositionClientImpl("DEBT_POSITION_BASE_URL", restTemplateBuilderMock);
   }
 
   //region getDebtPositionTypeOrgById
@@ -108,10 +106,11 @@ class DebtPositionClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<DebtPositionTypeOrg>() {
       })
     )).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+    String accessToken = TestUtils.getFakeAccessToken();
 
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, TestUtils.getFakeAccessToken()));
+      () -> debtPositionClient.getDebtPositionTypeOrgById(INVALID_DEBT_POSITION_TYPE_ORG_ID, accessToken));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
@@ -133,9 +132,10 @@ class DebtPositionClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<List<InstallmentDTO>>() {
       })
     )).thenReturn(new ResponseEntity<>(expectedResponse, HttpStatus.OK));
+    String accessToken = TestUtils.getFakeAccessToken();
 
     //when
-    List<InstallmentDTO> response = debtPositionClient.getDebtPositionsByOrganizationIdAndNav(VALID_DEBT_POSITION_ORG_ID, VALID_NAV, TestUtils.getFakeAccessToken());
+    List<InstallmentDTO> response = debtPositionClient.getDebtPositionsByOrganizationIdAndNav(VALID_DEBT_POSITION_ORG_ID, VALID_NAV, accessToken);
 
     //verify
     Assertions.assertEquals(expectedResponse, response);

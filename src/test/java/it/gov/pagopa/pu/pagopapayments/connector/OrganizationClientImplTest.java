@@ -32,7 +32,6 @@ class OrganizationClientImplTest {
 
   private OrganizationClientImpl organizationClient;
 
-  private static final String ORG_BASE_URL = "orgBaseUrl";
   private static final Long VALID_ORG_ID = 1L;
   private static final Long VALID_BROKER_ID = 1L;
   private static final Long INVALID_ORG_ID = 9L;
@@ -53,7 +52,7 @@ class OrganizationClientImplTest {
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    organizationClient = new OrganizationClientImpl(ORG_BASE_URL, restTemplateBuilderMock);
+    organizationClient = new OrganizationClientImpl("ORG_BASE_URL", restTemplateBuilderMock);
   }
 
   //region getOrganizationById
@@ -67,8 +66,10 @@ class OrganizationClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<Organization>() {})
     )).thenReturn(responseEntity);
 
+    String accessToken = TestUtils.getFakeAccessToken();
+
     //when
-    Organization response = organizationClient.getOrganizationById(VALID_ORG_ID, TestUtils.getFakeAccessToken());
+    Organization response = organizationClient.getOrganizationById(VALID_ORG_ID, accessToken);
 
     //verify
     Assertions.assertEquals(VALID_ORG, response);
@@ -84,6 +85,7 @@ class OrganizationClientImplTest {
       Mockito.any(RequestEntity.class),
       Mockito.eq(new ParameterizedTypeReference<Organization>() {})
     )).thenReturn(responseEntity);
+
     String accessToken = TestUtils.getFakeAccessToken();
 
     //when
@@ -103,9 +105,11 @@ class OrganizationClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<Organization>() {})
     )).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
+    String accessToken = TestUtils.getFakeAccessToken();
+
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> organizationClient.getOrganizationById(INVALID_ORG_ID, TestUtils.getFakeAccessToken()));
+      () -> organizationClient.getOrganizationById(INVALID_ORG_ID, accessToken));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
@@ -126,8 +130,10 @@ class OrganizationClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<BrokerApiKeys>() {})
     )).thenReturn(responseEntity);
 
+    String accessToken = TestUtils.getFakeAccessToken();
+
     //when
-    BrokerApiKeys response = organizationClient.getApiKeyByBrokerId(VALID_BROKER_ID, TestUtils.getFakeAccessToken());
+    BrokerApiKeys response = organizationClient.getApiKeyByBrokerId(VALID_BROKER_ID, accessToken);
 
     //verify
     Assertions.assertNotNull(response);
@@ -149,8 +155,10 @@ class OrganizationClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<Broker>() {})
     )).thenReturn(responseEntity);
 
+    String accessToken = TestUtils.getFakeAccessToken();
+
     //when
-    Broker response = organizationClient.getBrokerById(VALID_BROKER_ID, TestUtils.getFakeAccessToken());
+    Broker response = organizationClient.getBrokerById(VALID_BROKER_ID, accessToken);
 
     //verify
     Assertions.assertEquals(VALID_BROKER, response);
@@ -171,8 +179,10 @@ class OrganizationClientImplTest {
       Mockito.eq(new ParameterizedTypeReference<Organization>() {})
     )).thenReturn(responseEntity);
 
+    String accessToken = TestUtils.getFakeAccessToken();
+
     //when
-    Organization response = organizationClient.getOrganizationByFiscalCode(VALID_FISCAL_CODE, TestUtils.getFakeAccessToken());
+    Organization response = organizationClient.getOrganizationByFiscalCode(VALID_FISCAL_CODE, accessToken);
 
     //verify
     Assertions.assertEquals(VALID_ORG, response);

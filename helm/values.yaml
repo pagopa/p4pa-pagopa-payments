@@ -63,6 +63,7 @@ microservice-chart:
 
     AUTH_SERVER_BASE_URL: "http://p4pa-auth-microservice-chart:8080/payhub"
     DEBT_POSITION_BASE_URL: "http://p4pa-debt-position-microservice-chart:8080"
+    FILESHARE_BASE_URL: "http://p4pa-fileshare-microservice-chart:8080"
     ORGANIZATION_BASE_URL: "http://p4pa-organization-microservice-chart:8080"
 
   envSecret:

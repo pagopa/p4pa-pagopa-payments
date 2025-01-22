@@ -284,8 +284,8 @@ jaxb {
       extension = true
       args = listOf("-wsdl", "-Xannotate")
       outputDir = file("$projectDir/build/generated/jaxb/java")
-      schema = file("$rootDir/src/main/resources/soap/paForNode.wsdl")
-      bindings = layout.files("$rootDir/src/main/resources/soap/paForNode.xjb")
+      schema = file("$rootDir/src/main/resources/soap/wsdl/paForNode.wsdl")
+      bindings = layout.files("$rootDir/src/main/resources/soap/wsdl/paForNode.xjb")
     }
   }
 }

@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -56,10 +55,10 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
 
 
   public static final Map<String, String> XSD_NAME_PATH_MAP = Map.of(
-      XSD_PaForNode, WS_PATH_NODE,
-      XSD_SacCommonTypes, WS_PATH_NODE,
-      XSD_MarcaDaBollo, WS_PATH_NODE,
-      XSD_XmldsigCoreSchema, WS_PATH_NODE
+      XSD_PaForNode, "wsdl/xsd/",
+      XSD_SacCommonTypes, "xsd-common/",
+      XSD_MarcaDaBollo, "xsd-common/",
+      XSD_XmldsigCoreSchema, "xsd-common/"
   );
 
   private void registerWsdlDefinition(String path){
@@ -107,7 +106,7 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
         String uri = request.getRequestURI();
         String name = WebUtils.extractFilenameFromUrlPath(uri);
         String path = extractPathFromUrlPath(uri);
-        String xsdPath = request.getContextPath()+XSD_NAME_PATH_MAP.getOrDefault(name,"__NOT_FOUND__");
+        String xsdPath = request.getContextPath()+WS_PATH_NODE+XSD_NAME_PATH_MAP.getOrDefault(name,"__NOT_FOUND__");
         if(xsdPath.equals(path))
           return super.getXsdSchema(request);
         else
@@ -144,29 +143,28 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
 
 
   @Bean(name = PaForNodeEndpoint.NAME)
-  @ConditionalOnProperty(prefix = "fesp", name = "mode", havingValue = "local")
   public Wsdl11Definition paForNodeEndpoint(XsdSchemaCollection xsdSchemaCollection) {
-    registerWsdlDefinition(WS_PATH_NODE +PaForNodeEndpoint.NAME);
-    return new SimpleWsdl11Definition(resourceLoader.getResource("classpath:soap/paForNode.wsdl"));
+    registerWsdlDefinition(WS_PATH_NODE + "wsdl/" + PaForNodeEndpoint.NAME);
+    return new SimpleWsdl11Definition(resourceLoader.getResource("classpath:soap/wsdl/paForNode.wsdl"));
   }
 
   @Bean(name = XSD_PaForNode)
   public XsdSchema getPaForNodeXsd() {
-    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_PaForNode+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_PaForNode)+XSD_PaForNode+".xsd"));
   }
 
   @Bean(name = XSD_SacCommonTypes)
   public XsdSchema getSacCommonTypesXsd() {
-    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_SacCommonTypes+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_SacCommonTypes)+XSD_SacCommonTypes+".xsd"));
   }
 
   @Bean(name = XSD_MarcaDaBollo)
   public XsdSchema getMarcaDaBolloXsd() {
-    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_MarcaDaBollo+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_MarcaDaBollo)+XSD_MarcaDaBollo+".xsd"));
   }
 
   @Bean(name = XSD_XmldsigCoreSchema)
   public XsdSchema getXmldsigCoreSchemaXsd() {
-    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_XmldsigCoreSchema+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_XmldsigCoreSchema)+XSD_XmldsigCoreSchema+".xsd"));
   }
 }

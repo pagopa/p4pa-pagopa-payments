@@ -17,7 +17,7 @@ import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
@@ -39,7 +39,7 @@ public class PaForNodeEndpoint {
     this.paSendRTMapper = paSendRTMapper;
   }
 
-  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaDemandPaymentNoticeRequest")
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paDemandPaymentNoticeRequest")
   @ResponsePayload
   public PaDemandPaymentNoticeResponse paDemandPaymentNotice(@RequestPayload PaDemandPaymentNoticeRequest request){
     log.info("processing paDemandPaymentNotice idPA[{}] servizio[{}/{}]", request.getIdPA(), request.getIdSoggettoServizio(), request.getIdServizio());
@@ -68,14 +68,14 @@ public class PaForNodeEndpoint {
     }
   }
 
-  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaGetPaymentReq")
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paGetPaymentReq")
   @ResponsePayload
   public PaGetPaymentRes paGetPayment(@RequestPayload PaGetPaymentReq request) {
     log.info("processing UNSUPPORTED V1 paGetPayment idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
     return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdBrokerPA(), new PaGetPaymentRes());
   }
 
-  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaGetPaymentV2Request")
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paGetPaymentV2Request")
   @ResponsePayload
   public PaGetPaymentV2Response paGetPaymentV2(@RequestPayload PaGetPaymentV2Request request) {
     long startTime = System.currentTimeMillis();
@@ -97,14 +97,14 @@ public class PaForNodeEndpoint {
     }
   }
 
-  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaGetPaymentReq")
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paSendRTReq")
   @ResponsePayload
   public PaSendRTRes paSendRT(@RequestPayload PaSendRTReq request) {
     log.info("processing UNSUPPORTED V1 paSendRT idPA[{}] notice[{}/{}]", request.getIdPA(), request.getReceipt().getFiscalCode(), request.getReceipt().getNoticeNumber());
     return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdBrokerPA(), new PaSendRTRes());
   }
 
-  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaSendRTV2Request")
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paSendRTV2Request")
   @ResponsePayload
   public PaSendRTV2Response paSendRTV2(@RequestPayload PaSendRTV2Request request) {
     long startTime = System.currentTimeMillis();

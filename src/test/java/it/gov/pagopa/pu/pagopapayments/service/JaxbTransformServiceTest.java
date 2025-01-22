@@ -144,7 +144,7 @@ class JaxbTransformServiceTest {
       rootElement).getBytes(StandardCharsets.UTF_8);
 
     // when
-    PaVerifyPaymentNoticeReq response = jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeReq.class,"/soap/paForNode.xsd");
+    PaVerifyPaymentNoticeReq response = jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeReq.class,"/soap/wsdl/xsd/paForNode.xsd");
 
     // then
     Assertions.assertTrue(EqualsBuilder.reflectionEquals(expectedResponse, response, true, null, true));

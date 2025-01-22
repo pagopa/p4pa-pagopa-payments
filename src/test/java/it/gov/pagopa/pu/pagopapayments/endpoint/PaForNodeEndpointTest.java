@@ -47,15 +47,18 @@ class PaForNodeEndpointTest {
   //region paDemandPaymentNotice
 
   @Test
-  void givenAnyWhenPaDemandPaymentNoticeThenUnsupportedOperationException() {
+  void givenAnyWhenPaDemandPaymentNoticeThenFault() {
     // given
     PaDemandPaymentNoticeRequest paDemandPaymentNoticeRequest = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
 
-    //when
-    UnsupportedOperationException exception = Assertions.assertThrows(UnsupportedOperationException.class, () -> paForNodeEndpoint.paDemandPaymentNotice(paDemandPaymentNoticeRequest));
+    // when
+    PaDemandPaymentNoticeResponse response = paForNodeEndpoint.paDemandPaymentNotice(paDemandPaymentNoticeRequest);
 
-    //verify
-    Assertions.assertEquals("paDemandPaymentNotice is not supported", exception.getMessage());
+    // verify
+    Assertions.assertNotNull(response);
+    Assertions.assertNotNull(response.getFault());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(paDemandPaymentNoticeRequest.getIdBrokerPA(), response.getFault().getId());
   }
 
   //endregion
@@ -139,143 +142,18 @@ class PaForNodeEndpointTest {
   //region paGetPayment
 
   @Test
-  void givenValidPaGetPaymentReqNonPostalWhenPaGetPaymentThenOk() {
-    try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
-      // given
-      PaGetPaymentReq paGetPaymentReq = podamFactory.manufacturePojo(PaGetPaymentReq.class);
-      RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
-      InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-      Organization organization = podamFactory.manufacturePojo(Organization.class);
-      PaGetPaymentRes paGetPaymentRes = podamFactory.manufacturePojo(PaGetPaymentRes.class);
-      //set specific values for this test
-      paGetPaymentReq.setTransferType(StTransferType.PAGOPA);
-      retrievePaymentDTO.setPostalTransfer(false);
-      installmentDTO.getTransfers().forEach(t -> {
-        t.setStampHashDocument(null);
-        t.setStampProvincialResidence(null);
-        t.setStampType(null);
-      });
+  void givenAnyWhenPaGetPaymentThenFault() {
+    // given
+    PaGetPaymentReq request = podamFactory.manufacturePojo(PaGetPaymentReq.class);
 
-      mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
-      mapperMock.when(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, paGetPaymentReq.getTransferType())).thenReturn(paGetPaymentRes);
+    // when
+    PaGetPaymentRes response = paForNodeEndpoint.paGetPayment(request);
 
-      // when
-      PaGetPaymentRes response = paForNodeEndpoint.paGetPayment(paGetPaymentReq);
-
-      // verify
-      Assertions.assertEquals(paGetPaymentRes, response);
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
-      mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, paGetPaymentReq.getTransferType()), Mockito.times(1));
-    }
-  }
-
-  @Test
-  void givenValidPaGetPaymentReqPostalWhenPaGetPaymentThenOk() {
-    try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
-      // given
-      PaGetPaymentReq paGetPaymentReq = podamFactory.manufacturePojo(PaGetPaymentReq.class);
-      RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
-      InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-      Organization organization = podamFactory.manufacturePojo(Organization.class);
-      PaGetPaymentRes paGetPaymentRes = podamFactory.manufacturePojo(PaGetPaymentRes.class);
-      //set specific values for this test
-      paGetPaymentReq.setTransferType(StTransferType.POSTAL);
-      retrievePaymentDTO.setPostalTransfer(true);
-      installmentDTO.getTransfers().forEach(t -> {
-        t.setStampHashDocument(null);
-        t.setStampProvincialResidence(null);
-        t.setStampType(null);
-      });
-
-      mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
-      mapperMock.when(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, paGetPaymentReq.getTransferType())).thenReturn(paGetPaymentRes);
-
-      // when
-      PaGetPaymentRes response = paForNodeEndpoint.paGetPayment(paGetPaymentReq);
-
-      // verify
-      Assertions.assertEquals(paGetPaymentRes, response);
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
-      mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentRes(installmentDTO, organization, paGetPaymentReq.getTransferType()), Mockito.times(1));
-    }
-  }
-
-  @Test
-  void givenInvalidPaGetPaymentReqWhenPaGetPaymentThenFault() {
-    try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
-      // given
-      PaGetPaymentReq paGetPaymentReq = podamFactory.manufacturePojo(PaGetPaymentReq.class);
-      RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
-
-      mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenThrow(new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "EMITTER"));
-
-      // when
-      PaGetPaymentRes response = paForNodeEndpoint.paGetPayment(paGetPaymentReq);
-
-      // verify
-      Assertions.assertNotNull(response);
-      Assertions.assertNotNull(response.getFault());
-      Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
-      Assertions.assertEquals("EMITTER", response.getFault().getId());
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
-    }
-  }
-
-  @Test
-  void givenSystemErrorWhenPaGetPaymentThenFault() {
-    try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
-      // given
-      PaGetPaymentReq paGetPaymentReq = podamFactory.manufacturePojo(PaGetPaymentReq.class);
-      RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
-
-      mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenThrow(new RuntimeException("RUNTIME EXCEPTION"));
-
-      // when
-      PaGetPaymentRes response = paForNodeEndpoint.paGetPayment(paGetPaymentReq);
-
-      // verify
-      Assertions.assertNotNull(response);
-      Assertions.assertNotNull(response.getFault());
-      Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
-      Assertions.assertEquals(paGetPaymentReq.getIdPA(), response.getFault().getId());
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
-    }
-  }
-
-  @Test
-  void givenInvalidPaGetPaymentReqWithMarcadabolloWhenPaGetPaymentThenFault() {
-    try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
-      // given
-      PaGetPaymentReq paGetPaymentReq = podamFactory.manufacturePojo(PaGetPaymentReq.class);
-      RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
-      InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-      Organization organization = podamFactory.manufacturePojo(Organization.class);
-      //set specific values for this test
-      installmentDTO.getTransfers().getFirst().setIban(null);
-      installmentDTO.getTransfers().getFirst().setPostalIban(null);
-
-      mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
-      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
-
-      // when
-      PaGetPaymentRes response = paForNodeEndpoint.paGetPayment(paGetPaymentReq);
-
-      // verify
-      Assertions.assertNotNull(response);
-      Assertions.assertNotNull(response.getFault());
-      Assertions.assertEquals(PagoPaNodeFaults.PAA_SEMANTICA.code(), response.getFault().getFaultCode());
-      Assertions.assertEquals(retrievePaymentDTO.getIdPA(), response.getFault().getId());
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
-    }
+    // verify
+    Assertions.assertNotNull(response);
+    Assertions.assertNotNull(response.getFault());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(request.getIdBrokerPA(), response.getFault().getId());
   }
 
   //endregion
@@ -293,6 +171,39 @@ class PaForNodeEndpointTest {
       PaGetPaymentV2Response paGetPaymentV2Response = podamFactory.manufacturePojo(PaGetPaymentV2Response.class);
       //set specific values for this test
       paGetPaymentV2Request.setTransferType(StTransferType.PAGOPA);
+      retrievePaymentDTO.setPostalTransfer(false);
+      installmentDTO.getTransfers().forEach(t -> {
+        t.setStampHashDocument(null);
+        t.setStampProvincialResidence(null);
+        t.setStampType(null);
+      });
+
+      mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request)).thenReturn(retrievePaymentDTO);
+      Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
+      mapperMock.when(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, paGetPaymentV2Request.getTransferType())).thenReturn(paGetPaymentV2Response);
+
+      // when
+      PaGetPaymentV2Response response = paForNodeEndpoint.paGetPaymentV2(paGetPaymentV2Request);
+
+      // verify
+      Assertions.assertEquals(paGetPaymentV2Response, response);
+      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
+      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request), Mockito.times(1));
+      mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, paGetPaymentV2Request.getTransferType()), Mockito.times(1));
+    }
+  }
+
+  @Test
+  void givenValidPaGetPaymentV2RequestPostalWhenPaGetPaymentV2ThenOk() {
+    try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
+      // given
+      PaGetPaymentV2Request paGetPaymentV2Request = podamFactory.manufacturePojo(PaGetPaymentV2Request.class);
+      RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+      InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+      Organization organization = podamFactory.manufacturePojo(Organization.class);
+      PaGetPaymentV2Response paGetPaymentV2Response = podamFactory.manufacturePojo(PaGetPaymentV2Response.class);
+      //set specific values for this test
+      paGetPaymentV2Request.setTransferType(StTransferType.POSTAL);
       retrievePaymentDTO.setPostalTransfer(false);
       installmentDTO.getTransfers().forEach(t -> {
         t.setStampHashDocument(null);
@@ -359,6 +270,25 @@ class PaForNodeEndpointTest {
       Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
       mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
     }
+  }
+
+  //endregion
+
+  //region paSendRT
+
+  @Test
+  void givenAnyWhenPaSendRTThenFault() {
+    // given
+    PaSendRTReq request = podamFactory.manufacturePojo(PaSendRTReq.class);
+
+    // when
+    PaSendRTRes response = paForNodeEndpoint.paSendRT(request);
+
+    // verify
+    Assertions.assertNotNull(response);
+    Assertions.assertNotNull(response.getFault());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(request.getIdBrokerPA(), response.getFault().getId());
   }
 
   //endregion

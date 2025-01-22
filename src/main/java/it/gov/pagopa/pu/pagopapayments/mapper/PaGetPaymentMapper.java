@@ -32,53 +32,6 @@ public class PaGetPaymentMapper {
       .build();
   }
 
-  public static RetrievePaymentDTO paPaGetPaymentReq2RetrievePaymentDTO(PaGetPaymentReq request) {
-    return RetrievePaymentDTO.builder()
-      .idPA(request.getIdPA())
-      .idBrokerPA(request.getIdBrokerPA())
-      .idStation(request.getIdStation())
-      .fiscalCode(request.getQrCode().getFiscalCode())
-      .noticeNumber(request.getQrCode().getNoticeNumber())
-      .postalTransfer(request.getTransferType().equals(StTransferType.POSTAL))
-      .build();
-  }
-
-  public static PaGetPaymentRes installmentDto2PaGetPaymentRes(InstallmentDTO installmentDTO, Organization organization, StTransferType transferType) {
-    PaGetPaymentV2Response paGetPaymentV2Response = installmentDto2PaGetPaymentV2Response(installmentDTO, organization, transferType);
-    PaGetPaymentRes response = new PaGetPaymentRes();
-    response.setOutcome(paGetPaymentV2Response.getOutcome());
-    response.setFault(paGetPaymentV2Response.getFault());
-    if(paGetPaymentV2Response.getData() != null) {
-      CtPaymentPA data = new CtPaymentPA();
-      CtPaymentPAV2 dataV2 = paGetPaymentV2Response.getData();
-      response.setData(data);
-      data.setCreditorReferenceId(dataV2.getCreditorReferenceId());
-      data.setPaymentAmount(dataV2.getPaymentAmount());
-      data.setDueDate(dataV2.getDueDate());
-      data.setRetentionDate(dataV2.getRetentionDate());
-      data.setLastPayment(dataV2.isLastPayment());
-      data.setDescription(dataV2.getDescription());
-      data.setCompanyName(dataV2.getCompanyName());
-      data.setOfficeName(dataV2.getOfficeName());
-      data.setDebtor(dataV2.getDebtor());
-      data.setMetadata(dataV2.getMetadata());
-      if(dataV2.getTransferList() != null) {
-        data.setTransferList(new CtTransferListPA());
-        dataV2.getTransferList().getTransfers().forEach(transferV2 -> {
-          CtTransferPA transfer = new CtTransferPA();
-          transfer.setIdTransfer(transferV2.getIdTransfer());
-          transfer.setFiscalCodePA(transferV2.getFiscalCodePA());
-          transfer.setTransferAmount(transferV2.getTransferAmount());
-          transfer.setTransferCategory(transferV2.getTransferCategory());
-          transfer.setRemittanceInformation(transferV2.getRemittanceInformation());
-          transfer.setIBAN(transferV2.getIBAN());
-          data.getTransferList().getTransfers().add(transfer);
-        });
-      }
-    }
-    return response;
-  }
-
   public static PaGetPaymentV2Response installmentDto2PaGetPaymentV2Response (InstallmentDTO installmentDTO, Organization organization, StTransferType transferType) {
     CtPaymentPAV2 payment = new CtPaymentPAV2();
     payment.setCreditorReferenceId(installmentDTO.getIuv());

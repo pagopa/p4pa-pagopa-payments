@@ -48,6 +48,7 @@ class PaSendRtMapperTest {
     Assertions.assertEquals(receiptBytes, response.getReceiptBytes());
     Assertions.assertEquals(request.getReceipt().getFiscalCode(), response.getFiscalCode());
     Assertions.assertEquals(request.getReceipt().getNoticeNumber(), response.getNoticeNumber());
+    TestUtils.checkNotNullFields(request);
   }
 
   //endregion

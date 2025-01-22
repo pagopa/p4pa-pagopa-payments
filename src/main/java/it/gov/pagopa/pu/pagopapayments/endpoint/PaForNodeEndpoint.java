@@ -42,7 +42,8 @@ public class PaForNodeEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaDemandPaymentNoticeRequest")
   @ResponsePayload
   public PaDemandPaymentNoticeResponse paDemandPaymentNotice(@RequestPayload PaDemandPaymentNoticeRequest request){
-    throw new UnsupportedOperationException("paDemandPaymentNotice is not supported");
+    log.info("processing paDemandPaymentNotice idPA[{}] servizio[{}/{}]", request.getIdPA(), request.getIdSoggettoServizio(), request.getIdServizio());
+    return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdBrokerPA(), new PaDemandPaymentNoticeResponse());
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paVerifyPaymentNoticeReq")
@@ -50,6 +51,7 @@ public class PaForNodeEndpoint {
   public PaVerifyPaymentNoticeRes paVerifyPaymentNotice(@RequestPayload PaVerifyPaymentNoticeReq request){
     long startTime = System.currentTimeMillis();
     try {
+    log.info("processing paVerifyPaymentNotice idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
       RetrievePaymentDTO retrievePaymentDTO = PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(request);
       Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
       return PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
@@ -69,32 +71,8 @@ public class PaForNodeEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaGetPaymentReq")
   @ResponsePayload
   public PaGetPaymentRes paGetPayment(@RequestPayload PaGetPaymentReq request) {
-    // this operation is just supported for retro compatibility and ideally the broker should be configured to use paGetPaymentV2;
-    // it's implementation is similar to paGetPaymentV2, only differences are:
-    // - marcadabollo is not supported
-    // - metadata is not supported
-    long startTime = System.currentTimeMillis();
-    try {
-      RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentReq2RetrievePaymentDTO(request);
-      //invoke V2 service
-      Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
-      //verify response is compatible with V1
-      if(installmentAndOrganization.getLeft().getTransfers().stream().anyMatch(transfer -> transfer.getStampHashDocument() != null)) {
-        log.warn("paGetPaymentV1 [{}/{}]: marcadabollo is not supported", retrievePaymentDTO.getFiscalCode(), retrievePaymentDTO.getNoticeNumber());
-        return handleFault(PagoPaNodeFaults.PAA_SEMANTICA, retrievePaymentDTO.getIdPA(), new PaGetPaymentRes());
-      }
-      return PaGetPaymentMapper.installmentDto2PaGetPaymentRes(
-        installmentAndOrganization.getLeft(), installmentAndOrganization.getRight(), request.getTransferType());
-    } catch(PagoPaNodeFaultException spe) {
-      log.error("Fault in paGetPayment [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
-      return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaGetPaymentRes());
-    } catch(Exception e) {
-      log.error("Error in paGetPayment [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
-      return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaGetPaymentRes());
-    } finally {
-      long elapsed = System.currentTimeMillis() - startTime;
-      log.info("SOAP WS paGetPayment, elapsed time[{}]", elapsed);
-    }
+    log.info("processing UNSUPPORTED V1 paGetPayment idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
+    return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdBrokerPA(), new PaGetPaymentRes());
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaGetPaymentV2Request")
@@ -102,6 +80,7 @@ public class PaForNodeEndpoint {
   public PaGetPaymentV2Response paGetPaymentV2(@RequestPayload PaGetPaymentV2Request request) {
     long startTime = System.currentTimeMillis();
     try {
+      log.info("processing paGetPaymentV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
       RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(request);
       Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
       return PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
@@ -118,11 +97,19 @@ public class PaForNodeEndpoint {
     }
   }
 
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaGetPaymentReq")
+  @ResponsePayload
+  public PaSendRTRes paSendRT(@RequestPayload PaSendRTReq request) {
+    log.info("processing UNSUPPORTED V1 paSendRT idPA[{}] notice[{}/{}]", request.getIdPA(), request.getReceipt().getFiscalCode(), request.getReceipt().getNoticeNumber());
+    return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdBrokerPA(), new PaSendRTRes());
+  }
+
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaSendRTV2Request")
   @ResponsePayload
   public PaSendRTV2Response paSendRTV2(@RequestPayload PaSendRTV2Request request) {
     long startTime = System.currentTimeMillis();
     try {
+      log.info("processing paSendRTV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getReceipt().getFiscalCode(), request.getReceipt().getNoticeNumber());
       PaSendRtDTO paSendRtDTO = paSendRTMapper.paSendRtV2Request2PaSendRtDTO(request);
       receiptService.processReceivedReceipt(paSendRtDTO);
       PaSendRTV2Response response = new PaSendRTV2Response();

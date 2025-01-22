@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,22 +29,22 @@ public class AcaService {
     this.brokerService = brokerService;
   }
 
-  public void create(DebtPositionDTO debtPosition, String accessToken) {
-    invokePaCreatePositionImpl(debtPosition, OPERATION.CREATE, accessToken);
+  public List<String> create(DebtPositionDTO debtPosition, String accessToken) {
+    return invokePaCreatePositionImpl(debtPosition, OPERATION.CREATE, accessToken);
   }
 
-  public void update(DebtPositionDTO debtPosition, String accessToken) {
-    invokePaCreatePositionImpl(debtPosition, OPERATION.UPDATE, accessToken);
+  public List<String> update(DebtPositionDTO debtPosition, String accessToken) {
+    return invokePaCreatePositionImpl(debtPosition, OPERATION.UPDATE, accessToken);
   }
 
-  public void delete(DebtPositionDTO debtPosition, String accessToken) {
-    invokePaCreatePositionImpl(debtPosition, OPERATION.DELETE, accessToken);
+  public List<String> delete(DebtPositionDTO debtPosition, String accessToken) {
+    return invokePaCreatePositionImpl(debtPosition, OPERATION.DELETE, accessToken);
   }
 
-  private void invokePaCreatePositionImpl(DebtPositionDTO debtPosition, OPERATION operation, String accessToken) {
-    List<NewDebtPositionRequest> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
+  private List<String> invokePaCreatePositionImpl(DebtPositionDTO debtPosition, OPERATION operation, String accessToken) {
+    List<Pair<String, NewDebtPositionRequest>> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
     Pair<BrokerApiKeys, String> brokerData = brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), accessToken);
-    debtPostionToSendACA.forEach(newDebtPositionRequest -> {
+    debtPostionToSendACA.stream().map(Pair::getRight).forEach(newDebtPositionRequest -> {
       if (operation == OPERATION.DELETE) {
         //delete is defined calling the same paCreatePosition api, but having set amount=0
         newDebtPositionRequest.amount(0);
@@ -52,6 +53,7 @@ public class AcaService {
         newDebtPositionRequest.getEntityFiscalCode(), newDebtPositionRequest.getIuv(), operation);
       acaClient.paCreatePosition(newDebtPositionRequest, brokerData.getLeft().getAcaKey(), brokerData.getRight());
     });
+    return debtPostionToSendACA.stream().map(Pair::getLeft).toList();
   }
 
 }

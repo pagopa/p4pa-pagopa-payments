@@ -19,8 +19,14 @@ paths:
               $ref: "#/components/schemas/DebtPositionDTO"
         required: true
       responses:
-        "204":
-          description: No content
+        "200":
+          description: Inserted on ACA
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
         "400":
           description: Invalid request
         "500":
@@ -37,8 +43,14 @@ paths:
               $ref: "#/components/schemas/DebtPositionDTO"
         required: true
       responses:
-        "204":
-          description: No content
+        "200":
+          description: Updated on ACA
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
         "400":
           description: Invalid request
         "500":
@@ -55,8 +67,14 @@ paths:
               $ref: "#/components/schemas/DebtPositionDTO"
         required: true
       responses:
-        "204":
-          description: No content
+        "200":
+          description: Deleted on ACA
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
         "400":
           description: Invalid request
         "500":

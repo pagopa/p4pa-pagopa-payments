@@ -39,7 +39,7 @@ class AcaServiceTest {
     .syncKey("validSyncKey");
 
   private DebtPositionDTO debtPosition;
-  private List<NewDebtPositionRequest> newDebtPositionRequestList;
+  private List<Pair<String,NewDebtPositionRequest>> newDebtPositionRequestList;
 
   @BeforeEach
   void setUp() {
@@ -50,14 +50,14 @@ class AcaServiceTest {
       .build();
 
     newDebtPositionRequestList = List.of(
-      new NewDebtPositionRequest()
+      Pair.of("IUD",new NewDebtPositionRequest()
         .amount(1234)
         .iuv("IUV")
-        .entityFiscalCode("FISCAL_CODE"),
-      new NewDebtPositionRequest()
+        .entityFiscalCode("FISCAL_CODE")),
+      Pair.of("IUD2",new NewDebtPositionRequest()
         .amount(3456)
         .iuv("IUV2")
-        .entityFiscalCode("FISCAL_CODE2")
+        .entityFiscalCode("FISCAL_CODE2"))
     );
   }
 
@@ -72,7 +72,7 @@ class AcaServiceTest {
     Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition);
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
     newDebtPositionRequestList.forEach(newDebtPositionRequest ->
-      Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequest, VALID_ACA_KEY, VALID_SEGREGATION_CODE)
+      Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequest.getRight(), VALID_ACA_KEY, VALID_SEGREGATION_CODE)
     );
   }
 
@@ -87,7 +87,7 @@ class AcaServiceTest {
     Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition);
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
     newDebtPositionRequestList.forEach(newDebtPositionRequest ->
-      Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequest, VALID_ACA_KEY, VALID_SEGREGATION_CODE)
+      Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequest.getRight(), VALID_ACA_KEY, VALID_SEGREGATION_CODE)
     );
   }
 
@@ -104,7 +104,7 @@ class AcaServiceTest {
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
     newDebtPositionRequestList.forEach(newDebtPositionRequest ->
       Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(
-        Mockito.argThat(x -> x.getAmount()==0 && x.equals(newDebtPositionRequest)), Mockito.eq(VALID_ACA_KEY), Mockito.eq(VALID_SEGREGATION_CODE))
+        Mockito.argThat(x -> x.getAmount()==0 && x.equals(newDebtPositionRequest.getRight())), Mockito.eq(VALID_ACA_KEY), Mockito.eq(VALID_SEGREGATION_CODE))
     );
   }
 }

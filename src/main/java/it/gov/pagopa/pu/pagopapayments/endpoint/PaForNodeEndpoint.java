@@ -42,7 +42,8 @@ public class PaForNodeEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "PaDemandPaymentNoticeRequest")
   @ResponsePayload
   public PaDemandPaymentNoticeResponse paDemandPaymentNotice(@RequestPayload PaDemandPaymentNoticeRequest request){
-    throw new UnsupportedOperationException("paDemandPaymentNotice is not supported");
+    log.info("processing paDemandPaymentNotice idPA[{}] servizio[{}/{}]", request.getIdPA(), request.getIdSoggettoServizio(), request.getIdServizio());
+    return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaDemandPaymentNoticeResponse());
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paVerifyPaymentNoticeReq")
@@ -50,6 +51,7 @@ public class PaForNodeEndpoint {
   public PaVerifyPaymentNoticeRes paVerifyPaymentNotice(@RequestPayload PaVerifyPaymentNoticeReq request){
     long startTime = System.currentTimeMillis();
     try {
+    log.info("processing paVerifyPaymentNotice idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
       RetrievePaymentDTO retrievePaymentDTO = PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(request);
       Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
       return PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
@@ -102,6 +104,7 @@ public class PaForNodeEndpoint {
   public PaGetPaymentV2Response paGetPaymentV2(@RequestPayload PaGetPaymentV2Request request) {
     long startTime = System.currentTimeMillis();
     try {
+      log.info("processing paGetPaymentV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
       RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(request);
       Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
       return PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
@@ -123,6 +126,7 @@ public class PaForNodeEndpoint {
   public PaSendRTV2Response paSendRTV2(@RequestPayload PaSendRTV2Request request) {
     long startTime = System.currentTimeMillis();
     try {
+      log.info("processing paSendRTV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getReceipt().getFiscalCode(), request.getReceipt().getNoticeNumber());
       PaSendRtDTO paSendRtDTO = paSendRTMapper.paSendRtV2Request2PaSendRtDTO(request);
       receiptService.processReceivedReceipt(paSendRtDTO);
       PaSendRTV2Response response = new PaSendRTV2Response();

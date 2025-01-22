@@ -43,10 +43,8 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
 
 
   public static final String WS_PATH_NODE = WebSecurityConfig.SOAP_WS_BASE_PATH+"/node/";
+  private static final String SOAP_RESOURCES_FOLDER = "soap";
 
-  public static final String XSD_PagInf_Dovuti_Pagati_6_2_0 = "PagInf_Dovuti_Pagati_6_2_0";
-  public static final String XSD_PagInf_RP_Esito_6_2_0 = "PagInf_RP_Esito_6_2_0";
-  public static final String XSD_PagInf_RPT_RT_6_2_0 = "PagInf_RPT_RT_6_2_0";
   public static final String XSD_PaForNode = "paForNode";
   public static final String XSD_SacCommonTypes = "sac-common-types-1.0";
   public static final String XSD_MarcaDaBollo = "MarcaDaBollo";
@@ -58,7 +56,6 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
 
 
   public static final Map<String, String> XSD_NAME_PATH_MAP = Map.of(
-      XSD_PagInf_RPT_RT_6_2_0, WS_PATH_NODE,
       XSD_PaForNode, WS_PATH_NODE,
       XSD_SacCommonTypes, WS_PATH_NODE,
       XSD_MarcaDaBollo, WS_PATH_NODE,
@@ -150,41 +147,26 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
   @ConditionalOnProperty(prefix = "fesp", name = "mode", havingValue = "local")
   public Wsdl11Definition paForNodeEndpoint(XsdSchemaCollection xsdSchemaCollection) {
     registerWsdlDefinition(WS_PATH_NODE +PaForNodeEndpoint.NAME);
-    return new SimpleWsdl11Definition(resourceLoader.getResource("classpath:wsdl/fesp/paForNode.wsdl"));
-  }
-
-  @Bean(name = XSD_PagInf_Dovuti_Pagati_6_2_0)
-  public XsdSchema getPagInf_Dovuti_Pagati_6_2_0Xsd() {
-    return new SimpleXsdSchema(new ClassPathResource("wsdl/pa/"+XSD_PagInf_Dovuti_Pagati_6_2_0+".xsd"));
-  }
-
-  @Bean(name = XSD_PagInf_RP_Esito_6_2_0)
-  public XsdSchema getPagInf_RP_Esito_6_2_0Xsd() {
-    return new SimpleXsdSchema(new ClassPathResource("wsdl/pa/"+XSD_PagInf_RP_Esito_6_2_0+".xsd"));
-  }
-
-  @Bean(name = XSD_PagInf_RPT_RT_6_2_0)
-  public XsdSchema getPagInf_RPT_RT_6_2_0Xsd() {
-    return new SimpleXsdSchema(new ClassPathResource("wsdl/fesp/"+XSD_PagInf_RPT_RT_6_2_0+".xsd"));
+    return new SimpleWsdl11Definition(resourceLoader.getResource("classpath:soap/paForNode.wsdl"));
   }
 
   @Bean(name = XSD_PaForNode)
   public XsdSchema getPaForNodeXsd() {
-    return new SimpleXsdSchema(new ClassPathResource("wsdl/fesp/"+XSD_PaForNode+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_PaForNode+".xsd"));
   }
 
   @Bean(name = XSD_SacCommonTypes)
   public XsdSchema getSacCommonTypesXsd() {
-    return new SimpleXsdSchema(new ClassPathResource("wsdl/fesp/"+XSD_SacCommonTypes+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_SacCommonTypes+".xsd"));
   }
 
   @Bean(name = XSD_MarcaDaBollo)
   public XsdSchema getMarcaDaBolloXsd() {
-    return new SimpleXsdSchema(new ClassPathResource("wsdl/fesp/"+XSD_MarcaDaBollo+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_MarcaDaBollo+".xsd"));
   }
 
   @Bean(name = XSD_XmldsigCoreSchema)
   public XsdSchema getXmldsigCoreSchemaXsd() {
-    return new SimpleXsdSchema(new ClassPathResource("wsdl/fesp/"+XSD_XmldsigCoreSchema+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_XmldsigCoreSchema+".xsd"));
   }
 }

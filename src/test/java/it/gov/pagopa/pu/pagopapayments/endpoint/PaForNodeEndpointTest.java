@@ -47,15 +47,18 @@ class PaForNodeEndpointTest {
   //region paDemandPaymentNotice
 
   @Test
-  void givenAnyWhenPaDemandPaymentNoticeThenUnsupportedOperationException() {
+  void givenAnyWhenPaDemandPaymentNoticeThenFault() {
     // given
     PaDemandPaymentNoticeRequest paDemandPaymentNoticeRequest = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
 
-    //when
-    UnsupportedOperationException exception = Assertions.assertThrows(UnsupportedOperationException.class, () -> paForNodeEndpoint.paDemandPaymentNotice(paDemandPaymentNoticeRequest));
+    // when
+    PaDemandPaymentNoticeResponse response = paForNodeEndpoint.paDemandPaymentNotice(paDemandPaymentNoticeRequest);
 
-    //verify
-    Assertions.assertEquals("paDemandPaymentNotice is not supported", exception.getMessage());
+    // verify
+    Assertions.assertNotNull(response);
+    Assertions.assertNotNull(response.getFault());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(paDemandPaymentNoticeRequest.getIdBrokerPA(), response.getFault().getId());
   }
 
   //endregion

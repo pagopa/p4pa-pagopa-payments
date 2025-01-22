@@ -50,6 +50,8 @@ rest:
     read-millis: "\${DEFAULT_REST_READ_TIMEOUT_MILLIS:120000}"
   auth:
     base-url: "\${AUTH_SERVER_BASE_URL:}"
+    post-token:
+      client_secret: "\${AUTH_CLIENT_SECRET:clientsecret}"
   debt-position:
     base-url: "\${DEBT_POSITION_BASE_URL:}"
   fileshare:

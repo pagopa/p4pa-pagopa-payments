@@ -43,6 +43,7 @@ management:
 
 app:
   pagopa-payments-ws-base-url: "\${APP_PAGOPA_PAYMENTS_WS_BASE_URL:}"
+  node-for-pa-url: "\${APP_NODE_FOR_PA_URL:}"
 
 rest:
   default-timeout:

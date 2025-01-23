@@ -4,6 +4,7 @@ import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class AcaDebtPositionMapper {
     return true;
   }
 
-  public List<NewDebtPositionRequest> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition) {
+  public List<Pair<String,NewDebtPositionRequest>> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition) {
 
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
@@ -40,7 +41,7 @@ public class AcaDebtPositionMapper {
       .map(installment -> {
         TransferDTO transfer = installment.getTransfers().getFirst();
         PersonDTO debtor = installment.getDebtor();
-        return new NewDebtPositionRequest()
+        return Pair.of(installment.getIud() ,new NewDebtPositionRequest()
           .nav(installment.getNav())
           .iuv(installment.getIuv())
           .paFiscalCode(transfer.getOrgFiscalCode())
@@ -53,7 +54,7 @@ public class AcaDebtPositionMapper {
           .amount(installment.getAmountCents().intValue())
           .expirationDate(Optional.ofNullable(installment.getDueDate()).orElse(Constants.MAX_EXPIRATION_DATE))
           .switchToExpired(installment.getDueDate()!=null)
-          .payStandIn(true);
+          .payStandIn(true));
       }).toList();
   }
 }

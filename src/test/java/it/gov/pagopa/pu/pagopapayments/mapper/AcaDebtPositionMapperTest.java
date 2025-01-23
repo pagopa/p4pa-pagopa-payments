@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,12 +58,12 @@ class AcaDebtPositionMapperTest {
 
 
     //when
-    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
+    List<Pair<String,NewDebtPositionRequest>> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(installmentToMap.size(), response.size());
     for(int idx = 0; idx < installmentToMap.size(); idx++) {
-      Assertions.assertEquals(installmentToMap.get(idx).getDueDate(), response.get(idx).getExpirationDate());
+      Assertions.assertEquals(installmentToMap.get(idx).getDueDate(), response.get(idx).getRight().getExpirationDate());
     }
     response.forEach(TestUtils::checkNotNullFields);
   }
@@ -94,12 +95,12 @@ class AcaDebtPositionMapperTest {
     debtPosition.getPaymentOptions().get(1).getInstallments().get(0).setStatus(InstallmentStatus.TO_SYNC);
 
     //when
-    List<NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
+    List<Pair<String,NewDebtPositionRequest>> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(installmentToMap.size(), response.size());
     for(int idx = 0; idx < installmentToMap.size(); idx++) {
-      Assertions.assertEquals(Constants.MAX_EXPIRATION_DATE, response.get(idx).getExpirationDate());
+      Assertions.assertEquals(Constants.MAX_EXPIRATION_DATE, response.get(idx).getRight().getExpirationDate());
     }
     response.forEach(TestUtils::checkNotNullFields);
   }

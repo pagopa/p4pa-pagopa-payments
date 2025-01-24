@@ -146,7 +146,7 @@
   <wsdl:service name="paForNodeService">
     <wsdl:port name="paForNodePort"
                binding="tns:paForNodeBinding">
-      <soap:address location="http://pagopa-api.pagopa.gov.it/service/pa/paForNode" />
+      <soap:address location="/soap/node/wsdl/PaForNode" />
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

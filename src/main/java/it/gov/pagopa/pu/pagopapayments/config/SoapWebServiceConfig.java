@@ -94,14 +94,8 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
   }
 
   private void registerWsdlDefinition(String path){
-    String contextRoot;
-    try{
-      contextRoot = new URI(pagopaPaymentsWsdlBaseUrl).getPath().replaceAll("/$", "");
-    } catch(Exception e){
-      throw new ApplicationException("invalid app.pagopa-payments-ws-base-url ["+ pagopaPaymentsWsdlBaseUrl +"]", e);
-    }
-    log.debug("register ws soap: {}",contextRoot + path);
-    WS_PATH_NAME_SET.add(contextRoot + path);
+    log.debug("register ws soap: {}", path);
+    WS_PATH_NAME_SET.add(path);
     log.trace("WS_PATH_NAME_SET contains now: {}",WS_PATH_NAME_SET);
   }
 
@@ -116,7 +110,7 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
           url.append(location);
           return url.toString();
         } else {
-          log.warn("wsdl url in location must start with / : [{}]", request.getRequestURL());
+          log.error("wsdl url in location must start with / : [{}]", request.getRequestURL());
           return super.transformLocation(location, request);
         }
       }

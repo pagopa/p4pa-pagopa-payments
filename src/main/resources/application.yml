@@ -41,8 +41,9 @@ management:
         http: true
         logback: true
 
-app:
-  pagopa-payments-ws-base-url: "\${APP_PAGOPA_PAYMENTS_WS_BASE_URL:}"
+soap:
+  pagopa-payments:
+    wsdl-base-url: "\${PAGOPA_PAYMENTS_WSDL_BASE_URL:http://localhost:8080}"
 
 rest:
   default-timeout:

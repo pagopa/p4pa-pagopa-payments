@@ -4,7 +4,6 @@ import it.gov.pagopa.pu.pagopapayments.endpoint.PaForNodeEndpoint;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
@@ -34,56 +33,32 @@ import java.util.Set;
 @Configuration(proxyBeanMethods = false)
 public class SoapWebServiceConfig extends WsConfigurerAdapter {
 
-  @Value("${app.pagopa-payments-ws-base-url}")
-  private String pagopaPaymentsWsBaseUrl;
-
-  @Autowired
-  private ResourceLoader resourceLoader;
-
-
   public static final String WS_PATH_NODE = WebSecurityConfig.SOAP_WS_BASE_PATH+"/node/";
   private static final String SOAP_RESOURCES_FOLDER = "soap";
 
-  public static final String XSD_PaForNode = "paForNode";
-  public static final String XSD_SacCommonTypes = "sac-common-types-1.0";
-  public static final String XSD_MarcaDaBollo = "MarcaDaBollo";
-  public static final String XSD_XmldsigCoreSchema = "xmldsig-core-schema";
+  public static final String XSD_PA_FOR_NODE = "paForNode";
+  public static final String XSD_SAC_COMMON_TYPES = "sac-common-types-1.0";
+  public static final String XSD_MARCA_DA_BOLLO = "MarcaDaBollo";
+  public static final String XSD_XMLDSIG_CORE_SCHEMA = "xmldsig-core-schema";
+  public static final String XSD_COMMON_PATH = "xsd-common/";
 
-
-
-  public static Set<String> WS_PATH_NAME_SET = new HashSet<>();
-
+  protected static final Set<String> WS_PATH_NAME_SET = new HashSet<>();
 
   public static final Map<String, String> XSD_NAME_PATH_MAP = Map.of(
-      XSD_PaForNode, "wsdl/xsd/",
-      XSD_SacCommonTypes, "xsd-common/",
-      XSD_MarcaDaBollo, "xsd-common/",
-      XSD_XmldsigCoreSchema, "xsd-common/"
+    XSD_PA_FOR_NODE, "wsdl/xsd/",
+    XSD_SAC_COMMON_TYPES, XSD_COMMON_PATH,
+    XSD_MARCA_DA_BOLLO, XSD_COMMON_PATH,
+    XSD_XMLDSIG_CORE_SCHEMA, XSD_COMMON_PATH
   );
 
-  private void registerWsdlDefinition(String path){
-    String contextRoot;
-    try{
-      contextRoot = new URI(pagopaPaymentsWsBaseUrl).getPath().replaceAll("/$", "");
-    } catch(Exception e){
-      throw new ApplicationException("invalid app.pagopa-payments-ws-base-url ["+ pagopaPaymentsWsBaseUrl +"]", e);
-    }
-    log.debug("register ws soap: {}",contextRoot + path);
-    WS_PATH_NAME_SET.add(contextRoot + path);
-    log.trace("WS_PATH_NAME_SET contains now: {}",WS_PATH_NAME_SET);
-  }
+  private final String pagopaPaymentsWsdlBaseUrl;
+  private final ResourceLoader resourceLoader;
 
-  private static String extractPathFromUrlPath(String urlPath) {
-    int end = urlPath.indexOf('?');
-    if (end == -1) {
-      end = urlPath.indexOf('#');
-      if (end == -1) {
-        end = urlPath.length();
-      }
-    }
-    int begin = urlPath.lastIndexOf('/', end) + 1;
-    //int paramIndex = urlPath.indexOf(';', begin);
-    return urlPath.substring(0, begin);
+  public SoapWebServiceConfig(
+    @Value("${soap.pagopa-payments.wsdl-base-url}")String pagopaPaymentsWsdlBaseUrl,
+    ResourceLoader resourceLoader) {
+    this.pagopaPaymentsWsdlBaseUrl = pagopaPaymentsWsdlBaseUrl;
+    this.resourceLoader = resourceLoader;
   }
 
   @Bean
@@ -118,13 +93,19 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
     return new ServletRegistrationBean<>(servlet, WebSecurityConfig.SOAP_WS_BASE_PATH + "/*");
   }
 
+  private void registerWsdlDefinition(String path){
+    log.debug("register ws soap: {}", path);
+    WS_PATH_NAME_SET.add(path);
+    log.trace("WS_PATH_NAME_SET contains now: {}",WS_PATH_NAME_SET);
+  }
+
   @Bean("wsdlDefinitionHandlerAdapter")
   public WsdlDefinitionHandlerAdapter getWsdlDefinitionHandlerAdapter(){
     return new WsdlDefinitionHandlerAdapter(){
       @Override
       protected String transformLocation(String location, HttpServletRequest request) {
         //do not take url from request, because it may be changed by proxy / ingress. Use application property
-        StringBuilder url = new StringBuilder(pagopaPaymentsWsBaseUrl);
+        StringBuilder url = new StringBuilder(pagopaPaymentsWsdlBaseUrl);
         if (location.startsWith("/")) {
           url.append(location);
           return url.toString();
@@ -136,11 +117,23 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
     };
   }
 
+  private static String extractPathFromUrlPath(String urlPath) {
+    int end = urlPath.indexOf('?');
+    if (end == -1) {
+      end = urlPath.indexOf('#');
+      if (end == -1) {
+        end = urlPath.length();
+      }
+    }
+    int begin = urlPath.lastIndexOf('/', end) + 1;
+    //int paramIndex = urlPath.indexOf(';', begin);
+    return urlPath.substring(0, begin);
+  }
+
   @Bean
   public XsdSchemaCollection getXsdSchemaCollection() {
     return null;
   }
-
 
   @Bean(name = PaForNodeEndpoint.NAME)
   public Wsdl11Definition paForNodeEndpoint(XsdSchemaCollection xsdSchemaCollection) {
@@ -148,23 +141,24 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
     return new SimpleWsdl11Definition(resourceLoader.getResource("classpath:soap/wsdl/paForNode.wsdl"));
   }
 
-  @Bean(name = XSD_PaForNode)
+  @Bean(name = XSD_PA_FOR_NODE)
   public XsdSchema getPaForNodeXsd() {
-    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_PaForNode)+XSD_PaForNode+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_PA_FOR_NODE)+ XSD_PA_FOR_NODE +".xsd"));
   }
 
-  @Bean(name = XSD_SacCommonTypes)
-  public XsdSchema getSacCommonTypesXsd() {
-    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_SacCommonTypes)+XSD_SacCommonTypes+".xsd"));
-  }
-
-  @Bean(name = XSD_MarcaDaBollo)
+  @Bean(name = XSD_MARCA_DA_BOLLO)
   public XsdSchema getMarcaDaBolloXsd() {
-    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_MarcaDaBollo)+XSD_MarcaDaBollo+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_MARCA_DA_BOLLO)+ XSD_MARCA_DA_BOLLO +".xsd"));
   }
 
-  @Bean(name = XSD_XmldsigCoreSchema)
+  @Bean(name = XSD_SAC_COMMON_TYPES)
+  public XsdSchema getSacCommonTypesXsd() {
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_SAC_COMMON_TYPES)+ XSD_SAC_COMMON_TYPES +".xsd"));
+  }
+
+
+  @Bean(name = XSD_XMLDSIG_CORE_SCHEMA)
   public XsdSchema getXmldsigCoreSchemaXsd() {
-    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_XmldsigCoreSchema)+XSD_XmldsigCoreSchema+".xsd"));
+    return new SimpleXsdSchema(new ClassPathResource(SOAP_RESOURCES_FOLDER+"/"+XSD_NAME_PATH_MAP.get(XSD_XMLDSIG_CORE_SCHEMA)+ XSD_XMLDSIG_CORE_SCHEMA +".xsd"));
   }
 }

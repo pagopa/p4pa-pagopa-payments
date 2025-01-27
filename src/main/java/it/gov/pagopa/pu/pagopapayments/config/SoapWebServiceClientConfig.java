@@ -15,7 +15,7 @@ import org.springframework.ws.transport.http.ClientHttpRequestMessageSender;
 @Slf4j
 public class SoapWebServiceClientConfig {
 
-  @Value("${app.node-for-pa-url}")
+  @Value("${soap.pagopa-payments.node-for-pa-url}")
   private String nodeForPaUrl;
 
   @Bean

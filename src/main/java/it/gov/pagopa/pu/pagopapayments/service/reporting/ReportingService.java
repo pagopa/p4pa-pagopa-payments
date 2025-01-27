@@ -23,15 +23,32 @@ public class ReportingService {
   private final NodeForPaClient nodeForPaClient;
   private final BrokerService brokerService;
 
-    public ReportingService(NodeForPaClient nodeForPaClient, BrokerService brokerService) {
-        this.nodeForPaClient = nodeForPaClient;
-        this.brokerService = brokerService;
-    }
+  public ReportingService(NodeForPaClient nodeForPaClient, BrokerService brokerService) {
+    this.nodeForPaClient = nodeForPaClient;
+    this.brokerService = brokerService;
+  }
 
-    public List<ReportingIdDTO> getReportingList(Long organizationId, String accessToken) {
+  public List<ReportingIdDTO> getReportingList(Long organizationId, String accessToken) {
 
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
+    NodoChiediElencoFlussiRendicontazione request = getNodoChiediElencoFlussiRendicontazione(brokerForNodoPaDTO);
+
+    NodoChiediElencoFlussiRendicontazioneRisposta response = nodeForPaClient.nodoChiediElencoFlussiRendicontazione(request, brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey());
+
+    if (response.getFault() != null) {
+      throw new ApplicationException("Error during the call to the payment node " + response.getFault().getFaultCode());
+    }
+
+    List<ReportingIdDTO> reportingList = new ArrayList<>();
+
+    response.getElencoFlussiRendicontazione().getIdRendicontaziones().forEach(idRendicontazione -> reportingList.add(ReportingIdMapper.map(idRendicontazione)));
+
+
+    return reportingList;
+  }
+
+  private static NodoChiediElencoFlussiRendicontazione getNodoChiediElencoFlussiRendicontazione(BrokerForNodoPaDTO brokerForNodoPaDTO) {
     Broker broker = brokerForNodoPaDTO.getBroker();
     Organization organization = brokerForNodoPaDTO.getOrganization();
 
@@ -41,19 +58,7 @@ public class ReportingService {
     request.setIdentificativoIntermediarioPA(broker.getBrokerFiscalCode());
     request.setIdentificativoStazioneIntermediarioPA(broker.getBroadcastStationId());
     request.setIdentificativoPSP(null);
-
-    NodoChiediElencoFlussiRendicontazioneRisposta response = nodeForPaClient.nodoChiediElencoFlussiRendicontazione(request, brokerForNodoPaDTO.getBrokerApiKeys().getAcaKey());
-
-    if(response.getFault()!= null) {
-      throw new ApplicationException("Errore durante la chiamata al nodo dei pagamenti " + response.getFault().getFaultCode());
-    }
-
-    List<ReportingIdDTO> reportingList = new ArrayList<>();
-
-    response.getElencoFlussiRendicontazione().getIdRendicontaziones().forEach(idRendicontazione -> reportingList.add(ReportingIdMapper.map(idRendicontazione)));
-
-
-    return reportingList;
+    return request;
   }
 
 }

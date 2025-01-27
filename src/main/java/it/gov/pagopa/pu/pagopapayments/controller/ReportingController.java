@@ -15,7 +15,6 @@ import java.util.List;
 @Slf4j
 public class ReportingController implements ReportingApi {
 
-
   private final ReportingService reportingService;
 
   public ReportingController(ReportingService reportingService) {

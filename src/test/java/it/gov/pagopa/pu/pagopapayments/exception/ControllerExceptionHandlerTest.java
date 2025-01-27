@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import it.gov.pagopa.pu.pagopapayments.controller.AcaController;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
+import it.gov.pagopa.pu.pagopapayments.service.reporting.ReportingService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,8 @@ class ControllerExceptionHandlerTest {
 
   @MockitoBean
   private AcaService acaServiceMock;
+  @MockitoBean
+  private ReportingService reportingServiceMock;
 
   @Autowired
   private MockMvc mockMvc;

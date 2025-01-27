@@ -287,6 +287,12 @@ jaxb {
       schema = file("$rootDir/src/main/resources/soap/wsdl/paForNode.wsdl")
       bindings = layout.files("$rootDir/src/main/resources/soap/wsdl/paForNode.xjb")
     }
+    register("nodeForPa") {
+      args = listOf("-wsdl")
+      outputDir = file("$projectDir/build/generated/jaxb/java")
+      schema = file("$rootDir/src/main/resources/soap/wsdl/nodeForPa.wsdl")
+      bindings = layout.files("$rootDir/src/main/resources/soap/wsdl/nodeForPa.xjb")
+    }
   }
 }
 

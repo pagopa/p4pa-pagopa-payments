@@ -83,7 +83,7 @@ paths:
     get:
       tags:
         - reporting
-      operationId: getReportingList
+      operationId: getPaymentsReportingList
       parameters:
         - name: organizationId
           in: path

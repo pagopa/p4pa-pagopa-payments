@@ -184,7 +184,7 @@ components:
           type: string
           enum:
             - SINGLE_INSTALLMENT
-            - INSTALMENTS
+            - INSTALLMENTS
             - DOWN_PAYMENT
         installments:
           type: array
@@ -389,6 +389,9 @@ components:
       properties:
         entityType:
           type: string
+          enum:
+            - F
+            - G
         fiscalCode:
           type: string
         fullName:

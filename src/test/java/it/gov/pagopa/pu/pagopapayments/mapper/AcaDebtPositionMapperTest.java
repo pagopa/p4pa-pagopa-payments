@@ -51,7 +51,7 @@ class AcaDebtPositionMapperTest {
     // fix some field values
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
-        installment.getDebtor().setEntityType(NewDebtPositionRequest.EntityTypeEnum.F.name());
+        installment.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.valueOf(NewDebtPositionRequest.EntityTypeEnum.F.getValue()));
         installment.setStatus(InstallmentStatus.UNPAID);
         installment.setSyncStatus(null);
       }));

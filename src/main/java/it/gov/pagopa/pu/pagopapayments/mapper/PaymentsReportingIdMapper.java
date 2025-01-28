@@ -10,6 +10,10 @@ public class PaymentsReportingIdMapper {
   private PaymentsReportingIdMapper() {}
 
   public static ReportingIdDTO map(TipoIdRendicontazione tipoIdRendicontazione){
+    if(tipoIdRendicontazione==null){
+      return null;
+    }
+
     return ReportingIdDTO.builder()
       .reportId(tipoIdRendicontazione.getIdentificativoFlusso())
       .reportDate(ConversionUtils.toOffsetDateTime(tipoIdRendicontazione.getDataOraFlusso()))

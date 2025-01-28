@@ -42,4 +42,13 @@ class PaymentsReportingIdMapperTest {
     Assertions.assertNull(result.getReportId());
     Assertions.assertNull(result.getReportDate());
   }
+
+  @Test
+  void givenTipoIdRendicontazioneNullWhenMapThenReturnReportingIdDTOWithNullFields() {
+    // given & when
+    ReportingIdDTO result = PaymentsReportingIdMapper.map(null);
+
+    // then
+    Assertions.assertNull(result);
+  }
 }

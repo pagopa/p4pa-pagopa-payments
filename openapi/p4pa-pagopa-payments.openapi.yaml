@@ -153,7 +153,7 @@ components:
           type: string
           enum:
             - SINGLE_INSTALLMENT
-            - INSTALMENTS
+            - INSTALLMENTS
             - DOWN_PAYMENT
         installments:
           type: array

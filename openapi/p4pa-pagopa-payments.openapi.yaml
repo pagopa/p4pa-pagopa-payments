@@ -79,7 +79,7 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
-  /reporting/{organizationId}:
+  /paymentsReporting/{organizationId}:
     get:
       tags:
         - reporting
@@ -93,7 +93,7 @@ paths:
             format: int64
       responses:
         "200":
-          description: List of reporting
+          description: List of payments reporting
           content:
             application/json:
               schema:
@@ -421,6 +421,8 @@ components:
         reportDate:
           type: string
           format: date-time
+        fileName:
+          type: string
   securitySchemes:
     BearerAuth:
       type: http

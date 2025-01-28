@@ -6,10 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.ws.transport.http.ClientHttpRequestMessageSender;
 
 @Configuration
 @Slf4j
@@ -29,9 +26,7 @@ public class SoapWebServiceClientConfig {
     client.setMarshaller(marshaller);
     client.setUnmarshaller(marshaller);
 
-    ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-    ClientHttpRequestMessageSender messageSender = new ClientHttpRequestMessageSender(requestFactory);
-    client.setMessageSender(messageSender);
+
     return client;
   }
 

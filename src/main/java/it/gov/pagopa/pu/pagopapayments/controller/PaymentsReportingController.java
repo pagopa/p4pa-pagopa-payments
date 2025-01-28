@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.pagopapayments.controller.generated.ReportingApi;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
-import it.gov.pagopa.pu.pagopapayments.service.reporting.ReportingService;
+import it.gov.pagopa.pu.pagopapayments.service.paymentsReporting.PaymentsReportingService;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -13,18 +13,21 @@ import java.util.List;
 
 @RestController
 @Slf4j
-public class ReportingController implements ReportingApi {
+public class PaymentsReportingController implements ReportingApi {
 
-  private final ReportingService reportingService;
+  private final PaymentsReportingService paymentsReportingService;
 
-  public ReportingController(ReportingService reportingService) {
-    this.reportingService = reportingService;
+  public PaymentsReportingController(PaymentsReportingService paymentsReportingService) {
+    this.paymentsReportingService = paymentsReportingService;
   }
 
   @Override
   public ResponseEntity<List<ReportingIdDTO>> getPaymentsReportingList(@PathVariable Long organizationId) {
     log.info("invoking getReportingList, organizationId[{}]", organizationId);
-    List<ReportingIdDTO> reportingList = reportingService.getReportingList(organizationId, SecurityUtils.getAccessToken());
+    List<ReportingIdDTO> reportingList = paymentsReportingService.getReportingList(organizationId, SecurityUtils.getAccessToken());
     return ResponseEntity.ok(reportingList);
   }
+
+
+
 }

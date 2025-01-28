@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.OffsetDateTime;
 
 @ExtendWith(MockitoExtension.class)
-class ReportingIdMapperTest {
+class PaymentsReportingIdMapperTest {
 
   @Test
   void givenValidTipoIdRendicontazioneWhenMapThenReturnReportingIdDTO() {
@@ -21,7 +21,7 @@ class ReportingIdMapperTest {
     tipoIdRendicontazione.setDataOraFlusso(ConversionUtils.toXMLGregorianCalendar(OffsetDateTime.now()));
 
     // when
-    ReportingIdDTO result = ReportingIdMapper.map(tipoIdRendicontazione);
+    ReportingIdDTO result = PaymentsReportingIdMapper.map(tipoIdRendicontazione);
 
     // then
     Assertions.assertNotNull(result);
@@ -35,7 +35,7 @@ class ReportingIdMapperTest {
     TipoIdRendicontazione tipoIdRendicontazione = new TipoIdRendicontazione();
 
     // when
-    ReportingIdDTO result = ReportingIdMapper.map(tipoIdRendicontazione);
+    ReportingIdDTO result = PaymentsReportingIdMapper.map(tipoIdRendicontazione);
 
     // then
     Assertions.assertNotNull(result);

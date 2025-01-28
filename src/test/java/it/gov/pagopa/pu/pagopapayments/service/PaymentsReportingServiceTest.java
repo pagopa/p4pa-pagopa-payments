@@ -12,7 +12,7 @@ import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazione;
 import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazioneRisposta;
-import it.gov.pagopa.pu.pagopapayments.service.reporting.ReportingService;
+import it.gov.pagopa.pu.pagopapayments.service.paymentsReporting.PaymentsReportingService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ReportingServiceTest {
+class PaymentsReportingServiceTest {
 
   @Mock
   private BrokerService brokerServiceMock;
@@ -39,7 +39,7 @@ class ReportingServiceTest {
   private NodeForPaClient nodeForPaClientMock;
 
   @InjectMocks
-  private ReportingService reportingService;
+  private PaymentsReportingService paymentsReportingService;
 
   private static final Long ORGANIZATION_ID = 1L;
   private static final Broker BROKER = new Broker()
@@ -64,7 +64,7 @@ class ReportingServiceTest {
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenThrow(new ApplicationException("Broker service error"));
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> reportingService.getReportingList(ORGANIZATION_ID, accessToken));
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingService.getReportingList(ORGANIZATION_ID, accessToken));
     Assertions.assertEquals("Broker service error", exception.getMessage());
     verify(brokerServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     verify(nodeForPaClientMock, never()).nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), anyString());
@@ -80,7 +80,7 @@ class ReportingServiceTest {
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"))).thenReturn(response);
 
-    List<ReportingIdDTO> result = reportingService.getReportingList(ORGANIZATION_ID, accessToken);
+    List<ReportingIdDTO> result = paymentsReportingService.getReportingList(ORGANIZATION_ID, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertTrue(result.isEmpty());
@@ -95,7 +95,7 @@ class ReportingServiceTest {
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"))).thenThrow(new ApplicationException("Node client error"));
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> reportingService.getReportingList(ORGANIZATION_ID, accessToken));
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingService.getReportingList(ORGANIZATION_ID, accessToken));
     Assertions.assertEquals("Node client error", exception.getMessage());
     verify(brokerServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     verify(nodeForPaClientMock, times(1)).nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"));
@@ -115,7 +115,7 @@ class ReportingServiceTest {
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"))).thenReturn(response);
 
-    List<ReportingIdDTO> result = reportingService.getReportingList(ORGANIZATION_ID, accessToken);
+    List<ReportingIdDTO> result = paymentsReportingService.getReportingList(ORGANIZATION_ID, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertFalse(result.isEmpty());

@@ -1,10 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentStatus;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentSyncStatus;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
@@ -51,7 +48,7 @@ class AcaDebtPositionMapperTest {
     // fix some field values
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
-        installment.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.valueOf(NewDebtPositionRequest.EntityTypeEnum.F.getValue()));
+        installment.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
         installment.setStatus(InstallmentStatus.UNPAID);
         installment.setSyncStatus(null);
       }));

@@ -46,8 +46,8 @@ class AcaServiceTest {
   void givenValidDebtPositionWhenCreateThenOk() {
     //given
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    List<Triple<AcaService.OPERATION, String, NewDebtPositionRequest>> newDebtPositionRequestList = IntStream.range(0,2)
-      .mapToObj( idx -> Triple.of(AcaService.OPERATION.CREATE, podamFactory.manufacturePojo(String.class), podamFactory.manufacturePojo(NewDebtPositionRequest.class))).toList();
+    List<Triple<AcaDebtPositionMapper.OPERATION, String, NewDebtPositionRequest>> newDebtPositionRequestList = IntStream.range(0,2)
+      .mapToObj( idx -> Triple.of(AcaDebtPositionMapper.OPERATION.CREATE, podamFactory.manufacturePojo(String.class), podamFactory.manufacturePojo(NewDebtPositionRequest.class))).toList();
 
     Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition)).thenReturn(newDebtPositionRequestList);
     Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));
@@ -65,8 +65,8 @@ class AcaServiceTest {
   void givenValidDebtPositionWhenUpdateThenOk() {
     //given
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    List<Triple<AcaService.OPERATION, String, NewDebtPositionRequest>> newDebtPositionRequestList = IntStream.range(0,2)
-      .mapToObj( idx -> Triple.of(AcaService.OPERATION.UPDATE, podamFactory.manufacturePojo(String.class), podamFactory.manufacturePojo(NewDebtPositionRequest.class))).toList();
+    List<Triple<AcaDebtPositionMapper.OPERATION, String, NewDebtPositionRequest>> newDebtPositionRequestList = IntStream.range(0,2)
+      .mapToObj( idx -> Triple.of(AcaDebtPositionMapper.OPERATION.UPDATE, podamFactory.manufacturePojo(String.class), podamFactory.manufacturePojo(NewDebtPositionRequest.class))).toList();
 
     Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition)).thenReturn(newDebtPositionRequestList);
     Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));
@@ -84,8 +84,8 @@ class AcaServiceTest {
   void givenValidDebtPositionWhenDeleteThenOk() {
     //given
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    List<Triple<AcaService.OPERATION, String, NewDebtPositionRequest>> newDebtPositionRequestList = IntStream.range(0,2)
-      .mapToObj( idx -> Triple.of(AcaService.OPERATION.DELETE, podamFactory.manufacturePojo(String.class), podamFactory.manufacturePojo(NewDebtPositionRequest.class))).toList();
+    List<Triple<AcaDebtPositionMapper.OPERATION, String, NewDebtPositionRequest>> newDebtPositionRequestList = IntStream.range(0,2)
+      .mapToObj( idx -> Triple.of(AcaDebtPositionMapper.OPERATION.DELETE, podamFactory.manufacturePojo(String.class), podamFactory.manufacturePojo(NewDebtPositionRequest.class))).toList();
 
     Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition)).thenReturn(newDebtPositionRequestList);
     Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));

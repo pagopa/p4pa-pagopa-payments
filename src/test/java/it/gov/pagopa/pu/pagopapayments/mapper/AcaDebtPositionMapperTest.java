@@ -3,7 +3,6 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
-import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -82,7 +81,7 @@ class AcaDebtPositionMapperTest {
     debtPosition.getPaymentOptions().get(0).getInstallments().get(1).getTransfers().remove(1);
 
     //when
-    List<Triple<AcaService.OPERATION,String,NewDebtPositionRequest>> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
+    List<Triple<AcaDebtPositionMapper.OPERATION,String,NewDebtPositionRequest>> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
 
     //verify
     Assertions.assertNotNull(response);
@@ -91,7 +90,7 @@ class AcaDebtPositionMapperTest {
       Assertions.assertEquals(toSync.get(idx).getDueDate(), response.get(idx).getRight().getExpirationDate());
       Assertions.assertEquals(toSync.get(idx).getNav(), response.get(idx).getRight().getNav());
       Assertions.assertEquals(toSync.get(idx).getIud(), response.get(idx).getMiddle());
-      Assertions.assertEquals(AcaService.OPERATION.CREATE, response.get(idx).getLeft());
+      Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.get(idx).getLeft());
     }
     response.stream().map(Triple::getRight).forEach(TestUtils::checkNotNullFields);
   }
@@ -111,7 +110,7 @@ class AcaDebtPositionMapperTest {
     debtPosition.getPaymentOptions().get(0).getInstallments().get(1).getTransfers().remove(1);
 
     //when
-    List<Triple<AcaService.OPERATION,String,NewDebtPositionRequest>> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
+    List<Triple<AcaDebtPositionMapper.OPERATION,String,NewDebtPositionRequest>> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
 
     //verify
     Assertions.assertNotNull(response);
@@ -120,7 +119,7 @@ class AcaDebtPositionMapperTest {
       Assertions.assertEquals(Constants.MAX_EXPIRATION_DATE, response.get(idx).getRight().getExpirationDate());
       Assertions.assertEquals(toSync.get(idx).getNav(), response.get(idx).getRight().getNav());
       Assertions.assertEquals(toSync.get(idx).getIud(), response.get(idx).getMiddle());
-      Assertions.assertEquals(AcaService.OPERATION.CREATE, response.get(idx).getLeft());
+      Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.get(idx).getLeft());
     }
     response.stream().map(Triple::getRight).forEach(TestUtils::checkNotNullFields);
   }
@@ -128,27 +127,27 @@ class AcaDebtPositionMapperTest {
   @Test
   void givenValidDebtPositionWithVariousOpsWhenMapToNewDebtPositionRequestThenOk() {
     //given
-    List<Pair<InstallmentDTO, AcaService.OPERATION>> toSyncList = List.of(
-      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID), AcaService.OPERATION.CREATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentStatus.UNPAID, InstallmentStatus.UNPAID), AcaService.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentStatus.EXPIRED, InstallmentStatus.UNPAID), AcaService.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentStatus.UNPAID, InstallmentStatus.CANCELLED), AcaService.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentStatus.UNPAID, InstallmentStatus.INVALID), AcaService.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentStatus.EXPIRED, InstallmentStatus.CANCELLED), AcaService.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentStatus.EXPIRED, InstallmentStatus.INVALID), AcaService.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED), AcaService.OPERATION.DELETE)
+    List<Pair<InstallmentDTO, AcaDebtPositionMapper.OPERATION>> toSyncList = List.of(
+      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID), AcaDebtPositionMapper.OPERATION.CREATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentStatus.UNPAID, InstallmentStatus.UNPAID), AcaDebtPositionMapper.OPERATION.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentStatus.EXPIRED, InstallmentStatus.UNPAID), AcaDebtPositionMapper.OPERATION.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentStatus.UNPAID, InstallmentStatus.CANCELLED), AcaDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentStatus.UNPAID, InstallmentStatus.INVALID), AcaDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentStatus.EXPIRED, InstallmentStatus.CANCELLED), AcaDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentStatus.EXPIRED, InstallmentStatus.INVALID), AcaDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED), AcaDebtPositionMapper.OPERATION.DELETE)
     );
     //others installments will be ignored
 
     //when
-    List<Triple<AcaService.OPERATION,String,NewDebtPositionRequest>> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
+    List<Triple<AcaDebtPositionMapper.OPERATION,String,NewDebtPositionRequest>> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
 
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(toSyncList.size(), response.size());
     for(int idx = 0; idx < toSyncList.size(); idx++) {
       InstallmentDTO expected = toSyncList.get(idx).getLeft();
-      AcaService.OPERATION operation = toSyncList.get(idx).getRight();
+      AcaDebtPositionMapper.OPERATION operation = toSyncList.get(idx).getRight();
       Assertions.assertEquals(expected.getDueDate(), response.get(idx).getRight().getExpirationDate());
       Assertions.assertEquals(expected.getAmountCents(), response.get(idx).getRight().getAmount().longValue());
       Assertions.assertEquals(expected.getNav(), response.get(idx).getRight().getNav());

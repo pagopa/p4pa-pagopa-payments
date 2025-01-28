@@ -3,7 +3,6 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
-import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
@@ -38,13 +37,13 @@ public class AcaDebtPositionMapper {
     return true;
   }
 
-  public List<Triple<AcaService.OPERATION, String, NewDebtPositionRequest>> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition) {
+  public List<Triple<OPERATION, String, NewDebtPositionRequest>> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition) {
 
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
       .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId()))
       .map(installment -> {
-        AcaService.OPERATION operation = getOperation(installment);
+        OPERATION operation = getOperation(installment);
         TransferDTO transfer = installment.getTransfers().getFirst();
         PersonDTO debtor = installment.getDebtor();
         return Triple.of(operation, installment.getIud() ,new NewDebtPositionRequest()
@@ -64,21 +63,23 @@ public class AcaDebtPositionMapper {
       }).toList();
   }
 
-  private AcaService.OPERATION getOperation(InstallmentDTO installment) {
-    AcaService.OPERATION operation;
+  private OPERATION getOperation(InstallmentDTO installment) {
+    OPERATION operation;
     if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(installment.getSyncStatus().getSyncStatusFrom()) &&
       SYNC_STATUS_TO_DELETE.contains(installment.getSyncStatus().getSyncStatusTo())){
-      operation = AcaService.OPERATION.DELETE;
+      operation = OPERATION.DELETE;
     } else if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(installment.getSyncStatus().getSyncStatusFrom()) &&
       installment.getSyncStatus().getSyncStatusTo()==InstallmentStatus.UNPAID){
-      operation = AcaService.OPERATION.UPDATE;
+      operation = OPERATION.UPDATE;
     } else if(installment.getSyncStatus().getSyncStatusFrom()==InstallmentStatus.DRAFT &&
       installment.getSyncStatus().getSyncStatusTo()==InstallmentStatus.UNPAID){
-      operation = AcaService.OPERATION.CREATE;
+      operation = OPERATION.CREATE;
     } else {
       throw new InvalidValueException("Invalid sync status [%s->%s] for installment [%s]".formatted(
         installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()));
     }
     return operation;
   }
+
+  public enum OPERATION { CREATE, UPDATE, DELETE }
 }

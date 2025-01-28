@@ -17,8 +17,6 @@ import java.util.List;
 @Slf4j
 public class AcaService {
 
-  public enum OPERATION { CREATE, UPDATE, DELETE }
-
   private final AcaClient acaClient;
   private final AcaDebtPositionMapper acaDebtPositionMapper;
   private final BrokerService brokerService;
@@ -46,12 +44,12 @@ public class AcaService {
   }
 
   private List<String> invokePaCreatePositionImpl(DebtPositionDTO debtPosition, String accessToken) {
-    List<Triple<OPERATION, String, NewDebtPositionRequest>> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
+    List<Triple<AcaDebtPositionMapper.OPERATION, String, NewDebtPositionRequest>> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
     Pair<BrokerApiKeys, String> brokerData = brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), accessToken);
     return debtPostionToSendACA.stream().map(iudAndNewDebtPositionRequest -> {
       NewDebtPositionRequest newDebtPositionRequest = iudAndNewDebtPositionRequest.getRight();
-      OPERATION operation = iudAndNewDebtPositionRequest.getLeft();
-      if (operation == OPERATION.DELETE) {
+      AcaDebtPositionMapper.OPERATION operation = iudAndNewDebtPositionRequest.getLeft();
+      if (operation == AcaDebtPositionMapper.OPERATION.DELETE) {
         //delete is defined calling the same paCreatePosition api, but having set amount=0
         newDebtPositionRequest.amount(0);
       }

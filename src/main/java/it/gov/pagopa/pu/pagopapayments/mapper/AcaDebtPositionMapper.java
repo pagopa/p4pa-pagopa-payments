@@ -2,9 +2,11 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,6 +18,9 @@ import java.util.Set;
 public class AcaDebtPositionMapper {
 
   public static final Set<InstallmentStatus> STATUS_TO_SEND_ACA = Set.of(InstallmentStatus.TO_SYNC);
+  private static final Set<InstallmentStatus> SYNC_STATUS_TO_DELETE = Set.of(InstallmentStatus.CANCELLED, InstallmentStatus.INVALID, InstallmentStatus.EXPIRED);
+  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED);
+
 
   private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
     if (!STATUS_TO_SEND_ACA.contains(installment.getStatus())) {
@@ -33,15 +38,16 @@ public class AcaDebtPositionMapper {
     return true;
   }
 
-  public List<Pair<String,NewDebtPositionRequest>> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition) {
+  public List<Triple<AcaService.OPERATION, String, NewDebtPositionRequest>> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition) {
 
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
       .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId()))
       .map(installment -> {
+        AcaService.OPERATION operation = getOperation(installment);
         TransferDTO transfer = installment.getTransfers().getFirst();
         PersonDTO debtor = installment.getDebtor();
-        return Pair.of(installment.getIud() ,new NewDebtPositionRequest()
+        return Triple.of(operation, installment.getIud() ,new NewDebtPositionRequest()
           .nav(installment.getNav())
           .iuv(installment.getIuv())
           .paFiscalCode(transfer.getOrgFiscalCode())
@@ -56,5 +62,23 @@ public class AcaDebtPositionMapper {
           .switchToExpired(installment.getDueDate()!=null)
           .payStandIn(true));
       }).toList();
+  }
+
+  private AcaService.OPERATION getOperation(InstallmentDTO installment) {
+    AcaService.OPERATION operation;
+    if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(installment.getSyncStatus().getSyncStatusFrom()) &&
+      SYNC_STATUS_TO_DELETE.contains(installment.getSyncStatus().getSyncStatusTo())){
+      operation = AcaService.OPERATION.DELETE;
+    } else if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(installment.getSyncStatus().getSyncStatusFrom()) &&
+      installment.getSyncStatus().getSyncStatusTo()==InstallmentStatus.UNPAID){
+      operation = AcaService.OPERATION.UPDATE;
+    } else if(installment.getSyncStatus().getSyncStatusFrom()==InstallmentStatus.DRAFT &&
+      installment.getSyncStatus().getSyncStatusTo()==InstallmentStatus.UNPAID){
+      operation = AcaService.OPERATION.CREATE;
+    } else {
+      throw new InvalidValueException("Invalid sync status [%s->%s] for installment [%s]".formatted(
+        installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()));
+    }
+    return operation;
   }
 }

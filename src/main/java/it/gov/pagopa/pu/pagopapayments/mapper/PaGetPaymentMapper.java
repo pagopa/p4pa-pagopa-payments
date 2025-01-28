@@ -44,7 +44,7 @@ public class PaGetPaymentMapper {
     payment.setPaymentAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()));
     CtSubject debtor = new CtSubject();
     CtEntityUniqueIdentifier debtorId = new CtEntityUniqueIdentifier();
-    debtorId.setEntityUniqueIdentifierType(StEntityUniqueIdentifierType.valueOf(installmentDTO.getDebtor().getEntityType()));
+    debtorId.setEntityUniqueIdentifierType(StEntityUniqueIdentifierType.valueOf(String.valueOf(installmentDTO.getDebtor().getEntityType())));
     debtorId.setEntityUniqueIdentifierValue(installmentDTO.getDebtor().getFiscalCode());
     debtor.setUniqueIdentifier(debtorId);
     debtor.setFullName(installmentDTO.getDebtor().getFullName());

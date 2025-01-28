@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 import it.gov.pagopa.pagopa_api.pa.pafornode.*;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtMapEntry;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
@@ -54,7 +55,7 @@ class PaGetPaymentMapperTest {
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
 
-    installmentDTO.getDebtor().setEntityType(StEntityUniqueIdentifierType.F.name());
+    installmentDTO.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
     for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
       installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1L);
     }
@@ -81,7 +82,7 @@ class PaGetPaymentMapperTest {
     Assertions.assertEquals(installmentDTO.getDebtor().getFullName(), responseV2.getData().getDebtor().getFullName());
     Assertions.assertEquals(installmentDTO.getDebtor().getEmail(), responseV2.getData().getDebtor().getEMail());
     Assertions.assertEquals(installmentDTO.getDebtor().getFiscalCode(), responseV2.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierValue());
-    Assertions.assertEquals(installmentDTO.getDebtor().getEntityType(), responseV2.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierType().value());
+    Assertions.assertEquals(installmentDTO.getDebtor().getEntityType().toString(), responseV2.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierType().value());
     TestUtils.checkNotNullFields(responseV2.getData().getDebtor());
     Assertions.assertNotNull(responseV2.getData().getMetadata());
     Assertions.assertNotNull(responseV2.getData().getMetadata().getMapEntries());
@@ -111,7 +112,7 @@ class PaGetPaymentMapperTest {
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
 
-    installmentDTO.getDebtor().setEntityType(StEntityUniqueIdentifierType.F.name());
+    installmentDTO.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
     for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
       installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1L);
     }

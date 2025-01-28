@@ -47,7 +47,7 @@ public class AcaDebtPositionMapper {
           .paFiscalCode(transfer.getOrgFiscalCode())
           .iban(transfer.getIban())
           .postalIban(transfer.getPostalIban())
-          .entityType(NewDebtPositionRequest.EntityTypeEnum.valueOf(debtor.getEntityType()))
+          .entityType(NewDebtPositionRequest.EntityTypeEnum.valueOf(debtor.getEntityType().getValue()))
           .entityFiscalCode(debtor.getFiscalCode())
           .entityFullName(debtor.getFullName())
           .description(installment.getRemittanceInformation())

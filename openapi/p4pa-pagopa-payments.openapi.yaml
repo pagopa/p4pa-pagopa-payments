@@ -393,6 +393,9 @@ components:
       properties:
         entityType:
           type: string
+          enum:
+            - F
+            - G
         fiscalCode:
           type: string
         fullName:

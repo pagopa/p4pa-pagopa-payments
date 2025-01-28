@@ -4,6 +4,7 @@ import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentStatus;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,7 +41,7 @@ class AcaDebtPositionMapperTest {
     // fix some field values
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
-        installment.getDebtor().setEntityType(NewDebtPositionRequest.EntityTypeEnum.F.name());
+        installment.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.valueOf(NewDebtPositionRequest.EntityTypeEnum.F.getValue()));
         installment.setStatus(InstallmentStatus.UNPAID);
       }));
     // select 2 installments to send to ACA
@@ -77,7 +78,7 @@ class AcaDebtPositionMapperTest {
     // fix some field values
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
-        installment.getDebtor().setEntityType(NewDebtPositionRequest.EntityTypeEnum.F.name());
+        installment.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.valueOf(NewDebtPositionRequest.EntityTypeEnum.F.getValue()));
         installment.setStatus(InstallmentStatus.UNPAID);
       }));
     // select 2 installments to send to ACA

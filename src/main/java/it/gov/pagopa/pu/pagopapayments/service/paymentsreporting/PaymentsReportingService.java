@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.service.paymentsReporting;
+package it.gov.pagopa.pu.pagopapayments.service.paymentsreporting;
 
 import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazione;
 import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazioneRisposta;

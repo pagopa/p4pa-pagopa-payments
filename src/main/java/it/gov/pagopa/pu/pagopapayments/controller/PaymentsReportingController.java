@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.pagopapayments.controller.generated.ReportingApi;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
-import it.gov.pagopa.pu.pagopapayments.service.paymentsReporting.PaymentsReportingService;
+import it.gov.pagopa.pu.pagopapayments.service.paymentsreporting.PaymentsReportingService;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

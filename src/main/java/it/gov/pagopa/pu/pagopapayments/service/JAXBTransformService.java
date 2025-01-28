@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -28,6 +29,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class JAXBTransformService {
   private static final Pattern PATTERN_NAMESPACE = Pattern.compile("(\\s*xmlns(?>:\\w*)?\\s*=\\s*\".*?\"\\s*)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern PATTERN_INVALID_XML_CHAR = Pattern.compile("\\(Unicode\\s?:\\s?0x[0-9a-f]+\\)", Pattern.CASE_INSENSITIVE);
 
   private final ResourceLoader resourceLoader;
 
@@ -108,7 +110,8 @@ public class JAXBTransformService {
       return element.getValue();
     } catch (SAXException | IOException | JAXBException e ) {
       if(tryStrippingNonValidChars && e instanceof UnmarshalException unmarshalException && unmarshalException.getLinkedException()!=null &&
-      StringUtils.containsIgnoreCase(unmarshalException.getLinkedException().getMessage(), "invalid XML character")) {
+        unmarshalException.getLinkedException() instanceof SAXParseException saxParseException &&
+        PATTERN_INVALID_XML_CHAR.matcher(saxParseException.getMessage()).find()) {
         log.warn("detected 'invalid XML character' error unmarshalling XML.. trying to strip invalid characters", e);
         String string = new String(bytes, StandardCharsets.UTF_8);
         string = stripNonValidXMLCharacters(string);

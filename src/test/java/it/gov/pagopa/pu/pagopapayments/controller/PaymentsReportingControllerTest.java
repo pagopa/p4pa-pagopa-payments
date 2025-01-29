@@ -21,10 +21,10 @@ import java.util.List;
 class PaymentsReportingControllerTest {
 
   @Mock
-  PaymentsReportingService paymentsReportingServiceMock;
+  private PaymentsReportingService paymentsReportingServiceMock;
 
   @InjectMocks
-  PaymentsReportingController paymentsReportingController;
+  private PaymentsReportingController paymentsReportingController;
 
 
   @AfterEach

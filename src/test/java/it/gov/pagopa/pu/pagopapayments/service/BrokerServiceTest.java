@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.OrganizationClientImpl;
+import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.NotFoundException;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -63,4 +64,35 @@ class BrokerServiceTest {
     Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationById(INVALID_ORG_ID, accessToken);
     Mockito.verify(organizationClientMock, Mockito.never()).getApiKeyByBrokerId(Mockito.any(), Mockito.eq(accessToken));
   }
+
+  @Test
+  void givenValidBrokerIdWhenGetBrokerThenReturnBrokerForNodoPaDTO() {
+    String accessToken = TestUtils.getFakeAccessToken();
+    Mockito.when(organizationClientMock.getOrganizationById(VALID_ORG_ID, accessToken)).thenReturn(VALID_ORG);
+    Mockito.when(organizationClientMock.getApiKeyByBrokerId(VALID_BROKER_ID, accessToken)).thenReturn(VALID_API_KEYS);
+
+    BrokerForNodoPaDTO result = brokerService.getBrokerForNodoPaDTOByOrganizationId(VALID_ORG_ID, accessToken);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(VALID_API_KEYS, result.getBrokerApiKeys());
+    Assertions.assertEquals(VALID_ORG, result.getOrganization());
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationById(VALID_ORG_ID, accessToken);
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getApiKeyByBrokerId(VALID_BROKER_ID, accessToken);
+  }
+
+
+  @Test
+  void givenNotFoundOrganizationWhenGetBrokerForNodoPaDTOByOrganizationIdThenException() {
+    //given
+    String accessToken = TestUtils.getFakeAccessToken();
+    Mockito.when(organizationClientMock.getOrganizationById(INVALID_ORG_ID, accessToken)).thenReturn(null);
+    //when
+    NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> brokerService.getBrokerForNodoPaDTOByOrganizationId(INVALID_ORG_ID, accessToken));
+    //verify
+    Assertions.assertEquals("organization [%s]".formatted(INVALID_ORG_ID), exception.getMessage());
+    Mockito.verify(organizationClientMock, Mockito.times(1)).getOrganizationById(INVALID_ORG_ID, accessToken);
+    Mockito.verify(organizationClientMock, Mockito.never()).getApiKeyByBrokerId(Mockito.any(), Mockito.eq(accessToken));
+  }
+
+
 }

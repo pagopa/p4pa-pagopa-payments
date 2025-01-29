@@ -110,6 +110,31 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
+  /paymentsReporting/{organizationId}:
+    get:
+      tags:
+        - payments-reporting
+      operationId: getPaymentsReportingList
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: List of payments reporting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentsReportingIdDTO"
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
 security:
   - BearerAuth: []
 components:
@@ -484,6 +509,20 @@ components:
           $ref: "#/components/schemas/InstallmentStatus"
         syncStatusTo:
           $ref: "#/components/schemas/InstallmentStatus"
+    PaymentsReportingIdDTO:
+      required:
+        - pagopaPaymentsReportingId
+        - flowDateTime
+        - paymentsReportingFileName
+      type: object
+      properties:
+        pagopaPaymentsReportingId:
+          type: string
+        flowDateTime:
+          type: string
+          format: date-time
+        paymentsReportingFileName:
+          type: string
   securitySchemes:
     BearerAuth:
       type: http

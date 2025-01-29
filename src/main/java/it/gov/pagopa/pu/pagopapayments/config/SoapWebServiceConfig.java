@@ -1,7 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.config;
 
 import it.gov.pagopa.pu.pagopapayments.endpoint.PaForNodeEndpoint;
-import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +22,6 @@ import org.springframework.xml.xsd.SimpleXsdSchema;
 import org.springframework.xml.xsd.XsdSchema;
 import org.springframework.xml.xsd.XsdSchemaCollection;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;

@@ -8,7 +8,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +57,7 @@ class NodeForPaClientImplTest {
 
     doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
 
-    List<ReportingIdDTO> reportingList = nodeForPaClient.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
+    List<PaymentsReportingIdDTO> reportingList = nodeForPaClient.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
 
     Assertions.assertNotNull(reportingList);
     Assertions.assertFalse(reportingList.isEmpty());

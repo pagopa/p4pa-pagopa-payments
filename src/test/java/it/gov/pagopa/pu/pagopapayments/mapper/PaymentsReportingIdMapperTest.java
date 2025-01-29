@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import gov.telematici.pagamenti.ws.TipoIdRendicontazione;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,12 +21,12 @@ class PaymentsReportingIdMapperTest {
     tipoIdRendicontazione.setDataOraFlusso(ConversionUtils.toXMLGregorianCalendar(OffsetDateTime.now()));
 
     // when
-    ReportingIdDTO result = PaymentsReportingIdMapper.map(tipoIdRendicontazione);
+    PaymentsReportingIdDTO result = PaymentsReportingIdMapper.map(tipoIdRendicontazione);
 
     // then
     Assertions.assertNotNull(result);
-    Assertions.assertEquals("flow1", result.getReportId());
-    Assertions.assertNotNull(result.getReportDate());
+    Assertions.assertEquals("flow1", result.getPagopaPaymentsReportingId());
+    Assertions.assertNotNull(result.getFlowDateTime());
   }
 
   @Test
@@ -35,18 +35,18 @@ class PaymentsReportingIdMapperTest {
     TipoIdRendicontazione tipoIdRendicontazione = new TipoIdRendicontazione();
 
     // when
-    ReportingIdDTO result = PaymentsReportingIdMapper.map(tipoIdRendicontazione);
+    PaymentsReportingIdDTO result = PaymentsReportingIdMapper.map(tipoIdRendicontazione);
 
     // then
     Assertions.assertNotNull(result);
-    Assertions.assertNull(result.getReportId());
-    Assertions.assertNull(result.getReportDate());
+    Assertions.assertNull(result.getPagopaPaymentsReportingId());
+    Assertions.assertNull(result.getFlowDateTime());
   }
 
   @Test
   void givenTipoIdRendicontazioneNullWhenMapThenReturnReportingIdDTOWithNullFields() {
     // given & when
-    ReportingIdDTO result = PaymentsReportingIdMapper.map(null);
+    PaymentsReportingIdDTO result = PaymentsReportingIdMapper.map(null);
 
     // then
     Assertions.assertNull(result);

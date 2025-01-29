@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service.paymentsreporting;
 
 import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClient;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class PaymentsReportingService {
     this.brokerService = brokerService;
   }
 
-  public List<ReportingIdDTO> getPaymentsReportingList(Long organizationId, String accessToken) {
+  public List<PaymentsReportingIdDTO> getPaymentsReportingList(Long organizationId, String accessToken) {
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     return nodeForPaClient.getPaymentsReportingList(brokerForNodoPaDTO);
   }

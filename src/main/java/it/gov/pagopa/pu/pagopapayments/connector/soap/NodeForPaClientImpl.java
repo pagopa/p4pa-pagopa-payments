@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.soap;
 import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazione;
 import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazioneRisposta;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingIdMapper;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
@@ -21,7 +21,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
   public static final String HEADER_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key";
 
   @Override
-  public List<ReportingIdDTO> getPaymentsReportingList(BrokerForNodoPaDTO brokerForNodoPaDTO) {
+  public List<PaymentsReportingIdDTO> getPaymentsReportingList(BrokerForNodoPaDTO brokerForNodoPaDTO) {
     NodoChiediElencoFlussiRendicontazione request = createRequest(brokerForNodoPaDTO);
     NodoChiediElencoFlussiRendicontazioneRisposta response = (NodoChiediElencoFlussiRendicontazioneRisposta)
       getWebServiceTemplate().marshalSendAndReceive(request, getMessageCallback(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey(), "nodoChiediElencoFlussiRendicontazione"));
@@ -30,7 +30,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
       throw new ApplicationException("Error during the call to the payment node " + response.getFault().getFaultCode());
     }
 
-    List<ReportingIdDTO> reportingList = new ArrayList<>();
+    List<PaymentsReportingIdDTO> reportingList = new ArrayList<>();
     response.getElencoFlussiRendicontazione().getIdRendicontaziones().forEach(idRendicontazione ->
       reportingList.add(PaymentsReportingIdMapper.map(idRendicontazione))
     );

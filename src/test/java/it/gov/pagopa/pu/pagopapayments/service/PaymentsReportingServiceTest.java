@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClient;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.service.paymentsreporting.PaymentsReportingService;
@@ -68,12 +68,12 @@ class PaymentsReportingServiceTest {
   void getReportingList_whenNodeForPaClientReturnsEmptyList_thenReturnEmptyReportingList() {
     String accessToken = TestUtils.getFakeAccessToken();
 
-    List<ReportingIdDTO> response = new ArrayList<>();
+    List<PaymentsReportingIdDTO> response = new ArrayList<>();
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenReturn(response);
 
-    List<ReportingIdDTO> result = paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
+    List<PaymentsReportingIdDTO> result = paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertTrue(result.isEmpty());
@@ -99,14 +99,14 @@ class PaymentsReportingServiceTest {
   void getPaymentsReportingList_whenNodeForPaClientReturnsNonEmptyList_thenReturnPaymentsReportingList() {
     String accessToken = TestUtils.getFakeAccessToken();
 
-    List<ReportingIdDTO> response = new ArrayList<>();
-    response.add(new ReportingIdDTO().reportId("idRendicontazione"));
+    List<PaymentsReportingIdDTO> response = new ArrayList<>();
+    response.add(new PaymentsReportingIdDTO().pagopaPaymentsReportingId("idRendicontazione"));
 
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenReturn(response);
 
-    List<ReportingIdDTO> result = paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
+    List<PaymentsReportingIdDTO> result = paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertFalse(result.isEmpty());

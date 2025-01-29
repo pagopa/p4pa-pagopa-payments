@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import gov.telematici.pagamenti.ws.TipoIdRendicontazione;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 
 public class PaymentsReportingIdMapper {
@@ -9,15 +9,15 @@ public class PaymentsReportingIdMapper {
 
   private PaymentsReportingIdMapper() {}
 
-  public static ReportingIdDTO map(TipoIdRendicontazione tipoIdRendicontazione){
+  public static PaymentsReportingIdDTO map(TipoIdRendicontazione tipoIdRendicontazione){
     if(tipoIdRendicontazione==null){
       return null;
     }
 
-    return ReportingIdDTO.builder()
-      .reportId(tipoIdRendicontazione.getIdentificativoFlusso())
-      .reportDate(ConversionUtils.toOffsetDateTime(tipoIdRendicontazione.getDataOraFlusso()))
-      .fileName(getFileName(tipoIdRendicontazione))
+    return PaymentsReportingIdDTO.builder()
+      .pagopaPaymentsReportingId(tipoIdRendicontazione.getIdentificativoFlusso())
+      .flowDateTime(ConversionUtils.toOffsetDateTime(tipoIdRendicontazione.getDataOraFlusso()))
+      .paymentsReportingFileName(getFileName(tipoIdRendicontazione))
       .build();
 
   }

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
-import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.service.paymentsreporting.PaymentsReportingService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -35,12 +35,12 @@ class PaymentsReportingControllerTest {
   @Test
   void getReportingList_whenValidRequest_thenReturnReportingList() {
     Long organizationId = 1L;
-    List<ReportingIdDTO> expectedResponse = List.of(new ReportingIdDTO());
+    List<PaymentsReportingIdDTO> expectedResponse = List.of(new PaymentsReportingIdDTO());
 
     Mockito.when(paymentsReportingServiceMock.getPaymentsReportingList(organizationId, TestUtils.getFakeAccessToken())).thenReturn(expectedResponse);
     TestUtils.setFakeAccessTokenInContext();
 
-    ResponseEntity<List<ReportingIdDTO>> response = paymentsReportingController.getPaymentsReportingList(organizationId);
+    ResponseEntity<List<PaymentsReportingIdDTO>> response = paymentsReportingController.getPaymentsReportingList(organizationId);
 
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedResponse, response.getBody());

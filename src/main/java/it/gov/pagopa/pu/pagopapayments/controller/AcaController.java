@@ -54,9 +54,9 @@ public class AcaController implements AcaApi {
   }
 
   @Override
-  public ResponseEntity<Void> syncAca(DebtPositionDTO debtPositionDTO) {
-    log.info("invoking syncAca, debtPositionDTO[{}]", debtPositionDTO.getDebtPositionId());
-    acaService.sync(debtPositionDTO, SecurityUtils.getAccessToken());
+  public ResponseEntity<Void> syncAca(String iud, DebtPositionDTO debtPositionDTO) {
+    log.info("invoking syncAca, iud[{}] debtPositionDTO[{}]", iud, debtPositionDTO.getDebtPositionId());
+    acaService.sync(iud, debtPositionDTO, SecurityUtils.getAccessToken());
     return ResponseEntity.ok().build();
   }
 }

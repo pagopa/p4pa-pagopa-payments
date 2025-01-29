@@ -90,6 +90,13 @@ paths:
       tags:
         - aca
       operationId: syncAca
+      parameters:
+        - name: iud
+          in: query
+          description: iud of installment to sync with ACA
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:

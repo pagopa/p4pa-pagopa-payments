@@ -8,7 +8,6 @@ import it.gov.pagopa.pu.pagopapayments.mapper.AcaDebtPositionMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,36 +27,34 @@ public class AcaService {
   }
 
   public List<String> create(DebtPositionDTO debtPosition, String accessToken) {
-    return invokePaCreatePositionImpl(debtPosition, accessToken);
+    throw new UnsupportedOperationException("create not implemented");
   }
 
   public List<String> update(DebtPositionDTO debtPosition, String accessToken) {
-    return invokePaCreatePositionImpl(debtPosition, accessToken);
+    throw new UnsupportedOperationException("update not implemented");
   }
 
   public List<String> delete(DebtPositionDTO debtPosition, String accessToken) {
-    return invokePaCreatePositionImpl(debtPosition, accessToken);
+    throw new UnsupportedOperationException("delete not implemented");
   }
 
-  public void sync(DebtPositionDTO debtPosition, String accessToken) {
-    invokePaCreatePositionImpl(debtPosition, accessToken);
+  public void sync(String iud, DebtPositionDTO debtPosition, String accessToken) {
+    invokePaCreatePositionImpl(iud, debtPosition, accessToken);
   }
 
-  private List<String> invokePaCreatePositionImpl(DebtPositionDTO debtPosition, String accessToken) {
-    List<Triple<AcaDebtPositionMapper.OPERATION, String, NewDebtPositionRequest>> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(debtPosition);
+  private void invokePaCreatePositionImpl(String iud, DebtPositionDTO debtPosition, String accessToken) {
+    Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(iud, debtPosition);
     Pair<BrokerApiKeys, String> brokerData = brokerService.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), accessToken);
-    return debtPostionToSendACA.stream().map(iudAndNewDebtPositionRequest -> {
-      NewDebtPositionRequest newDebtPositionRequest = iudAndNewDebtPositionRequest.getRight();
-      AcaDebtPositionMapper.OPERATION operation = iudAndNewDebtPositionRequest.getLeft();
-      if (operation == AcaDebtPositionMapper.OPERATION.DELETE) {
-        //delete is defined calling the same paCreatePosition api, but having set amount=0
-        newDebtPositionRequest.amount(0);
-      }
-      log.info("invoking ACA paCreatePosition for installment[{}/{}], operation[{}]",
-        newDebtPositionRequest.getEntityFiscalCode(), newDebtPositionRequest.getIuv(), operation);
-      acaClient.paCreatePosition(newDebtPositionRequest, brokerData.getLeft().getAcaKey(), brokerData.getRight());
-      return iudAndNewDebtPositionRequest.getMiddle();
-    }).toList();
+
+    NewDebtPositionRequest newDebtPositionRequest = debtPostionToSendACA.getRight();
+    AcaDebtPositionMapper.OPERATION operation = debtPostionToSendACA.getLeft();
+    if (operation == AcaDebtPositionMapper.OPERATION.DELETE) {
+      //delete is defined calling the same paCreatePosition api, but having set amount=0
+      newDebtPositionRequest.amount(0);
+    }
+    log.info("invoking ACA paCreatePosition for installment[{}/{}], operation[{}]",
+      newDebtPositionRequest.getEntityFiscalCode(), newDebtPositionRequest.getIuv(), operation);
+    acaClient.paCreatePosition(newDebtPositionRequest, brokerData.getLeft().getAcaKey(), brokerData.getRight());
   }
 
 }

@@ -102,13 +102,13 @@ class AcaControllerTest {
   @Test
   void givenValidDebtPositionWhenSyncAcaThenOk() {
     //given
-    Mockito.doNothing().when(acaServiceMock).sync(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
+    Mockito.doNothing().when(acaServiceMock).sync("IUD", VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
     TestUtils.setFakeAccessTokenInContext();
     //when
-    ResponseEntity<Void> response = acaController.syncAca(VALID_DEBT_POSITION);
+    ResponseEntity<Void> response = acaController.syncAca("IUD", VALID_DEBT_POSITION);
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-    Mockito.verify(acaServiceMock, Mockito.times(1)).sync(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
+    Mockito.verify(acaServiceMock, Mockito.times(1)).sync("IUD", VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
   }
 }

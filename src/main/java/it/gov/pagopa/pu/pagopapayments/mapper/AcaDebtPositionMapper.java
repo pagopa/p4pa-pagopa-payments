@@ -5,10 +5,9 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,7 +28,7 @@ public class AcaDebtPositionMapper {
 
     if (installment.getTransfers().size() != 1) {
       //if installment has multiple transfer ("multibeneficiario"), is not supported on ACA due to ACA API limitations: ignore it
-      log.warn("ACA mapToNewDebtPositionRequest: ignoring installment [{}/{}] beacuse has multiple transfer[{}]",
+      log.warn("ACA mapToNewDebtPositionRequest: ignoring installment [{}/{}] because has multiple transfer[{}]",
         organizationId, installment.getIuv(), installment.getTransfers().size());
       return false;
     }
@@ -37,16 +36,16 @@ public class AcaDebtPositionMapper {
     return true;
   }
 
-  public List<Triple<OPERATION, String, NewDebtPositionRequest>> mapToNewDebtPositionRequest(DebtPositionDTO debtPosition) {
-
+  public Pair<OPERATION, NewDebtPositionRequest> mapToNewDebtPositionRequest(String iud, DebtPositionDTO debtPosition) {
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
+      .filter(installment -> installment.getIud().equals(iud))
       .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId()))
       .map(installment -> {
         OPERATION operation = getOperation(installment);
         TransferDTO transfer = installment.getTransfers().getFirst();
         PersonDTO debtor = installment.getDebtor();
-        return Triple.of(operation, installment.getIud() ,new NewDebtPositionRequest()
+        return Pair.of(operation, new NewDebtPositionRequest()
           .nav(installment.getNav())
           .iuv(installment.getIuv())
           .paFiscalCode(transfer.getOrgFiscalCode())
@@ -60,7 +59,7 @@ public class AcaDebtPositionMapper {
           .expirationDate(Optional.ofNullable(installment.getDueDate()).orElse(Constants.MAX_EXPIRATION_DATE))
           .switchToExpired(installment.getDueDate()!=null)
           .payStandIn(true));
-      }).toList();
+      }).findAny().orElseThrow(() -> new InvalidValueException("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));
   }
 
   private OPERATION getOperation(InstallmentDTO installment) {

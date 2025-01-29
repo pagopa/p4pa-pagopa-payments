@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -107,8 +108,8 @@ public class JAXBTransformService {
       JAXBElement<T> element = unmarshaller.unmarshal(source, clazz);
       return element.getValue();
     } catch (SAXException | IOException | JAXBException e ) {
-      if(tryStrippingNonValidChars && e instanceof UnmarshalException unmarshalException && unmarshalException.getLinkedException()!=null &&
-      StringUtils.containsIgnoreCase(unmarshalException.getLinkedException().getMessage(), "invalid XML character")) {
+      if(tryStrippingNonValidChars && e instanceof UnmarshalException unmarshalException &&
+        unmarshalException.getLinkedException() instanceof SAXParseException) {
         log.warn("detected 'invalid XML character' error unmarshalling XML.. trying to strip invalid characters", e);
         String string = new String(bytes, StandardCharsets.UTF_8);
         string = stripNonValidXMLCharacters(string);

@@ -58,7 +58,7 @@ class PaVerifyPaymentNoticeMapperTest {
 
     installmentDTO.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
     for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
-      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1L);
+      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1);
     }
     //when
     PaVerifyPaymentNoticeRes response = PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(installmentDTO, organization);

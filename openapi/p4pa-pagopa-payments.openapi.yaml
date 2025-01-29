@@ -414,7 +414,7 @@ components:
           type: string
         email:
           type: string
-    ReportingIdDTO:
+    PaymentsReportingIdDTO:
       required:
         - reportId
       type: object

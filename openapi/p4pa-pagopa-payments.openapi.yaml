@@ -416,15 +416,15 @@ components:
           type: string
     PaymentsReportingIdDTO:
       required:
-        - reportId
+        - pagopaPaymentsReportingId
       type: object
       properties:
-        reportId:
+        pagopaPaymentsReportingId:
           type: string
-        reportDate:
+        flowDateTime:
           type: string
           format: date-time
-        fileName:
+        paymentsReportingFileName:
           type: string
   securitySchemes:
     BearerAuth:

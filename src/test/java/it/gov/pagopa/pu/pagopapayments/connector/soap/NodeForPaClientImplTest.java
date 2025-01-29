@@ -17,7 +17,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.WebServiceTemplate;
+import org.springframework.ws.soap.SoapMessage;
+import org.springframework.ws.transport.context.TransportContext;
+import org.springframework.ws.transport.context.TransportContextHolder;
+import org.springframework.ws.transport.http.HttpUrlConnection;
 
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -72,4 +78,25 @@ class NodeForPaClientImplTest {
     Assertions.assertEquals("WebService error", exception.getMessage());
     verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
   }
+
+  @Test
+  void getMessageCallback_whenCalled_thenSetsSoapActionAndApiKey() throws IOException, TransformerException {
+    String apiKey = "testApiKey";
+    String soapAction = "testSoapAction";
+    NodeForPaClientImpl client = new NodeForPaClientImpl();
+
+    SoapMessage soapMessageMock = mock(SoapMessage.class);
+    TransportContext transportContextMock = mock(TransportContext.class);
+    HttpUrlConnection httpUrlConnectionMock = mock(HttpUrlConnection.class);
+
+    when(transportContextMock.getConnection()).thenReturn(httpUrlConnectionMock);
+    TransportContextHolder.setTransportContext(transportContextMock);
+
+    WebServiceMessageCallback callback = client.getMessageCallback(apiKey, soapAction);
+    callback.doWithMessage(soapMessageMock);
+
+    verify(soapMessageMock, times(1)).setSoapAction(soapAction);
+    verify(httpUrlConnectionMock, times(1)).addRequestHeader(NodeForPaClientImpl.HEADER_SUBSCRIPTION_KEY, apiKey);
+  }
+
 }

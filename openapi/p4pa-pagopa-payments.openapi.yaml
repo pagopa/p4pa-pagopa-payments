@@ -510,6 +510,8 @@ components:
     PaymentsReportingIdDTO:
       required:
         - pagopaPaymentsReportingId
+        - flowDateTime
+        - paymentsReportingFileName
       type: object
       properties:
         pagopaPaymentsReportingId:

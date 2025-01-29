@@ -48,7 +48,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
     return request;
   }
 
-  private WebServiceMessageCallback getMessageCallback(String apiKey, String soapAction) {
+  WebServiceMessageCallback getMessageCallback(String apiKey, String soapAction) {
     return message -> {
       ((SoapMessage) message).setSoapAction(soapAction);
       TransportContext context = TransportContextHolder.getTransportContext();

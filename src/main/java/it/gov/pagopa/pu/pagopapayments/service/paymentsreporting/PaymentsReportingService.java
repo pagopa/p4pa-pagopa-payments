@@ -28,7 +28,7 @@ public class PaymentsReportingService {
     this.brokerService = brokerService;
   }
 
-  public List<ReportingIdDTO> getReportingList(Long organizationId, String accessToken) {
+  public List<ReportingIdDTO> getPaymentsReportingList(Long organizationId, String accessToken) {
 
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);

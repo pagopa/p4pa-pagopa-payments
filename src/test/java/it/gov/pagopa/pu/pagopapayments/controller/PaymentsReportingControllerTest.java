@@ -37,7 +37,7 @@ class PaymentsReportingControllerTest {
     Long organizationId = 1L;
     List<ReportingIdDTO> expectedResponse = List.of(new ReportingIdDTO());
 
-    Mockito.when(paymentsReportingServiceMock.getReportingList(organizationId, TestUtils.getFakeAccessToken())).thenReturn(expectedResponse);
+    Mockito.when(paymentsReportingServiceMock.getPaymentsReportingList(organizationId, TestUtils.getFakeAccessToken())).thenReturn(expectedResponse);
     TestUtils.setFakeAccessTokenInContext();
 
     ResponseEntity<List<ReportingIdDTO>> response = paymentsReportingController.getPaymentsReportingList(organizationId);

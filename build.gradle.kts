@@ -128,7 +128,8 @@ tasks.register("dependenciesBuild") {
     "openApiGenerateORGANIZATION",
     "openApiGenerateFILESHARE",
     "openApiGeneratePaCreatePosition",
-    "jaxbJavaGenPaForNode"
+    "jaxbJavaGenPaForNode",
+    "jaxbJavaGenNodeForPa"
   )
 }
 

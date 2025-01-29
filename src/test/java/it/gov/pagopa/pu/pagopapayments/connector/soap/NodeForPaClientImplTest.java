@@ -2,6 +2,13 @@ package it.gov.pagopa.pu.pagopapayments.connector.soap;
 
 import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazione;
 import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazioneRisposta;
+import gov.telematici.pagamenti.ws.TipoElencoFlussiRendicontazione;
+import gov.telematici.pagamenti.ws.TipoIdRendicontazione;
+import it.gov.pagopa.pu.organization.dto.generated.Broker;
+import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,8 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,32 +32,44 @@ class NodeForPaClientImplTest {
   @InjectMocks
   private NodeForPaClientImpl nodeForPaClient;
 
+  private static final Broker BROKER = new Broker()
+    .brokerFiscalCode("brokerCode")
+    .broadcastStationId("stationId");
+
+  private static final BrokerApiKeys BROKER_API_KEYS = new BrokerApiKeys()
+    .syncKey("syncKey");
+  private static final Organization ORGANIZATION = new Organization()
+    .orgFiscalCode("orgFiscalCode");
+
+  private static final BrokerForNodoPaDTO BROKER_FOR_NODO_PA_DTO = BrokerForNodoPaDTO.builder()
+    .broker(BROKER)
+    .organization(ORGANIZATION)
+    .brokerApiKeys(BROKER_API_KEYS)
+    .build();
+
+
+
   @Test
   void nodoChiediElencoFlussiRendicontazione_whenValidRequest_thenReturnResponse() {
-    NodoChiediElencoFlussiRendicontazione request = new NodoChiediElencoFlussiRendicontazione();
-    NodoChiediElencoFlussiRendicontazioneRisposta expectedResponse = new NodoChiediElencoFlussiRendicontazioneRisposta();
-    String apiKey = "testApiKey";
+    NodoChiediElencoFlussiRendicontazioneRisposta response = new NodoChiediElencoFlussiRendicontazioneRisposta();
+    response.setElencoFlussiRendicontazione(new TipoElencoFlussiRendicontazione());
+    response.getElencoFlussiRendicontazione().getIdRendicontaziones().add(new TipoIdRendicontazione());
 
-    when(webServiceTemplate.marshalSendAndReceive(eq(request), any(WebServiceMessageCallback.class)))
-      .thenReturn(expectedResponse);
+    doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
 
-    NodoChiediElencoFlussiRendicontazioneRisposta response = nodeForPaClient.nodoChiediElencoFlussiRendicontazione(request, apiKey);
+    List<ReportingIdDTO> reportingList = nodeForPaClient.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
 
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals(expectedResponse, response);
-    verify(webServiceTemplate, times(1)).marshalSendAndReceive(eq(request), any(WebServiceMessageCallback.class));
+    Assertions.assertNotNull(reportingList);
+    Assertions.assertFalse(reportingList.isEmpty());
+    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
   }
 
   @Test
   void nodoChiediElencoFlussiRendicontazione_whenWebServiceTemplateThrowsException_thenThrowException() {
-    NodoChiediElencoFlussiRendicontazione request = new NodoChiediElencoFlussiRendicontazione();
-    String apiKey = "testApiKey";
+    doThrow(new RuntimeException("WebService error")).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
 
-    when(webServiceTemplate.marshalSendAndReceive(eq(request), any(WebServiceMessageCallback.class)))
-      .thenThrow(new RuntimeException("WebService error"));
-
-    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> nodeForPaClient.nodoChiediElencoFlussiRendicontazione(request, apiKey));
+    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> nodeForPaClient.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO));
     Assertions.assertEquals("WebService error", exception.getMessage());
-    verify(webServiceTemplate, times(1)).marshalSendAndReceive(eq(request), any(WebServiceMessageCallback.class));
+    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
   }
 }

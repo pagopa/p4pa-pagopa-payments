@@ -1,7 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
-import gov.telematici.pagamenti.ws.TipoElencoFlussiRendicontazione;
-import gov.telematici.pagamenti.ws.TipoIdRendicontazione;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
@@ -10,8 +8,6 @@ import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
-import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazione;
-import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazioneRisposta;
 import it.gov.pagopa.pu.pagopapayments.service.paymentsreporting.PaymentsReportingService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
@@ -22,11 +18,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,28 +58,27 @@ class PaymentsReportingServiceTest {
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenThrow(new ApplicationException("Broker service error"));
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingService.getReportingList(ORGANIZATION_ID, accessToken));
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
     Assertions.assertEquals("Broker service error", exception.getMessage());
     verify(brokerServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
-    verify(nodeForPaClientMock, never()).nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), anyString());
+    verify(nodeForPaClientMock, never()).getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
   }
 
   @Test
   void getReportingList_whenNodeForPaClientReturnsEmptyList_thenReturnEmptyReportingList() {
     String accessToken = TestUtils.getFakeAccessToken();
 
-    NodoChiediElencoFlussiRendicontazioneRisposta response = new NodoChiediElencoFlussiRendicontazioneRisposta();
-    response.setElencoFlussiRendicontazione(new TipoElencoFlussiRendicontazione());
+    List<ReportingIdDTO> response = new ArrayList<>();
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
-    Mockito.when(nodeForPaClientMock.nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"))).thenReturn(response);
+    Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenReturn(response);
 
-    List<ReportingIdDTO> result = paymentsReportingService.getReportingList(ORGANIZATION_ID, accessToken);
+    List<ReportingIdDTO> result = paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertTrue(result.isEmpty());
     verify(brokerServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
-    verify(nodeForPaClientMock, times(1)).nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"));
+    verify(nodeForPaClientMock, times(1)).getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
   }
 
   @Test
@@ -93,34 +86,32 @@ class PaymentsReportingServiceTest {
     String accessToken = TestUtils.getFakeAccessToken();
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
-    Mockito.when(nodeForPaClientMock.nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"))).thenThrow(new ApplicationException("Node client error"));
+    Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenThrow(new ApplicationException("Node client error"));
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingService.getReportingList(ORGANIZATION_ID, accessToken));
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
     Assertions.assertEquals("Node client error", exception.getMessage());
     verify(brokerServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
-    verify(nodeForPaClientMock, times(1)).nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"));
+    verify(nodeForPaClientMock, times(1)).getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
   }
 
 
   @Test
-  void getReportingList_whenNodeForPaClientReturnsNonEmptyList_thenReturnReportingList() {
+  void getPaymentsReportingList_whenNodeForPaClientReturnsNonEmptyList_thenReturnPaymentsReportingList() {
     String accessToken = TestUtils.getFakeAccessToken();
 
+    List<ReportingIdDTO> response = new ArrayList<>();
+    response.add(new ReportingIdDTO().reportId("idRendicontazione"));
 
-    NodoChiediElencoFlussiRendicontazioneRisposta response = new NodoChiediElencoFlussiRendicontazioneRisposta();
-    TipoElencoFlussiRendicontazione elenco = new TipoElencoFlussiRendicontazione();
-    elenco.getIdRendicontaziones().add(new TipoIdRendicontazione());
-    response.setElencoFlussiRendicontazione(elenco);
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
-    Mockito.when(nodeForPaClientMock.nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"))).thenReturn(response);
+    Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenReturn(response);
 
-    List<ReportingIdDTO> result = paymentsReportingService.getReportingList(ORGANIZATION_ID, accessToken);
+    List<ReportingIdDTO> result = paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertFalse(result.isEmpty());
     Mockito.verify(brokerServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
-    Mockito.verify(nodeForPaClientMock, times(1)).nodoChiediElencoFlussiRendicontazione(any(NodoChiediElencoFlussiRendicontazione.class), eq("syncKey"));
+    Mockito.verify(nodeForPaClientMock, times(1)).getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
   }
 
 }

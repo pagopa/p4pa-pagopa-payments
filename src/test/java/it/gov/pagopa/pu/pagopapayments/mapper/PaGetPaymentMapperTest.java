@@ -57,7 +57,7 @@ class PaGetPaymentMapperTest {
 
     installmentDTO.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
     for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
-      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1L);
+      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1);
     }
     //when
     PaGetPaymentV2Response responseV2 = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, StTransferType.PAGOPA);
@@ -114,7 +114,7 @@ class PaGetPaymentMapperTest {
 
     installmentDTO.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
     for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
-      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1L);
+      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1);
     }
     //when
     PaGetPaymentV2Response responseV2 = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, StTransferType.POSTAL);

@@ -1,8 +1,10 @@
 package it.gov.pagopa.pu.pagopapayments.connector.soap;
 
-import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazione;
-import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazioneRisposta;
+import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.ReportingIdDTO;
+
+import java.util.List;
 
 public interface NodeForPaClient {
-  NodoChiediElencoFlussiRendicontazioneRisposta nodoChiediElencoFlussiRendicontazione(NodoChiediElencoFlussiRendicontazione request, String apiKey);
+  List<ReportingIdDTO> getPaymentsReportingList(BrokerForNodoPaDTO brokerForNodoPaDTO);
 }

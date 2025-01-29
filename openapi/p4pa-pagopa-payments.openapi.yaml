@@ -9,6 +9,8 @@ servers:
 paths:
   /aca/create:
     post:
+      deprecated: true
+      description: Use [/aca/sync](#/aca/sync/syncAca) instead
       tags:
         - aca
       operationId: createAca
@@ -33,6 +35,8 @@ paths:
           description: Internal server error
   /aca/update:
     post:
+      deprecated: true
+      description: Use [/aca/sync](#/aca/sync/syncAca) instead
       tags:
         - aca
       operationId: updateAca
@@ -57,6 +61,8 @@ paths:
           description: Internal server error
   /aca/delete:
     post:
+      deprecated: true
+      description: Use [/aca/sync](#/aca/sync/syncAca) instead
       tags:
         - aca
       operationId: deleteAca
@@ -79,14 +85,40 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
+  /aca/sync:
+    post:
+      tags:
+        - aca
+      operationId: syncAca
+      parameters:
+        - name: iud
+          in: query
+          description: iud of installment to sync with ACA
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebtPositionDTO"
+        required: true
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
 security:
   - BearerAuth: []
 components:
   schemas:
     DebtPositionDTO:
       required:
-        - debtPositionTypeOrgId
         - organizationId
+        - debtPositionTypeOrgId
+        - paymentOptions
       type: object
       properties:
         debtPositionId:
@@ -98,6 +130,8 @@ components:
           type: string
         status:
           $ref: "#/components/schemas/DebtPositionStatus"
+        debtPositionOrigin:
+          $ref: "#/components/schemas/DebtPositionOrigin"
         ingestionFlowFileId:
           type: integer
           format: int64
@@ -132,9 +166,13 @@ components:
       required:
         - installments
         - totalAmountCents
+        - paymentOptionType
       type: object
       properties:
         paymentOptionId:
+          type: integer
+          format: int64
+        debtPositionId:
           type: integer
           format: int64
         totalAmountCents:
@@ -175,6 +213,8 @@ components:
           format: int64
         status:
           $ref: "#/components/schemas/InstallmentStatus"
+        syncStatus:
+          $ref: "#/components/schemas/InstallmentSyncStatus"
         iupdPagopa:
           type: string
         iud:
@@ -230,6 +270,9 @@ components:
         transferId:
           type: integer
           format: int64
+        installmentId:
+          type: integer
+          format: int64
         orgFiscalCode:
           type: string
         orgName:
@@ -256,6 +299,22 @@ components:
           format: int32
     ReceiptDTO:
       type: object
+      required:
+        - receiptSource
+        - paymentReceiptId
+        - noticeNumber
+        - orgFiscalCode
+        - outcome
+        - creditorReferenceId
+        - paymentAmountCents
+        - description
+        - companyName
+        - idPsp
+        - pspCompanyName
+        - idChannel
+        - channelDescription
+        - debtor
+        - payer
       properties:
         receiptId:
           type: integer
@@ -263,9 +322,16 @@ components:
         installmentId:
           type: integer
           format: int64
+        ingestionFlowFileId:
+          type: integer
+          format: int64
+        receiptOrigin:
+          type: string
         paymentReceiptId:
           type: string
         noticeNumber:
+          type: string
+        paymentNote:
           type: string
         orgFiscalCode:
           type: string
@@ -308,9 +374,6 @@ components:
         transferDate:
           type: string
           format: date-time
-        receiptBytes:
-          type: string
-          format: byte
         standin:
           type: boolean
         debtor:
@@ -323,47 +386,12 @@ components:
         updateDate:
           type: string
           format: date-time
-    DebtPositionStatus:
-      type: string
-      enum:
-        - TO_SYNC
-        - REPORTED
-        - PAID
-        - PARTIALLY_PAID
-        - CANCELLED
-        - INVALID
-        - EXPIRED
-        - UNPAID
-        - DRAFT
-    PaymentOptionStatus:
-      type: string
-      enum:
-        - TO_SYNC
-        - REPORTED
-        - PAID
-        - PARTIALLY_PAID
-        - CANCELLED
-        - INVALID
-        - EXPIRED
-        - UNPAID
-        - DRAFT
-    InstallmentStatus:
-      type: string
-      enum:
-        - TO_SYNC
-        - REPORTED
-        - PAID
-        - CANCELLED
-        - INVALID
-        - EXPIRED
-        - UNPAID
-        - DRAFT
     PersonDTO:
       required:
         - email
         - fullName
-        - fiscalCode
         - entityType
+        - fiscalCode
       type: object
       properties:
         entityType:
@@ -389,6 +417,71 @@ components:
           type: string
         email:
           type: string
+    DebtPositionStatus:
+      type: string
+      enum:
+        - TO_SYNC
+        - REPORTED
+        - PAID
+        - PARTIALLY_PAID
+        - CANCELLED
+        - INVALID
+        - EXPIRED
+        - UNPAID
+        - DRAFT
+    DebtPositionOrigin:
+      type: string
+      enum:
+        - ORDINARY
+        - SPONTANEOUS
+        - SECONDARY_ORG
+        - RECEIPT_FILE
+        - RECEIPT_PAGOPA
+        - REPORTING_PAGOPA
+    PaymentOptionStatus:
+      type: string
+      enum:
+        - TO_SYNC
+        - REPORTED
+        - PAID
+        - PARTIALLY_PAID
+        - CANCELLED
+        - INVALID
+        - EXPIRED
+        - UNPAID
+        - DRAFT
+    InstallmentStatus:
+      type: string
+      enum:
+        - TO_SYNC
+        - REPORTED
+        - PAID
+        - CANCELLED
+        - INVALID
+        - EXPIRED
+        - UNPAID
+        - DRAFT
+    SyncStatusUpdateRequestDTO:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/IupdSyncStatusUpdateDTO"
+    IupdSyncStatusUpdateDTO:
+      type: object
+      properties:
+        newStatus:
+          $ref: "#/components/schemas/InstallmentStatus"
+        iupdPagopa:
+          type: string
+    InstallmentSyncStatus:
+      required:
+        - syncStatusFrom
+        - syncStatusTo
+      type: object
+      properties:
+        syncStatusFrom:
+          $ref: "#/components/schemas/InstallmentStatus"
+        syncStatusTo:
+          $ref: "#/components/schemas/InstallmentStatus"
   securitySchemes:
     BearerAuth:
       type: http

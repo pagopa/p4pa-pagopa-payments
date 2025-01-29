@@ -40,6 +40,7 @@ val jaxbApiVersion = "4.0.2"
 val activationVersion = "2.1.3"
 val wsdl4jVersion = "1.6.3"
 val xmlSchemaVersion = "2.3.1"
+val podamVersion = "8.0.2.RELEASE"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -78,7 +79,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.mockito:mockito-core")
 	testImplementation ("org.projectlombok:lombok")
-  testImplementation("uk.co.jemos.podam:podam:8.0.2.RELEASE")
+  testImplementation("uk.co.jemos.podam:podam:$podamVersion")
 
 }
 

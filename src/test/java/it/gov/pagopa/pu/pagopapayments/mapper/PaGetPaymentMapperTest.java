@@ -82,7 +82,7 @@ class PaGetPaymentMapperTest {
     Assertions.assertEquals(installmentDTO.getDebtor().getFullName(), responseV2.getData().getDebtor().getFullName());
     Assertions.assertEquals(installmentDTO.getDebtor().getEmail(), responseV2.getData().getDebtor().getEMail());
     Assertions.assertEquals(installmentDTO.getDebtor().getFiscalCode(), responseV2.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierValue());
-    Assertions.assertEquals(installmentDTO.getDebtor().getEntityType().toString(), responseV2.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierType().value());
+    Assertions.assertEquals(installmentDTO.getDebtor().getEntityType().getValue(), responseV2.getData().getDebtor().getUniqueIdentifier().getEntityUniqueIdentifierType().value());
     TestUtils.checkNotNullFields(responseV2.getData().getDebtor());
     Assertions.assertNotNull(responseV2.getData().getMetadata());
     Assertions.assertNotNull(responseV2.getData().getMetadata().getMapEntries());

@@ -99,7 +99,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ReportingIdDTO"
+                  $ref: "#/components/schemas/PaymentsReportingIdDTO"
         "400":
           description: Invalid request
         "500":

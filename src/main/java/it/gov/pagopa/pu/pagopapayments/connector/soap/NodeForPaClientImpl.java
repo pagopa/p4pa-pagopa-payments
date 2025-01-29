@@ -11,7 +11,7 @@ import org.springframework.ws.transport.http.HttpUrlConnection;
 
 public class NodeForPaClientImpl extends WebServiceGatewaySupport implements NodeForPaClient {
 
-  public static final String SUBSCRIPTION_KEY_KEY = "Ocp-Apim-Subscription-Key";
+  public static final String HEADER_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key";
 
   @Override
   public NodoChiediElencoFlussiRendicontazioneRisposta nodoChiediElencoFlussiRendicontazione(NodoChiediElencoFlussiRendicontazione request, String apiKey) {

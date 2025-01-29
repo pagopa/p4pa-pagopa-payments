@@ -9,15 +9,14 @@ import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
+import uk.co.jemos.podam.api.PodamFactory;
 
 @ExtendWith(MockitoExtension.class)
 class AcaServiceTest {
@@ -31,80 +30,64 @@ class AcaServiceTest {
   @InjectMocks
   private AcaService acaService;
 
-  private static final Long VALID_ORG_ID = 1L;
   private static final String VALID_ACA_KEY = "validAcaKey";
   private static final String VALID_SEGREGATION_CODE = "01";
   private static final BrokerApiKeys VALID_API_KEYS = new BrokerApiKeys()
     .acaKey(VALID_ACA_KEY)
     .syncKey("validSyncKey");
 
-  private DebtPositionDTO debtPosition;
-  private List<Pair<String,NewDebtPositionRequest>> newDebtPositionRequestList;
+  private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
-  @BeforeEach
-  void setUp() {
-    debtPosition = DebtPositionDTO.builder()
-      .debtPositionId(1L)
-      .description("description")
-      .organizationId(VALID_ORG_ID)
-      .build();
 
-    newDebtPositionRequestList = List.of(
-      Pair.of("IUD",new NewDebtPositionRequest()
-        .amount(1234)
-        .iuv("IUV")
-        .entityFiscalCode("FISCAL_CODE")),
-      Pair.of("IUD2",new NewDebtPositionRequest()
-        .amount(3456)
-        .iuv("IUV2")
-        .entityFiscalCode("FISCAL_CODE2"))
-    );
+  @Test
+  void givenValidDebtPositionWhenCreateThenError() {
+    //given
+    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    //when
+    String accessToken = TestUtils.getFakeAccessToken();
+    UnsupportedOperationException exception = Assertions.assertThrows(UnsupportedOperationException.class, () -> acaService.create(debtPosition, accessToken));
+    //verify
+    Assertions.assertNotNull(exception);
+    Assertions.assertEquals("create not implemented", exception.getMessage());
   }
 
   @Test
-  void givenValidDebtPositionWhenCreateThenOk() {
+  void givenValidDebtPositionWhenUpdateThenError() {
     //given
-    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition)).thenReturn(newDebtPositionRequestList);
-    Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));
+    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     //when
-    acaService.create(debtPosition, TestUtils.getFakeAccessToken());
+    String accessToken = TestUtils.getFakeAccessToken();
+    UnsupportedOperationException exception = Assertions.assertThrows(UnsupportedOperationException.class, () -> acaService.update(debtPosition, accessToken));
     //verify
-    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition);
-    Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
-    newDebtPositionRequestList.forEach(newDebtPositionRequest ->
-      Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequest.getRight(), VALID_ACA_KEY, VALID_SEGREGATION_CODE)
-    );
+    Assertions.assertNotNull(exception);
+    Assertions.assertEquals("update not implemented", exception.getMessage());
   }
 
   @Test
-  void givenValidDebtPositionWhenUpdateThenOk() {
+  void givenValidDebtPositionWhenDeleteThenError() {
     //given
-    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition)).thenReturn(newDebtPositionRequestList);
-    Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));
+    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     //when
-    acaService.update(debtPosition, TestUtils.getFakeAccessToken());
+    String accessToken = TestUtils.getFakeAccessToken();
+    UnsupportedOperationException exception = Assertions.assertThrows(UnsupportedOperationException.class, () -> acaService.delete(debtPosition, accessToken));
     //verify
-    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition);
-    Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
-    newDebtPositionRequestList.forEach(newDebtPositionRequest ->
-      Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequest.getRight(), VALID_ACA_KEY, VALID_SEGREGATION_CODE)
-    );
+    Assertions.assertNotNull(exception);
+    Assertions.assertEquals("delete not implemented", exception.getMessage());
   }
 
   @Test
-  void givenValidDebtPositionWhenDeleteThenOk() {
+  void givenValidDebtPositionWhenSyncThenOk() {
     //given
-    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest(debtPosition)).thenReturn(newDebtPositionRequestList);
-    Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));
-    //when
-    acaService.delete(debtPosition, TestUtils.getFakeAccessToken());
-    //verify
+    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> newDebtPositionRequestAndOperation = Pair.of(AcaDebtPositionMapper.OPERATION.DELETE, podamFactory.manufacturePojo(NewDebtPositionRequest.class));
 
-    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest(debtPosition);
-    Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, TestUtils.getFakeAccessToken());
-    newDebtPositionRequestList.forEach(newDebtPositionRequest ->
-      Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(
-        Mockito.argThat(x -> x.getAmount()==0 && x.equals(newDebtPositionRequest.getRight())), Mockito.eq(VALID_ACA_KEY), Mockito.eq(VALID_SEGREGATION_CODE))
-    );
+    Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest("IUD", debtPosition)).thenReturn(newDebtPositionRequestAndOperation);
+    Mockito.when(brokerServiceMock.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken())).thenReturn(Pair.of(VALID_API_KEYS, VALID_SEGREGATION_CODE));
+    //when
+    acaService.sync("IUD", debtPosition, TestUtils.getFakeAccessToken());
+    //verify
+    Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest("IUD", debtPosition);
+    Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken());
+    Mockito.verify(acaClientMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequestAndOperation.getRight(), VALID_ACA_KEY, VALID_SEGREGATION_CODE);
   }
 }

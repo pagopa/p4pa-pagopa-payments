@@ -23,7 +23,7 @@ public class PaymentsReportingController implements ReportingApi {
 
   @Override
   public ResponseEntity<List<ReportingIdDTO>> getPaymentsReportingList(@PathVariable Long organizationId) {
-    log.info("invoking getReportingList, organizationId[{}]", organizationId);
+    log.info("User requested getPaymentsReportingList, organizationId[{}]", organizationId);
     List<ReportingIdDTO> reportingList = paymentsReportingService.getReportingList(organizationId, SecurityUtils.getAccessToken());
     return ResponseEntity.ok(reportingList);
   }

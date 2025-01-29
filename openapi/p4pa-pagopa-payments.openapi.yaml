@@ -82,7 +82,7 @@ paths:
   /paymentsReporting/{organizationId}:
     get:
       tags:
-        - reporting
+        - payments-reporting
       operationId: getPaymentsReportingList
       parameters:
         - name: organizationId

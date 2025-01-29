@@ -131,7 +131,7 @@ components:
         status:
           $ref: "#/components/schemas/DebtPositionStatus"
         debtPositionOrigin:
-          $ref: "#/components/schemas/DebtPositionOrigin"
+          type: string
         ingestionFlowFileId:
           type: integer
           format: int64
@@ -213,6 +213,8 @@ components:
           format: int64
         status:
           $ref: "#/components/schemas/InstallmentStatus"
+        debtPositionOrigin:
+          $ref: "#/components/schemas/DebtPositionOrigin"
         syncStatus:
           $ref: "#/components/schemas/InstallmentSyncStatus"
         iupdPagopa:

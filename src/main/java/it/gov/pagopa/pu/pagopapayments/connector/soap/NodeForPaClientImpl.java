@@ -55,11 +55,10 @@ public PaPaymentReporingDTO uploadOfPaymentReporting(BrokerForNodoPaDTO brokerFo
   }
 
   return PaPaymentReporingDTO.builder()
-    .idPA(null)//todo fill
+    .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
     .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())
     .idStation(brokerForNodoPaDTO.getBroker().getStationId())
     .fiscalCode(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
-    .noticeNumber(null)//todo fill
     .paymentReportingBytes(response.getXmlRendicontazione().getContentType().getBytes(StandardCharsets.UTF_8))
     .build();
   }

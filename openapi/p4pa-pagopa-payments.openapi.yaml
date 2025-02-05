@@ -523,6 +523,20 @@ components:
           format: date-time
         paymentsReportingFileName:
           type: string
+    PagoPaPaymentsErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - PAGOPA_PAYMENTS_NOT_FOUND
+            - PAGOPA_PAYMENTS_BAD_REQUEST
+            - PAGOPA_PAYMENTS_GENERIC_ERROR
+        message:
+          type: string
   securitySchemes:
     BearerAuth:
       type: http

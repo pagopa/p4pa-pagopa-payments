@@ -11,6 +11,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaPaymentReporingDTO extends PaForNodeDTO {
+public class PaPaymentReportingDTO extends PaForNodeDTO {
     private byte[] paymentReportingBytes;
 }

@@ -1,14 +1,15 @@
 package it.gov.pagopa.pu.pagopapayments.connector.soap;
 
-import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazione;
-import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazioneRisposta;
-import gov.telematici.pagamenti.ws.TipoElencoFlussiRendicontazione;
-import gov.telematici.pagamenti.ws.TipoIdRendicontazione;
+import gov.telematici.pagamenti.ws.*;
+import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtFaultBean;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReporingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import jakarta.activation.DataHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +41,8 @@ class NodeForPaClientImplTest {
 
   private static final Broker BROKER = new Broker()
     .brokerFiscalCode("brokerCode")
-    .broadcastStationId("stationId");
+    .broadcastStationId("stationId")
+    .stationId("stationId");
 
   private static final BrokerApiKeys BROKER_API_KEYS = new BrokerApiKeys()
     .syncKey("syncKey");
@@ -99,4 +101,41 @@ class NodeForPaClientImplTest {
     verify(httpUrlConnectionMock, times(1)).addRequestHeader(NodeForPaClientImpl.HEADER_SUBSCRIPTION_KEY, apiKey);
   }
 
+  @Test
+  void uploadOfPaymentReporting_whenValidRequest_thenReturnPaPaymentReportingDTO() {
+    NodoChiediFlussoRendicontazioneRisposta response = new NodoChiediFlussoRendicontazioneRisposta();
+    response.setXmlRendicontazione(new DataHandler("test", "text/xml"));
+
+    doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+
+    PaPaymentReporingDTO result = nodeForPaClient.uploadOfPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId");
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals("brokerCode", result.getIdBrokerPA());
+    Assertions.assertEquals("stationId", result.getIdStation());
+    Assertions.assertEquals("orgFiscalCode", result.getFiscalCode());
+    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+  }
+
+  @Test
+  void uploadOfPaymentReporting_whenResponseHasFault_thenThrowException() {
+    NodoChiediFlussoRendicontazioneRisposta response = new NodoChiediFlussoRendicontazioneRisposta();
+    response.setFault(new CtFaultBean());
+    response.getFault().setFaultCode("faultCode");
+
+    doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> nodeForPaClient.uploadOfPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId"));
+    Assertions.assertEquals("Error during the call to the payment node faultCode", exception.getMessage());
+    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+  }
+
+  @Test
+  void uploadOfPaymentReporting_whenWebServiceTemplateThrowsException_thenThrowException() {
+    doThrow(new RuntimeException("WebService error")).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+
+    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> nodeForPaClient.uploadOfPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId"));
+    Assertions.assertEquals("WebService error", exception.getMessage());
+    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+  }
 }

@@ -135,6 +135,39 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
+  /paymentsReporting/{organizationId}/upload:
+    get:
+      tags:
+        - payments-reporting
+      operationId: uploadOfPaymentReporting
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: fileName
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: flowId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
 security:
   - BearerAuth: []
 components:

@@ -129,7 +129,7 @@ class PaymentsReportingServiceTest {
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID)).thenReturn(response);
-    Mockito.when(fileShareClientMock.fetchPaymentReporting(response, ORGANIZATION_ID, accessToken)).thenReturn("fileId");
+    Mockito.when(fileShareClientMock.uploadPaymentReporting(response, ORGANIZATION_ID, accessToken)).thenReturn("fileId");
 
     String result = paymentsReportingService.fetchPaymentReporting(ORGANIZATION_ID, REPORTING_ID, accessToken);
 
@@ -137,7 +137,7 @@ class PaymentsReportingServiceTest {
     Assertions.assertEquals("fileId", result);
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     Mockito.verify(nodeForPaClientMock, Mockito.times(1)).fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID);
-    Mockito.verify(fileShareClientMock, Mockito.times(1)).fetchPaymentReporting(response, ORGANIZATION_ID, accessToken);
+    Mockito.verify(fileShareClientMock, Mockito.times(1)).uploadPaymentReporting(response, ORGANIZATION_ID, accessToken);
   }
 
   @Test
@@ -149,7 +149,7 @@ class PaymentsReportingServiceTest {
     Assertions.assertEquals("Broker service error", exception.getMessage());
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     Mockito.verify(nodeForPaClientMock, Mockito.never()).fetchPaymentReporting(Mockito.any(), Mockito.any());
-    Mockito.verify(fileShareClientMock, Mockito.never()).fetchPaymentReporting(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(fileShareClientMock, Mockito.never()).uploadPaymentReporting(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -162,7 +162,7 @@ class PaymentsReportingServiceTest {
     Assertions.assertEquals("Node client error", exception.getMessage());
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     Mockito.verify(nodeForPaClientMock, Mockito.times(1)).fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID);
-    Mockito.verify(fileShareClientMock, Mockito.never()).fetchPaymentReporting(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(fileShareClientMock, Mockito.never()).uploadPaymentReporting(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -175,13 +175,13 @@ class PaymentsReportingServiceTest {
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID)).thenReturn(response);
-    Mockito.when(fileShareClientMock.fetchPaymentReporting(response, ORGANIZATION_ID, accessToken)).thenThrow(new ApplicationException("File share client error"));
+    Mockito.when(fileShareClientMock.uploadPaymentReporting(response, ORGANIZATION_ID, accessToken)).thenThrow(new ApplicationException("File share client error"));
 
     ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingService.fetchPaymentReporting(ORGANIZATION_ID, REPORTING_ID, accessToken));
     Assertions.assertEquals("File share client error", exception.getMessage());
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     Mockito.verify(nodeForPaClientMock, Mockito.times(1)).fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID);
-    Mockito.verify(fileShareClientMock, Mockito.times(1)).fetchPaymentReporting(response, ORGANIZATION_ID, accessToken);
+    Mockito.verify(fileShareClientMock, Mockito.times(1)).uploadPaymentReporting(response, ORGANIZATION_ID, accessToken);
   }
 
 

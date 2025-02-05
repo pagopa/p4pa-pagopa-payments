@@ -51,7 +51,7 @@ public class FileShareClientImpl implements FileShareClient {
   }
 
   @Override
-  public String fetchPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String accessToken) {
+  public String uploadPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String accessToken) {
     //todo manage fileName after resolution of P4ADEV-2107
 
     bearerTokenHolder.set(accessToken);

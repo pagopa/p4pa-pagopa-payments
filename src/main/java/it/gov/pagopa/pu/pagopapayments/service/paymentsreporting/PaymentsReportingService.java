@@ -34,7 +34,7 @@ public class PaymentsReportingService {
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     PaPaymentReportingDTO response = nodeForPaClient.fetchPaymentReporting(brokerForNodoPaDTO, reportingId);
-    return fileShareClient.fetchPaymentReporting(response, organizationId, accessToken);
+    return fileShareClient.uploadPaymentReporting(response, organizationId, accessToken);
   }
 
 }

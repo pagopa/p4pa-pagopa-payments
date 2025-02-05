@@ -142,7 +142,7 @@ class FileShareClientImplTest {
     Long organizationId = 1L;
     String accessToken = TestUtils.getFakeAccessToken();
 
-    String result = fileShareClient.fetchPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
+    String result = fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("ingestionFlowFileId", result);
@@ -167,7 +167,7 @@ class FileShareClientImplTest {
 
     //when
     Assertions.assertThrows(RestClientException.class,
-      () -> fileShareClient.fetchPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
+      () -> fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))
@@ -191,7 +191,7 @@ class FileShareClientImplTest {
 
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> fileShareClient.fetchPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
+      () -> fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());

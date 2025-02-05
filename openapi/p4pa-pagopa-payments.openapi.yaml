@@ -135,11 +135,11 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
-  /paymentsReporting/{organizationId}/upload:
+  /paymentsReporting/{organizationId}/fetch:
     get:
       tags:
         - payments-reporting
-      operationId: uploadOfPaymentReporting
+      operationId: fetchPaymentReporting
       parameters:
         - name: organizationId
           in: path

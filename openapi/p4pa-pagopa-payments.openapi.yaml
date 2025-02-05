@@ -147,11 +147,6 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: fileName
-          in: query
-          required: true
-          schema:
-            type: string
         - name: flowId
           in: query
           required: true

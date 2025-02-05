@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector;
 
 import it.gov.pagopa.pu.fileshare.dto.generated.UploadIngestionFlowFileResponseDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReporingDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
@@ -138,11 +138,11 @@ class FileShareClientImplTest {
       })
     )).thenReturn(responseEntity);
 
-    PaPaymentReporingDTO paPaymentReporingDTO = podamFactory.manufacturePojo(PaPaymentReporingDTO.class);
+    PaPaymentReportingDTO paPaymentReportingDTO = podamFactory.manufacturePojo(PaPaymentReportingDTO.class);
     Long organizationId = 1L;
     String accessToken = TestUtils.getFakeAccessToken();
 
-    String result = fileShareClient.uploadPaymentReporting(paPaymentReporingDTO, organizationId, accessToken);
+    String result = fileShareClient.fetchPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("ingestionFlowFileId", result);
@@ -161,13 +161,13 @@ class FileShareClientImplTest {
       })
     )).thenReturn(responseEntity);
 
-    PaPaymentReporingDTO paPaymentReporingDTO = podamFactory.manufacturePojo(PaPaymentReporingDTO.class);
+    PaPaymentReportingDTO paPaymentReportingDTO = podamFactory.manufacturePojo(PaPaymentReportingDTO.class);
     Long organizationId = 1L;
     String accessToken = TestUtils.getFakeAccessToken();
 
     //when
     Assertions.assertThrows(RestClientException.class,
-      () -> fileShareClient.uploadPaymentReporting(paPaymentReporingDTO, organizationId, accessToken));
+      () -> fileShareClient.fetchPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))
@@ -185,13 +185,13 @@ class FileShareClientImplTest {
       })
     )).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-    PaPaymentReporingDTO paPaymentReporingDTO = podamFactory.manufacturePojo(PaPaymentReporingDTO.class);
+    PaPaymentReportingDTO paPaymentReportingDTO = podamFactory.manufacturePojo(PaPaymentReportingDTO.class);
     Long organizationId = 1L;
     String accessToken = TestUtils.getFakeAccessToken();
 
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> fileShareClient.uploadPaymentReporting(paPaymentReporingDTO, organizationId, accessToken));
+      () -> fileShareClient.fetchPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());

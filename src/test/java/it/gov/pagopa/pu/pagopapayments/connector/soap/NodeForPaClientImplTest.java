@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReporingDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import jakarta.activation.DataHandler;
@@ -108,7 +108,7 @@ class NodeForPaClientImplTest {
 
     doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
 
-    PaPaymentReporingDTO result = nodeForPaClient.uploadOfPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId");
+    PaPaymentReportingDTO result = nodeForPaClient.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("brokerCode", result.getIdBrokerPA());
@@ -125,7 +125,7 @@ class NodeForPaClientImplTest {
 
     doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> nodeForPaClient.uploadOfPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId"));
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> nodeForPaClient.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId"));
     Assertions.assertEquals("Error during the call to the payment node faultCode", exception.getMessage());
     verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
   }
@@ -134,7 +134,7 @@ class NodeForPaClientImplTest {
   void uploadOfPaymentReporting_whenWebServiceTemplateThrowsException_thenThrowException() {
     doThrow(new RuntimeException("WebService error")).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
 
-    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> nodeForPaClient.uploadOfPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId"));
+    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> nodeForPaClient.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId"));
     Assertions.assertEquals("WebService error", exception.getMessage());
     verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
   }

@@ -7,7 +7,7 @@ import gov.telematici.pagamenti.ws.NodoChiediFlussoRendicontazioneRisposta;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReporingDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingIdMapper;
@@ -44,7 +44,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
     return reportingList;
   }
 
-public PaPaymentReporingDTO uploadOfPaymentReporting(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId) {
+public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId) {
   NodoChiediFlussoRendicontazione request = createFlussoRendicontazioneRequest(brokerForNodoPaDTO, reportingId);
 
   NodoChiediFlussoRendicontazioneRisposta response = (NodoChiediFlussoRendicontazioneRisposta)
@@ -54,7 +54,7 @@ public PaPaymentReporingDTO uploadOfPaymentReporting(BrokerForNodoPaDTO brokerFo
     throw new ApplicationException("Error during the call to the payment node " + response.getFault().getFaultCode());
   }
 
-  return PaPaymentReporingDTO.builder()
+  return PaPaymentReportingDTO.builder()
     .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
     .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())
     .idStation(brokerForNodoPaDTO.getBroker().getStationId())
@@ -66,7 +66,7 @@ public PaPaymentReporingDTO uploadOfPaymentReporting(BrokerForNodoPaDTO brokerFo
   private NodoChiediElencoFlussiRendicontazione createElencoFlussiRendicontazioneRequest(BrokerForNodoPaDTO brokerForNodoPaDTO) {
     NodoChiediElencoFlussiRendicontazione request = new NodoChiediElencoFlussiRendicontazione();
     request.setIdentificativoDominio(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
-    request.setPassword("password");
+    request.setPassword("password"); //parameter for retrocompatibility but not used. it is required by the wsdl
     request.setIdentificativoIntermediarioPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode());
     request.setIdentificativoStazioneIntermediarioPA(brokerForNodoPaDTO.getBroker().getStationId());
     request.setIdentificativoPSP(null);

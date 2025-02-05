@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service.paymentsreporting;
 import it.gov.pagopa.pu.pagopapayments.connector.FileShareClient;
 import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClient;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReporingDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +30,11 @@ public class PaymentsReportingService {
     return nodeForPaClient.getPaymentsReportingList(brokerForNodoPaDTO);
   }
 
-  public String uploadPaymentsReporting(Long organizationId, String reportingId, String fileName, String accessToken) {
+  public String fetchPaymentReporting(Long organizationId, String reportingId, String accessToken) {
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
-    PaPaymentReporingDTO response = nodeForPaClient.uploadOfPaymentReporting(brokerForNodoPaDTO, reportingId);
-    return fileShareClient.uploadPaymentReporting(response, organizationId, accessToken);
+    PaPaymentReportingDTO response = nodeForPaClient.fetchPaymentReporting(brokerForNodoPaDTO, reportingId);
+    return fileShareClient.fetchPaymentReporting(response, organizationId, accessToken);
   }
 
 }

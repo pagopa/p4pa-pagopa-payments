@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.fileshare.dto.generated.FileOrigin;
 import it.gov.pagopa.pu.fileshare.dto.generated.IngestionFlowFileType;
 import it.gov.pagopa.pu.fileshare.dto.generated.UploadIngestionFlowFileResponseDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReporingDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.util.RestUtil;
 import jakarta.annotation.PreDestroy;
@@ -51,7 +51,7 @@ public class FileShareClientImpl implements FileShareClient {
   }
 
   @Override
-  public String uploadPaymentReporting(PaPaymentReporingDTO paPaymentReporingDTO, Long organizationId, String accessToken) {
+  public String fetchPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String accessToken) {
     //todo manage fileName after resolution of P4ADEV-2107
 
     bearerTokenHolder.set(accessToken);

@@ -9,7 +9,6 @@ import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,43 +36,6 @@ class AcaServiceTest {
     .syncKey("validSyncKey");
 
   private final PodamFactory podamFactory = TestUtils.getPodamFactory();
-
-
-  @Test
-  void givenValidDebtPositionWhenCreateThenError() {
-    //given
-    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    //when
-    String accessToken = TestUtils.getFakeAccessToken();
-    UnsupportedOperationException exception = Assertions.assertThrows(UnsupportedOperationException.class, () -> acaService.create(debtPosition, accessToken));
-    //verify
-    Assertions.assertNotNull(exception);
-    Assertions.assertEquals("create not implemented", exception.getMessage());
-  }
-
-  @Test
-  void givenValidDebtPositionWhenUpdateThenError() {
-    //given
-    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    //when
-    String accessToken = TestUtils.getFakeAccessToken();
-    UnsupportedOperationException exception = Assertions.assertThrows(UnsupportedOperationException.class, () -> acaService.update(debtPosition, accessToken));
-    //verify
-    Assertions.assertNotNull(exception);
-    Assertions.assertEquals("update not implemented", exception.getMessage());
-  }
-
-  @Test
-  void givenValidDebtPositionWhenDeleteThenError() {
-    //given
-    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    //when
-    String accessToken = TestUtils.getFakeAccessToken();
-    UnsupportedOperationException exception = Assertions.assertThrows(UnsupportedOperationException.class, () -> acaService.delete(debtPosition, accessToken));
-    //verify
-    Assertions.assertNotNull(exception);
-    Assertions.assertEquals("delete not implemented", exception.getMessage());
-  }
 
   @Test
   void givenValidDebtPositionWhenSyncThenOk() {

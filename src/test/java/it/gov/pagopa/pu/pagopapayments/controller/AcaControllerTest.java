@@ -55,51 +55,6 @@ class AcaControllerTest {
   }
 
   @Test
-  void givenValidDebtPositionWhenCreateAcaThenOk() {
-    //given
-    Mockito.when(acaServiceMock.create(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken())).thenReturn(List.of("777777"));
-    TestUtils.setFakeAccessTokenInContext();
-    //when
-    ResponseEntity<List<String>> response = acaController.createAca(VALID_DEBT_POSITION);
-    //verify
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-    Assertions.assertNotNull(response.getBody());
-    Assertions.assertIterableEquals(List.of("777777"),response.getBody());
-    Mockito.verify(acaServiceMock, Mockito.times(1)).create(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
-  }
-
-  @Test
-  void givenValidDebtPositionWhenUpdateAcaThenOk() {
-    //given
-    Mockito.when(acaServiceMock.update(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken())).thenReturn(List.of("777777"));
-    TestUtils.setFakeAccessTokenInContext();
-    //when
-    ResponseEntity<List<String>> response = acaController.updateAca(VALID_DEBT_POSITION);
-    //verify
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-    Assertions.assertNotNull(response.getBody());
-    Assertions.assertIterableEquals(List.of("777777"),response.getBody());
-    Mockito.verify(acaServiceMock, Mockito.times(1)).update(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
-  }
-
-  @Test
-  void givenValidDebtPositionWhenDeleteAcaThenOk() {
-    //given
-    Mockito.when(acaServiceMock.delete(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken())).thenReturn(List.of("777777"));
-    TestUtils.setFakeAccessTokenInContext();
-    //when
-    ResponseEntity<List<String>> response = acaController.deleteAca(VALID_DEBT_POSITION);
-    //verify
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-    Assertions.assertNotNull(response.getBody());
-    Assertions.assertIterableEquals(List.of("777777"),response.getBody());
-    Mockito.verify(acaServiceMock, Mockito.times(1)).delete(VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
-  }
-
-  @Test
   void givenValidDebtPositionWhenSyncAcaThenOk() {
     //given
     Mockito.doNothing().when(acaServiceMock).sync("IUD", VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());

@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @Slf4j
 public class AcaService {
@@ -24,18 +22,6 @@ public class AcaService {
     this.acaClient = acaClient;
     this.acaDebtPositionMapper = acaDebtPositionMapper;
     this.brokerService = brokerService;
-  }
-
-  public List<String> create(DebtPositionDTO debtPosition, String accessToken) {
-    throw new UnsupportedOperationException("create not implemented");
-  }
-
-  public List<String> update(DebtPositionDTO debtPosition, String accessToken) {
-    throw new UnsupportedOperationException("update not implemented");
-  }
-
-  public List<String> delete(DebtPositionDTO debtPosition, String accessToken) {
-    throw new UnsupportedOperationException("delete not implemented");
   }
 
   public void sync(String iud, DebtPositionDTO debtPosition, String accessToken) {

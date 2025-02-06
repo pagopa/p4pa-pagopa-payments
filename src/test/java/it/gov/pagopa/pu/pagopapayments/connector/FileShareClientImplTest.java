@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector;
 
 import it.gov.pagopa.pu.fileshare.dto.generated.UploadIngestionFlowFileResponseDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
@@ -29,6 +30,7 @@ class FileShareClientImplTest {
   private RestTemplateBuilder restTemplateBuilderMock;
   @Mock
   private RestTemplate restTemplateMock;
+
   private FileShareClientImpl fileShareClient;
 
   private final PodamFactory podamFactory;
@@ -124,4 +126,78 @@ class FileShareClientImplTest {
   }
 
   //endregion
+
+  @Test
+  void uploadPaymentReporting_whenValidRequest_thenReturnIngestionFlowFileId() {
+    String expectedIngestionFlowId = "ingestionFlowFileId";
+    ResponseEntity<UploadIngestionFlowFileResponseDTO> responseEntity = new ResponseEntity<>(new UploadIngestionFlowFileResponseDTO()
+      .ingestionFlowFileId(expectedIngestionFlowId),HttpStatus.OK);
+    Mockito.when(restTemplateMock.exchange(
+      Mockito.any(RequestEntity.class),
+      Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
+      })
+    )).thenReturn(responseEntity);
+
+    PaPaymentReportingDTO paPaymentReportingDTO = podamFactory.manufacturePojo(PaPaymentReportingDTO.class);
+    Long organizationId = 1L;
+    String accessToken = TestUtils.getFakeAccessToken();
+
+    String result = fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals("ingestionFlowFileId", result);
+    Mockito.verify(restTemplateMock, Mockito.times(1))
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
+      }));
+  }
+
+  @Test
+  void givenNotFoundPaymentReportingWhenUploadPaymentReportingThenRestClientException() {
+    //given
+    ResponseEntity<UploadIngestionFlowFileResponseDTO> responseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    Mockito.when(restTemplateMock.exchange(
+      Mockito.any(RequestEntity.class),
+      Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
+      })
+    )).thenReturn(responseEntity);
+
+    PaPaymentReportingDTO paPaymentReportingDTO = podamFactory.manufacturePojo(PaPaymentReportingDTO.class);
+    Long organizationId = 1L;
+    String accessToken = TestUtils.getFakeAccessToken();
+
+    //when
+    Assertions.assertThrows(RestClientException.class,
+      () -> fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
+
+    //verify
+    Mockito.verify(restTemplateMock, Mockito.times(1))
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
+      }));
+  }
+
+  //error
+  @Test
+  void givenApiInvocationErrorWhenUploadPaymentReportingThenRestClientException() {
+    //given
+    Mockito.when(restTemplateMock.exchange(
+      Mockito.any(RequestEntity.class),
+      Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
+      })
+    )).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+
+    PaPaymentReportingDTO paPaymentReportingDTO = podamFactory.manufacturePojo(PaPaymentReportingDTO.class);
+    Long organizationId = 1L;
+    String accessToken = TestUtils.getFakeAccessToken();
+
+    //when
+    HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
+      () -> fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
+
+    //verify
+    Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+    Mockito.verify(restTemplateMock, Mockito.times(1))
+      .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
+      }));
+  }
+
 }

@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.fileshare.dto.generated.FileOrigin;
 import it.gov.pagopa.pu.fileshare.dto.generated.IngestionFlowFileType;
 import it.gov.pagopa.pu.fileshare.dto.generated.UploadIngestionFlowFileResponseDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.util.RestUtil;
 import jakarta.annotation.PreDestroy;
@@ -46,6 +47,20 @@ public class FileShareClientImpl implements FileShareClient {
       "upload receipt[%s/%s]".formatted(paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber()), true
     );
     log.info("Receipt [{}/{}] uploaded with id: {}", paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber(), response.getIngestionFlowFileId());
+    return response.getIngestionFlowFileId();
+  }
+
+  @Override
+  public String uploadPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String accessToken) {
+    //todo manage fileName after resolution of P4ADEV-2107
+
+    bearerTokenHolder.set(accessToken);
+    UploadIngestionFlowFileResponseDTO response = RestUtil.handleRestException(
+      () -> ingestionFlowFileApi.uploadIngestionFlowFile(organizationId, IngestionFlowFileType.PAYMENTS_REPORTING_PAGOPA, FileOrigin.PAGOPA,
+        new ByteArrayResource(paPaymentReporingDTO.getPaymentReportingBytes()) ),
+      "upload payment reporting[%s/%s]".formatted(paPaymentReporingDTO.getFiscalCode(), paPaymentReporingDTO.getNoticeNumber()), true
+    );
+    log.info("Payment reporting [{}/{}] uploaded with id: {}", paPaymentReporingDTO.getFiscalCode(), paPaymentReporingDTO.getNoticeNumber(), response.getIngestionFlowFileId());
     return response.getIngestionFlowFileId();
   }
 

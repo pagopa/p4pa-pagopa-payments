@@ -47,7 +47,7 @@ public class FileShareClientImpl implements FileShareClient {
       "upload receipt[%s/%s]".formatted(paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber()), true
     );
     log.info("Receipt [{}/{}] uploaded with id: {}", paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber(), response.getIngestionFlowFileId());
-    return String.valueOf(response.getIngestionFlowFileId());
+    return response.getIngestionFlowFileId();
   }
 
   @Override
@@ -61,7 +61,7 @@ public class FileShareClientImpl implements FileShareClient {
       "upload payment reporting[%s/%s]".formatted(paPaymentReporingDTO.getFiscalCode(), paPaymentReporingDTO.getNoticeNumber()), true
     );
     log.info("Payment reporting [{}/{}] uploaded with id: {}", paPaymentReporingDTO.getFiscalCode(), paPaymentReporingDTO.getNoticeNumber(), response.getIngestionFlowFileId());
-    return String.valueOf(response.getIngestionFlowFileId());
+    return response.getIngestionFlowFileId();
   }
 
 }

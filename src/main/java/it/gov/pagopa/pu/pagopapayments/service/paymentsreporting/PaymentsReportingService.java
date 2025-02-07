@@ -30,7 +30,7 @@ public class PaymentsReportingService {
     return nodeForPaClient.getPaymentsReportingList(brokerForNodoPaDTO);
   }
 
-  public String fetchPaymentReporting(Long organizationId, String reportingId, String accessToken) {
+  public Long fetchPaymentReporting(Long organizationId, String reportingId, String accessToken) {
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     PaPaymentReportingDTO response = nodeForPaClient.fetchPaymentReporting(brokerForNodoPaDTO, reportingId);

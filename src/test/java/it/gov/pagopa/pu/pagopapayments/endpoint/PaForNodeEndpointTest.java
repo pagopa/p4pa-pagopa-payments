@@ -302,7 +302,7 @@ class PaForNodeEndpointTest {
     PaSendRtDTO paSendRtDTO  = podamFactory.manufacturePojo(PaSendRtDTO.class);
 
     Mockito.when(paSendRTMapperMock.paSendRtV2Request2PaSendRtDTO(request)).thenReturn(paSendRtDTO);
-    Mockito.when(receiptServiceMock.processReceivedReceipt(paSendRtDTO)).thenReturn("FLOW_ID");
+    Mockito.when(receiptServiceMock.processReceivedReceipt(paSendRtDTO)).thenReturn(1L);
 
     // when
     PaSendRTV2Response response = paForNodeEndpoint.paSendRTV2(request);

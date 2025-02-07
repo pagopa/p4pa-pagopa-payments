@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @Slf4j
 public class AcaController implements AcaApi {
@@ -18,39 +16,6 @@ public class AcaController implements AcaApi {
 
   public AcaController(AcaService acaService){
     this.acaService = acaService;
-  }
-
-  /**
-   * @deprecated
-   */
-  @Override
-  @Deprecated(forRemoval = true)
-  public ResponseEntity<List<String>> createAca(DebtPositionDTO debtPositionDTO) {
-    log.info("invoking createAca, debtPositionDTO[{}]", debtPositionDTO.getDebtPositionId());
-    List<String> iudList = acaService.create(debtPositionDTO, SecurityUtils.getAccessToken());
-    return ResponseEntity.ok(iudList);
-  }
-
-  /**
-   * @deprecated
-   */
-  @Override
-  @Deprecated(forRemoval = true)
-  public ResponseEntity<List<String>> updateAca(DebtPositionDTO debtPositionDTO) {
-    log.info("invoking updateAca, debtPositionDTO[{}]", debtPositionDTO.getDebtPositionId());
-    List<String> iudList = acaService.update(debtPositionDTO, SecurityUtils.getAccessToken());
-    return ResponseEntity.ok(iudList);
-  }
-
-  /**
-   * @deprecated
-   */
-  @Override
-  @Deprecated(forRemoval = true)
-  public ResponseEntity<List<String>> deleteAca(DebtPositionDTO debtPositionDTO) {
-    log.info("invoking deleteAca, debtPositionDTO[{}]", debtPositionDTO.getDebtPositionId());
-    List<String> iudList = acaService.delete(debtPositionDTO, SecurityUtils.getAccessToken());
-    return ResponseEntity.ok(iudList);
   }
 
   @Override

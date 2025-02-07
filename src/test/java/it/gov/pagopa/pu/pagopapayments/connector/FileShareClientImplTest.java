@@ -66,10 +66,10 @@ class FileShareClientImplTest {
     String accessToken = TestUtils.getFakeAccessToken();
 
     //when
-    String ingestionFlowId = fileShareClient.uploadRt(paSendRtDTO, organization, accessToken);
+    Long ingestionFlowId = fileShareClient.uploadRt(paSendRtDTO, organization, accessToken);
 
     //verify
-    Assertions.assertEquals(expectedIngestionFlowId.toString(), ingestionFlowId);
+    Assertions.assertEquals(expectedIngestionFlowId, ingestionFlowId);
     Mockito.verify(restTemplateMock, Mockito.times(1))
       .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
       }));
@@ -142,10 +142,10 @@ class FileShareClientImplTest {
     Long organizationId = 1L;
     String accessToken = TestUtils.getFakeAccessToken();
 
-    String result = fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
+    Long result = fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
 
     Assertions.assertNotNull(result);
-    Assertions.assertEquals(expectedIngestionFlowId.toString(), result);
+    Assertions.assertEquals(expectedIngestionFlowId, result);
     Mockito.verify(restTemplateMock, Mockito.times(1))
       .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
       }));

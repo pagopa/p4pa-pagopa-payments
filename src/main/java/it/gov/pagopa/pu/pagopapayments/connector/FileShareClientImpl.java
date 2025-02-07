@@ -39,7 +39,7 @@ public class FileShareClientImpl implements FileShareClient {
   }
 
   @Override
-  public String uploadRt(PaSendRtDTO paSendRtDTO, Organization organization, String accessToken) {
+  public Long uploadRt(PaSendRtDTO paSendRtDTO, Organization organization, String accessToken) {
     bearerTokenHolder.set(accessToken);
     UploadIngestionFlowFileResponseDTO response = RestUtil.handleRestException(
       () -> ingestionFlowFileApi.uploadIngestionFlowFile(organization.getOrganizationId(), IngestionFlowFileType.RECEIPT_PAGOPA, FileOrigin.PAGOPA,
@@ -51,8 +51,8 @@ public class FileShareClientImpl implements FileShareClient {
   }
 
   @Override
-  public String uploadPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String accessToken) {
-    //todo manage fileName after resolution of P4ADEV-2107
+  public Long uploadPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String accessToken) {
+    //TODO manage fileName after resolution of P4ADEV-2107
 
     bearerTokenHolder.set(accessToken);
     UploadIngestionFlowFileResponseDTO response = RestUtil.handleRestException(

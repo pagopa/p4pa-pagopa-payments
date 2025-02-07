@@ -126,15 +126,16 @@ class PaymentsReportingServiceTest {
     response.setIdBrokerPA("brokerCode");
     response.setIdStation("stationId");
     response.setFiscalCode("orgFiscalCode");
+    Long ingestionFlowFileId = 1L;
 
     Mockito.when(brokerServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID)).thenReturn(response);
-    Mockito.when(fileShareClientMock.uploadPaymentReporting(response, ORGANIZATION_ID, accessToken)).thenReturn("fileId");
+    Mockito.when(fileShareClientMock.uploadPaymentReporting(response, ORGANIZATION_ID, accessToken)).thenReturn(ingestionFlowFileId);
 
-    String result = paymentsReportingService.fetchPaymentReporting(ORGANIZATION_ID, REPORTING_ID, accessToken);
+    Long result = paymentsReportingService.fetchPaymentReporting(ORGANIZATION_ID, REPORTING_ID, accessToken);
 
     Assertions.assertNotNull(result);
-    Assertions.assertEquals("fileId", result);
+    Assertions.assertEquals(ingestionFlowFileId, result);
     Mockito.verify(brokerServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     Mockito.verify(nodeForPaClientMock, Mockito.times(1)).fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID);
     Mockito.verify(fileShareClientMock, Mockito.times(1)).uploadPaymentReporting(response, ORGANIZATION_ID, accessToken);

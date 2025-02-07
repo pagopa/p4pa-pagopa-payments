@@ -30,9 +30,9 @@ public class PaymentsReportingController implements PaymentsReportingApi {
   }
 
   @Override
-  public ResponseEntity<String> fetchPaymentReporting(@PathVariable Long organizationId, @RequestParam String flowId){
+  public ResponseEntity<Long> fetchPaymentReporting(@PathVariable Long organizationId, @RequestParam String flowId){
     log.info("invoking uploadPaymentsReporting, organizationId[{}], flowId[{}]", organizationId, flowId);
-    String result = paymentsReportingService.fetchPaymentReporting(organizationId, flowId, SecurityUtils.getAccessToken());
+    Long result = paymentsReportingService.fetchPaymentReporting(organizationId, flowId, SecurityUtils.getAccessToken());
     return ResponseEntity.ok(result);
   }
 

@@ -22,7 +22,7 @@ public class ReceiptService {
     this.authnService = authnService;
   }
 
-  public String processReceivedReceipt(PaSendRtDTO request) {
+  public Long processReceivedReceipt(PaSendRtDTO request) {
     String accessToken = authnService.getAccessToken();
     Organization organization = paForNodeRequestValidatorService.paForNodeRequestValidate(request, accessToken);
     return fileShareClient.uploadRt(request, organization, accessToken);

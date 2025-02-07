@@ -39,7 +39,7 @@ class ReceiptServiceTest {
   @Test
   void givenValidReceiptWhenProcessReceivedReceiptThenOk(){
     // given
-    String validIngestionFlowId = "validIngestionFlowId";
+    Long validIngestionFlowId = 1L;
     PaSendRtDTO request = podamFactory.manufacturePojo(PaSendRtDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
 
@@ -48,7 +48,7 @@ class ReceiptServiceTest {
     Mockito.when(fileShareClientMock.uploadRt(request, organization, VALID_ACCESS_TOKEN)).thenReturn(validIngestionFlowId);
 
     // when
-    String response = receiptService.processReceivedReceipt(request);
+    Long response = receiptService.processReceivedReceipt(request);
 
     // then
     Assertions.assertEquals(validIngestionFlowId, response);

@@ -51,7 +51,7 @@ class FileShareClientImplTest {
   @Test
   void givenValidRtWhenUploadRtThenOk() {
     //given
-    String expectedIngestionFlowId = "ingestionFlowId";
+    Long expectedIngestionFlowId = 1L;
     ResponseEntity<UploadIngestionFlowFileResponseDTO> responseEntity = new ResponseEntity<>(new UploadIngestionFlowFileResponseDTO()
       .ingestionFlowFileId(expectedIngestionFlowId),HttpStatus.OK);
     Mockito.when(restTemplateMock.exchange(
@@ -66,7 +66,7 @@ class FileShareClientImplTest {
     String accessToken = TestUtils.getFakeAccessToken();
 
     //when
-    String ingestionFlowId = fileShareClient.uploadRt(paSendRtDTO, organization, accessToken);
+    Long ingestionFlowId = fileShareClient.uploadRt(paSendRtDTO, organization, accessToken);
 
     //verify
     Assertions.assertEquals(expectedIngestionFlowId, ingestionFlowId);
@@ -129,7 +129,7 @@ class FileShareClientImplTest {
 
   @Test
   void uploadPaymentReporting_whenValidRequest_thenReturnIngestionFlowFileId() {
-    String expectedIngestionFlowId = "ingestionFlowFileId";
+    Long expectedIngestionFlowId = 1L;
     ResponseEntity<UploadIngestionFlowFileResponseDTO> responseEntity = new ResponseEntity<>(new UploadIngestionFlowFileResponseDTO()
       .ingestionFlowFileId(expectedIngestionFlowId),HttpStatus.OK);
     Mockito.when(restTemplateMock.exchange(
@@ -142,10 +142,10 @@ class FileShareClientImplTest {
     Long organizationId = 1L;
     String accessToken = TestUtils.getFakeAccessToken();
 
-    String result = fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
+    Long result = fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
 
     Assertions.assertNotNull(result);
-    Assertions.assertEquals("ingestionFlowFileId", result);
+    Assertions.assertEquals(expectedIngestionFlowId, result);
     Mockito.verify(restTemplateMock, Mockito.times(1))
       .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
       }));

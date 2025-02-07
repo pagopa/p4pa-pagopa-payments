@@ -51,7 +51,7 @@ class FileShareClientImplTest {
   @Test
   void givenValidRtWhenUploadRtThenOk() {
     //given
-    String expectedIngestionFlowId = "ingestionFlowId";
+    Long expectedIngestionFlowId = 1L;
     ResponseEntity<UploadIngestionFlowFileResponseDTO> responseEntity = new ResponseEntity<>(new UploadIngestionFlowFileResponseDTO()
       .ingestionFlowFileId(expectedIngestionFlowId),HttpStatus.OK);
     Mockito.when(restTemplateMock.exchange(
@@ -69,7 +69,7 @@ class FileShareClientImplTest {
     String ingestionFlowId = fileShareClient.uploadRt(paSendRtDTO, organization, accessToken);
 
     //verify
-    Assertions.assertEquals(expectedIngestionFlowId, ingestionFlowId);
+    Assertions.assertEquals(expectedIngestionFlowId.toString(), ingestionFlowId);
     Mockito.verify(restTemplateMock, Mockito.times(1))
       .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
       }));
@@ -129,7 +129,7 @@ class FileShareClientImplTest {
 
   @Test
   void uploadPaymentReporting_whenValidRequest_thenReturnIngestionFlowFileId() {
-    String expectedIngestionFlowId = "ingestionFlowFileId";
+    Long expectedIngestionFlowId = 1L;
     ResponseEntity<UploadIngestionFlowFileResponseDTO> responseEntity = new ResponseEntity<>(new UploadIngestionFlowFileResponseDTO()
       .ingestionFlowFileId(expectedIngestionFlowId),HttpStatus.OK);
     Mockito.when(restTemplateMock.exchange(
@@ -145,7 +145,7 @@ class FileShareClientImplTest {
     String result = fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
 
     Assertions.assertNotNull(result);
-    Assertions.assertEquals("ingestionFlowFileId", result);
+    Assertions.assertEquals(expectedIngestionFlowId.toString(), result);
     Mockito.verify(restTemplateMock, Mockito.times(1))
       .exchange(Mockito.any(RequestEntity.class), Mockito.eq(new ParameterizedTypeReference<UploadIngestionFlowFileResponseDTO>() {
       }));

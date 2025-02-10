@@ -32,8 +32,7 @@ public class PagoPaApiClient {
   }
 
   public List<PaTaxonomyDTO> getTaxonomies() {
-    String url = baseUrlGithub;
-    String json = RestUtil.handleRestException(() -> restTemplate.getForObject(url, String.class), "getTaxonomies", true);
+    String json = RestUtil.handleRestException(() -> restTemplate.getForObject(baseUrl, String.class), "getTaxonomies", true);
     return deserializeTaxonomies(json);
   }
 

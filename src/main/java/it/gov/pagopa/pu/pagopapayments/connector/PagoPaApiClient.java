@@ -23,11 +23,11 @@ public class PagoPaApiClient {
   private final String baseUrlGithub;
 
   public PagoPaApiClient(
-    @Value("${rest.pagopa-platform.base-url}") String baseUrlGithub,
+    @Value("${rest.pagopa-platform.base-url}") String baseUrl,
     RestTemplateBuilder restTemplateBuilder,
     ObjectMapper objectMapper) {
     this.restTemplate = restTemplateBuilder.build();
-    this.baseUrlGithub = baseUrlGithub;
+    this.baseUrl = baseUrl;
     this.objectMapper = objectMapper;
   }
 

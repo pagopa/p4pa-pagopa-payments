@@ -214,9 +214,53 @@
 			"item": [
 				{
 					"name": "fetchTaxonomies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm=instrumentPmMethod(pm);\r",
+									"\r",
+									"pm.test(\"PagopaPayments - fetchTaxonomies - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Auth - fetchTaxonomies - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"\r",
+									"    let taxonomy = jsonResponse[0]; \r",
+									"    pm.expect(taxonomy.organizationType).to.equal(\"08\"); \r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{pagopaPaymentsInnerBaseUrl}}/taxonomies/fetch",
+							"host": [
+								"{{pagopaPaymentsInnerBaseUrl}}"
+							],
+							"path": [
+								"taxonomies",
+								"fetch"
+							]
+						}
 					},
 					"response": []
 				}

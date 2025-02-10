@@ -20,10 +20,10 @@ public class PagoPaApiClient {
 
   private final RestTemplate restTemplate;
   private final ObjectMapper objectMapper;
-  private final String baseUrlGithub;
+  private final String baseUrl;
 
   public PagoPaApiClient(
-    @Value("${rest.pagopa-platform.base-url}") String baseUrl,
+    @Value("${rest.pagopa-taxonomies.base-url}") String baseUrl,
     RestTemplateBuilder restTemplateBuilder,
     ObjectMapper objectMapper) {
     this.restTemplate = restTemplateBuilder.build();

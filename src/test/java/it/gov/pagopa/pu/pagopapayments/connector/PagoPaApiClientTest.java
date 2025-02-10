@@ -36,12 +36,12 @@ class PagoPaApiClientTest {
   @InjectMocks
   private PagoPaApiClient pagoPaApiClient;
 
-  private final String baseUrlGithub = "http://example.com";
+  private final String baseUrl = "http://example.com";
 
   @BeforeEach
   void setUp() {
     when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    pagoPaApiClient = new PagoPaApiClient(baseUrlGithub, restTemplateBuilderMock, objectMapperMock);
+    pagoPaApiClient = new PagoPaApiClient(baseUrl, restTemplateBuilderMock, objectMapperMock);
   }
 
   @Test
@@ -52,7 +52,7 @@ class PagoPaApiClientTest {
 
     // When & Then
     assertThrows(ApplicationException.class, () -> pagoPaApiClient.getTaxonomies());
-    verify(restTemplateMock, times(1)).getForObject(baseUrlGithub, String.class);
+    verify(restTemplateMock, times(1)).getForObject(baseUrl, String.class);
   }
 
   @Test
@@ -69,7 +69,7 @@ class PagoPaApiClientTest {
 
     // Then
     assertEquals(expectedResponse, actualResponse);
-    verify(restTemplateMock, times(1)).getForObject(baseUrlGithub, String.class);
+    verify(restTemplateMock, times(1)).getForObject(baseUrl, String.class);
     verify(objectMapperMock, times(1)).readValue(eq(json), any(TypeReference.class));
   }
 

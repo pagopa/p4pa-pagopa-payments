@@ -1,9 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.pu.organization.dto.generated.Taxonomy;
 import it.gov.pagopa.pu.pagopapayments.dto.PaTaxonomyDTO;
-
-import java.time.ZoneId;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.Taxonomy;
+import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 
 public class PaTaxonomyMapper {
 
@@ -26,8 +25,8 @@ public class PaTaxonomyMapper {
       .serviceType(paTaxonomyDTO.getTipoServizio())
       .serviceTypeDescription(paTaxonomyDTO.getDescrizioneTipoServizio())
       .collectionReason(paTaxonomyDTO.getMotivoRiscossione())
-      .startDateValidity(paTaxonomyDTO.getDataInizioValidita().toInstant().atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime())
-      .endDateOfValidity(paTaxonomyDTO.getDataFineValidita().toInstant().atZone(ZoneId.of("Europe/Rome")).toOffsetDateTime())
+      .startDateValidity(ConversionUtils.toOffsetDateTime(paTaxonomyDTO.getDataInizioValidita()))
+      .endDateOfValidity(ConversionUtils.toOffsetDateTime(paTaxonomyDTO.getDataFineValidita()))
       .build();
   }
 }

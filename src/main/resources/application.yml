@@ -70,6 +70,11 @@ rest:
   pagopa-node-services:
     aca:
       base-url: "\${PAGOPA_NODE_ACA_BASE_URL:}"
+  pagopa-platform:
+    base-url: "\${PAGOPA_PLATFORM_BASE_URL:}"
+    taxonomy:
+      service:
+        context: "\${PAGOPA_PLATFORM_TAXONOMY_SERVICE_CONTEXT:}"
 
 springdoc:
   writer-with-default-pretty-printer: true

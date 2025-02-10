@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.pu.organization.dto.generated.Taxonomy;
 import it.gov.pagopa.pu.pagopapayments.dto.PaTaxonomyDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.Taxonomy;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;

@@ -48,10 +48,4 @@ public class PaTaxonomyDTO implements Serializable {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
   private Date dataFineValidita;
 
-  public enum Fields {
-    ;// This is necessary!
-    public String fieldName() {
-      return  name();
-    }
-  }
 }

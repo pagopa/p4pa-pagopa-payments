@@ -208,6 +208,19 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "02_getTaxonomies",
+			"item": [
+				{
+					"name": "fetchTaxonomies",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [

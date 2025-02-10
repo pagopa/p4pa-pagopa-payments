@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
-import it.gov.pagopa.pu.organization.dto.generated.Taxonomy;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.Taxonomy;
 import it.gov.pagopa.pu.pagopapayments.service.taxonomy.TaxonomyService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +48,7 @@ class TaxonomyControllerTest {
     when(taxonomyService.getTaxonomies()).thenReturn(expectedTaxonomies);
 
     // When
-    ResponseEntity<List<Taxonomy>> response = taxonomyController.getTaxonomies();
+    ResponseEntity<List<Taxonomy>> response = taxonomyController.fetchTaxonomies();
 
     // Then
     assertEquals(ResponseEntity.ok(expectedTaxonomies), response);
@@ -62,7 +62,7 @@ class TaxonomyControllerTest {
     when(taxonomyService.getTaxonomies()).thenReturn(expectedTaxonomies);
 
     // When
-    ResponseEntity<List<Taxonomy>> response = taxonomyController.getTaxonomies();
+    ResponseEntity<List<Taxonomy>> response = taxonomyController.fetchTaxonomies();
 
     // Then
     assertEquals(ResponseEntity.ok(expectedTaxonomies), response);

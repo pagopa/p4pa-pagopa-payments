@@ -208,6 +208,77 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "02_getTaxonomies",
+			"item": [
+				{
+					"name": "fetchTaxonomies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm=instrumentPmMethod(pm);\r",
+									"\r",
+									"pm.test(\"PagopaPayments - fetchTaxonomies - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Auth - fetchTaxonomies - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonResponse.length).to.be.above(0);\r",
+									"\r",
+									"    jsonResponse.forEach(taxonomy => {\r",
+									"        pm.expect(taxonomy.organizationType).to.not.be.null;\r",
+									"        pm.expect(taxonomy.organizationTypeDescription).to.not.be.null;\r",
+									"        pm.expect(taxonomy.macroAreaCode).to.not.be.null;\r",
+									"        pm.expect(taxonomy.macroAreaName).to.not.be.null;\r",
+									"        pm.expect(taxonomy.macroAreaDescription).to.not.be.null;\r",
+									"        pm.expect(taxonomy.serviceTypeCode).to.not.be.null;\r",
+									"        pm.expect(taxonomy.serviceType).to.not.be.null;\r",
+									"        pm.expect(taxonomy.serviceTypeDescription).to.not.be.null;\r",
+									"        pm.expect(taxonomy.collectionReason).to.not.be.null;\r",
+									"        pm.expect(taxonomy.startDateValidity).to.not.be.null;\r",
+									"        pm.expect(taxonomy.endDateOfValidity).to.not.be.null;\r",
+									"        pm.expect(taxonomy.taxonomyCode).to.not.be.null;\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{pagopaPaymentsInnerBaseUrl}}/taxonomies/fetch",
+							"host": [
+								"{{pagopaPaymentsInnerBaseUrl}}"
+							],
+							"path": [
+								"taxonomies",
+								"fetch"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [

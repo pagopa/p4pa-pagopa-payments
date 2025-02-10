@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Date;
 
 public class ConversionUtils {
   private ConversionUtils() {
@@ -41,6 +42,13 @@ public class ConversionUtils {
     OffsetDateTime odt = OffsetDateTime.parse(xmlGregorianCalendar.toString());
     ZoneOffset zoneOffset = ZONE_ID_ROME.getRules().getOffset(odt.toInstant());
     return odt.withOffsetSameInstant(zoneOffset);
+  }
+
+  public static OffsetDateTime toOffsetDateTime(Date date) {
+    if (date == null) {
+      return null;
+    }
+    return OffsetDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
   }
 
 }

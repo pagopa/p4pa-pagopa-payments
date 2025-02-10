@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
+import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.common.AttributeStrategy;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,12 +30,8 @@ class AcaDebtPositionMapperTest {
   AcaDebtPositionMapperTest() {
     podamFactory = TestUtils.getPodamFactory();
     podamFactory.getStrategy().setDefaultNumberOfCollectionElements(3);
-    podamFactory.getStrategy().addOrReplaceAttributeStrategy(InstallmentDTO.class, "amountCents", new AttributeStrategy<Long>() {
-      @Override
-      public Long getValue(Class<?> attrType, List<Annotation> attrAnnotations) {
-        return RandomUtils.insecure().randomLong(1, 1000000);
-      }
-    });
+    podamFactory.getStrategy().addOrReplaceAttributeStrategy(InstallmentDTO.class, "amountCents",
+      (AttributeStrategy<Long>) (attrType, attrAnnotations) -> RandomUtils.insecure().randomLong(1, 1000000));
   }
 
   @BeforeEach
@@ -47,17 +42,17 @@ class AcaDebtPositionMapperTest {
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
         installment.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
-        installment.setStatus(InstallmentStatus.UNPAID);
+        installment.setStatus(InstallmentDTO.StatusEnum.UNPAID);
         installment.setSyncStatus(null);
       }));
   }
 
-  private InstallmentDTO setSyncStatus(DebtPositionDTO debtPosition, int indexPaymentOption, int indexInstallment, InstallmentStatus syncStatusFrom, InstallmentStatus syncStatusTo) {
+  private InstallmentDTO setSyncStatus(DebtPositionDTO debtPosition, int indexPaymentOption, int indexInstallment, InstallmentDTO.StatusEnum syncStatusFrom, InstallmentDTO.StatusEnum syncStatusTo) {
     InstallmentDTO installmentDTO = debtPosition.getPaymentOptions().get(indexPaymentOption).getInstallments().get(indexInstallment);
-    installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
+    installmentDTO.setStatus(InstallmentDTO.StatusEnum.TO_SYNC);
     installmentDTO.setSyncStatus(InstallmentSyncStatus.builder()
-      .syncStatusFrom(syncStatusFrom)
-      .syncStatusTo(syncStatusTo)
+      .syncStatusFrom(InstallmentSyncStatus.SyncStatusFromEnum.valueOf(syncStatusFrom.name()))
+      .syncStatusTo(InstallmentSyncStatus.SyncStatusToEnum.valueOf(syncStatusTo.name()))
       .build());
     installmentDTO.setTransfers(List.of(installmentDTO.getTransfers().getFirst()));
     return installmentDTO;
@@ -68,7 +63,7 @@ class AcaDebtPositionMapperTest {
   @Test
   void givenValidDebtPositionExpiringWhenMapToNewDebtPositionRequestThenOk() {
     //given
-    InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID);
+    InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentDTO.StatusEnum.DRAFT, InstallmentDTO.StatusEnum.UNPAID);
 
     //when
     Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(toSync.getIud(), debtPosition);
@@ -87,7 +82,7 @@ class AcaDebtPositionMapperTest {
   @Test
   void givenValidDebtPositionNonExpiringWhenMapToNewDebtPositionRequestThenOk() {
     //given
-    InstallmentDTO toSync = setSyncStatus(debtPosition, 1, 1, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID);
+    InstallmentDTO toSync = setSyncStatus(debtPosition, 1, 1, InstallmentDTO.StatusEnum.DRAFT, InstallmentDTO.StatusEnum.UNPAID);
     toSync.setDueDate(null);
 
     //when
@@ -108,14 +103,14 @@ class AcaDebtPositionMapperTest {
   void givenValidDebtPositionWithVariousOpsWhenMapToNewDebtPositionRequestThenOk() {
     //given
     List<Pair<InstallmentDTO, AcaDebtPositionMapper.OPERATION>> toSyncList = List.of(
-      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID), AcaDebtPositionMapper.OPERATION.CREATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentStatus.UNPAID, InstallmentStatus.UNPAID), AcaDebtPositionMapper.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentStatus.EXPIRED, InstallmentStatus.UNPAID), AcaDebtPositionMapper.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentStatus.UNPAID, InstallmentStatus.CANCELLED), AcaDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentStatus.UNPAID, InstallmentStatus.INVALID), AcaDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentStatus.EXPIRED, InstallmentStatus.CANCELLED), AcaDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentStatus.EXPIRED, InstallmentStatus.INVALID), AcaDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED), AcaDebtPositionMapper.OPERATION.DELETE)
+      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentDTO.StatusEnum.DRAFT, InstallmentDTO.StatusEnum.UNPAID), AcaDebtPositionMapper.OPERATION.CREATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.UNPAID), AcaDebtPositionMapper.OPERATION.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentDTO.StatusEnum.EXPIRED, InstallmentDTO.StatusEnum.UNPAID), AcaDebtPositionMapper.OPERATION.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.CANCELLED), AcaDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.INVALID), AcaDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentDTO.StatusEnum.EXPIRED, InstallmentDTO.StatusEnum.CANCELLED), AcaDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentDTO.StatusEnum.EXPIRED, InstallmentDTO.StatusEnum.INVALID), AcaDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.EXPIRED), AcaDebtPositionMapper.OPERATION.DELETE)
     );
     //others installments will be ignored
 
@@ -137,7 +132,7 @@ class AcaDebtPositionMapperTest {
   @Test
   void givenValidDebtPositionWithInvalidStatusWhenMapToNewDebtPositionRequestThenException() {
     //given
-    InstallmentDTO installment = setSyncStatus(debtPosition, 1, 2, InstallmentStatus.PAID, InstallmentStatus.UNPAID);
+    InstallmentDTO installment = setSyncStatus(debtPosition, 1, 2, InstallmentDTO.StatusEnum.PAID, InstallmentDTO.StatusEnum.UNPAID);
     //others installments will be ignored
 
     //when
@@ -153,7 +148,7 @@ class AcaDebtPositionMapperTest {
   @Test
   void givenValidDebtPositionWithMultipleTransferWhenMapToNewDebtPositionRequestThenException() {
     //given
-    InstallmentDTO installment = setSyncStatus(debtPosition, 1, 2, InstallmentStatus.PAID, InstallmentStatus.UNPAID);
+    InstallmentDTO installment = setSyncStatus(debtPosition, 1, 2, InstallmentDTO.StatusEnum.PAID, InstallmentDTO.StatusEnum.UNPAID);
     installment.setTransfers(podamFactory.manufacturePojo(List.class, TransferDTO.class));
     //others installments will be ignored
 

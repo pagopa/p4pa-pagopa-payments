@@ -1,9 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
-import it.gov.pagopa.pu.pagopapayments.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.InstallmentStatus;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentOptionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -31,26 +28,54 @@ class AcaControllerTest {
 
   private static final DebtPositionDTO VALID_DEBT_POSITION = DebtPositionDTO.builder()
     .debtPositionId(1L)
+    .organizationId(1L)
     .description("descr")
     .debtPositionTypeOrgId(2L)
     .paymentOptions(List.of(PaymentOptionDTO.builder()
       .paymentOptionId(3L)
+      .totalAmountCents(21_00L)
+      .paymentOptionType(PaymentOptionDTO.PaymentOptionTypeEnum.INSTALLMENTS)
       .installments(List.of(InstallmentDTO.builder()
-        .installmentId(4L)
-        .status(InstallmentStatus.TO_SYNC)
-        .iuv("444444")
-        .iud("777777")
-        .build(), InstallmentDTO.builder()
-        .installmentId(5L)
-        .status(InstallmentStatus.UNPAID)
-        .iuv("555555")
-        .iud("666666")
-        .build()))
+          .installmentId(4L)
+          .iuv("444444")
+          .iud("777777")
+          .status(InstallmentDTO.StatusEnum.TO_SYNC)
+          .amountCents(11_00L)
+          .remittanceInformation("REMITTANCE4")
+          .debtor(TestUtils.getPodamFactory().manufacturePojo(PersonDTO.class))
+          .transfers(List.of(TransferDTO.builder()
+              .transferId(4L)
+              .orgFiscalCode("ORGFC")
+              .orgName("ORG")
+              .remittanceInformation("REMITTANCE4")
+              .category("CATEGORY")
+              .transferIndex(1)
+              .amountCents(11_00L)
+            .build()))
+          .build(),
+        InstallmentDTO.builder()
+          .installmentId(5L)
+          .iuv("555555")
+          .iud("666666")
+          .status(InstallmentDTO.StatusEnum.UNPAID)
+          .amountCents(10_00L)
+          .remittanceInformation("REMITTANCE5")
+          .debtor(TestUtils.getPodamFactory().manufacturePojo(PersonDTO.class))
+          .transfers(List.of(TransferDTO.builder()
+            .transferId(5L)
+            .orgFiscalCode("ORGFC")
+            .orgName("ORG")
+            .remittanceInformation("REMITTANCE5")
+            .category("CATEGORY")
+            .transferIndex(1)
+            .amountCents(10_00L)
+            .build()))
+          .build()))
       .build()))
     .build();
 
   @AfterEach
-  void clear(){
+  void clear() {
     SecurityContextHolder.clearContext();
   }
 

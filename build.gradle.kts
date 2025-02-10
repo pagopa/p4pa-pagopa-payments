@@ -158,6 +158,10 @@ openApiGenerate {
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.pu.pagopapayments.controller.generated")
   modelPackage.set("it.gov.pagopa.pu.pagopapayments.dto.generated")
+  typeMappings.set(mapOf(
+    "DebtPositionDTO" to "it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO",
+    "InstallmentStatus" to "it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO.StatusEnum"
+  ))
   configOptions.set(mapOf(
     "dateLibrary" to "java8",
     "requestMappingMode" to "api_interface",

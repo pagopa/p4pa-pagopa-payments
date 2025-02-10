@@ -67,7 +67,7 @@ class PaVerifyPaymentNoticeMapperTest {
     Assertions.assertNull(response.getFault());
     Assertions.assertEquals(organization.getOrgFiscalCode(), response.getFiscalCodePA());
     Assertions.assertEquals(organization.getOrgName(), response.getCompanyName());
-    Assertions.assertEquals(installmentDTO.getHumanFriendlyRemittanceInformation(), response.getPaymentDescription());
+    Assertions.assertEquals(installmentDTO.getRemittanceInformation(), response.getPaymentDescription());
     Assertions.assertEquals(StOutcome.OK, response.getOutcome());
     TestUtils.checkNotNullFields(response,"fault", "officeName");
     Assertions.assertNotNull(response.getPaymentList());

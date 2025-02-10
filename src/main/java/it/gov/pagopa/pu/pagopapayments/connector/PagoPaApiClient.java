@@ -21,21 +21,18 @@ public class PagoPaApiClient {
   private final RestTemplate restTemplate;
   private final ObjectMapper objectMapper;
   private final String baseUrlGithub;
-  private final String taxonomyPathContext;
 
   public PagoPaApiClient(
     @Value("${rest.pagopa-platform.base-url}") String baseUrlGithub,
-    @Value("${rest.pagopa-platform.taxonomy.service.context}") String taxonomyPathContext,
     RestTemplateBuilder restTemplateBuilder,
     ObjectMapper objectMapper) {
     this.restTemplate = restTemplateBuilder.build();
     this.baseUrlGithub = baseUrlGithub;
-    this.taxonomyPathContext = taxonomyPathContext;
     this.objectMapper = objectMapper;
   }
 
   public List<PaTaxonomyDTO> getTaxonomies() {
-    String url = baseUrlGithub + taxonomyPathContext;
+    String url = baseUrlGithub;
     String json = RestUtil.handleRestException(() -> restTemplate.getForObject(url, String.class), "getTaxonomies", true);
     return deserializeTaxonomies(json);
   }

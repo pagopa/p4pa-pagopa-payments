@@ -10,7 +10,6 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
@@ -38,7 +37,7 @@ public class PaGetPaymentMapper {
     payment.setDueDate(ConversionUtils.toXMLGregorianCalendar(Optional.ofNullable(installmentDTO.getDueDate()).orElse(Constants.MAX_EXPIRATION_DATE)));
     payment.setRetentionDate(ConversionUtils.toXMLGregorianCalendar(OffsetDateTime.now().plusMinutes(15))); //the data validity of this response: set to 15 minutes
     payment.setLastPayment(true);
-    payment.setDescription(StringUtils.firstNonBlank(installmentDTO.getHumanFriendlyRemittanceInformation(), installmentDTO.getRemittanceInformation()));
+    payment.setDescription(installmentDTO.getRemittanceInformation());
     payment.setCompanyName(organization.getOrgName());
     payment.setOfficeName(null);
     payment.setPaymentAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()));
@@ -59,7 +58,7 @@ public class PaGetPaymentMapper {
     CtTransferListPAV2 transferList = new CtTransferListPAV2();
     installmentDTO.getTransfers().forEach(transferDTO -> {
       CtTransferPAV2 transfer = new CtTransferPAV2();
-      transfer.setIdTransfer(transferDTO.getTransferIndex() != null ? transferDTO.getTransferIndex().intValue() : 0);
+      transfer.setIdTransfer(transferDTO.getTransferIndex() != null ? transferDTO.getTransferIndex() : 0);
       transfer.setFiscalCodePA(transferDTO.getOrgFiscalCode());
       transfer.setCompanyName(transferDTO.getOrgName());
       transfer.setTransferAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(transferDTO.getAmountCents()));

@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.*;
+import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +15,9 @@ import java.util.Set;
 @Slf4j
 public class AcaDebtPositionMapper {
 
-  public static final Set<InstallmentStatus> STATUS_TO_SEND_ACA = Set.of(InstallmentStatus.TO_SYNC);
-  private static final Set<InstallmentStatus> SYNC_STATUS_TO_DELETE = Set.of(InstallmentStatus.CANCELLED, InstallmentStatus.INVALID, InstallmentStatus.EXPIRED);
-  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED);
+  public static final Set<InstallmentDTO.StatusEnum> STATUS_TO_SEND_ACA = Set.of(InstallmentDTO.StatusEnum.TO_SYNC);
+  private static final Set<InstallmentDTO.StatusEnum> SYNC_STATUS_TO_DELETE = Set.of(InstallmentDTO.StatusEnum.CANCELLED, InstallmentDTO.StatusEnum.INVALID, InstallmentDTO.StatusEnum.EXPIRED);
+  private static final Set<InstallmentDTO.StatusEnum> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.EXPIRED);
 
 
   private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
@@ -39,7 +39,7 @@ public class AcaDebtPositionMapper {
   public Pair<OPERATION, NewDebtPositionRequest> mapToNewDebtPositionRequest(String iud, DebtPositionDTO debtPosition) {
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
-      .filter(installment -> installment.getIud().equals(iud))
+      .filter(installment -> iud.equals(installment.getIud()))
       .filter(installment -> installment2sendAca(installment, debtPosition.getOrganizationId()))
       .map(installment -> {
         OPERATION operation = getOperation(installment);
@@ -64,18 +64,24 @@ public class AcaDebtPositionMapper {
 
   private OPERATION getOperation(InstallmentDTO installment) {
     OPERATION operation;
-    if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(installment.getSyncStatus().getSyncStatusFrom()) &&
-      SYNC_STATUS_TO_DELETE.contains(installment.getSyncStatus().getSyncStatusTo())){
+    InstallmentSyncStatus syncStatus = installment.getSyncStatus();
+
+    if(syncStatus==null){
+      throw new InvalidValueException("Sync status is null for installment [%s]".formatted(installment.getIud()));
+    }
+
+    if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
+      SYNC_STATUS_TO_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusTo().name()))){
       operation = OPERATION.DELETE;
-    } else if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(installment.getSyncStatus().getSyncStatusFrom()) &&
-      installment.getSyncStatus().getSyncStatusTo()==InstallmentStatus.UNPAID){
+    } else if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
+      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())){
       operation = OPERATION.UPDATE;
-    } else if(installment.getSyncStatus().getSyncStatusFrom()==InstallmentStatus.DRAFT &&
-      installment.getSyncStatus().getSyncStatusTo()==InstallmentStatus.UNPAID){
+    } else if(syncStatus.getSyncStatusFrom().name().equals(InstallmentDTO.StatusEnum.DRAFT.name()) &&
+      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())){
       operation = OPERATION.CREATE;
     } else {
       throw new InvalidValueException("Invalid sync status [%s->%s] for installment [%s]".formatted(
-        installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()));
+        syncStatus.getSyncStatusFrom(), syncStatus.getSyncStatusTo(), installment.getIud()));
     }
     return operation;
   }

@@ -31,8 +31,8 @@ public class PaVerifyPaymentNoticeMapper {
     response.setFiscalCodePA(organization.getOrgFiscalCode());
     response.setCompanyName(organization.getOrgName());
     response.setOfficeName(null);
-    response.setPaymentDescription(StringUtils.firstNonBlank(installment.getHumanFriendlyRemittanceInformation(), installment.getRemittanceInformation()));
     CtPaymentOptionDescriptionPA paymentOption = new CtPaymentOptionDescriptionPA();
+    response.setPaymentDescription(installment.getRemittanceInformation());
     paymentOption.setOptions(StAmountOption.EQ);
     paymentOption.setAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(installment.getAmountCents()));
     paymentOption.setDueDate(ConversionUtils.toXMLGregorianCalendar(

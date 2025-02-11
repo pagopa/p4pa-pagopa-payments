@@ -5,6 +5,8 @@ import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClient;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingIdMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,11 +32,13 @@ public class PaymentsReportingService {
     return nodeForPaClient.getPaymentsReportingList(brokerForNodoPaDTO);
   }
 
-  public Long fetchPaymentReporting(Long organizationId, String reportingId, String accessToken) {
-
+  public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, String fileName, String accessToken) {
+    if(!PaymentsReportingIdMapper.validateFileName(fileName, paymentsReportingId)){
+      throw new InvalidValueException("PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
+    }
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
-    PaPaymentReportingDTO response = nodeForPaClient.fetchPaymentReporting(brokerForNodoPaDTO, reportingId);
-    return fileShareClient.uploadPaymentReporting(response, organizationId, accessToken);
+    PaPaymentReportingDTO response = nodeForPaClient.fetchPaymentReporting(brokerForNodoPaDTO, paymentsReportingId);
+    return fileShareClient.uploadPaymentReporting(response, organizationId, fileName, accessToken);
   }
 
 }

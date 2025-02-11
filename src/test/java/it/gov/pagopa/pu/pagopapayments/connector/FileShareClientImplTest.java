@@ -140,9 +140,10 @@ class FileShareClientImplTest {
 
     PaPaymentReportingDTO paPaymentReportingDTO = podamFactory.manufacturePojo(PaPaymentReportingDTO.class);
     Long organizationId = 1L;
+    String fileName = "fileName";
     String accessToken = TestUtils.getFakeAccessToken();
 
-    Long result = fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken);
+    Long result = fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, fileName, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(expectedIngestionFlowId, result);
@@ -163,11 +164,12 @@ class FileShareClientImplTest {
 
     PaPaymentReportingDTO paPaymentReportingDTO = podamFactory.manufacturePojo(PaPaymentReportingDTO.class);
     Long organizationId = 1L;
+    String fileName = "fileName";
     String accessToken = TestUtils.getFakeAccessToken();
 
     //when
     Assertions.assertThrows(RestClientException.class,
-      () -> fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
+      () -> fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, fileName, accessToken));
 
     //verify
     Mockito.verify(restTemplateMock, Mockito.times(1))
@@ -187,11 +189,12 @@ class FileShareClientImplTest {
 
     PaPaymentReportingDTO paPaymentReportingDTO = podamFactory.manufacturePojo(PaPaymentReportingDTO.class);
     Long organizationId = 1L;
+    String fileName = "fileName";
     String accessToken = TestUtils.getFakeAccessToken();
 
     //when
     HttpServerErrorException exception = Assertions.assertThrows(HttpServerErrorException.class,
-      () -> fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, accessToken));
+      () -> fileShareClient.uploadPaymentReporting(paPaymentReportingDTO, organizationId, fileName, accessToken));
 
     //verify
     Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());

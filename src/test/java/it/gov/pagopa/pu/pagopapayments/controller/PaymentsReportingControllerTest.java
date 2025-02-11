@@ -50,13 +50,14 @@ class PaymentsReportingControllerTest {
   void uploadOfPaymentReporting_whenValidRequest_thenReturnFileId() {
     Long organizationId = 1L;
     String flowId = "flowId";
+    String fileName = "fileName";
     Long expectedIngestionFlowFileId = 2L;
 
-    Mockito.when(paymentsReportingServiceMock.fetchPaymentReporting(organizationId, flowId, TestUtils.getFakeAccessToken()))
+    Mockito.when(paymentsReportingServiceMock.fetchPaymentReporting(organizationId, flowId, fileName, TestUtils.getFakeAccessToken()))
       .thenReturn(expectedIngestionFlowFileId);
     TestUtils.setFakeAccessTokenInContext();
 
-    ResponseEntity<Long> response = paymentsReportingController.fetchPaymentReporting(organizationId, flowId);
+    ResponseEntity<Long> response = paymentsReportingController.fetchPaymentReporting(organizationId, flowId, fileName);
 
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedIngestionFlowFileId, response.getBody());

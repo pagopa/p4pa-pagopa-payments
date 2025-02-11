@@ -41,26 +41,27 @@ public class FileShareClientImpl implements FileShareClient {
   @Override
   public Long uploadRt(PaSendRtDTO paSendRtDTO, Organization organization, String accessToken) {
     bearerTokenHolder.set(accessToken);
+    String rtFileName = "RT_" + paSendRtDTO.getNoticeNumber() + ".xml";
     UploadIngestionFlowFileResponseDTO response = RestUtil.handleRestException(
       () -> ingestionFlowFileApi.uploadIngestionFlowFile(organization.getOrganizationId(), IngestionFlowFileType.RECEIPT_PAGOPA, FileOrigin.PAGOPA,
-        new ByteArrayResource(paSendRtDTO.getReceiptBytes()) ),
+        rtFileName, new ByteArrayResource(paSendRtDTO.getReceiptBytes()) ),
       "upload receipt[%s/%s]".formatted(paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber()), true
     );
-    log.info("Receipt [{}/{}] uploaded with id: {}", paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber(), response.getIngestionFlowFileId());
+    log.info("Receipt [{}/{}] uploaded with id: {}",
+      paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber(), response.getIngestionFlowFileId());
     return response.getIngestionFlowFileId();
   }
 
   @Override
-  public Long uploadPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String accessToken) {
-    //TODO manage fileName after resolution of P4ADEV-2107
-
+  public Long uploadPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String fileName, String accessToken) {
     bearerTokenHolder.set(accessToken);
     UploadIngestionFlowFileResponseDTO response = RestUtil.handleRestException(
       () -> ingestionFlowFileApi.uploadIngestionFlowFile(organizationId, IngestionFlowFileType.PAYMENTS_REPORTING_PAGOPA, FileOrigin.PAGOPA,
-        new ByteArrayResource(paPaymentReporingDTO.getPaymentReportingBytes()) ),
+        fileName, new ByteArrayResource(paPaymentReporingDTO.getPaymentReportingBytes()) ),
       "upload payment reporting[%s/%s]".formatted(paPaymentReporingDTO.getFiscalCode(), paPaymentReporingDTO.getNoticeNumber()), true
     );
-    log.info("Payment reporting [{}/{}] uploaded with id: {}", paPaymentReporingDTO.getFiscalCode(), paPaymentReporingDTO.getNoticeNumber(), response.getIngestionFlowFileId());
+    log.info("Payment reporting [{}/{}] uploaded with id: {}",
+      paPaymentReporingDTO.getFiscalCode(), paPaymentReporingDTO.getNoticeNumber(), response.getIngestionFlowFileId());
     return response.getIngestionFlowFileId();
   }
 

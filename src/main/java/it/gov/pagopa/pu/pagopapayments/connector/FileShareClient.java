@@ -7,5 +7,5 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 public interface FileShareClient {
 
   Long uploadRt(PaSendRtDTO paSendRtDTO, Organization organization, String accessToken);
-  Long uploadPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String accessToken);
+  Long uploadPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String fileName, String accessToken);
 }

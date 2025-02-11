@@ -74,6 +74,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: fileName
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: OK

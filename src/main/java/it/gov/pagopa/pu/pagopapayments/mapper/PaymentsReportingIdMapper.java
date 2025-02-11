@@ -7,6 +7,8 @@ import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 public class PaymentsReportingIdMapper {
 
 
+  public static final String PAYMENTS_REPORTING_FILE_EXTENSION = ".xml";
+
   private PaymentsReportingIdMapper() {}
 
   public static PaymentsReportingIdDTO map(TipoIdRendicontazione tipoIdRendicontazione){
@@ -29,7 +31,11 @@ public class PaymentsReportingIdMapper {
     if(tipoIdRendicontazione.getIdentificativoFlusso()==null || tipoIdRendicontazione.getDataOraFlusso()==null){
       return null;
     }
-    return tipoIdRendicontazione.getIdentificativoFlusso()+tipoIdRendicontazione.getDataOraFlusso().toString()+".xml";
+    return tipoIdRendicontazione.getIdentificativoFlusso()+tipoIdRendicontazione.getDataOraFlusso().toString()+ PAYMENTS_REPORTING_FILE_EXTENSION;
+  }
+
+  public static boolean validateFileName(String fileName, String paymentsReportingId){
+    return fileName.startsWith(paymentsReportingId) && fileName.endsWith(PAYMENTS_REPORTING_FILE_EXTENSION);
   }
 
 }

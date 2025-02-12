@@ -10,6 +10,8 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -104,7 +106,10 @@ class NodeForPaClientImplTest {
   @Test
   void uploadOfPaymentReporting_whenValidRequest_thenReturnPaPaymentReportingDTO() {
     NodoChiediFlussoRendicontazioneRisposta response = new NodoChiediFlussoRendicontazioneRisposta();
-    response.setXmlRendicontazione(new DataHandler("test", "text/xml"));
+    ClassLoader classLoader = getClass().getClassLoader();
+    DataSource dataSource = new FileDataSource(classLoader.getResource("nodeForPaClientImplTest.xml").getFile());
+    DataHandler dataHandler = new DataHandler(dataSource);
+    response.setXmlRendicontazione(dataHandler);
 
     doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
 

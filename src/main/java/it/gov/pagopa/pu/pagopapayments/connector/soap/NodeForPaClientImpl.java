@@ -18,13 +18,14 @@ import org.springframework.ws.transport.context.TransportContext;
 import org.springframework.ws.transport.context.TransportContextHolder;
 import org.springframework.ws.transport.http.HttpUrlConnection;
 
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NodeForPaClientImpl extends WebServiceGatewaySupport implements NodeForPaClient {
 
   public static final String HEADER_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key";
+  public static final String ERROR_MESSAGE = "Error during the call to the payment node ";
 
   @Override
   public List<PaymentsReportingIdDTO> getPaymentsReportingList(BrokerForNodoPaDTO brokerForNodoPaDTO) {
@@ -33,7 +34,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
       getWebServiceTemplate().marshalSendAndReceive(request, getMessageCallback(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey(), "nodoChiediElencoFlussiRendicontazione"));
 
     if (response.getFault() != null) {
-      throw new ApplicationException("Error during the call to the payment node " + response.getFault().getFaultCode());
+      throw new ApplicationException(ERROR_MESSAGE + response.getFault().getFaultCode());
     }
 
     List<PaymentsReportingIdDTO> reportingList = new ArrayList<>();
@@ -51,15 +52,24 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
     getWebServiceTemplate().marshalSendAndReceive(request, getMessageCallback(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey(), "nodoChiediFlussoRendicontazione"));
 
   if (response.getFault() != null) {
-    throw new ApplicationException("Error during the call to the payment node " + response.getFault().getFaultCode());
+    throw new ApplicationException(ERROR_MESSAGE + response.getFault().getFaultCode());
   }
+  byte[] bytes;
+  try (InputStream inputStream = response.getXmlRendicontazione().getInputStream()) {
+    bytes = inputStream.readAllBytes();
+  }
+  catch (Exception e) {
+    throw new ApplicationException(ERROR_MESSAGE + e.getMessage());
+  }
+
+
 
   return PaPaymentReportingDTO.builder()
     .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
     .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())
     .idStation(brokerForNodoPaDTO.getBroker().getStationId())
     .fiscalCode(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
-    .paymentReportingBytes(response.getXmlRendicontazione().getContentType().getBytes(StandardCharsets.UTF_8))
+    .paymentReportingBytes(bytes)
     .build();
   }
 

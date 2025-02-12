@@ -31,6 +31,7 @@ class AcaControllerTest {
     .organizationId(1L)
     .description("descr")
     .debtPositionTypeOrgId(2L)
+    .flagPagoPaPayment(true)
     .paymentOptions(List.of(PaymentOptionDTO.builder()
       .paymentOptionId(3L)
       .totalAmountCents(21_00L)

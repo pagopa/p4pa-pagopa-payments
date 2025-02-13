@@ -50,6 +50,8 @@ jobs:
           azure_template_parameters: |
             {
               "APPS_TOP": "[p4pa-pagopa-payments]",
+              "APPS_MID": "[]",
+              "APPS_EXT": "[]",
               "POSTMAN_BRANCH": "${{ github.ref_name }}",
               "TRIGGER_MESSAGE": "p4pa-pagopa-payments"
             }

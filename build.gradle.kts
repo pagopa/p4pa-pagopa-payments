@@ -90,6 +90,16 @@ tasks.withType<Test> {
 	finalizedBy(tasks.jacocoTestReport)
 }
 
+val mockitoAgent = configurations.create("mockitoAgent")
+dependencies {
+  mockitoAgent("org.mockito:mockito-core") { isTransitive = false }
+}
+tasks {
+  test {
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
+  }
+}
+
 tasks.jacocoTestReport {
 	dependsOn(tasks.test)
 	reports {

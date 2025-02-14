@@ -59,19 +59,37 @@ rest:
     read-millis: "\${DEFAULT_REST_READ_TIMEOUT_MILLIS:120000}"
   auth:
     base-url: "\${AUTH_SERVER_BASE_URL:}"
+    max-attempts: "\${AUTH_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${AUTH_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${AUTH_PRINT_BODY_WHEN_ERROR:true}"
     post-token:
       client_secret: "\${AUTH_CLIENT_SECRET:clientsecret}"
   debt-position:
     base-url: "\${DEBT_POSITION_BASE_URL:}"
+    max-attempts: "\${DEBT_POSITION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${DEBT_POSITION_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${DEBT_POSITION_PRINT_BODY_WHEN_ERROR:true}"
   fileshare:
     base-url: "\${FILESHARE_BASE_URL:}"
+    max-attempts: "\${FILE_SHARE_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${FILE_SHARE_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${FILE_SHARE_PRINT_BODY_WHEN_ERROR:true}"
   organization:
     base-url: "\${ORGANIZATION_BASE_URL:}"
+    max-attempts: "\${ORGANIZATION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${ORGANIZATION_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${ORGANIZATION_PRINT_BODY_WHEN_ERROR:true}"
   pagopa-node-services:
     aca:
       base-url: "\${PAGOPA_NODE_ACA_BASE_URL:}"
+      max-attempts: "\${PAGOPA_NODE_ACA_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+      wait-time-millis: "\${PAGOPA_NODE_ACA_WAIT_TIME_MILLIS:500}"
+      print-body-when-error: "\${PAGOPA_NODE_ACA_PRINT_BODY_WHEN_ERROR:true}"
   pagopa-taxonomies:
     base-url: "\${PAGOPA_TAXONOMIES_BASE_URL:}"
+    max-attempts: "\${PAGOPA_TAXONOMIES_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${PAGOPA_TAXONOMIES_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${PAGOPA_TAXONOMIES_PRINT_BODY_WHEN_ERROR:true}"
 
 springdoc:
   writer-with-default-pretty-printer: true

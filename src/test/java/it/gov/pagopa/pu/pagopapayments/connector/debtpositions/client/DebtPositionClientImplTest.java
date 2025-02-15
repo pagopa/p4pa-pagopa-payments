@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.connector;
+package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;

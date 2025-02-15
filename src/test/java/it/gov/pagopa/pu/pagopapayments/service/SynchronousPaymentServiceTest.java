@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.pagopapayments.connector.DebtPositionClient;
+import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;

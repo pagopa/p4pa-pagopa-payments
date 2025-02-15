@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
-import it.gov.pagopa.pu.pagopapayments.connector.PagoPaApiClient;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.client.PagoPaTaxonomyApiClient;
 import it.gov.pagopa.pu.pagopapayments.dto.PaTaxonomyDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.Taxonomy;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaTaxonomyMapper;
@@ -24,14 +24,14 @@ import static org.mockito.Mockito.*;
 class TaxonomyServiceTest {
 
   @Mock
-  private PagoPaApiClient pagoPaApiClientMock;
+  private PagoPaTaxonomyApiClient pagoPaTaxonomyApiClientMock;
 
   @InjectMocks
   private TaxonomyService taxonomyService;
 
   @BeforeEach
   void setUp() {
-    taxonomyService = new TaxonomyService(pagoPaApiClientMock);
+    taxonomyService = new TaxonomyService(pagoPaTaxonomyApiClientMock);
   }
 
 
@@ -40,14 +40,14 @@ class TaxonomyServiceTest {
   void getTaxonomiesReturnsEmptyListWhenJsonIsEmpty() {
     // Given
     List<PaTaxonomyDTO> expectedTaxonomies = Collections.emptyList();
-    when(pagoPaApiClientMock.getTaxonomies()).thenReturn(expectedTaxonomies);
+    when(pagoPaTaxonomyApiClientMock.getTaxonomies()).thenReturn(expectedTaxonomies);
 
     // When
     List<Taxonomy> actualTaxonomies = taxonomyService.getTaxonomies();
 
     // Then
     assertTrue(actualTaxonomies.isEmpty());
-    verify(pagoPaApiClientMock, times(1)).getTaxonomies();
+    verify(pagoPaTaxonomyApiClientMock, times(1)).getTaxonomies();
   }
 
   @Test
@@ -70,13 +70,13 @@ class TaxonomyServiceTest {
       .build();
     List<PaTaxonomyDTO> paTaxonomyDTOList = List.of(paTaxonomyDTO);
     List<Taxonomy> expectedTaxonomies = List.of(PaTaxonomyMapper.map(paTaxonomyDTO));
-    when(pagoPaApiClientMock.getTaxonomies()).thenReturn(paTaxonomyDTOList);
+    when(pagoPaTaxonomyApiClientMock.getTaxonomies()).thenReturn(paTaxonomyDTOList);
 
     // When
     List<Taxonomy> actualTaxonomies = taxonomyService.getTaxonomies();
 
     // Then
     assertEquals(expectedTaxonomies, actualTaxonomies);
-    verify(pagoPaApiClientMock, times(1)).getTaxonomies();
+    verify(pagoPaTaxonomyApiClientMock, times(1)).getTaxonomies();
   }
 }

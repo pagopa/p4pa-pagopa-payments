@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.connector;
+package it.gov.pagopa.pu.pagopapayments.connector.fileshare.client;
 
 import it.gov.pagopa.pu.fileshare.controller.ApiClient;
 import it.gov.pagopa.pu.fileshare.controller.generated.IngestionFlowFileApi;

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service.paymentsreporting;
 
-import it.gov.pagopa.pu.pagopapayments.connector.FileShareClient;
+import it.gov.pagopa.pu.pagopapayments.connector.fileshare.client.FileShareClient;
 import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClient;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;

@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.connector;
+package it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,13 +16,13 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class PagoPaApiClient {
+public class PagoPaTaxonomyApiClient {
 
   private final RestTemplate restTemplate;
   private final ObjectMapper objectMapper;
   private final String baseUrl;
 
-  public PagoPaApiClient(
+  public PagoPaTaxonomyApiClient(
     @Value("${rest.pagopa-taxonomies.base-url}") String baseUrl,
     RestTemplateBuilder restTemplateBuilder,
     ObjectMapper objectMapper) {

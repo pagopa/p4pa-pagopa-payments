@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.connector;
+package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
 import it.gov.pagopa.pu.debtpositions.controller.ApiClient;
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionEntityControllerApi;

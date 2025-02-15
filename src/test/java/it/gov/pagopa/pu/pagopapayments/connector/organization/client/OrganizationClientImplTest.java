@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.connector;
+package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;

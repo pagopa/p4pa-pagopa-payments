@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.performancelogger;
 
-import it.gov.pagopa.payhub.auth.performancelogger.PerformanceLoggerThresholdLevels;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.LoggerFactory;

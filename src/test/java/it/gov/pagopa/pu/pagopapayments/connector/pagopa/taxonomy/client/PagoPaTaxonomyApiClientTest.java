@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.connector;
+package it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PagoPaApiClientTest {
+class PagoPaTaxonomyApiClientTest {
 
   @Mock
   private RestTemplate restTemplateMock;
@@ -34,14 +34,14 @@ class PagoPaApiClientTest {
   private ObjectMapper objectMapperMock;
 
   @InjectMocks
-  private PagoPaApiClient pagoPaApiClient;
+  private PagoPaTaxonomyApiClient pagoPaTaxonomyApiClient;
 
   private final String baseUrl = "http://example.com";
 
   @BeforeEach
   void setUp() {
     when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    pagoPaApiClient = new PagoPaApiClient(baseUrl, restTemplateBuilderMock, objectMapperMock);
+    pagoPaTaxonomyApiClient = new PagoPaTaxonomyApiClient(baseUrl, restTemplateBuilderMock, objectMapperMock);
   }
 
   @Test
@@ -51,7 +51,7 @@ class PagoPaApiClientTest {
     doThrow(new JsonProcessingException("Error") {}).when(objectMapperMock).readValue(anyString(), any(TypeReference.class));
 
     // When & Then
-    assertThrows(ApplicationException.class, () -> pagoPaApiClient.getTaxonomies());
+    assertThrows(ApplicationException.class, () -> pagoPaTaxonomyApiClient.getTaxonomies());
     verify(restTemplateMock, times(1)).getForObject(baseUrl, String.class);
   }
 
@@ -65,7 +65,7 @@ class PagoPaApiClientTest {
     when(objectMapperMock.readValue(eq(json), any(TypeReference.class))).thenReturn(expectedResponse);
 
     // When
-    List<PaTaxonomyDTO> actualResponse = pagoPaApiClient.getTaxonomies();
+    List<PaTaxonomyDTO> actualResponse = pagoPaTaxonomyApiClient.getTaxonomies();
 
     // Then
     assertEquals(expectedResponse, actualResponse);

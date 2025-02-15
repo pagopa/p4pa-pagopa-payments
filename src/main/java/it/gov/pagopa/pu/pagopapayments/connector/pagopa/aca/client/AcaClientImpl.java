@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.connector;
+package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.client;
 
 import it.gov.pagopa.nodo.pacreateposition.controller.ApiClient;
 import it.gov.pagopa.nodo.pacreateposition.controller.generated.AcaApi;

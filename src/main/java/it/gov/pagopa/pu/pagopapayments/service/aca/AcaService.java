@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service.aca;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.pagopapayments.connector.AcaClient;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.client.AcaClient;
 import it.gov.pagopa.pu.pagopapayments.mapper.AcaDebtPositionMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
 import lombok.extern.slf4j.Slf4j;

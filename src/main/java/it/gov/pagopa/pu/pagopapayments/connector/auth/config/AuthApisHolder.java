@@ -6,57 +6,58 @@ import it.gov.pagopa.pu.auth.generated.ApiClient;
 import it.gov.pagopa.pu.auth.generated.BaseApi;
 import it.gov.pagopa.pu.pagopapayments.config.RestTemplateConfig;
 import jakarta.annotation.PreDestroy;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-@Lazy
 @Service
 public class AuthApisHolder {
 
-    private final AuthnApi authnApi;
-    private final AuthzApi authzApi;
+  private final AuthnApi authnApi;
+  private final AuthzApi authzApi;
 
-    private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
+  private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
-    public AuthApisHolder(
-        AuthClientConfig clientConfig,
-        RestTemplateBuilder restTemplateBuilder
-    ) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        ApiClient apiClient = new ApiClient(restTemplate);
-      apiClient.setBasePath(clientConfig.getBaseUrl());
-      apiClient.setBearerToken(bearerTokenHolder::get);
-      apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
-      apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
-      if (clientConfig.isPrintBodyWhenError()) {
-        restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("ORGANIZATION"));
-      }
-
-        this.authnApi = new AuthnApi(apiClient);
-        this.authzApi = new AuthzApi(apiClient);
+  public AuthApisHolder(
+    AuthApiClientConfig clientConfig,
+    RestTemplateBuilder restTemplateBuilder
+  ) {
+    RestTemplate restTemplate = restTemplateBuilder.build();
+    ApiClient apiClient = new ApiClient(restTemplate);
+    apiClient.setBasePath(clientConfig.getBaseUrl());
+    apiClient.setBearerToken(bearerTokenHolder::get);
+    apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
+    apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
+    if (clientConfig.isPrintBodyWhenError()) {
+      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("AUTH"));
     }
 
-    @PreDestroy
-    public void unload(){
-        bearerTokenHolder.remove();
-    }
+    this.authnApi = new AuthnApi(apiClient);
+    this.authzApi = new AuthzApi(apiClient);
+  }
 
-    /** It will return a {@link AuthnApi} instrumented with the provided accessToken. Use null if auth is not required */
-    public AuthnApi getAuthnApi(String accessToken){
-        return getApi(accessToken, authnApi);
-    }
+  @PreDestroy
+  public void unload() {
+    bearerTokenHolder.remove();
+  }
 
-    /** It will return a {@link AuthzApi} instrumented with the provided accessToken. Use null if auth is not required */
-    public AuthzApi getAuthzApi(String accessToken){
-        bearerTokenHolder.set(accessToken);
-        return getApi(accessToken, authzApi);
-    }
+  /**
+   * It will return a {@link AuthnApi} instrumented with the provided accessToken. Use null if auth is not required
+   */
+  public AuthnApi getAuthnApi(String accessToken) {
+    return getApi(accessToken, authnApi);
+  }
 
-    private <T extends BaseApi> T getApi(String accessToken, T api) {
-        bearerTokenHolder.set(accessToken);
-        return api;
-    }
+  /**
+   * It will return a {@link AuthzApi} instrumented with the provided accessToken. Use null if auth is not required
+   */
+  public AuthzApi getAuthzApi(String accessToken) {
+    bearerTokenHolder.set(accessToken);
+    return getApi(accessToken, authzApi);
+  }
+
+  private <T extends BaseApi> T getApi(String accessToken, T api) {
+    bearerTokenHolder.set(accessToken);
+    return api;
+  }
 }

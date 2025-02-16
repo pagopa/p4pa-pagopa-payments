@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.pagopapayments.controller.generated.TaxonomiesApi;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.Taxonomy;
-import it.gov.pagopa.pu.pagopapayments.service.taxonomy.TaxonomyService;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.TaxonomyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 

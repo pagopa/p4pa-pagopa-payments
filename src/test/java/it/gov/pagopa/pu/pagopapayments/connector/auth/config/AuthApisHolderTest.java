@@ -24,7 +24,7 @@ class AuthApisHolderTest extends BaseApiHolderTest {
     void setUp() {
         Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
         Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-        AuthClientConfig clientConfig = AuthClientConfig.builder()
+        AuthApiClientConfig clientConfig = AuthApiClientConfig.builder()
           .baseUrl("http://example.com")
           .build();
         authApisHolder = new AuthApisHolder(clientConfig, restTemplateBuilderMock);

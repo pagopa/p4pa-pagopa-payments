@@ -2,8 +2,8 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client.DebtPositionClient;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
+import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
@@ -28,7 +28,7 @@ import java.util.List;
 class SynchronousPaymentServiceTest {
 
   @Mock
-  private DebtPositionClient debtPositionClientMock;
+  private DebtPositionService debtPositionServiceMock;
   @Mock
   private AuthnService authnServiceMock;
   @Mock
@@ -65,7 +65,7 @@ class SynchronousPaymentServiceTest {
     retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode());
 
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN)).thenReturn(organization);
-    Mockito.when(debtPositionClientMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN))
+    Mockito.when(debtPositionServiceMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN))
       .thenReturn(installmentDTOList);
     Mockito.when(synchronousPaymentStatusVerifierServiceMock.verifyPaymentStatus(organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer())).thenReturn(installmentDTO);
 
@@ -78,7 +78,7 @@ class SynchronousPaymentServiceTest {
     Assertions.assertTrue(new ReflectionEquals(expectedResponse).matches(response));
     Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
     Mockito.verify(paForNodeRequestValidatorServiceMock, Mockito.times(1)).paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN);
-    Mockito.verify(debtPositionClientMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionServiceMock, Mockito.times(1)).getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN);
     Mockito.verify(synchronousPaymentStatusVerifierServiceMock, Mockito.times(1))
       .verifyPaymentStatus(organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer());
   }
@@ -96,7 +96,7 @@ class SynchronousPaymentServiceTest {
     Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, exception.getErrorCode());
     Assertions.assertEquals(retrievePaymentDTO.getFiscalCode(), exception.getErrorEmitter());
     Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
-    Mockito.verifyNoInteractions(paForNodeRequestValidatorServiceMock, debtPositionClientMock, synchronousPaymentStatusVerifierServiceMock);
+    Mockito.verifyNoInteractions(paForNodeRequestValidatorServiceMock, debtPositionServiceMock, synchronousPaymentStatusVerifierServiceMock);
   }
 
   //endregion

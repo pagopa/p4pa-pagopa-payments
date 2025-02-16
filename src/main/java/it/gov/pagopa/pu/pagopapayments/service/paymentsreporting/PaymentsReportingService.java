@@ -7,7 +7,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingIdMapper;
-import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerService;
+import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,17 +18,17 @@ import java.util.List;
 public class PaymentsReportingService {
 
   private final NodeForPaClient nodeForPaClient;
-  private final BrokerService brokerService;
+  private final BrokerRetrieverService brokerRetrieverService;
   private final FileShareClient fileShareClient;
 
-  public PaymentsReportingService(NodeForPaClient nodeForPaClient, BrokerService brokerService, FileShareClient fileShareClient) {
+  public PaymentsReportingService(NodeForPaClient nodeForPaClient, BrokerRetrieverService brokerRetrieverService, FileShareClient fileShareClient) {
     this.nodeForPaClient = nodeForPaClient;
-    this.brokerService = brokerService;
+    this.brokerRetrieverService = brokerRetrieverService;
       this.fileShareClient = fileShareClient;
   }
 
   public List<PaymentsReportingIdDTO> getPaymentsReportingList(Long organizationId, String accessToken) {
-    BrokerForNodoPaDTO brokerForNodoPaDTO = brokerService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
+    BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     return nodeForPaClient.getPaymentsReportingList(brokerForNodoPaDTO);
   }
 
@@ -36,7 +36,7 @@ public class PaymentsReportingService {
     if(!PaymentsReportingIdMapper.validateFileName(fileName, paymentsReportingId)){
       throw new InvalidValueException("PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
     }
-    BrokerForNodoPaDTO brokerForNodoPaDTO = brokerService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
+    BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     PaPaymentReportingDTO response = nodeForPaClient.fetchPaymentReporting(brokerForNodoPaDTO, paymentsReportingId);
     return fileShareClient.uploadPaymentReporting(response, organizationId, fileName, accessToken);
   }

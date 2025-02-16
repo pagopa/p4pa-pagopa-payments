@@ -3,12 +3,11 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.gov.pagopa.pu.pagopapayments.dto.PaTaxonomyDTO;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.dto.PaTaxonomyDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -33,7 +32,6 @@ class PagoPaTaxonomyApiClientTest {
   @Mock
   private ObjectMapper objectMapperMock;
 
-  @InjectMocks
   private PagoPaTaxonomyApiClient pagoPaTaxonomyApiClient;
 
   private final String baseUrl = "http://example.com";
@@ -41,7 +39,7 @@ class PagoPaTaxonomyApiClientTest {
   @BeforeEach
   void setUp() {
     when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    pagoPaTaxonomyApiClient = new PagoPaTaxonomyApiClient(baseUrl, restTemplateBuilderMock, objectMapperMock);
+    pagoPaTaxonomyApiClient = new PagoPaTaxonomyApiClient(baseUrl, true, restTemplateBuilderMock, objectMapperMock);
   }
 
   @Test

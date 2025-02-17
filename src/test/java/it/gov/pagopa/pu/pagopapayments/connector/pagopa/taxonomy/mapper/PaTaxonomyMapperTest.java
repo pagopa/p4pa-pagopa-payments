@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.mapper;
 
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.dto.PaTaxonomyDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.Taxonomy;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.TaxonomyDTO;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
@@ -31,10 +31,9 @@ class PaTaxonomyMapperTest {
     paTaxonomyDTO.setDataFineValidita(new Date());
 
     // When
-    Taxonomy taxonomy = PaTaxonomyMapper.map(paTaxonomyDTO);
+    TaxonomyDTO taxonomy = PaTaxonomyMapper.map(paTaxonomyDTO);
 
     // Then
-    assertEquals(paTaxonomyDTO.getId(), taxonomy.getTaxonomyId());
     assertEquals(paTaxonomyDTO.getDatiSpecificiIncasso(), taxonomy.getTaxonomyCode());
     assertEquals(paTaxonomyDTO.getCodiceTipoEnte(), taxonomy.getOrganizationType());
     assertEquals(paTaxonomyDTO.getDescrizioneTipoEnte(), taxonomy.getOrganizationTypeDescription());
@@ -55,7 +54,7 @@ class PaTaxonomyMapperTest {
     PaTaxonomyDTO paTaxonomyDTO = null;
 
     // When
-    Taxonomy taxonomy = PaTaxonomyMapper.map(paTaxonomyDTO);
+    TaxonomyDTO taxonomy = PaTaxonomyMapper.map(paTaxonomyDTO);
 
     // Then
     assertNull(taxonomy);

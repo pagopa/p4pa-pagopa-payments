@@ -2,8 +2,8 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy;
 
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.client.PagoPaTaxonomyApiClient;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.dto.PaTaxonomyDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.Taxonomy;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.mapper.PaTaxonomyMapper;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.TaxonomyDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ class TaxonomyServiceTest {
     when(pagoPaTaxonomyApiClientMock.getTaxonomies()).thenReturn(expectedTaxonomies);
 
     // When
-    List<Taxonomy> actualTaxonomies = taxonomyService.getTaxonomies();
+    List<TaxonomyDTO> actualTaxonomies = taxonomyService.getTaxonomies();
 
     // Then
     assertTrue(actualTaxonomies.isEmpty());
@@ -68,11 +68,11 @@ class TaxonomyServiceTest {
       .dataFineValidita(new Date())
       .build();
     List<PaTaxonomyDTO> paTaxonomyDTOList = List.of(paTaxonomyDTO);
-    List<Taxonomy> expectedTaxonomies = List.of(PaTaxonomyMapper.map(paTaxonomyDTO));
+    List<TaxonomyDTO> expectedTaxonomies = List.of(PaTaxonomyMapper.map(paTaxonomyDTO));
     when(pagoPaTaxonomyApiClientMock.getTaxonomies()).thenReturn(paTaxonomyDTOList);
 
     // When
-    List<Taxonomy> actualTaxonomies = taxonomyService.getTaxonomies();
+    List<TaxonomyDTO> actualTaxonomies = taxonomyService.getTaxonomies();
 
     // Then
     assertEquals(expectedTaxonomies, actualTaxonomies);

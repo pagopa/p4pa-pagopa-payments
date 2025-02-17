@@ -104,7 +104,7 @@ paths:
               schema:
                 type: array
                 items:
-                    $ref: "#/components/schemas/Taxonomy"
+                    $ref: "#/components/schemas/TaxonomyDTO"
         "400":
           description: Invalid request
         "500":
@@ -141,32 +141,8 @@ components:
             - PAGOPA_PAYMENTS_GENERIC_ERROR
         message:
           type: string
-    Taxonomy:
-      required:
-        - collectionReason
-        - endDateOfValidity
-        - macroAreaCode
-        - macroAreaDescription
-        - macroAreaName
-        - organizationType
-        - organizationTypeDescription
-        - serviceType
-        - serviceTypeCode
-        - serviceTypeDescription
-        - startDateValidity
-        - taxonomyCode
+    TaxonomyDTO:
       properties:
-        creationDate:
-          type: string
-          format: date-time
-        updateDate:
-          type: string
-          format: date-time
-        updateOperatorExternalId:
-          type: string
-        taxonomyId:
-          type: integer
-          format: int64
         organizationType:
           type: string
         organizationTypeDescription:
@@ -193,6 +169,8 @@ components:
           format: date-time
         taxonomyCode:
           type: string
+        version:
+            type: string
   securitySchemes:
     BearerAuth:
       type: http

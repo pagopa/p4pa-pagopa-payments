@@ -1,11 +1,10 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
-import it.gov.pagopa.pu.pagopapayments.controller.generated.TaxonomiesApi;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.Taxonomy;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.TaxonomyService;
+import it.gov.pagopa.pu.pagopapayments.controller.generated.TaxonomiesApi;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.TaxonomyDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -22,9 +21,9 @@ public class TaxonomyController implements TaxonomiesApi {
 
 
   @Override
-  public ResponseEntity<List<Taxonomy>> fetchTaxonomies(){
+  public ResponseEntity<List<TaxonomyDTO>> fetchTaxonomies(){
     log.info("retrieve taxonomies");
-    List<Taxonomy> result = taxonomyService.getTaxonomies();
+    List<TaxonomyDTO> result = taxonomyService.getTaxonomies();
     return ResponseEntity.ok(result);
   }
 

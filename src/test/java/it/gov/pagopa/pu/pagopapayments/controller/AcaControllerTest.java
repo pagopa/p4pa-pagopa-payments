@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
-import it.gov.pagopa.pu.pagopapayments.service.aca.AcaService;
+import it.gov.pagopa.pu.pagopapayments.service.aca.AcaFacadeService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -21,7 +21,7 @@ import java.util.List;
 class AcaControllerTest {
 
   @Mock
-  private AcaService acaServiceMock;
+  private AcaFacadeService acaFacadeServiceMock;
 
   @InjectMocks
   private AcaController acaController;
@@ -83,13 +83,13 @@ class AcaControllerTest {
   @Test
   void givenValidDebtPositionWhenSyncAcaThenOk() {
     //given
-    Mockito.doNothing().when(acaServiceMock).sync("IUD", VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
+    Mockito.doNothing().when(acaFacadeServiceMock).sync("IUD", VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
     TestUtils.setFakeAccessTokenInContext();
     //when
     ResponseEntity<Void> response = acaController.syncAca("IUD", VALID_DEBT_POSITION);
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-    Mockito.verify(acaServiceMock, Mockito.times(1)).sync("IUD", VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
+    Mockito.verify(acaFacadeServiceMock, Mockito.times(1)).sync("IUD", VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
   }
 }

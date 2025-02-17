@@ -19,25 +19,35 @@ import java.util.stream.IntStream;
 
 public abstract class BaseApiHolderTest {
 
+  public enum AUTH_TYPE {
+    API_KEY,
+    BEARER
+  }
+
   @Mock
   protected RestTemplate restTemplateMock;
 
   protected <T> void assertAuthenticationShouldBeSetInThreadSafeMode(Function<String, T> apiInvoke, Class<T> apiReturnedType, Runnable apiUnloader) throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(apiInvoke, apiReturnedType, apiUnloader, AUTH_TYPE.BEARER, HttpHeaders.AUTHORIZATION);
+  }
+
+  protected <T> void assertAuthenticationShouldBeSetInThreadSafeMode(Function<String, T> apiInvoke, Class<T> apiReturnedType, Runnable apiUnloader, AUTH_TYPE authType, String authHeader) throws InterruptedException {
     // Configuring useCases in a single thread
     List<Pair<String, T>> useCases = IntStream.rangeClosed(0, 100)
       .mapToObj(i -> {
         try {
-          String accessToken = "accessToken" + i;
+          String auth = "auth" + i;
+          String authPrefix = AUTH_TYPE.BEARER.equals(authType) ? "Bearer " : "";
           T expectedResult = apiReturnedType.getConstructor().newInstance();
 
           Mockito.doReturn(ResponseEntity.ok(expectedResult))
             .when(restTemplateMock)
             .exchange(
               Mockito.argThat(req ->
-                req.getHeaders().getOrDefault(HttpHeaders.AUTHORIZATION, Collections.emptyList()).getFirst()
-                  .equals("Bearer " + accessToken)),
+                req.getHeaders().getOrDefault(authHeader, Collections.emptyList()).getFirst()
+                  .equals(authPrefix + auth)),
               Mockito.eq(apiReturnedType));
-          return Pair.of(accessToken, expectedResult);
+          return Pair.of(auth, expectedResult);
         } catch (Exception e) {
           throw new IllegalStateException(e);
         }

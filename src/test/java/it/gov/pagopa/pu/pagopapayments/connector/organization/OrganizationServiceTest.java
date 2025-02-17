@@ -1,0 +1,52 @@
+package it.gov.pagopa.pu.pagopapayments.connector.organization;
+
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.connector.organization.client.OrganizationClient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class OrganizationServiceTest {
+
+  @Mock
+  private OrganizationClient client;
+
+  private OrganizationService service;
+
+  @BeforeEach
+  void setUp() {
+    service = new OrganizationServiceImpl(client);
+  }
+
+  @Test
+  void testGetOrganizationById() {
+    Organization expected = new Organization();
+    Long orgId = 1L;
+    String accessToken = "accessToken";
+
+    when(client.getOrganizationById(orgId, accessToken)).thenReturn(expected);
+
+    Organization result = service.getOrganizationById(orgId, accessToken);
+
+    assertEquals(expected, result);
+  }
+
+  @Test
+  void testGetOrganizationByFiscalCode() {
+    Organization expected = new Organization();
+    String fiscalCode = "fiscalCode";
+    String accessToken = "accessToken";
+
+    when(client.getOrganizationByFiscalCode(fiscalCode, accessToken)).thenReturn(expected);
+
+    Organization result = service.getOrganizationByFiscalCode(fiscalCode, accessToken);
+
+    assertEquals(expected, result);
+  }
+}

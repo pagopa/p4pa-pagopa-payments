@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.pagopapayments.dto.generated.Taxonomy;
-import it.gov.pagopa.pu.pagopapayments.service.taxonomy.TaxonomyService;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.TaxonomyService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

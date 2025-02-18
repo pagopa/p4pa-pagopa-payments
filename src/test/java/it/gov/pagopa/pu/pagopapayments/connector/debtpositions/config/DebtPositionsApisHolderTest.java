@@ -12,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class DebtPositionsApisHolderTest extends BaseApiHolderTest {
     @Mock
@@ -45,5 +47,14 @@ class DebtPositionsApisHolderTest extends BaseApiHolderTest {
                 DebtPositionTypeOrg.class,
                 apisHolder::unload);
     }
+
+  @Test
+  void whenGetInstallmentApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      accessToken -> apisHolder.getInstallmentApi(accessToken)
+        .getInstallmentsByOrganizationIdAndNav(1L, "nav"),
+      List.class,
+      apisHolder::unload);
+  }
 
 }

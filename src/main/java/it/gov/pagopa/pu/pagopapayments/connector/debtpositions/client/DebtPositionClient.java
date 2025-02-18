@@ -31,6 +31,8 @@ public class DebtPositionClient {
   }
 
   public List<InstallmentDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav, String accessToken) {
-    return List.of(); //TODO blocked by P4ADEV-1779
+    return debtPositionsApisHolder
+      .getInstallmentApi(accessToken)
+      .getInstallmentsByOrganizationIdAndNav(organizationId, nav);
   }
 }

@@ -38,7 +38,7 @@ public abstract class BaseApiHolderTest {
         try {
           String auth = "auth" + i;
           String authPrefix = AUTH_TYPE.BEARER.equals(authType) ? "Bearer " : "";
-          T expectedResult = apiReturnedType.getConstructor().newInstance();
+          T expectedResult = Mockito.mock(apiReturnedType);
 
           Mockito.doReturn(ResponseEntity.ok(expectedResult))
             .when(restTemplateMock)

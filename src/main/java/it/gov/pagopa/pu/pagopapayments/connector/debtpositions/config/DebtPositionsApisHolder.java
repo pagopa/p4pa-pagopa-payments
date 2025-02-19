@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config;
 import it.gov.pagopa.pu.debtpositions.controller.ApiClient;
 import it.gov.pagopa.pu.debtpositions.controller.BaseApi;
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgEntityControllerApi;
+import it.gov.pagopa.pu.debtpositions.controller.generated.InstallmentApi;
 import it.gov.pagopa.pu.pagopapayments.config.RestTemplateConfig;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -13,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 public class DebtPositionsApisHolder {
 
   private final DebtPositionTypeOrgEntityControllerApi debtPositionTypeOrgEntityControllerApi;
+
+  private final InstallmentApi installmentApi;
 
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
@@ -31,6 +34,7 @@ public class DebtPositionsApisHolder {
     }
 
     this.debtPositionTypeOrgEntityControllerApi = new DebtPositionTypeOrgEntityControllerApi(apiClient);
+    this.installmentApi = new InstallmentApi(apiClient);
   }
 
   @PreDestroy
@@ -40,6 +44,10 @@ public class DebtPositionsApisHolder {
 
   public DebtPositionTypeOrgEntityControllerApi getDebtPositionTypeOrgEntityControllerApi(String accessToken) {
     return getApi(accessToken, debtPositionTypeOrgEntityControllerApi);
+  }
+
+  public InstallmentApi getInstallmentApi(String accessToken) {
+    return getApi(accessToken, installmentApi);
   }
 
   private <T extends BaseApi> T getApi(String accessToken, T api) {

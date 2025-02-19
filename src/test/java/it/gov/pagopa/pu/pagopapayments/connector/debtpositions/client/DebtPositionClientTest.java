@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgEntityControllerApi;
+import it.gov.pagopa.pu.debtpositions.controller.generated.InstallmentApi;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
@@ -24,6 +25,9 @@ class DebtPositionClientTest {
   private DebtPositionsApisHolder apisHolderMock;
   @Mock
   private DebtPositionTypeOrgEntityControllerApi debtPositionTypeOrgEntityControllerApiMock;
+  @Mock
+  private InstallmentApi installmentApiMock;
+
 
   private DebtPositionClient client;
 
@@ -36,7 +40,8 @@ class DebtPositionClientTest {
   void verifyNoMoreInteractions(){
     Mockito.verifyNoMoreInteractions(
       apisHolderMock,
-      debtPositionTypeOrgEntityControllerApiMock
+      debtPositionTypeOrgEntityControllerApiMock,
+      installmentApiMock
       );
   }
 
@@ -84,6 +89,12 @@ class DebtPositionClientTest {
     long organizationId = 1L;
     String nav = "NAV";
     List<InstallmentDTO> expectedResult = List.of();
+
+    Mockito.when(apisHolderMock.getInstallmentApi(accessToken))
+      .thenReturn(installmentApiMock);
+    Mockito.when(installmentApiMock.getInstallmentsByOrganizationIdAndNav(organizationId, nav))
+      .thenReturn(expectedResult);
+
 
     // When
     List<InstallmentDTO> result = client.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, accessToken);

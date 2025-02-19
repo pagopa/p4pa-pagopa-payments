@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class ConversionUtils {
   private ConversionUtils() {
@@ -31,7 +32,7 @@ public class ConversionUtils {
   }
 
   public static XMLGregorianCalendar toXMLGregorianCalendar(OffsetDateTime offsetDateTime) {
-    return offsetDateTime != null ? DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR.newXMLGregorianCalendar(offsetDateTime.toString()) : null;
+    return offsetDateTime != null ? DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR.newXMLGregorianCalendar(GregorianCalendar.from(offsetDateTime.toZonedDateTime())) : null;
   }
 
 

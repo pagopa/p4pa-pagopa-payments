@@ -60,7 +60,7 @@ public class PaForNodeEndpoint {
       log.error("Fault in paVerifyPaymentNotice [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
       return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaVerifyPaymentNoticeRes());
     } catch(Exception e) {
-      log.error("Error in paGetPayment [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
+      log.error("Error in paVerifyPaymentNotice [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
       return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaVerifyPaymentNoticeRes());
     } finally {
       long elapsed = System.currentTimeMillis() - startTime;

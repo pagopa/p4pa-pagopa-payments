@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
@@ -75,12 +76,14 @@ public class PaGetPaymentMapper {
       transferList.getTransfers().add(transfer);
     });
     payment.setTransferList(transferList);
-    CtMetadata metadata = new CtMetadata();
-    CtMapEntry entry = new CtMapEntry();
-    entry.setKey("datiSpecificiRiscossione");
-    entry.setValue(installmentDTO.getLegacyPaymentMetadata());
-    metadata.getMapEntries().add(entry);
-    payment.setMetadata(metadata);
+    if(StringUtils.isNotBlank(installmentDTO.getLegacyPaymentMetadata())) {
+      CtMetadata metadata = new CtMetadata();
+      CtMapEntry entry = new CtMapEntry();
+      entry.setKey("datiSpecificiRiscossione");
+      entry.setValue(installmentDTO.getLegacyPaymentMetadata());
+      metadata.getMapEntries().add(entry);
+      payment.setMetadata(metadata);
+    }
     PaGetPaymentV2Response response = new PaGetPaymentV2Response();
     response.setData(payment);
     response.setOutcome(StOutcome.OK);

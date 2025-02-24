@@ -1,5 +1,5 @@
 {
-  "openapi" : "3.0.1",
+  "openapi" : "3.1.0",
   "info" : {
     "title" : "p4pa-pagopa-payments",
     "description" : "Api and Models",
@@ -282,7 +282,6 @@
   "components" : {
     "schemas" : {
       "PagoPaPaymentsErrorDTO" : {
-        "required" : [ "code", "message" ],
         "type" : "object",
         "properties" : {
           "code" : {
@@ -292,7 +291,8 @@
           "message" : {
             "type" : "string"
           }
-        }
+        },
+        "required" : [ "code", "message" ]
       },
       "DebtPositionDTO" : {
         "type" : "object",
@@ -629,7 +629,6 @@
         }
       },
       "PaymentsReportingIdDTO" : {
-        "required" : [ "flowDateTime", "pagopaPaymentsReportingId", "paymentsReportingFileName" ],
         "type" : "object",
         "properties" : {
           "pagopaPaymentsReportingId" : {
@@ -642,7 +641,8 @@
           "paymentsReportingFileName" : {
             "type" : "string"
           }
-        }
+        },
+        "required" : [ "flowDateTime", "pagopaPaymentsReportingId", "paymentsReportingFileName" ]
       }
     },
     "securitySchemes" : {

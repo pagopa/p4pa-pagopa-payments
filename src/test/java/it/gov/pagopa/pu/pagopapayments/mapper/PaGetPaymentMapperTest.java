@@ -11,6 +11,9 @@ import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 
@@ -106,10 +109,13 @@ class PaGetPaymentMapperTest {
     }
   }
 
-  @Test
-  void givenValidInstallmentDTOPostalWhenInstallmentDto2PaGetPaymentV2ResponseThenOk() {
+  @ParameterizedTest
+  @ValueSource(strings = {"legacyPaymentMetadata"})
+  @NullSource
+  void givenValidInstallmentDTOPostalWhenInstallmentDto2PaGetPaymentV2ResponseThenOk(String legacyPaymentMetadata) {
     //given
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setLegacyPaymentMetadata(legacyPaymentMetadata);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
 
     installmentDTO.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
@@ -121,7 +127,16 @@ class PaGetPaymentMapperTest {
     //verify
     Assertions.assertNotNull(responseV2);
     Assertions.assertNotNull(responseV2.getData());
-    TestUtils.checkNotNullFields(responseV2.getData(),"officeName");
+    TestUtils.checkNotNullFields(responseV2.getData(),"officeName", "metadata");
+    if(legacyPaymentMetadata!=null){
+      Assertions.assertNotNull(responseV2.getData().getMetadata());
+      Assertions.assertNotNull(responseV2.getData().getMetadata().getMapEntries());
+      Assertions.assertTrue(responseV2.getData().getMetadata().getMapEntries().stream().anyMatch(e -> e.getKey().equals("datiSpecificiRiscossione")));
+      Assertions.assertEquals(legacyPaymentMetadata, responseV2.getData().getMetadata().getMapEntries()
+        .stream().filter(e -> e.getKey().equals("datiSpecificiRiscossione")).findFirst().map(CtMapEntry::getValue).orElse(null));
+    } else {
+      Assertions.assertNull(responseV2.getData().getMetadata());
+    }
     TestUtils.checkNotNullFields(responseV2.getData().getDebtor());
     Assertions.assertEquals(installmentDTO.getTransfers().size(), responseV2.getData().getTransferList().getTransfers().size());
     for (int i = 0; i < responseV2.getData().getTransferList().getTransfers().size(); i++) {

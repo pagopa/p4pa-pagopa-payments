@@ -1,6 +1,6 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.4.1"
+	id("org.springframework.boot") version "3.4.3"
 	id("io.spring.dependency-management") version "1.1.7"
 	jacoco
 	id("org.sonarqube") version "6.0.1.5171"
@@ -31,10 +31,10 @@ repositories {
 	mavenCentral()
 }
 
-val springDocOpenApiVersion = "2.7.0"
+val springDocOpenApiVersion = "2.8.5"
 val openApiToolsVersion = "0.2.6"
-val micrometerVersion = "1.4.1"
-val bouncycastleVersion = "1.79"
+val micrometerVersion = "1.4.3"
+val bouncycastleVersion = "1.80"
 val jaxbVersion = "4.0.5"
 val jaxbApiVersion = "4.0.2"
 val activationVersion = "2.1.3"
@@ -55,6 +55,7 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
+  implementation("org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion")
 
   //webservice soap
   implementation("wsdl4j:wsdl4j:$wsdl4jVersion")
@@ -73,9 +74,6 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
   testAnnotationProcessor("org.projectlombok:lombok")
-
-  //security
-  implementation("org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion")
 
   //	Testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

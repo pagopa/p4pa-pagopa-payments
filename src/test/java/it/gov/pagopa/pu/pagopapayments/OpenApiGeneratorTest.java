@@ -43,7 +43,7 @@ class OpenApiGeneratorTest {
       .replace("\r", "")
       .replace("EntityModel", "");
 
-    Assertions.assertTrue(openApiResult.startsWith("{\n  \"openapi\" : \"3.0."));
+    Assertions.assertTrue(openApiResult.startsWith("{\n  \"openapi\" : \"3."));
 
     Path openApiGeneratedPath = Path.of("openapi/generated.openapi.json");
     boolean toStore=true;

@@ -52,7 +52,7 @@ class DebtPositionsApisHolderTest extends BaseApiHolderTest {
   void whenGetInstallmentApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> apisHolder.getInstallmentApi(accessToken)
-        .getInstallmentsByOrganizationIdAndNav(1L, "nav"),
+        .getInstallmentsByOrganizationIdAndNav(1L, "nav", null),
       List.class,
       apisHolder::unload);
   }

@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client.DebtPositionClient;
@@ -25,7 +26,9 @@ public class DebtPositionServiceImpl implements DebtPositionService {
   }
 
   @Override
-  public List<InstallmentDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav, String accessToken){
-    return client.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, accessToken);
+  public List<InstallmentDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav,
+                                                                     List<DebtPositionDTO.DebtPositionOriginEnum> debtPositionOriginList,
+                                                                     String accessToken){
+    return client.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList, accessToken);
   }
 }

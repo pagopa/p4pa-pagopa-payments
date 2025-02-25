@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client.DebtPositionClient;
@@ -8,6 +9,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,19 +53,23 @@ class DebtPositionServiceTest {
     Assertions.assertSame(expectedResult, result);
   }
 
-  @Test
-  void whenGetDebtPositionsByOrganizationIdAndNavThenInvokeClient(){
+  @ParameterizedTest
+  @ValueSource(strings = "ORDINARY")
+  @NullAndEmptySource
+  void whenGetDebtPositionsByOrganizationIdAndNavThenInvokeClient(String debtPositionOrigin){
     // Given
     Long organizationId = 1L;
     String nav = "NAV";
     String accessToken = "ACCESSTOKEN";
     List<InstallmentDTO> expectedResult = List.of();
+    List<DebtPositionDTO.DebtPositionOriginEnum> debtPositionOriginList = debtPositionOrigin==null ? null :
+      (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionDTO.DebtPositionOriginEnum.valueOf(debtPositionOrigin)));
 
-    Mockito.when(clientMock.getDebtPositionsByOrganizationIdAndNav(Mockito.same(organizationId), Mockito.same(nav), Mockito.same(accessToken)))
+    Mockito.when(clientMock.getDebtPositionsByOrganizationIdAndNav(Mockito.same(organizationId), Mockito.same(nav), Mockito.same(debtPositionOriginList), Mockito.same(accessToken)))
       .thenReturn(expectedResult);
 
     // When
-    List<InstallmentDTO> result = service.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, accessToken);
+    List<InstallmentDTO> result = service.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

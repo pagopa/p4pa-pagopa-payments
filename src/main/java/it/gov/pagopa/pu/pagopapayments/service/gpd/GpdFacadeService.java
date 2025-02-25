@@ -51,10 +51,10 @@ public class GpdFacadeService {
         gpdService.paDeletePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd());
         break;
       case GpdDebtPositionMapper.OPERATION.UPDATE:
-        gpdService.paCreatePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel);
+        gpdService.paUpdatePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd(),newPaymentPositionModel);
         break;
       case GpdDebtPositionMapper.OPERATION.CREATE:
-        gpdService.paUpdatePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd(),newPaymentPositionModel);
+        gpdService.paCreatePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel);
         break;
     }
   }

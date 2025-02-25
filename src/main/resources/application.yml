@@ -90,6 +90,11 @@ rest:
       max-attempts: "\${PAGOPA_NODE_ACA_MAX_ATTEMPTS:3}" # It's counting also the first attempt
       wait-time-millis: "\${PAGOPA_NODE_ACA_WAIT_TIME_MILLIS:500}"
       print-body-when-error: "\${PAGOPA_NODE_ACA_PRINT_BODY_WHEN_ERROR:true}"
+    gpd:
+      base-url: "\${PAGOPA_NODE_GPD_BASE_URL:}"
+      max-attempts: "\${PAGOPA_NODE_GPD_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+      wait-time-millis: "\${PAGOPA_NODE_GPD_WAIT_TIME_MILLIS:500}"
+      print-body-when-error: "\${PAGOPA_NODE_GPD_PRINT_BODY_WHEN_ERROR:true}"
   pagopa-taxonomies:
     base-url: "\${PAGOPA_TAXONOMIES_BASE_URL:}"
     print-body-when-error: "\${PAGOPA_TAXONOMIES_PRINT_BODY_WHEN_ERROR:true}"

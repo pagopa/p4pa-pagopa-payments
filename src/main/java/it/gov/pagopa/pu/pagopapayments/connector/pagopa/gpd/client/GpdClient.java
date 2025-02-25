@@ -15,14 +15,14 @@ public class GpdClient {
     this.gpdApisHolder = gpdApisHolder;
   }
 
-  public void createPosition(String apiKey, String organizationfiscalcode, PaymentPositionModel paymentPositionModel, Boolean toPublish) {
+  public void createPosition(String apiKey, String organizationfiscalcode, PaymentPositionModel paymentPositionModel) {
     gpdApisHolder.getGpdApiClientByApiKey(apiKey)
-      .createPosition(organizationfiscalcode, paymentPositionModel, null, toPublish);
+      .createPosition(organizationfiscalcode, paymentPositionModel, null, true);
   }
 
-  public void updatePosition(String apiKey, String organizationfiscalcode, String iupd, PaymentPositionModel paymentPositionModel, Boolean toPublish) {
+  public void updatePosition(String apiKey, String organizationfiscalcode, String iupd, PaymentPositionModel paymentPositionModel){
     gpdApisHolder.getGpdApiClientByApiKey(apiKey)
-      .updatePosition(organizationfiscalcode, iupd, paymentPositionModel, null,toPublish);
+      .updatePosition(organizationfiscalcode, iupd, paymentPositionModel, null,true);
   }
 
   public void deletePosition(String apiKey, String organizationfiscalcode, String iupd) {

@@ -1,9 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentOptionModel;
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.*;
 import it.gov.pagopa.nodo.gpd.dto.generated.Stamp;
-import it.gov.pagopa.nodo.gpd.dto.generated.TransferModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
@@ -24,8 +22,8 @@ public class GpdDebtPositionMapper {
   private static final Set<InstallmentDTO.StatusEnum> SYNC_STATUS_FROM_INSERT = Set.of(InstallmentDTO.StatusEnum.DRAFT);
 
   private boolean installment2sendGpd(InstallmentDTO installment) {
-      //skip installment whose status is not in the filterInstallmentStatus
-      return STATUS_TO_SEND_GPD.contains(installment.getStatus());
+    //skip installment whose status is not in the filterInstallmentStatus
+    return STATUS_TO_SEND_GPD.contains(installment.getStatus());
   }
 
   public Pair<OPERATION, PaymentPositionModel> mapToNewPaymentPositionModel(String iud, DebtPositionDTO debtPosition, Organization org) {
@@ -37,21 +35,21 @@ public class GpdDebtPositionMapper {
         OPERATION operation = getOperation(installment);
         PersonDTO debtor = installment.getDebtor();
         return Pair.of(operation, new PaymentPositionModel()
-            .iupd(installment.getIupdPagopa())
-            .type(PaymentPositionModel.TypeEnum.valueOf(debtor.getEntityType().getValue()))
-            .fiscalCode(debtor.getFiscalCode())
-            .fullName(debtor.getFullName())
-            .streetName(debtor.getAddress())
-            .civicNumber(debtor.getCivic())
-            .postalCode(debtor.getPostalCode())
-            .city(debtor.getLocation())
-            .province(debtor.getProvince())
-            .country(debtor.getNation())
-            .email(debtor.getEmail())
-            .switchToExpired(installment.getDueDate()!=null)
-            .companyName(org.getOrgName())
-            .paymentOption(List.of(getPaymentOption(installment)))
-            .validityDate(debtPosition.getValidityDate())
+          .iupd(installment.getIupdPagopa())
+          .type(PaymentPositionModel.TypeEnum.valueOf(debtor.getEntityType().getValue()))
+          .fiscalCode(debtor.getFiscalCode())
+          .fullName(debtor.getFullName())
+          .streetName(debtor.getAddress())
+          .civicNumber(debtor.getCivic())
+          .postalCode(debtor.getPostalCode())
+          .city(debtor.getLocation())
+          .province(debtor.getProvince())
+          .country(debtor.getNation())
+          .email(debtor.getEmail())
+          .switchToExpired(installment.getDueDate() != null)
+          .companyName(org.getOrgName())
+          .paymentOption(List.of(getPaymentOption(installment)))
+          .validityDate(debtPosition.getValidityDate())
         );
       }).findAny().orElseThrow(() -> new InvalidValueException("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));
   }
@@ -60,18 +58,18 @@ public class GpdDebtPositionMapper {
     OPERATION operation;
     InstallmentSyncStatus syncStatus = installment.getSyncStatus();
 
-    if(syncStatus==null){
+    if (syncStatus == null) {
       throw new InvalidValueException("Sync status is null for installment [%s]".formatted(installment.getIud()));
     }
 
-    if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
-      SYNC_STATUS_TO_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusTo().name()))){
+    if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
+      SYNC_STATUS_TO_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusTo().name()))) {
       operation = OPERATION.DELETE;
-    } else if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
-      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())){
+    } else if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
+      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())) {
       operation = OPERATION.UPDATE;
-    } else if(SYNC_STATUS_FROM_INSERT.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
-      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())){
+    } else if (SYNC_STATUS_FROM_INSERT.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
+      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())) {
       operation = OPERATION.CREATE;
     } else {
       throw new InvalidValueException("Invalid sync status [%s->%s] for installment [%s]".formatted(
@@ -80,7 +78,7 @@ public class GpdDebtPositionMapper {
     return operation;
   }
 
-  private PaymentOptionModel getPaymentOption(InstallmentDTO installment){
+  private PaymentOptionModel getPaymentOption(InstallmentDTO installment) {
     return PaymentOptionModel.builder()
       .nav(installment.getNav())
       .iuv(installment.getIuv())
@@ -90,16 +88,20 @@ public class GpdDebtPositionMapper {
       .dueDate(installment.getDueDate())
       .fee(0L)
       .notificationFee(0L)
+      .paymentOptionMetadata(List.of(PaymentOptionMetadataModel.builder()
+        .key("datiSpecificiRiscossione")
+        .value(installment.getLegacyPaymentMetadata())
+        .build()))
       .transfer(installment.getTransfers().stream()
         .map(this::getTransfer).toList())
       .build();
   }
 
-  private TransferModel getTransfer(TransferDTO transfer){
+  private TransferModel getTransfer(TransferDTO transfer) {
 
     boolean isStamp = transfer.getStampHashDocument() != null;
     Stamp stamp = null;
-    if (isStamp){
+    if (isStamp) {
       stamp = Stamp.builder()
         .stampType(transfer.getStampType())
         .hashDocument(transfer.getStampHashDocument())
@@ -108,7 +110,7 @@ public class GpdDebtPositionMapper {
     }
 
     return TransferModel.builder()
-      .idTransfer(TransferModel.IdTransferEnum.valueOf(transfer.getTransferId().toString()))
+      .idTransfer(TransferModel.IdTransferEnum.fromValue(transfer.getTransferId().toString()))
       .amount(transfer.getAmountCents())
       .organizationFiscalCode(transfer.getOrgFiscalCode())
       .remittanceInformation(transfer.getRemittanceInformation())
@@ -122,6 +124,5 @@ public class GpdDebtPositionMapper {
   }
 
 
-
-  public enum OPERATION { CREATE, UPDATE, DELETE }
+  public enum OPERATION {CREATE, UPDATE, DELETE}
 }

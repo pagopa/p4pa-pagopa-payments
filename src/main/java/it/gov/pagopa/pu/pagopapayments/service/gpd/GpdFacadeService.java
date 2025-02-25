@@ -35,7 +35,6 @@ public class GpdFacadeService {
   }
 
   private void invokeCreatePositionImpl(String iud, DebtPositionDTO debtPositionDTO, String accessToken) {
-    Pair<BrokerApiKeys, String> brokerData = brokerRetrieverService.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPositionDTO.getOrganizationId(), accessToken);
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(debtPositionDTO.getOrganizationId(), accessToken);
     Organization organization = brokerForNodoPaDTO.getOrganization();
     Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> debtPostionToSendGPD = gpdDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPositionDTO,organization);
@@ -46,17 +45,17 @@ public class GpdFacadeService {
     if (operation == GpdDebtPositionMapper.OPERATION.DELETE) {
       log.info("invoking GPD paDeletePosition for installment[{}/{}]",
         newPaymentPositionModel.getFiscalCode(), newPaymentPositionModel.getPaymentOption().getFirst().getIuv());
-      gpdService.paDeletePosition(brokerData.getLeft().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd());
+      gpdService.paDeletePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd());
     }
     if (operation == GpdDebtPositionMapper.OPERATION.CREATE) {
       log.info("invoking GPD paCreatePosition for installment[{}/{}]",
         newPaymentPositionModel.getFiscalCode(), newPaymentPositionModel.getPaymentOption().getFirst().getIuv());
-      gpdService.paCreatePosition(brokerData.getLeft().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel, true);
+      gpdService.paCreatePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel);
     }
     if (operation == GpdDebtPositionMapper.OPERATION.UPDATE) {
       log.info("invoking GPD paUpdatePosition for installment[{}/{}]",
         newPaymentPositionModel.getFiscalCode(), newPaymentPositionModel.getPaymentOption().getFirst().getIuv());
-      gpdService.paUpdatePosition(brokerData.getLeft().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd(),newPaymentPositionModel, true);
+      gpdService.paUpdatePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd(),newPaymentPositionModel);
     }
   }
 

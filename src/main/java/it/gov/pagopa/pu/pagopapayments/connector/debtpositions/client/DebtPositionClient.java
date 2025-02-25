@@ -33,6 +33,6 @@ public class DebtPositionClient {
   public List<InstallmentDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav, String accessToken) {
     return debtPositionsApisHolder
       .getInstallmentApi(accessToken)
-      .getInstallmentsByOrganizationIdAndNav(organizationId, nav);
+      .getInstallmentsByOrganizationIdAndNav(organizationId, nav, null);
   }
 }

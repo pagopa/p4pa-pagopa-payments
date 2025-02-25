@@ -92,7 +92,7 @@ class DebtPositionClientTest {
 
     Mockito.when(apisHolderMock.getInstallmentApi(accessToken))
       .thenReturn(installmentApiMock);
-    Mockito.when(installmentApiMock.getInstallmentsByOrganizationIdAndNav(organizationId, nav))
+    Mockito.when(installmentApiMock.getInstallmentsByOrganizationIdAndNav(organizationId, nav,null))
       .thenReturn(expectedResult);
 
 

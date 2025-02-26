@@ -14,13 +14,13 @@ public class GpdServiceImpl implements GpdService {
   }
 
   @Override
-  public void paCreatePosition(String apiKey, String organizationfiscalcode, PaymentPositionModel paymentPositionModel, Boolean toPublish) {
-    client.createPosition(apiKey, organizationfiscalcode,paymentPositionModel, toPublish);
+  public void paCreatePosition(String apiKey, String organizationfiscalcode, PaymentPositionModel paymentPositionModel) {
+    client.createPosition(apiKey, organizationfiscalcode,paymentPositionModel);
   }
 
   @Override
-  public void paUpdatePosition(String apiKey, String organizationfiscalcode, String iupd, PaymentPositionModel paymentPositionModel, Boolean toPublish) {
-    client.updatePosition(apiKey, organizationfiscalcode,iupd, paymentPositionModel, toPublish);
+  public void paUpdatePosition(String apiKey, String organizationfiscalcode, String iupd, PaymentPositionModel paymentPositionModel) {
+    client.updatePosition(apiKey, organizationfiscalcode,iupd, paymentPositionModel);
   }
 
   @Override

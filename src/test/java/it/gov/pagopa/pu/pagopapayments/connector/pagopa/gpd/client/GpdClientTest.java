@@ -47,7 +47,7 @@ class GpdClientTest {
 
     when(gpdApisHolderMock.getGpdApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
 
-    gpdClient.createPosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, paymentPositionModel, TO_PUBLISH);
+    gpdClient.createPosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, paymentPositionModel);
 
     verify(debtPositionsApiMock, times(1)).createPosition(ORGANIZATION_FISCAL_CODE, paymentPositionModel, null, TO_PUBLISH);
   }
@@ -58,7 +58,7 @@ class GpdClientTest {
 
     when(gpdApisHolderMock.getGpdApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
 
-    gpdClient.updatePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel, TO_PUBLISH);
+    gpdClient.updatePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 
     verify(debtPositionsApiMock, times(1)).updatePosition(ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel, null, TO_PUBLISH);
   }

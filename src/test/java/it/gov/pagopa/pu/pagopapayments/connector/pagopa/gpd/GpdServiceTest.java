@@ -20,7 +20,6 @@ class GpdServiceTest {
   private static final String API_KEY = "testApiKey";
   private static final String ORGANIZATION_FISCAL_CODE = "testOrganizationFiscalCode";
   private static final PaymentPositionModel PAYMENT_POSITION_MODEL = new PaymentPositionModel();
-  private static final Boolean TO_PUBLISH = true;
   private static final String IUPD = "testIupd";
 
   @BeforeEach
@@ -30,14 +29,14 @@ class GpdServiceTest {
 
   @Test
   void testPaCreatePosition() {
-    gpdService.paCreatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, PAYMENT_POSITION_MODEL, TO_PUBLISH);
-    verify(gpdClientMock, times(1)).createPosition(API_KEY, ORGANIZATION_FISCAL_CODE, PAYMENT_POSITION_MODEL, TO_PUBLISH);
+    gpdService.paCreatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, PAYMENT_POSITION_MODEL);
+    verify(gpdClientMock, times(1)).createPosition(API_KEY, ORGANIZATION_FISCAL_CODE, PAYMENT_POSITION_MODEL);
   }
 
   @Test
   void testPaUpdatePosition() {
-    gpdService.paUpdatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL, TO_PUBLISH);
-    verify(gpdClientMock, times(1)).updatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL, TO_PUBLISH);
+    gpdService.paUpdatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL);
+    verify(gpdClientMock, times(1)).updatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL);
   }
 
   @Test

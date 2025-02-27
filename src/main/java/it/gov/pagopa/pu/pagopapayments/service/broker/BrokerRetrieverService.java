@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service.broker;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.config.CacheConfig;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
@@ -24,7 +25,7 @@ public class BrokerRetrieverService {
     this.organizationService = organizationService;
   }
 
-  @Cacheable("brokerApiKeyAndSegregationCodes")
+  @Cacheable(cacheNames = CacheConfig.Fields.brokerApiKeyAndSegregationCodes, key = "#organizationId", unless="#result == null")
   public Pair<BrokerApiKeys, String> getBrokerApiKeyAndSegregationCodesByOrganizationId(Long organizationId, String accessToken){
     Organization organization = organizationService.getOrganizationById(organizationId, accessToken);
     if(organization==null){
@@ -35,7 +36,7 @@ public class BrokerRetrieverService {
     return Pair.of(apiKeys, segregationCodes);
   }
 
-  @Cacheable("brokerApiKeyAndFiscalCode")
+  @Cacheable(cacheNames = CacheConfig.Fields.brokerApiKeyAndFiscalCode, key = "#organizationId", unless="#result == null")
   public BrokerForNodoPaDTO getBrokerForNodoPaDTOByOrganizationId(Long organizationId, String accessToken){
     Organization organization = organizationService.getOrganizationById(organizationId, accessToken);
     if(organization==null){

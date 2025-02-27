@@ -41,6 +41,7 @@ val activationVersion = "2.1.3"
 val wsdl4jVersion = "1.6.3"
 val xmlSchemaVersion = "2.3.1"
 val podamVersion = "8.0.2.RELEASE"
+val caffeineVersion = "3.2.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -56,6 +57,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
   implementation("org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion")
+  implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
 
   //webservice soap
   implementation("wsdl4j:wsdl4j:$wsdl4jVersion")

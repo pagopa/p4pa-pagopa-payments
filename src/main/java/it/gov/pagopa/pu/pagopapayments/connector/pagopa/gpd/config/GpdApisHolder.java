@@ -18,7 +18,7 @@ public class GpdApisHolder {
   private final RestTemplate restTemplate;
   private final GpdApiClientConfig clientConfig;
 
-  private final Map<String, DebtPositionsApiApi> acaApiMap = new ConcurrentHashMap<>();
+  private final Map<String, DebtPositionsApiApi> gpdApiMap = new ConcurrentHashMap<>();
 
   public GpdApisHolder(
     GpdApiClientConfig clientConfig,
@@ -32,7 +32,7 @@ public class GpdApisHolder {
   }
 
   public DebtPositionsApiApi getGpdApiClientByApiKey(String apiKey) {
-    return acaApiMap.computeIfAbsent(apiKey, key -> {
+    return gpdApiMap.computeIfAbsent(apiKey, key -> {
       ApiClient apiClient = new ApiClient(restTemplate);
       apiClient.setBasePath(clientConfig.getBaseUrl());
       apiClient.setApiKey(key);

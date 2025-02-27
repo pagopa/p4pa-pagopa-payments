@@ -21,7 +21,7 @@ public class DebtPositionServiceImpl implements DebtPositionService {
     this.client = client;
   }
 
-  @Cacheable(cacheNames = CacheConfig.Fields.debtPositionTypeOrg, key = "#ipaCode", unless="#result == null")
+  @Cacheable(cacheNames = CacheConfig.Fields.debtPositionTypeOrg, key = "#debtPositionTypeOrgId", unless="#result == null")
   public DebtPositionTypeOrg getDebtPositionTypeOrgById(Long debtPositionTypeOrgId, String accessToken) {
     return client.getDebtPositionTypeOrgById(debtPositionTypeOrgId, accessToken);
   }

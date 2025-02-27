@@ -28,6 +28,7 @@ class GpdControllerTest {
 
   private static final DebtPositionDTO VALID_DEBT_POSITION = DebtPositionDTO.builder()
     .debtPositionId(1L)
+    .debtPositionOrigin(DebtPositionDTO.DebtPositionOriginEnum.ORDINARY)
     .organizationId(1L)
     .description("descr")
     .debtPositionTypeOrgId(2L)

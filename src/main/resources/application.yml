@@ -16,7 +16,7 @@ management:
       exposure.include: "*"
     web:
       exposure:
-        include: health, info, prometheus, metrics
+        include: health, info, prometheus, metrics, caches
       base-path: /actuator
   endpoint:
     health:
@@ -113,3 +113,14 @@ jwt:
                 odND6HPvvvmgbK1/2qTHn/HJjWUm11LUC73BszR32BKbdEEhxPQnnwswVekWzPi1
                 IwIDAQAB
                 -----END PUBLIC KEY-----}"
+
+cache:
+  brokerApiKeyAndSegregationCodes:
+    size: "\${CACHE_BROKER_API_SEGREGATION_CODES_SIZE:100}"
+    expire-in: "\${CACHE_BROKER_API_SEGREGATION_CODES_MINUTES:60}"
+  brokerApiKeyAndFiscalCode:
+    size: "\${CACHE_BROKER_API_FISCAL_CODE_SIZE:100}"
+    expire-in: "\${CACHE_BROKER_API_FISCAL_CODE_MINUTES:60}"
+  debtPositionTypeOrg:
+    size: "\${CACHE_DEBTPOSITION_TYPE_ORG_SIZE:100}"
+    expire-in: "\${CACHE_DEBTPOSITION_TYPE_ORG_MINUTES:60}"

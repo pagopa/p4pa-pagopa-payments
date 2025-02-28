@@ -6,9 +6,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
-import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class PaVerifyPaymentNoticeMapper {
@@ -36,7 +34,7 @@ public class PaVerifyPaymentNoticeMapper {
     paymentOption.setOptions(StAmountOption.EQ);
     paymentOption.setAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(installment.getAmountCents()));
     paymentOption.setDueDate(ConversionUtils.toXMLGregorianCalendar(
-      ObjectUtils.firstNonNull(installment.getDueDate(), Constants.MAX_EXPIRATION_DATE)));
+      ConversionUtils.localDate2RomeMaxTime(installment.getDueDate())));
     boolean postalPayment = installment.getTransfers().stream().map(TransferDTO::getPostalIban).noneMatch(StringUtils::isBlank);
     paymentOption.setAllCCP(postalPayment);
     CtPaymentOptionsDescriptionListPA paymentOptions = new CtPaymentOptionsDescriptionListPA();

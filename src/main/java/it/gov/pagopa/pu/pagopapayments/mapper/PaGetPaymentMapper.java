@@ -8,13 +8,11 @@ import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
-import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
 public class PaGetPaymentMapper {
 
@@ -35,7 +33,7 @@ public class PaGetPaymentMapper {
   public static PaGetPaymentV2Response installmentDto2PaGetPaymentV2Response (InstallmentDTO installmentDTO, Organization organization, StTransferType transferType) {
     CtPaymentPAV2 payment = new CtPaymentPAV2();
     payment.setCreditorReferenceId(installmentDTO.getIuv());
-    payment.setDueDate(ConversionUtils.toXMLGregorianCalendar(Optional.ofNullable(installmentDTO.getDueDate()).orElse(Constants.MAX_EXPIRATION_DATE)));
+    payment.setDueDate(ConversionUtils.toXMLGregorianCalendar(ConversionUtils.localDate2RomeMaxTime(installmentDTO.getDueDate())));
     payment.setRetentionDate(ConversionUtils.toXMLGregorianCalendar(OffsetDateTime.now().plusMinutes(15))); //the data validity of this response: set to 15 minutes
     payment.setLastPayment(true);
     payment.setDescription(installmentDTO.getRemittanceInformation());

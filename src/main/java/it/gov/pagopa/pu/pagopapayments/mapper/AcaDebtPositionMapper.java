@@ -3,12 +3,11 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
-import it.gov.pagopa.pu.pagopapayments.util.Constants;
+import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -56,7 +55,7 @@ public class AcaDebtPositionMapper {
           .entityFullName(debtor.getFullName())
           .description(installment.getRemittanceInformation())
           .amount(installment.getAmountCents().intValue())
-          .expirationDate(Optional.ofNullable(installment.getDueDate()).orElse(Constants.MAX_EXPIRATION_DATE))
+          .expirationDate(ConversionUtils.localDate2RomeMaxTime(installment.getDueDate()))
           .switchToExpired(installment.getDueDate()!=null)
           .payStandIn(true));
       }).findAny().orElseThrow(() -> new InvalidValueException("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));

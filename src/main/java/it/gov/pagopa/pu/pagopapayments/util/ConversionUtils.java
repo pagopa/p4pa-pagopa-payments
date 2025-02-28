@@ -5,11 +5,10 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 
 public class ConversionUtils {
   private ConversionUtils() {
@@ -17,7 +16,8 @@ public class ConversionUtils {
 
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
   private static final DatatypeFactory DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR;
-  private static final ZoneId ZONE_ID_ROME = ZoneId.of("Europe/Rome");
+  public static final ZoneId ZONE_ID_ROME = ZoneId.of("Europe/Rome");
+  public static final OffsetDateTime MAX_EXPIRATION_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59).atZone(ConversionUtils.ZONE_ID_ROME).toOffsetDateTime();
 
   static {
     try {
@@ -50,6 +50,12 @@ public class ConversionUtils {
       return null;
     }
     return OffsetDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+  }
+
+  public static OffsetDateTime localDate2RomeMaxTime(LocalDate dueDate){
+    return Optional.ofNullable(dueDate)
+      .map(dt -> dt.atTime(LocalTime.MAX).atZone(ConversionUtils.ZONE_ID_ROME).toOffsetDateTime())
+      .orElse(MAX_EXPIRATION_DATE);
   }
 
 }

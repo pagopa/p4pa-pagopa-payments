@@ -69,7 +69,7 @@ class PaGetPaymentMapperTest {
     Assertions.assertNotNull(responseV2.getData());
     Assertions.assertEquals(installmentDTO.getIuv(), responseV2.getData().getCreditorReferenceId());
     Assertions.assertEquals(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()), responseV2.getData().getPaymentAmount());
-    Assertions.assertEquals(ConversionUtils.toXMLGregorianCalendar(installmentDTO.getDueDate()), responseV2.getData().getDueDate());
+    Assertions.assertEquals(ConversionUtils.toXMLGregorianCalendar(ConversionUtils.localDate2RomeMaxTime(installmentDTO.getDueDate())), responseV2.getData().getDueDate());
     Assertions.assertTrue(responseV2.getData().isLastPayment());
     Assertions.assertEquals(installmentDTO.getRemittanceInformation(), responseV2.getData().getDescription());
     Assertions.assertEquals(organization.getOrgName(), responseV2.getData().getCompanyName());

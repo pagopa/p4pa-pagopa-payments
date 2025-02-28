@@ -75,7 +75,7 @@ class PaVerifyPaymentNoticeMapperTest {
     TestUtils.checkNotNullFields(response.getPaymentList().getPaymentOptionDescription(),"detailDescription");
     Assertions.assertEquals(StAmountOption.EQ, response.getPaymentList().getPaymentOptionDescription().getOptions());
     Assertions.assertEquals(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()), response.getPaymentList().getPaymentOptionDescription().getAmount());
-    Assertions.assertEquals(ConversionUtils.toXMLGregorianCalendar(installmentDTO.getDueDate()), response.getPaymentList().getPaymentOptionDescription().getDueDate());
+    Assertions.assertEquals(ConversionUtils.toXMLGregorianCalendar(ConversionUtils.localDate2RomeMaxTime(installmentDTO.getDueDate())), response.getPaymentList().getPaymentOptionDescription().getDueDate());
     boolean postalPayment = installmentDTO.getTransfers().stream().noneMatch(t -> StringUtils.isBlank(t.getPostalIban()));
     Assertions.assertEquals(postalPayment, response.getPaymentList().getPaymentOptionDescription().isAllCCP());
   }

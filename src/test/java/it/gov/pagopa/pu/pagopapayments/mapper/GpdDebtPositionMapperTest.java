@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentSyncStatus;
 import it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.common.AttributeStrategy;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +50,7 @@ class GpdDebtPositionMapperTest {
         installment.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
         installment.setStatus(InstallmentDTO.StatusEnum.UNPAID);
         installment.setSyncStatus(null);
-        installment.setDueDate(OffsetDateTime.now().plusDays(10));
+        installment.setDueDate(LocalDate.now().plusDays(10));
         installment.getTransfers().forEach(transfer ->
           transfer.setTransferId(1L));
       }));
@@ -111,7 +112,7 @@ class GpdDebtPositionMapperTest {
       Assertions.assertNotNull(paymentPositionModel);
       TestUtils.checkNotNullFields(paymentPositionModel, "payStandIn","streetName","civicNumber","postalCode","city","province","country","region","email","phone","officeName","validityDate","paymentDate","status");
 
-      Assertions.assertEquals(pair.getLeft().getDueDate(), paymentPositionModel.getPaymentOption().getFirst().getDueDate());
+      Assertions.assertEquals(ConversionUtils.localDate2RomeMaxTime(pair.getLeft().getDueDate()), paymentPositionModel.getPaymentOption().getFirst().getDueDate());
       Assertions.assertEquals(pair.getLeft().getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
       Assertions.assertEquals(pair.getRight(), response.getLeft());
     });

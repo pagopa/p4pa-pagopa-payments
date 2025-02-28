@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
-import it.gov.pagopa.pu.pagopapayments.util.Constants;
+import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -74,7 +74,7 @@ class AcaDebtPositionMapperTest {
     Assertions.assertNotNull(newDebtPositionRequest);
     TestUtils.checkNotNullFields(newDebtPositionRequest);
 
-    Assertions.assertEquals(toSync.getDueDate(), newDebtPositionRequest.getExpirationDate());
+    Assertions.assertEquals(ConversionUtils.localDate2RomeMaxTime(toSync.getDueDate()), newDebtPositionRequest.getExpirationDate());
     Assertions.assertEquals(toSync.getNav(), newDebtPositionRequest.getNav());
     Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
   }
@@ -94,7 +94,7 @@ class AcaDebtPositionMapperTest {
     Assertions.assertNotNull(newDebtPositionRequest);
     TestUtils.checkNotNullFields(newDebtPositionRequest);
 
-    Assertions.assertEquals(Constants.MAX_EXPIRATION_DATE, newDebtPositionRequest.getExpirationDate());
+    Assertions.assertEquals(ConversionUtils.MAX_EXPIRATION_DATE, newDebtPositionRequest.getExpirationDate());
     Assertions.assertEquals(toSync.getNav(), newDebtPositionRequest.getNav());
     Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
   }
@@ -123,7 +123,7 @@ class AcaDebtPositionMapperTest {
       Assertions.assertNotNull(newDebtPositionRequest);
       TestUtils.checkNotNullFields(newDebtPositionRequest);
 
-      Assertions.assertEquals(pair.getLeft().getDueDate(), newDebtPositionRequest.getExpirationDate());
+      Assertions.assertEquals(ConversionUtils.localDate2RomeMaxTime(pair.getLeft().getDueDate()), newDebtPositionRequest.getExpirationDate());
       Assertions.assertEquals(pair.getLeft().getNav(), newDebtPositionRequest.getNav());
       Assertions.assertEquals(pair.getRight(), response.getLeft());
     });

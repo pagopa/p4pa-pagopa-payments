@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Lazy
@@ -22,12 +21,12 @@ public class AuthAccessTokenRetriever {
   private static final String GRANT_TYPE = "client_credentials";
   private static final String SCOPE = "openid";
   private static final String CLIENT_ID_PREFIX = "piattaforma-unitaria_";
+  private static final String NULL_ORG_ID = "!NULL_ORG_IPA_CODE!";
 
   private final AuthnClient authnClient;
   private final String clientSecret;
 
-  private final AtomicReference<Pair<LocalDateTime, AccessToken>> accessTokenRefNoOrg = new AtomicReference<>();
-  private final Map<String, AtomicReference<Pair<LocalDateTime, AccessToken>>> accessTokenRefMap = new ConcurrentHashMap<>();
+  private final Map<String, Pair<LocalDateTime, AccessToken>> accessTokenRefMap = new ConcurrentHashMap<>();
 
   public AuthAccessTokenRetriever(
     @Value("${rest.auth.post-token.client_secret}")
@@ -39,24 +38,19 @@ public class AuthAccessTokenRetriever {
   }
 
   public AccessToken getAccessToken(String orgIpaCode) {
-    AtomicReference<Pair<LocalDateTime, AccessToken>> accessTokenRef =
-      orgIpaCode == null
-        ? accessTokenRefNoOrg
-        : accessTokenRefMap.computeIfAbsent(orgIpaCode, s -> new AtomicReference<>());
-    return accessTokenRef.updateAndGet(pair -> checkAndReturn(pair, orgIpaCode)).getValue();
+    String orgIpaCodeKey = orgIpaCode == null ? NULL_ORG_ID : orgIpaCode;
+    return accessTokenRefMap.compute(orgIpaCodeKey, (k, v) -> {
+      if (v == null || LocalDateTime.now().isAfter(v.getLeft())) {
+        String clientId = CLIENT_ID_PREFIX + StringUtils.stripToEmpty(orgIpaCode);
+        log.info("M2M AccessToken with clientId[{}] expired, refreshing", clientId);
+        LocalDateTime tokenRequestDateTime = LocalDateTime.now();
+        AccessToken accessToken = authnClient.postToken(clientId, GRANT_TYPE, SCOPE, null, null, null, clientSecret);
+        LocalDateTime expiration = tokenRequestDateTime.plusSeconds(accessToken.getExpiresIn() - 5L); // setting some seconds to avoid too strict expiration
+        return Pair.of(expiration, accessToken);
+      } else {
+        return v;
+      }
+    }).getRight();
   }
 
-  private Pair<LocalDateTime, AccessToken> checkAndReturn(Pair<LocalDateTime, AccessToken> tokenPair, String orgIpaCode) {
-    if (tokenPair == null || LocalDateTime.now().isAfter(tokenPair.getLeft())) {
-      String clientId = CLIENT_ID_PREFIX + StringUtils.stripToEmpty(orgIpaCode);
-      log.info("M2M AccessToken with clientId[{}] expired, refreshing", clientId);
-      LocalDateTime tokenRequestDateTime = LocalDateTime.now();
-      AccessToken accessToken = authnClient.postToken(clientId, GRANT_TYPE, SCOPE, null, null, null, clientSecret);
-      LocalDateTime expiration = tokenRequestDateTime.plusSeconds(accessToken.getExpiresIn() - 5L); // setting some seconds to avoid too strict expiration
-      return Pair.of(expiration, accessToken
-      );
-    } else {
-      return tokenPair;
-    }
-  }
 }

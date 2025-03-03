@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.pagopapayments.connector.fileshare.client.FileShareClient;
+import it.gov.pagopa.pu.pagopapayments.connector.fileshare.FileShareService;
 import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClient;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
@@ -35,7 +35,7 @@ class PaymentsReportingServiceTest {
   @Mock
   private NodeForPaClient nodeForPaClientMock;
   @Mock
-  private FileShareClient fileShareClientMock;
+  private FileShareService fileShareServiceMock;
 
   @InjectMocks
   private PaymentsReportingService paymentsReportingService;
@@ -132,7 +132,7 @@ class PaymentsReportingServiceTest {
 
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID)).thenReturn(response);
-    Mockito.when(fileShareClientMock.uploadPaymentReporting(response, ORGANIZATION_ID, fileName, accessToken)).thenReturn(ingestionFlowFileId);
+    Mockito.when(fileShareServiceMock.uploadPaymentReporting(response, ORGANIZATION_ID, fileName, accessToken)).thenReturn(ingestionFlowFileId);
 
     Long result = paymentsReportingService.fetchPaymentReporting(ORGANIZATION_ID, REPORTING_ID, fileName, accessToken);
 
@@ -140,7 +140,7 @@ class PaymentsReportingServiceTest {
     Assertions.assertEquals(ingestionFlowFileId, result);
     Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     Mockito.verify(nodeForPaClientMock, Mockito.times(1)).fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID);
-    Mockito.verify(fileShareClientMock, Mockito.times(1)).uploadPaymentReporting(response, ORGANIZATION_ID, fileName, accessToken);
+    Mockito.verify(fileShareServiceMock, Mockito.times(1)).uploadPaymentReporting(response, ORGANIZATION_ID, fileName, accessToken);
   }
 
   @Test

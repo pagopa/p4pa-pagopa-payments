@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.performancelogger;
 
+import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import jakarta.annotation.Nonnull;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -23,6 +24,6 @@ public class RestInvokePerformanceLogger implements ClientHttpRequestInterceptor
     }
 
     static String getRequestDetails(HttpRequest request) {
-        return "%s %s".formatted(request.getMethod(), request.getURI());
+        return "%s %s".formatted(request.getMethod(), SecurityUtils.removePiiFromURI(request.getURI()));
     }
 }

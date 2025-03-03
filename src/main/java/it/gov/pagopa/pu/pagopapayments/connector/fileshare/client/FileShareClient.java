@@ -21,24 +21,37 @@ public class FileShareClient {
   }
 
   public Long uploadRt(PaSendRtDTO paSendRtDTO, Organization organization, String accessToken) {
+    String fileName = "RT_" + paSendRtDTO.getNoticeNumber() + ".xml";
+    ByteArrayResource file = new ByteArrayResource(paSendRtDTO.getReceiptBytes()){
+      @Override
+      public String getFilename() {
+        return fileName;
+      }
+    };
     return apisHolder.getIngestionFlowFileApi(accessToken)
       .uploadIngestionFlowFile(
         organization.getOrganizationId(),
         IngestionFlowFileType.RECEIPT_PAGOPA,
         FileOrigin.PAGOPA,
-        "RT_" + paSendRtDTO.getNoticeNumber() + ".xml",
-        new ByteArrayResource(paSendRtDTO.getReceiptBytes()))
+        fileName,
+        file)
       .getIngestionFlowFileId();
   }
 
   public Long uploadPaymentReporting(PaPaymentReportingDTO paPaymentReporingDTO, Long organizationId, String fileName, String accessToken) {
+    ByteArrayResource file = new ByteArrayResource(paPaymentReporingDTO.getPaymentReportingBytes()){
+      @Override
+      public String getFilename() {
+        return fileName;
+      }
+    };
     return apisHolder.getIngestionFlowFileApi(accessToken)
       .uploadIngestionFlowFile(
         organizationId,
         IngestionFlowFileType.PAYMENTS_REPORTING_PAGOPA,
         FileOrigin.PAGOPA,
         fileName,
-        new ByteArrayResource(paPaymentReporingDTO.getPaymentReportingBytes()) )
+        file)
       .getIngestionFlowFileId();
   }
 

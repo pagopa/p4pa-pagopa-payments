@@ -21,7 +21,6 @@ public class AuthAccessTokenRetriever {
   private static final String GRANT_TYPE = "client_credentials";
   private static final String SCOPE = "openid";
   private static final String CLIENT_ID_PREFIX = "piattaforma-unitaria_";
-  private static final String NULL_ORG_ID = "!NULL_ORG_IPA_CODE!";
 
   private final AuthnClient authnClient;
   private final String clientSecret;
@@ -38,10 +37,9 @@ public class AuthAccessTokenRetriever {
   }
 
   public AccessToken getAccessToken(String orgIpaCode) {
-    String orgIpaCodeKey = orgIpaCode == null ? NULL_ORG_ID : orgIpaCode;
-    return accessTokenRefMap.compute(orgIpaCodeKey, (k, v) -> {
+    String clientId = CLIENT_ID_PREFIX + StringUtils.stripToEmpty(orgIpaCode);
+    return accessTokenRefMap.compute(clientId, (k, v) -> {
       if (v == null || LocalDateTime.now().isAfter(v.getLeft())) {
-        String clientId = CLIENT_ID_PREFIX + StringUtils.stripToEmpty(orgIpaCode);
         log.info("M2M AccessToken with clientId[{}] expired, refreshing", clientId);
         LocalDateTime tokenRequestDateTime = LocalDateTime.now();
         AccessToken accessToken = authnClient.postToken(clientId, GRANT_TYPE, SCOPE, null, null, null, clientSecret);

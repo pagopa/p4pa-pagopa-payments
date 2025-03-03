@@ -25,7 +25,7 @@ public class AuthAccessTokenRetriever {
   private final AuthnClient authnClient;
   private final String clientSecret;
 
-  private final Map<String, Pair<LocalDateTime, AccessToken>> accessTokenRefMap = new ConcurrentHashMap<>();
+  private final Map<String, Pair<LocalDateTime, AccessToken>> clientId2accessTokensMap = new ConcurrentHashMap<>();
 
   public AuthAccessTokenRetriever(
     @Value("${rest.auth.post-token.client_secret}")
@@ -38,7 +38,7 @@ public class AuthAccessTokenRetriever {
 
   public AccessToken getAccessToken(String orgIpaCode) {
     String clientId = CLIENT_ID_PREFIX + StringUtils.stripToEmpty(orgIpaCode);
-    return accessTokenRefMap.compute(clientId, (k, v) -> {
+    return clientId2accessTokensMap.compute(clientId, (k, v) -> {
       if (v == null || LocalDateTime.now().isAfter(v.getLeft())) {
         log.info("M2M AccessToken with clientId[{}] expired, refreshing", clientId);
         LocalDateTime tokenRequestDateTime = LocalDateTime.now();

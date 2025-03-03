@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service.paymentsreporting;
 
-import it.gov.pagopa.pu.pagopapayments.connector.fileshare.client.FileShareClient;
+import it.gov.pagopa.pu.pagopapayments.connector.fileshare.FileShareService;
 import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClient;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
@@ -19,12 +19,12 @@ public class PaymentsReportingService {
 
   private final NodeForPaClient nodeForPaClient;
   private final BrokerRetrieverService brokerRetrieverService;
-  private final FileShareClient fileShareClient;
+  private final FileShareService fileShareService;
 
-  public PaymentsReportingService(NodeForPaClient nodeForPaClient, BrokerRetrieverService brokerRetrieverService, FileShareClient fileShareClient) {
+  public PaymentsReportingService(NodeForPaClient nodeForPaClient, BrokerRetrieverService brokerRetrieverService, FileShareService fileShareService) {
     this.nodeForPaClient = nodeForPaClient;
     this.brokerRetrieverService = brokerRetrieverService;
-      this.fileShareClient = fileShareClient;
+      this.fileShareService = fileShareService;
   }
 
   public List<PaymentsReportingIdDTO> getPaymentsReportingList(Long organizationId, String accessToken) {
@@ -38,7 +38,7 @@ public class PaymentsReportingService {
     }
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     PaPaymentReportingDTO response = nodeForPaClient.fetchPaymentReporting(brokerForNodoPaDTO, paymentsReportingId);
-    return fileShareClient.uploadPaymentReporting(response, organizationId, fileName, accessToken);
+    return fileShareService.uploadPaymentReporting(response, organizationId, fileName, accessToken);
   }
 
 }

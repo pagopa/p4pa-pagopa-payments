@@ -14,8 +14,13 @@ public class AuthnServiceImpl implements AuthnService {
         this.accessTokenRetriever = accessTokenRetriever;
     }
 
+  @Override
+  public String getAccessToken() {
+    return accessTokenRetriever.getAccessToken(null).getAccessToken();
+  }
+
     @Override
-    public String getAccessToken() {
-        return accessTokenRetriever.getAccessToken().getAccessToken();
+    public String getAccessToken(String orgIpaCode) {
+        return accessTokenRetriever.getAccessToken(orgIpaCode).getAccessToken();
     }
 }

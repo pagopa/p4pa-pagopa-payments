@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.config;
 
 import it.gov.pagopa.pu.pagopapayments.performancelogger.RestInvokePerformanceLogger;
+import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -53,12 +54,12 @@ public class RestTemplateConfig {
                     super.handleError(response, statusCode, url, method);
                 } catch (HttpStatusCodeException ex) {
                     errorBodyLogger.info("{} {} Returned status {} and resulted on exception {} - {}: {}",
-                            method,
-                            url,
-                            ex.getStatusCode(),
-                            ex.getClass().getSimpleName(),
-                            ex.getMessage(),
-                            ex.getResponseBodyAsString());
+                      method,
+                      SecurityUtils.removePiiFromURI(url),
+                      ex.getStatusCode(),
+                      ex.getClass().getSimpleName(),
+                      ex.getMessage(),
+                      ex.getResponseBodyAsString());
                     throw ex;
                 }
             }

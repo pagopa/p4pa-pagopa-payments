@@ -84,6 +84,22 @@ class NodeForPaClientImplTest {
   }
 
   @Test
+  void nodoChiediElencoFlussiRendicontazione_whenFaultCodeIsPPT_DOMINIO_SCONOSCIUTO_thenReturnEmptyList() {
+    NodoChiediElencoFlussiRendicontazioneRisposta response = new NodoChiediElencoFlussiRendicontazioneRisposta();
+    response.setFault(new CtFaultBean());
+    response.getFault().setFaultCode("PPT_DOMINIO_SCONOSCIUTO");
+
+    doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
+
+    List<PaymentsReportingIdDTO> reportingList = nodeForPaClient.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
+
+    Assertions.assertNotNull(reportingList);
+    Assertions.assertTrue(reportingList.isEmpty());
+    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
+  }
+
+
+  @Test
   void getMessageCallback_whenCalled_thenSetsSoapActionAndApiKey() throws IOException, TransformerException {
     String apiKey = "testApiKey";
     String soapAction = "testSoapAction";

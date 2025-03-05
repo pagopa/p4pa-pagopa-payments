@@ -37,7 +37,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
 
     if (response.getFault() != null) {
       if(response.getFault().getFaultCode().equals("PPT_DOMINIO_SCONOSCIUTO")) {
-        log.info("Retrived fault code PPT_DOMINIO_SCONOSCIUTO for org {}. Returning empty list",brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
+        log.info("Retrieved fault code PPT_DOMINIO_SCONOSCIUTO for org {}. Returning empty list",brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
         return Collections.emptyList();
       }
       else

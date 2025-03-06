@@ -11,6 +11,11 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingIdMapper;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.SoapMessage;
@@ -18,10 +23,7 @@ import org.springframework.ws.transport.context.TransportContext;
 import org.springframework.ws.transport.context.TransportContextHolder;
 import org.springframework.ws.transport.http.HttpUrlConnection;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
+@Slf4j
 public class NodeForPaClientImpl extends WebServiceGatewaySupport implements NodeForPaClient {
 
   public static final String HEADER_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key";
@@ -34,7 +36,12 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
       getWebServiceTemplate().marshalSendAndReceive(request, getMessageCallback(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey(), "nodoChiediElencoFlussiRendicontazione"));
 
     if (response.getFault() != null) {
-      throw new ApplicationException(ERROR_MESSAGE + response.getFault().getFaultCode());
+      if(response.getFault().getFaultCode().equals("PPT_DOMINIO_SCONOSCIUTO")) {
+        log.info("Retrieved fault code PPT_DOMINIO_SCONOSCIUTO for org {}. Returning empty list",brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
+        return Collections.emptyList();
+      }
+      else
+        throw new ApplicationException(ERROR_MESSAGE + response.getFault().getFaultCode());
     }
 
     List<PaymentsReportingIdDTO> reportingList = new ArrayList<>();

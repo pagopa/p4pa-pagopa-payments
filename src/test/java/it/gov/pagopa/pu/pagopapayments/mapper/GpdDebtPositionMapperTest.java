@@ -52,7 +52,7 @@ class GpdDebtPositionMapperTest {
         installment.setSyncStatus(null);
         installment.setDueDate(LocalDate.now().plusDays(10));
         installment.getTransfers().forEach(transfer ->
-          transfer.setTransferId(1L));
+          transfer.setTransferIndex(1));
       }));
 
     organization = podamFactory.manufacturePojo(Organization.class);

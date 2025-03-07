@@ -111,7 +111,7 @@ public class GpdDebtPositionMapper {
     }
 
     return TransferModel.builder()
-      .idTransfer(TransferModel.IdTransferEnum.fromValue(transfer.getTransferId().toString()))
+      .idTransfer(TransferModel.IdTransferEnum.fromValue(transfer.getTransferIndex().toString()))
       .amount(transfer.getAmountCents())
       .organizationFiscalCode(transfer.getOrgFiscalCode())
       .remittanceInformation(transfer.getRemittanceInformation())

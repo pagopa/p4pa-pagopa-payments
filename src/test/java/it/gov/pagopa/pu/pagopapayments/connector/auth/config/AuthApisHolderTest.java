@@ -1,7 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.connector.auth.config;
 
-import it.gov.pagopa.pu.auth.dto.generated.AccessToken;
-import it.gov.pagopa.pu.auth.dto.generated.UserInfo;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +42,7 @@ class AuthApisHolderTest extends BaseApiHolderTest {
         assertAuthenticationShouldBeSetInThreadSafeMode(
                 accessToken -> authApisHolder.getAuthzApi(accessToken)
                         .getUserInfoFromMappedExternaUserId("externalUserId"),
-                UserInfo.class,
+                new ParameterizedTypeReference<>() {},
                 authApisHolder::unload);
     }
 
@@ -51,8 +50,8 @@ class AuthApisHolderTest extends BaseApiHolderTest {
     void whenGetAuthnApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
         assertAuthenticationShouldBeSetInThreadSafeMode(
                 accessToken -> authApisHolder.getAuthnApi(accessToken)
-                        .postToken("clientId", "grantType", "scope", "subjectToken", "subjectIssuer", "subjectTokenType", "clientSecret"),
-                AccessToken.class,
+                        .getUserInfo(),
+                new ParameterizedTypeReference<>() {},
                 authApisHolder::unload);
     }
 

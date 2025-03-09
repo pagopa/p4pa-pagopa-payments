@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,9 +9,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-
-import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class DebtPositionsApisHolderTest extends BaseApiHolderTest {
@@ -44,7 +42,7 @@ class DebtPositionsApisHolderTest extends BaseApiHolderTest {
         assertAuthenticationShouldBeSetInThreadSafeMode(
                 accessToken -> apisHolder.getDebtPositionTypeOrgEntityControllerApi(accessToken)
                         .crudGetDebtpositiontypeorg("debtPositionId"),
-                DebtPositionTypeOrg.class,
+                new ParameterizedTypeReference<>() {},
                 apisHolder::unload);
     }
 
@@ -53,7 +51,7 @@ class DebtPositionsApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> apisHolder.getInstallmentApi(accessToken)
         .getInstallmentsByOrganizationIdAndNav(1L, "nav", null),
-      List.class,
+      new ParameterizedTypeReference<>() {},
       apisHolder::unload);
   }
 

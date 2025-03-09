@@ -2,7 +2,6 @@ package it.gov.pagopa.pu.pagopapayments.connector.fileshare.config;
 
 import it.gov.pagopa.pu.fileshare.dto.generated.FileOrigin;
 import it.gov.pagopa.pu.fileshare.dto.generated.IngestionFlowFileType;
-import it.gov.pagopa.pu.fileshare.dto.generated.UploadIngestionFlowFileResponseDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -45,7 +45,7 @@ class FileShareApisHolderTest extends BaseApiHolderTest {
         assertAuthenticationShouldBeSetInThreadSafeMode(
                 accessToken -> apisHolder.getIngestionFlowFileApi(accessToken)
                         .uploadIngestionFlowFile(1L, IngestionFlowFileType.PAYMENTS_REPORTING, FileOrigin.PORTAL, "FILENAME", Mockito.mock(Resource.class)),
-                UploadIngestionFlowFileResponseDTO.class,
+                new ParameterizedTypeReference<>() {},
                 apisHolder::unload);
     }
 

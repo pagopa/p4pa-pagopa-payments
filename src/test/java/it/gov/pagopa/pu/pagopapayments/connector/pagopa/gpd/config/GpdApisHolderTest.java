@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +44,7 @@ class GpdApisHolderTest extends BaseApiHolderTest{
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> gpdApisHolder.getGpdApiClientByApiKey(apiKey)
         .createPosition(ORG_FISCAL_CODE,new PaymentPositionModel(), null, true),
-      Object.class,
+      new ParameterizedTypeReference<>() {},
       () -> {},
       BaseApiHolderTest.AUTH_TYPE.API_KEY,
       "Ocp-Apim-Subscription-Key");

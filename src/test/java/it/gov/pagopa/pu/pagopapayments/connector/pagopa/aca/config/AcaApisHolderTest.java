@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config;
 
-import it.gov.pagopa.nodo.pacreateposition.dto.generated.DebtPositionResponse;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
@@ -11,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,7 +42,7 @@ class AcaApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> acaApisHolder.getAcaApiClientByApiKey(apiKey)
         .newDebtPosition(new NewDebtPositionRequest(), "00"),
-      DebtPositionResponse.class,
+      new ParameterizedTypeReference<>() {},
       () -> {},
       AUTH_TYPE.API_KEY,
       "Ocp-Apim-Subscription-Key");

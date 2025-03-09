@@ -1,8 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization.config;
 
-import it.gov.pagopa.pu.organization.dto.generated.Broker;
-import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +41,7 @@ class OrganizationApiHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> organizationApisHolder.getOrganizationEntityControllerApi(accessToken)
         .crudGetOrganization("ORGID"),
-      Organization.class,
+      new ParameterizedTypeReference<>() {},
       organizationApisHolder::unload);
   }
 
@@ -52,7 +50,7 @@ class OrganizationApiHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> organizationApisHolder.getOrganizationSearchControllerApi(accessToken)
         .crudOrganizationsFindByIpaCode("IPACODE"),
-      Organization.class,
+      new ParameterizedTypeReference<>() {},
       organizationApisHolder::unload);
   }
 
@@ -61,7 +59,7 @@ class OrganizationApiHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> organizationApisHolder.getBrokerEntityControllerApi(accessToken)
         .crudGetBroker("BROKERID"),
-      Broker.class,
+      new ParameterizedTypeReference<>() {},
       organizationApisHolder::unload);
   }
 
@@ -70,7 +68,7 @@ class OrganizationApiHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> organizationApisHolder.getBrokerApi(accessToken)
         .getBrokerApiKeys(1L),
-      BrokerApiKeys.class,
+      new ParameterizedTypeReference<>() {},
       organizationApisHolder::unload);
   }
 

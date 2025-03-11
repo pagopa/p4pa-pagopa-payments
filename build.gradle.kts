@@ -1,14 +1,15 @@
 plugins {
-	java
-	id("org.springframework.boot") version "3.4.3"
-	id("io.spring.dependency-management") version "1.1.7"
-	jacoco
-	id("org.sonarqube") version "6.0.1.5171"
-	id("com.github.ben-manes.versions") version "0.51.0"
-	id("org.openapi.generator") version "7.10.0"
+  java
+  id("org.springframework.boot") version "3.4.3"
+  id("io.spring.dependency-management") version "1.1.7"
+  jacoco
+  id("org.sonarqube") version "6.0.1.5171"
+  id("com.github.ben-manes.versions") version "0.51.0"
+  id("org.openapi.generator") version "7.10.0"
   id("org.ajoberstar.grgit") version "5.3.0"
   //code generation for soap webservices classes (via jaxb)
   id("com.intershop.gradle.jaxb") version "7.0.1"
+  id("com.gorylenko.gradle-git-properties") version "2.5.0"
 }
 
 group = "it.gov.pagopa.payhub"
@@ -16,19 +17,19 @@ version = "0.0.1"
 description = "p4pa-pagopa-payments"
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom(configurations.annotationProcessor.get())
-	}
+  compileOnly {
+    extendsFrom(configurations.annotationProcessor.get())
+  }
 }
 
 repositories {
-	mavenCentral()
+  mavenCentral()
 }
 
 val springDocOpenApiVersion = "2.8.5"
@@ -44,8 +45,8 @@ val podamVersion = "8.0.2.RELEASE"
 val caffeineVersion = "3.2.0"
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter")
-	implementation("org.springframework.boot:spring-boot-starter-web")
+  implementation("org.springframework.boot:spring-boot-starter")
+  implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-validation")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -53,9 +54,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-web-services")
   implementation("io.micrometer:micrometer-tracing-bridge-otel:$micrometerVersion")
   implementation("io.micrometer:micrometer-registry-prometheus")
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion")
-	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-	implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+  implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
   implementation("org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion")
   implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
 
@@ -73,21 +74,21 @@ dependencies {
   jaxbext("org.jvnet.jaxb:jaxb-plugin-annotate:3.0.2")
   jaxbext("org.slf4j:slf4j-simple:2.0.16") // see https://github.com/IntershopCommunicationsAG/jaxb-gradle-plugin/issues/37
 
-	compileOnly("org.projectlombok:lombok")
-	annotationProcessor("org.projectlombok:lombok")
+  compileOnly("org.projectlombok:lombok")
+  annotationProcessor("org.projectlombok:lombok")
   testAnnotationProcessor("org.projectlombok:lombok")
 
   //	Testing
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.mockito:mockito-core")
-	testImplementation ("org.projectlombok:lombok")
+  testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation("org.mockito:mockito-core")
+  testImplementation("org.projectlombok:lombok")
   testImplementation("uk.co.jemos.podam:podam:$podamVersion")
 
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
-	finalizedBy(tasks.jacocoTestReport)
+  useJUnitPlatform()
+  finalizedBy(tasks.jacocoTestReport)
 }
 
 val mockitoAgent = configurations.create("mockitoAgent")
@@ -101,29 +102,29 @@ tasks {
 }
 
 tasks.jacocoTestReport {
-	dependsOn(tasks.test)
-	reports {
-		xml.required = true
-	}
+  dependsOn(tasks.test)
+  reports {
+    xml.required = true
+  }
 }
 
 val projectInfo = mapOf(
-	"artifactId" to project.name,
-	"version" to project.version
+  "artifactId" to project.name,
+  "version" to project.version
 )
 
 tasks {
-	val processResources by getting(ProcessResources::class) {
-		filesMatching("**/application.yml") {
-			expand(projectInfo)
-		}
-	}
+  val processResources by getting(ProcessResources::class) {
+    filesMatching("**/application.yml") {
+      expand(projectInfo)
+    }
+  }
 }
 
 configurations {
-	compileClasspath {
-		resolutionStrategy.activateDependencyLocking()
-	}
+  compileClasspath {
+    resolutionStrategy.activateDependencyLocking()
+  }
 }
 
 tasks.compileJava {
@@ -148,13 +149,14 @@ tasks.register("dependenciesBuild") {
 }
 
 configure<SourceSetContainer> {
-	named("main") {
-		java.srcDir("$projectDir/build/generated/src/main/java")
-	}
+  named("main") {
+    java.srcDir("$projectDir/build/generated/src/main/java")
+  }
 }
 
 springBoot {
-	mainClass.value("it.gov.pagopa.pu.pagopapayments.PagoPaPaymentsApplication")
+  buildInfo()
+  mainClass.value("it.gov.pagopa.pu.pagopapayments.PagoPaPaymentsApplication")
 }
 
 var targetEnv = when (grgit.branch.current().name) {
@@ -322,8 +324,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   apiPackage.set("it.gov.pagopa.nodo.gpd.controller.generated")
   modelPackage.set("it.gov.pagopa.nodo.gpd.dto.generated")
   typeMappings.set(mapOf(
-    "DateTime" to "String" //GPD needs LocalDateTime instead of OffsetDateTime autogenerated,
-  // mapping to String because, for the same reason, we configured the ObjectMapper in order to always transform LocalDateTime into OffsetDateTime
+    "DateTime" to "String" //GPD needs LocalDateTime instead of OffsetDateTime autogenerated, mapping to String because, for the same reason, we configured the ObjectMapper in order to always transform LocalDateTime into OffsetDateTime
   ))
   configOptions.set(mapOf(
     "swaggerAnnotations" to "false",

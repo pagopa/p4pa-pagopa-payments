@@ -11,6 +11,10 @@ spring:
       enabled: "\${VIRTUAL_THREADS_ENABLED:true}"
 
 management:
+  info:
+    build.enabled: true
+    java.enabled: true
+    git.enabled: true
   endpoints:
     jmx:
       exposure.include: "*"

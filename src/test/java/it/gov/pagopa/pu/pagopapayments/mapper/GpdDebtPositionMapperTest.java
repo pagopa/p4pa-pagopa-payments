@@ -112,7 +112,7 @@ class GpdDebtPositionMapperTest {
       Assertions.assertNotNull(paymentPositionModel);
       TestUtils.checkNotNullFields(paymentPositionModel, "payStandIn","streetName","civicNumber","postalCode","city","province","country","region","email","phone","officeName","validityDate","paymentDate","status");
 
-      Assertions.assertEquals(ConversionUtils.localDate2RomeMaxTime(pair.getLeft().getDueDate()), paymentPositionModel.getPaymentOption().getFirst().getDueDate());
+      Assertions.assertEquals(ConversionUtils.localDateToLocalDateTime(pair.getLeft().getDueDate()), paymentPositionModel.getPaymentOption().getFirst().getDueDate());
       Assertions.assertEquals(pair.getLeft().getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
       Assertions.assertEquals(pair.getRight(), response.getLeft());
     });

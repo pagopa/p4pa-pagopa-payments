@@ -58,9 +58,9 @@ public class ConversionUtils {
       .orElse(MAX_EXPIRATION_DATE);
   }
 
-  public static LocalDateTime localDateToLocalDateTime(LocalDate localDate) {
+  public static LocalDateTime atEndOfDay(LocalDate localDate) {
     return Optional.ofNullable(localDate)
-      .map(dt -> dt.atTime(LocalTime.MAX).atZone(ConversionUtils.ZONE_ID_ROME).toLocalDateTime())
+      .map(dt -> LocalDateTime.of(dt, LocalTime.MAX))
       .orElse(null);
   }
 }

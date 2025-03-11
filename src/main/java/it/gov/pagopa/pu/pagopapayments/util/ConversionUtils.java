@@ -58,4 +58,10 @@ public class ConversionUtils {
       .orElse(MAX_EXPIRATION_DATE);
   }
 
+  public static LocalDateTime atEndOfDay(LocalDate localDate) {
+    if(localDate == null){
+      return null;
+    }
+    return LocalDateTime.of(localDate, LocalTime.MAX);
+  }
 }

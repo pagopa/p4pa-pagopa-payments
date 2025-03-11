@@ -59,8 +59,9 @@ public class ConversionUtils {
   }
 
   public static LocalDateTime atEndOfDay(LocalDate localDate) {
-    return Optional.ofNullable(localDate)
-      .map(dt -> LocalDateTime.of(dt, LocalTime.MAX))
-      .orElse(null);
+    if(localDate == null){
+      return null;
+    }
+    return LocalDateTime.of(localDate, LocalTime.MAX);
   }
 }

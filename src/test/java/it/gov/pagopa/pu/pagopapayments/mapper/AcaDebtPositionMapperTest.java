@@ -94,7 +94,7 @@ class AcaDebtPositionMapperTest {
     Assertions.assertNotNull(newDebtPositionRequest);
     TestUtils.checkNotNullFields(newDebtPositionRequest);
 
-    Assertions.assertEquals(ConversionUtils.MAX_EXPIRATION_DATE, newDebtPositionRequest.getExpirationDate());
+    Assertions.assertEquals(ConversionUtils.MAX_EXPIRATION_DATE.atZone(ConversionUtils.ZONE_ID_ROME).toOffsetDateTime(), newDebtPositionRequest.getExpirationDate());
     Assertions.assertEquals(toSync.getNav(), newDebtPositionRequest.getNav());
     Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
   }

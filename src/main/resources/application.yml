@@ -15,6 +15,9 @@ management:
     build.enabled: true
     java.enabled: true
     git.enabled: true
+  tracing:
+    baggage.remote-fields:
+      - X-user-id
   endpoints:
     jmx:
       exposure.include: "*"

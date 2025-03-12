@@ -50,7 +50,7 @@ public class GpdDebtPositionMapper {
           .switchToExpired(installment.getDueDate() != null)
           .companyName(org.getOrgName())
           .paymentOption(List.of(getPaymentOption(installment)))
-          .validityDate(debtPosition.getValidityDate() != null ? ConversionUtils.atEndOfDay(debtPosition.getValidityDate()).toString() : null)
+          .validityDate(debtPosition.getValidityDate() != null ? debtPosition.getValidityDate().atStartOfDay().toString() : null)
         );
       }).findAny().orElseThrow(() -> new InvalidValueException("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));
   }
@@ -89,13 +89,20 @@ public class GpdDebtPositionMapper {
       .dueDate(installment.getDueDate() != null ? ConversionUtils.atEndOfDay(installment.getDueDate()).toString() : ConversionUtils.MAX_EXPIRATION_DATE.toString())
       .fee(0L)
       .notificationFee(0L)
-      .paymentOptionMetadata(List.of(PaymentOptionMetadataModel.builder()
-        .key("datiSpecificiRiscossione")
-        .value(installment.getLegacyPaymentMetadata())
-        .build()))
+      .paymentOptionMetadata(getPaymentOptionMetadata(installment.getLegacyPaymentMetadata()))
       .transfer(installment.getTransfers().stream()
         .map(this::getTransfer).toList())
       .build();
+  }
+
+  private List<PaymentOptionMetadataModel> getPaymentOptionMetadata(String legacyPaymentMetadata) {
+    if(legacyPaymentMetadata == null){
+      return List.of();
+    }
+    return List.of(PaymentOptionMetadataModel.builder()
+      .key("datiSpecificiRiscossione")
+      .value(legacyPaymentMetadata)
+      .build());
   }
 
   private TransferModel getTransfer(TransferDTO transfer) {

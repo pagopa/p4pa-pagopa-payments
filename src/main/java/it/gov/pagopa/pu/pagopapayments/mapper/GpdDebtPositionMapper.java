@@ -89,20 +89,14 @@ public class GpdDebtPositionMapper {
       .dueDate(installment.getDueDate() != null ? ConversionUtils.atEndOfDay(installment.getDueDate()).toString() : ConversionUtils.MAX_EXPIRATION_DATE.toString())
       .fee(0L)
       .notificationFee(0L)
-      .paymentOptionMetadata(getPaymentOptionMetadata(installment.getLegacyPaymentMetadata()))
+      .paymentOptionMetadata(installment.getLegacyPaymentMetadata() != null ?
+        List.of(PaymentOptionMetadataModel.builder()
+          .key("datiSpecificiRiscossione")
+          .value(installment.getLegacyPaymentMetadata())
+          .build()) : null)
       .transfer(installment.getTransfers().stream()
         .map(this::getTransfer).toList())
       .build();
-  }
-
-  private List<PaymentOptionMetadataModel> getPaymentOptionMetadata(String legacyPaymentMetadata) {
-    if(legacyPaymentMetadata == null){
-      return List.of();
-    }
-    return List.of(PaymentOptionMetadataModel.builder()
-      .key("datiSpecificiRiscossione")
-      .value(legacyPaymentMetadata)
-      .build());
   }
 
   private TransferModel getTransfer(TransferDTO transfer) {

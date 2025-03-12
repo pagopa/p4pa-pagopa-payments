@@ -50,7 +50,7 @@ public class GpdDebtPositionMapper {
           .switchToExpired(installment.getDueDate() != null)
           .companyName(org.getOrgName())
           .paymentOption(List.of(getPaymentOption(installment)))
-          .validityDate(String.valueOf(ConversionUtils.atEndOfDay(debtPosition.getValidityDate())))
+          .validityDate(debtPosition.getValidityDate() != null ? ConversionUtils.atEndOfDay(debtPosition.getValidityDate()).toString() : null)
         );
       }).findAny().orElseThrow(() -> new InvalidValueException("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));
   }

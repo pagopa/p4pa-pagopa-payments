@@ -32,7 +32,7 @@ public class SecurityUtils {
       .orElse(null));
   }
 
-  private static String resolvePuSystemUser(String mappedExternalUserId) {
+  public static String resolvePuSystemUser(String mappedExternalUserId) {
     if(mappedExternalUserId != null && mappedExternalUserId.startsWith(SYSTEM_USERID_PREFIX) && RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes servletRequestAttributes){
       HttpServletRequest requestAttributes = servletRequestAttributes.getRequest();
       mappedExternalUserId = ObjectUtils.firstNonNull(requestAttributes.getHeader(HEADER_USER_ID), mappedExternalUserId);

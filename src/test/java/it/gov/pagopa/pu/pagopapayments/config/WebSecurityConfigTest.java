@@ -1,5 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.config;
 
+import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
+import it.gov.pagopa.pu.pagopapayments.util.SecurityUtilsTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -34,6 +37,7 @@ class WebSecurityConfigTest {
     """;
   private static final String JWT_TOKEN_USERID = "MAPPEDUSEREXTERNALID";
   private static final String JWT_TOKEN = "eyJraWQiOiIyNWNhZDlkYi0wMDIyLTNiODctYTcwYS1mMmRhMjcyMTdjODgiLCJ0eXAiOiJhdCtKV1QiLCJhbGciOiJSUzUxMiJ9.eyJ0eXAiOiJiZWFyZXIiLCJpc3MiOiJBUFBMSUNBVElPTl9BVURJRU5DRSIsImp0aSI6IjA2ZWZmMzhjLTZhZDEtNGU5Ni1iYmYyLTUxYWVlMTFiNzZmYyIsInN1YiI6Ik1BUFBFRFVTRVJFWFRFUk5BTElEIiwiaWF0IjoxNzM2MDgwNTMzLCJleHAiOjI3MzYwODA1MzIsIm9yZ2FuaXphdGlvbklwYUNvZGUiOiJPUkdJUEFDT0RFIn0.qfcPvKVW6GOPC-Hb4QfqEpfT1zwrZ30QRbW2RPvrAlaBdYi51ZTmy6iWIcoy7YubkkctRp7xHDgcQuMRyRzGr2S-FayTA7kHXwa0y9UOnb7FXuZn9j0G6-4qVqlH6qo2KKTuDl_HykDAEmbI0AMJXilN8cM_ZkIQXCv6mDWsQCcxglsxcw89G0U9m5cZ5n9RxaAikMp8xRssiSqoFdhA67j-Iqs9P0vC-L0YvrIuqJ8CuJxoZQX_rPh-aLAzjPswctT_yaUk2tX5XpYG_1Yo0k9Mxy7CyyUa1JbRLRWbXkfOCPDbBOMn6KkXU_2w3pj4u6sIZsWuTNGT4d8zBye8JA";
+  private static final String JWT_TOKEN_SYSTEM_USER = "eyJraWQiOiIyNWNhZDlkYi0wMDIyLTNiODctYTcwYS1mMmRhMjcyMTdjODgiLCJ0eXAiOiJhdCtKV1QiLCJhbGciOiJSUzUxMiJ9.eyJ0eXAiOiJiZWFyZXIiLCJpc3MiOiJBUFBMSUNBVElPTl9BVURJRU5DRSIsImp0aSI6IjA2ZWZmMzhjLTZhZDEtNGU5Ni1iYmYyLTUxYWVlMTFiNzZmYyIsInN1YiI6IldTX1VTRVItcGlhdHRhZm9ybWEtdW5pdGFyaWFfIiwiaWF0IjoxNzM2MDgwNTMzLCJleHAiOjI3MzYwODA1MzIsIm9yZ2FuaXphdGlvbklwYUNvZGUiOiJPUkdJUEFDT0RFIn0.FGb-MSXK204B6Ydhk3-uE9Uqvn5J2ashFZHXJEzQNmmSIB17n_UMHMBmFcyLC-_jHFBa4lGg33AhjVWLlvjavjvuW-WWL5LwjSPjBXMb8Gd1LK0PrPsO3xhJdjxHpyUhCZ43M1OsKlsevwwlAv5_Jb3AXB-B5RZnj7jHG7TYJYUQRAp8ajmKwY3P_XeMR_wBx3mx_eSHpXEojDwmJaCARRDsahma4NLbBuf_wJ3VAGXvLLQ3_TXN1N1ivb9pejQzLdrmK-u-x4YLLr-FCjNe5GA7MmDmDCpkdWNjJZ9b7Rbgz8DC82e8CETHTvXquepsjGqXN1Oe1QK6Fmx9txYBPQ";
 
   private final WebSecurityConfig securityConfig = new WebSecurityConfig();
   private final JwtDecoder jwtDecoder = securityConfig.jwtDecoder(PUBLIC_KEY);
@@ -45,6 +49,7 @@ class WebSecurityConfigTest {
   @AfterEach
   void verifyNoMoreInteractions() {
     SecurityContextHolder.clearContext();
+    RequestContextHolder.resetRequestAttributes();
     MDC.clear();
   }
 
@@ -59,5 +64,22 @@ class WebSecurityConfigTest {
     jwtAuthenticationConverter.convert(jwt);
 
     Assertions.assertEquals(JWT_TOKEN_USERID, MDC.get("externalUserId"));
+  }
+
+  @Test
+  void givenSystemUserTokenAndNotUserIdWhenJwtDecoderDecodeAndJwtAuthenticationConverterConvertThenMdcConfiguredWithJustSystemUser() {
+    Jwt jwt = jwtDecoder.decode(JWT_TOKEN_SYSTEM_USER);
+    jwtAuthenticationConverter.convert(jwt);
+
+    Assertions.assertEquals(SecurityUtils.SYSTEM_USERID_PREFIX, MDC.get("externalUserId"));
+  }
+
+  @Test
+  void givenSystemUserTokenAndUserIdWhenJwtDecoderDecodeAndJwtAuthenticationConverterConvertThenMdcConfiguredWithJustSystemUser() {
+    Jwt jwt = jwtDecoder.decode(JWT_TOKEN_SYSTEM_USER);
+    SecurityUtilsTest.configureXUserIdHeader(JWT_TOKEN_USERID);
+    jwtAuthenticationConverter.convert(jwt);
+
+    Assertions.assertEquals(SecurityUtils.SYSTEM_USERID_PREFIX+"]["+JWT_TOKEN_USERID, MDC.get("externalUserId"));
   }
 }

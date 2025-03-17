@@ -1,13 +1,16 @@
 package it.gov.pagopa.pu.pagopapayments.config;
 
 import it.gov.pagopa.pu.pagopapayments.performancelogger.RestInvokePerformanceLogger;
+import it.gov.pagopa.pu.pagopapayments.util.HttpUtils;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateBuilderConfigurer;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,28 +24,23 @@ import org.springframework.web.client.ResponseErrorHandler;
 
 import java.io.IOException;
 import java.net.URI;
-import java.time.Duration;
 
 @Slf4j
 @Configuration(proxyBeanMethods = false)
 public class RestTemplateConfig {
-    private final int connectTimeoutMillis;
-    private final int readTimeoutHandlerMillis;
 
-    public RestTemplateConfig(
-            @Value("${rest.default-timeout.connect-millis}") int connectTimeoutMillis,
-            @Value("${rest.default-timeout.read-millis}") int readTimeoutHandlerMillis) {
-        this.connectTimeoutMillis = connectTimeoutMillis;
-        this.readTimeoutHandlerMillis = readTimeoutHandlerMillis;
-    }
+  @Bean
+  @ConfigurationProperties(prefix = "rest.defaults")
+  public HttpClientConfig defaultHttpClientConfig(){
+    return new HttpClientConfig();
+  }
 
-    @Bean
-    public RestTemplateBuilder restTemplateBuilder(RestTemplateBuilderConfigurer configurer) {
-        return configurer.configure(new RestTemplateBuilder())
-                .additionalInterceptors(new RestInvokePerformanceLogger())
-                .connectTimeout(Duration.ofMillis(connectTimeoutMillis))
-                .readTimeout(Duration.ofMillis(readTimeoutHandlerMillis));
-    }
+  @Bean
+  public RestTemplateBuilder restTemplateBuilder(RestTemplateBuilderConfigurer configurer, HttpClientConfig defaultHttpClientConfig, SslBundles sslBundles) {
+    return configurer.configure(new RestTemplateBuilder())
+      .additionalInterceptors(new RestInvokePerformanceLogger())
+      .requestFactoryBuilder(HttpUtils.buildPooledConnection(defaultHttpClientConfig, DefaultClientTlsStrategy.createSystemDefault()));
+  }
 
     public static ResponseErrorHandler bodyPrinterWhenError(String applicationName) {
         final Logger errorBodyLogger = LoggerFactory.getLogger("REST_INVOKE." + applicationName);

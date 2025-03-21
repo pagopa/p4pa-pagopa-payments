@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
@@ -36,9 +37,9 @@ class SynchronousPaymentStatusVerifierServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentDTO.setStatus(InstallmentDTO.StatusEnum.UNPAID);
+    installmentDTO.setStatus(InstallmentStatus.UNPAID);
     InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    otherInstallmentDTO.setStatus(InstallmentDTO.StatusEnum.EXPIRED);
+    otherInstallmentDTO.setStatus(InstallmentStatus.EXPIRED);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, otherInstallmentDTO);
     Boolean postalAccess = null;
 
@@ -54,13 +55,13 @@ class SynchronousPaymentStatusVerifierServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentDTO.setStatus(InstallmentDTO.StatusEnum.UNPAID);
+    installmentDTO.setStatus(InstallmentStatus.UNPAID);
     installmentDTO.setTransfers(List.of(
       new TransferDTO().orgFiscalCode(organization.getOrgFiscalCode()).postalIban("IBAN"),
       new TransferDTO().orgFiscalCode(organization.getOrgFiscalCode()+"xxxx").iban("IBAN")
     ));
     InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    otherInstallmentDTO.setStatus(InstallmentDTO.StatusEnum.UNPAID);
+    otherInstallmentDTO.setStatus(InstallmentStatus.UNPAID);
     otherInstallmentDTO.setTransfers(List.of(new TransferDTO().orgFiscalCode(organization.getOrgFiscalCode()).iban("IBAN")));
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, otherInstallmentDTO);
     Boolean postalAccess = true;
@@ -77,10 +78,10 @@ class SynchronousPaymentStatusVerifierServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentDTO.setStatus(InstallmentDTO.StatusEnum.UNPAID);
+    installmentDTO.setStatus(InstallmentStatus.UNPAID);
     installmentDTO.setTransfers(List.of(new TransferDTO().orgFiscalCode(organization.getOrgFiscalCode()).postalIban("IBAN")));
     InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    otherInstallmentDTO.setStatus(InstallmentDTO.StatusEnum.UNPAID);
+    otherInstallmentDTO.setStatus(InstallmentStatus.UNPAID);
     otherInstallmentDTO.setTransfers(List.of(
       new TransferDTO().orgFiscalCode(organization.getOrgFiscalCode()).iban("IBAN"),
       new TransferDTO().orgFiscalCode(organization.getOrgFiscalCode()+"xxxx").postalIban("IBAN")
@@ -116,7 +117,7 @@ class SynchronousPaymentStatusVerifierServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentDTO.setStatus(InstallmentDTO.StatusEnum.UNPAID);
+    installmentDTO.setStatus(InstallmentStatus.UNPAID);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, installmentDTO);
     Boolean postalAccess = null;
 
@@ -134,9 +135,9 @@ class SynchronousPaymentStatusVerifierServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentDTO.setStatus(InstallmentDTO.StatusEnum.TO_SYNC);
+    installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
     InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    otherInstallmentDTO.setStatus(InstallmentDTO.StatusEnum.EXPIRED);
+    otherInstallmentDTO.setStatus(InstallmentStatus.EXPIRED);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, otherInstallmentDTO);
     Boolean postalAccess = null;
 
@@ -154,7 +155,7 @@ class SynchronousPaymentStatusVerifierServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentDTO.setStatus(InstallmentDTO.StatusEnum.PAID);
+    installmentDTO.setStatus(InstallmentStatus.PAID);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
     Boolean postalAccess = null;
 
@@ -172,9 +173,9 @@ class SynchronousPaymentStatusVerifierServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentDTO.setStatus(InstallmentDTO.StatusEnum.TO_SYNC);
+    installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
     InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    otherInstallmentDTO.setStatus(InstallmentDTO.StatusEnum.CANCELLED);
+    otherInstallmentDTO.setStatus(InstallmentStatus.CANCELLED);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, otherInstallmentDTO);
     Boolean postalAccess = null;
 
@@ -192,7 +193,7 @@ class SynchronousPaymentStatusVerifierServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentDTO.setStatus(InstallmentDTO.StatusEnum.TO_SYNC);
+    installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
     Boolean postalAccess = null;
 

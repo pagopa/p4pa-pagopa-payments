@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service.synchronouspayments;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
@@ -20,10 +20,10 @@ import java.util.Objects;
 @Slf4j
 public class SynchronousPaymentService {
 
-  public static final List<DebtPositionDTO.DebtPositionOriginEnum> ORDINARY_DEBT_POSITION_ORIGINS = List.of(
-    DebtPositionDTO.DebtPositionOriginEnum.ORDINARY,
-    DebtPositionDTO.DebtPositionOriginEnum.ORDINARY_SIL,
-    DebtPositionDTO.DebtPositionOriginEnum.SPONTANEOUS);
+  public static final List<DebtPositionOrigin> ORDINARY_DEBT_POSITION_ORIGINS = List.of(
+    DebtPositionOrigin.ORDINARY,
+    DebtPositionOrigin.ORDINARY_SIL,
+    DebtPositionOrigin.SPONTANEOUS);
 
   private final DebtPositionService debtPositionService;
   private final PaForNodeRequestValidatorService paForNodeRequestValidatorService;

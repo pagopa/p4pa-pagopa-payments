@@ -4,8 +4,8 @@ import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeReq;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeRes;
 import it.gov.pagopa.pagopa_api.pa.pafornode.StAmountOption;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
+import it.gov.pagopa.pu.debtpositions.dto.generated.EntityTypeEnum;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
@@ -56,7 +56,7 @@ class PaVerifyPaymentNoticeMapperTest {
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
 
-    installmentDTO.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
+    installmentDTO.getDebtor().setEntityType(EntityTypeEnum.F);
     for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
       installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1);
     }

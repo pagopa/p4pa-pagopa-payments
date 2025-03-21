@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgEntityControllerApi;
 import it.gov.pagopa.pu.debtpositions.controller.generated.InstallmentApi;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
@@ -95,13 +95,12 @@ class DebtPositionClientTest {
     long organizationId = 1L;
     String nav = "NAV";
     List<InstallmentDTO> expectedResult = List.of();
-    List<DebtPositionDTO.DebtPositionOriginEnum> debtPositionOriginList = debtPositionOrigin==null ? null :
-      (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionDTO.DebtPositionOriginEnum.valueOf(debtPositionOrigin)));
-    List<String> debtPositionOriginListAsString = debtPositionOrigin==null || debtPositionOrigin.isEmpty() ? null : List.of(debtPositionOrigin);
+    List<DebtPositionOrigin> debtPositionOriginList = debtPositionOrigin==null ? null :
+      (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionOrigin.valueOf(debtPositionOrigin)));
 
     Mockito.when(apisHolderMock.getInstallmentApi(accessToken))
       .thenReturn(installmentApiMock);
-    Mockito.when(installmentApiMock.getInstallmentsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginListAsString))
+    Mockito.when(installmentApiMock.getInstallmentsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList))
       .thenReturn(expectedResult);
 
 

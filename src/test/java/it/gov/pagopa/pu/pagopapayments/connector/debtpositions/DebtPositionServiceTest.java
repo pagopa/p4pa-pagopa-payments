@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client.DebtPositionClient;
@@ -62,8 +62,8 @@ class DebtPositionServiceTest {
     String nav = "NAV";
     String accessToken = "ACCESSTOKEN";
     List<InstallmentDTO> expectedResult = List.of();
-    List<DebtPositionDTO.DebtPositionOriginEnum> debtPositionOriginList = debtPositionOrigin==null ? null :
-      (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionDTO.DebtPositionOriginEnum.valueOf(debtPositionOrigin)));
+    List<DebtPositionOrigin> debtPositionOriginList = debtPositionOrigin==null ? null :
+      (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionOrigin.valueOf(debtPositionOrigin)));
 
     Mockito.when(clientMock.getDebtPositionsByOrganizationIdAndNav(Mockito.same(organizationId), Mockito.same(nav), Mockito.same(debtPositionOriginList), Mockito.same(accessToken)))
       .thenReturn(expectedResult);

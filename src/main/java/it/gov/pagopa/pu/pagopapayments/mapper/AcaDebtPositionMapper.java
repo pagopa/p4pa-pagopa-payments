@@ -14,9 +14,9 @@ import java.util.Set;
 @Slf4j
 public class AcaDebtPositionMapper {
 
-  public static final Set<InstallmentDTO.StatusEnum> STATUS_TO_SEND_ACA = Set.of(InstallmentDTO.StatusEnum.TO_SYNC);
-  private static final Set<InstallmentDTO.StatusEnum> SYNC_STATUS_TO_DELETE = Set.of(InstallmentDTO.StatusEnum.CANCELLED, InstallmentDTO.StatusEnum.INVALID, InstallmentDTO.StatusEnum.EXPIRED);
-  private static final Set<InstallmentDTO.StatusEnum> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.EXPIRED);
+  public static final Set<InstallmentStatus> STATUS_TO_SEND_ACA = Set.of(InstallmentStatus.TO_SYNC);
+  private static final Set<InstallmentStatus> SYNC_STATUS_TO_DELETE = Set.of(InstallmentStatus.CANCELLED, InstallmentStatus.INVALID, InstallmentStatus.EXPIRED);
+  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED);
 
 
   private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
@@ -69,14 +69,14 @@ public class AcaDebtPositionMapper {
       throw new InvalidValueException("Sync status is null for installment [%s]".formatted(installment.getIud()));
     }
 
-    if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
-      SYNC_STATUS_TO_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusTo().name()))){
+    if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
+      SYNC_STATUS_TO_DELETE.contains(syncStatus.getSyncStatusTo())){
       operation = OPERATION.DELETE;
-    } else if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
-      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())){
+    } else if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
+      syncStatus.getSyncStatusTo().equals(InstallmentStatus.UNPAID)){
       operation = OPERATION.UPDATE;
-    } else if(syncStatus.getSyncStatusFrom().name().equals(InstallmentDTO.StatusEnum.DRAFT.name()) &&
-      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())){
+    } else if(syncStatus.getSyncStatusFrom().equals(InstallmentStatus.DRAFT) &&
+      syncStatus.getSyncStatusTo().equals(InstallmentStatus.UNPAID)){
       operation = OPERATION.CREATE;
     } else {
       throw new InvalidValueException("Invalid sync status [%s->%s] for installment [%s]".formatted(

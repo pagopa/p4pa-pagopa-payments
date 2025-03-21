@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -25,5 +27,9 @@ import org.springframework.context.annotation.Configuration;
   bearerFormat = "JWT",
   scheme = "bearer"
 )
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SwaggerConfig {
+  static {
+    io.swagger.v3.core.jackson.ModelResolver.enumsAsRef = true;
+  }
 }

@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.service.synchronouspayments;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
@@ -34,7 +35,7 @@ public class SynchronousPaymentStatusVerifierService {
 
     List<InstallmentDTO> payableInstallmentDTOList = installmentDTOList.stream().filter(i -> {
       //if status is not UNPAID, the installment is not payable
-      if (!Objects.equals(i.getStatus(), InstallmentDTO.StatusEnum.UNPAID))
+      if (!Objects.equals(i.getStatus(), InstallmentStatus.UNPAID))
         return false;
       //only for getPayment (for verifyPayment, postalTransfer is not set):
       //if at least 1 transfer of the same organization that created the debt position
@@ -49,11 +50,11 @@ public class SynchronousPaymentStatusVerifierService {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO, organization.getOrgFiscalCode());
     } else if (payableInstallmentDTOList.size() == 1) {
       return payableInstallmentDTOList.getFirst();
-    } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), InstallmentDTO.StatusEnum.EXPIRED))) {
+    } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), InstallmentStatus.EXPIRED))) {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO, organization.getOrgFiscalCode());
-    } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), InstallmentDTO.StatusEnum.PAID))) {
+    } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), InstallmentStatus.PAID))) {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO, organization.getOrgFiscalCode());
-    } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), InstallmentDTO.StatusEnum.CANCELLED))) {
+    } else if (installmentDTOList.stream().anyMatch(i -> Objects.equals(i.getStatus(), InstallmentStatus.CANCELLED))) {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_ANNULLATO, organization.getOrgFiscalCode());
     } else {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO, organization.getOrgFiscalCode());

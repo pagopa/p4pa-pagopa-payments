@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.Stamp;
 import it.gov.pagopa.nodo.gpd.dto.generated.*;
+import it.gov.pagopa.nodo.gpd.dto.generated.Stamp;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
@@ -17,10 +17,10 @@ import java.util.Set;
 @Slf4j
 public class GpdDebtPositionMapper {
 
-  public static final Set<InstallmentDTO.StatusEnum> STATUS_TO_SEND_GPD = Set.of(InstallmentDTO.StatusEnum.TO_SYNC);
-  private static final Set<InstallmentDTO.StatusEnum> SYNC_STATUS_TO_DELETE = Set.of(InstallmentDTO.StatusEnum.CANCELLED, InstallmentDTO.StatusEnum.INVALID, InstallmentDTO.StatusEnum.EXPIRED);
-  private static final Set<InstallmentDTO.StatusEnum> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.EXPIRED);
-  private static final Set<InstallmentDTO.StatusEnum> SYNC_STATUS_FROM_INSERT = Set.of(InstallmentDTO.StatusEnum.DRAFT);
+  public static final Set<InstallmentStatus> STATUS_TO_SEND_GPD = Set.of(InstallmentStatus.TO_SYNC);
+  private static final Set<InstallmentStatus> SYNC_STATUS_TO_DELETE = Set.of(InstallmentStatus.CANCELLED, InstallmentStatus.INVALID, InstallmentStatus.EXPIRED);
+  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED);
+  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_INSERT = Set.of(InstallmentStatus.DRAFT);
 
   private boolean installment2sendGpd(InstallmentDTO installment) {
     //skip installment whose status is not in the filterInstallmentStatus
@@ -63,14 +63,14 @@ public class GpdDebtPositionMapper {
       throw new InvalidValueException("Sync status is null for installment [%s]".formatted(installment.getIud()));
     }
 
-    if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
-      SYNC_STATUS_TO_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusTo().name()))) {
+    if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
+      SYNC_STATUS_TO_DELETE.contains(syncStatus.getSyncStatusTo())) {
       operation = OPERATION.DELETE;
-    } else if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
-      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())) {
+    } else if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
+      syncStatus.getSyncStatusTo().equals(InstallmentStatus.UNPAID)) {
       operation = OPERATION.UPDATE;
-    } else if (SYNC_STATUS_FROM_INSERT.contains(InstallmentDTO.StatusEnum.valueOf(syncStatus.getSyncStatusFrom().name())) &&
-      syncStatus.getSyncStatusTo().name().equals(InstallmentDTO.StatusEnum.UNPAID.name())) {
+    } else if (SYNC_STATUS_FROM_INSERT.contains(syncStatus.getSyncStatusFrom()) &&
+      syncStatus.getSyncStatusTo().equals(InstallmentStatus.UNPAID)) {
       operation = OPERATION.CREATE;
     } else {
       throw new InvalidValueException("Invalid sync status [%s->%s] for installment [%s]".formatted(

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
@@ -32,11 +32,9 @@ public class DebtPositionClient {
   }
 
   public List<InstallmentDTO> getDebtPositionsByOrganizationIdAndNav(
-    Long organizationId, String nav, List<DebtPositionDTO.DebtPositionOriginEnum> debtPositionOriginList, String accessToken) {
-    List<String> debtPositionOriginListAsString = debtPositionOriginList == null || debtPositionOriginList.isEmpty() ? null :
-      debtPositionOriginList.stream().map(Enum::name).toList();
+    Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOriginList, String accessToken) {
     return debtPositionsApisHolder
       .getInstallmentApi(accessToken)
-      .getInstallmentsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginListAsString);
+      .getInstallmentsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList);
   }
 }

@@ -1,10 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentSyncStatus;
-import it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
@@ -47,8 +44,8 @@ class GpdDebtPositionMapperTest {
     // fix some field values
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
-        installment.getDebtor().setEntityType(PersonDTO.EntityTypeEnum.F);
-        installment.setStatus(InstallmentDTO.StatusEnum.UNPAID);
+        installment.getDebtor().setEntityType(EntityTypeEnum.F);
+        installment.setStatus(InstallmentStatus.UNPAID);
         installment.setSyncStatus(null);
         installment.setDueDate(LocalDate.now().plusDays(10));
         installment.getTransfers().forEach(transfer ->
@@ -58,12 +55,12 @@ class GpdDebtPositionMapperTest {
     organization = podamFactory.manufacturePojo(Organization.class);
   }
 
-  private InstallmentDTO setSyncStatus(DebtPositionDTO debtPosition, int indexPaymentOption, int indexInstallment, InstallmentDTO.StatusEnum syncStatusFrom, InstallmentDTO.StatusEnum syncStatusTo) {
+  private InstallmentDTO setSyncStatus(DebtPositionDTO debtPosition, int indexPaymentOption, int indexInstallment, InstallmentStatus syncStatusFrom, InstallmentStatus syncStatusTo) {
     InstallmentDTO installmentDTO = debtPosition.getPaymentOptions().get(indexPaymentOption).getInstallments().get(indexInstallment);
-    installmentDTO.setStatus(InstallmentDTO.StatusEnum.TO_SYNC);
+    installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
     installmentDTO.setSyncStatus(InstallmentSyncStatus.builder()
-      .syncStatusFrom(InstallmentSyncStatus.SyncStatusFromEnum.valueOf(syncStatusFrom.name()))
-      .syncStatusTo(InstallmentSyncStatus.SyncStatusToEnum.valueOf(syncStatusTo.name()))
+      .syncStatusFrom(syncStatusFrom)
+      .syncStatusTo(syncStatusTo)
       .build());
     installmentDTO.setTransfers(List.of(installmentDTO.getTransfers().getFirst()));
     return installmentDTO;
@@ -73,7 +70,7 @@ class GpdDebtPositionMapperTest {
   @Test
   void givenValidDebtPositionExpiringWhenMapToPaymentPositionModelThenOk() {
     //given
-    InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentDTO.StatusEnum.DRAFT, InstallmentDTO.StatusEnum.UNPAID);
+    InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID);
 
     //when
     Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
@@ -93,14 +90,14 @@ class GpdDebtPositionMapperTest {
   void givenValidDebtPositionWithVariousOpsWhenMapToPaymentPositionModelThenOk() {
     //given
     List<Pair<InstallmentDTO, GpdDebtPositionMapper.OPERATION>> toSyncList = List.of(
-      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentDTO.StatusEnum.DRAFT, InstallmentDTO.StatusEnum.UNPAID), GpdDebtPositionMapper.OPERATION.CREATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.UNPAID), GpdDebtPositionMapper.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentDTO.StatusEnum.EXPIRED, InstallmentDTO.StatusEnum.UNPAID), GpdDebtPositionMapper.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.CANCELLED), GpdDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.INVALID), GpdDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentDTO.StatusEnum.EXPIRED, InstallmentDTO.StatusEnum.CANCELLED), GpdDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentDTO.StatusEnum.EXPIRED, InstallmentDTO.StatusEnum.INVALID), GpdDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentDTO.StatusEnum.UNPAID, InstallmentDTO.StatusEnum.EXPIRED), GpdDebtPositionMapper.OPERATION.DELETE)
+      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID), GpdDebtPositionMapper.OPERATION.CREATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentStatus.UNPAID, InstallmentStatus.UNPAID), GpdDebtPositionMapper.OPERATION.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentStatus.EXPIRED, InstallmentStatus.UNPAID), GpdDebtPositionMapper.OPERATION.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentStatus.UNPAID, InstallmentStatus.CANCELLED), GpdDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentStatus.UNPAID, InstallmentStatus.INVALID), GpdDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentStatus.EXPIRED, InstallmentStatus.CANCELLED), GpdDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentStatus.EXPIRED, InstallmentStatus.INVALID), GpdDebtPositionMapper.OPERATION.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED), GpdDebtPositionMapper.OPERATION.DELETE)
     );
 
     toSyncList.forEach(pair -> {
@@ -121,7 +118,7 @@ class GpdDebtPositionMapperTest {
   @Test
   void givenValidDebtPositionWithInvalidStatusWhenMapToPaymentPositionModelThenException() {
     //given
-    InstallmentDTO installment = setSyncStatus(debtPosition, 1, 2, InstallmentDTO.StatusEnum.PAID, InstallmentDTO.StatusEnum.UNPAID);
+    InstallmentDTO installment = setSyncStatus(debtPosition, 1, 2, InstallmentStatus.PAID, InstallmentStatus.UNPAID);
     //others installments will be ignored
 
     //when

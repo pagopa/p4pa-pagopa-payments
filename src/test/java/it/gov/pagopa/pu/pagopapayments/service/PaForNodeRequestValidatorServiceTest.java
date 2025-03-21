@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStatus;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
@@ -54,7 +55,7 @@ class PaForNodeRequestValidatorServiceTest {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     Broker broker = podamFactory.manufacturePojo(Broker.class);
     organization.setBrokerId(broker.getBrokerId());
-    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    organization.setStatus(OrganizationStatus.ACTIVE);
 
     Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
     Mockito.when(brokerServiceMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
@@ -96,7 +97,7 @@ class PaForNodeRequestValidatorServiceTest {
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
     request.setIdPA(request.getFiscalCode());
     Organization organization = podamFactory.manufacturePojo(Organization.class);
-    organization.setStatus(Organization.StatusEnum.DRAFT);
+    organization.setStatus(OrganizationStatus.DRAFT);
     organization.setOrgFiscalCode(request.getFiscalCode());
 
     Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
@@ -113,7 +114,7 @@ class PaForNodeRequestValidatorServiceTest {
   void givenInvalidBrokerWhenPaForNodeRequestValidateThenOk() {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
-    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    organization.setStatus(OrganizationStatus.ACTIVE);
     Broker broker = podamFactory.manufacturePojo(Broker.class);
 
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
@@ -136,7 +137,7 @@ class PaForNodeRequestValidatorServiceTest {
   void givenInvalidStationWhenPaForNodeRequestValidateThenOk() {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
-    organization.setStatus(Organization.StatusEnum.ACTIVE);
+    organization.setStatus(OrganizationStatus.ACTIVE);
     Broker broker = podamFactory.manufacturePojo(Broker.class);
 
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);

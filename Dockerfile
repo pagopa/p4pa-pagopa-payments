@@ -3,11 +3,12 @@
 #
 # 🎯 Version Management
 #
-ARG CORRETTO_VERSION="21-alpine3.21"
-ARG CORRETTO_SHA="1b53a05c5693b5452a0c41a39b1fa3b8e7d77aa37f325acc378b7928bc1d8253"
+ARG IMAGE="public.ecr.aws/docker/library/eclipse-temurin"
+ARG IMAGE_VERSION="21-alpine-3.21"
+ARG IMAGE_SHA="cafcfad1d9d3b6e7dd983fa367f085ca1c846ce792da59bcb420ac4424296d56"
 ARG GRADLE_VERSION="8.10.2"
 ARG GRADLE_DOWNLOAD_SHA256="31c55713e40233a8303827ceb42ca48a47267a0ad4bab9177123121e71524c26"
-ARG APPINSIGHTS_VERSION="3.7.0"
+ARG APPINSIGHTS_VERSION="3.7.1"
 
 # 🌍 Timezone Configuration
 ARG TZ="Europe/Rome"
@@ -28,7 +29,7 @@ ARG GRADLE_HOME="/opt/gradle"
 #
 # 📥 Base Setup Stage
 #
-FROM amazoncorretto:${CORRETTO_VERSION}@sha256:${CORRETTO_SHA} AS base
+FROM ${IMAGE}:${IMAGE_VERSION}@sha256:${IMAGE_SHA} AS base
 ARG APP_USER
 ARG APP_GROUP
 
@@ -120,7 +121,7 @@ RUN gradle bootJar --no-daemon
 #
 # 🚀 Runtime Stage
 #
-FROM amazoncorretto:${CORRETTO_VERSION}@sha256:${CORRETTO_SHA} AS runtime
+FROM ${IMAGE}:${IMAGE_VERSION}@sha256:${IMAGE_SHA} AS runtime
 ARG APP_USER
 ARG APP_GROUP
 ARG APP_HOME

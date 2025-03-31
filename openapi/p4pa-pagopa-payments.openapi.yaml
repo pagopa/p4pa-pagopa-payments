@@ -1,0 +1,202 @@
+openapi: 3.0.1
+info:
+  title: p4pa-pagopa-payments
+  description: Api and Models
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+paths:
+  /aca/sync:
+    post:
+      tags:
+        - aca
+      operationId: syncAca
+      parameters:
+        - name: iud
+          in: query
+          description: iud of installment to sync with ACA
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "DebtPositionDTO"
+        required: true
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+  /paymentsReporting/{organizationId}:
+    get:
+      tags:
+        - payments-reporting
+      operationId: getPaymentsReportingList
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: List of payments reporting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentsReportingIdDTO"
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+  /paymentsReporting/{organizationId}/fetch:
+    get:
+      tags:
+        - payments-reporting
+      operationId: fetchPaymentReporting
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: flowId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: fileName
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int64
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+  /taxonomies/fetch:
+    get:
+      tags:
+        - taxonomies
+      operationId: fetchTaxonomies
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                    $ref: "#/components/schemas/TaxonomyDTO"
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+  /gpd/sync:
+    post:
+      tags:
+        - gpd
+      operationId: syncGpd
+      parameters:
+        - name: iud
+          in: query
+          description: iud of installment to sync with GPD
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "DebtPositionDTO"
+        required: true
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+security:
+  - BearerAuth: []
+components:
+  schemas:
+    PaymentsReportingIdDTO:
+      required:
+        - pagopaPaymentsReportingId
+        - flowDateTime
+        - paymentsReportingFileName
+      type: object
+      properties:
+        pagopaPaymentsReportingId:
+          type: string
+        flowDateTime:
+          type: string
+          format: date-time
+        paymentsReportingFileName:
+          type: string
+    PagoPaPaymentsErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - PAGOPA_PAYMENTS_NOT_FOUND
+            - PAGOPA_PAYMENTS_BAD_REQUEST
+            - PAGOPA_PAYMENTS_GENERIC_ERROR
+        message:
+          type: string
+    TaxonomyDTO:
+      properties:
+        organizationType:
+          type: string
+        organizationTypeDescription:
+          type: string
+        macroAreaCode:
+          type: string
+        macroAreaName:
+          type: string
+        macroAreaDescription:
+          type: string
+        serviceTypeCode:
+          type: string
+        serviceType:
+          type: string
+        serviceTypeDescription:
+          type: string
+        collectionReason:
+          type: string
+        startDateValidity:
+          type: string
+          format: date-time
+        endDateOfValidity:
+          type: string
+          format: date-time
+        taxonomyCode:
+          type: string
+        version:
+            type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

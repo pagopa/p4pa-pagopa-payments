@@ -1,0 +1,378 @@
+{
+	"info": {
+		"_postman_id": "3ea7bf76-33db-41ca-b3d8-d4492acfd898",
+		"name": "PagopaPayments E2E",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40109713"
+	},
+	"item": [
+		{
+			"name": "00_login",
+			"item": [
+				{
+					"name": "00_authtoken jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm=instrumentPmMethod(pm);\r",
+									"\r",
+									"pm.test(\"p4paAuth - 01_authtoken - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"p4paAuth - 01_authtoken jwt - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonResponse).have.property(\"access_token\")\r",
+									"    pm.expect(jsonResponse).have.property(\"token_type\")\r",
+									"    pm.expect(jsonResponse).have.property(\"expires_in\")\r",
+									"});\r",
+									"\r",
+									"let jsonResponse = pm.response.json();\r",
+									"pm.collectionVariables.set(\"accessToken\", jsonResponse.access_token);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{p4paAuthBaseUrl}}/auth/token?client_id=piattaforma-unitaria&grant_type=urn:ietf:params:oauth:grant-type:token-exchange&subject_token={{tokenExchange_subjectToken}}&subject_issuer={{tokenExchange_issuer}}&scope=openid&subject_token_type=urn:ietf:params:oauth:token-type:jwt",
+							"host": [
+								"{{p4paAuthBaseUrl}}"
+							],
+							"path": [
+								"auth",
+								"token"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "piattaforma-unitaria"
+								},
+								{
+									"key": "grant_type",
+									"value": "urn:ietf:params:oauth:grant-type:token-exchange"
+								},
+								{
+									"key": "subject_token",
+									"value": "{{tokenExchange_subjectToken}}"
+								},
+								{
+									"key": "subject_issuer",
+									"value": "{{tokenExchange_issuer}}"
+								},
+								{
+									"key": "scope",
+									"value": "openid"
+								},
+								{
+									"key": "subject_token_type",
+									"value": "urn:ietf:params:oauth:token-type:jwt"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "00_getUserInfo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm=instrumentPmMethod(pm);\r",
+									"\r",
+									"pm.test(\"Auth - getUserInfo - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Auth - getUserInfo - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    const orgIpaCode=pm.environment.get(\"codIpaEnte\")\r",
+									"\r",
+									"    jsonResponse.organizations.forEach(org => {    \r",
+									"        if(org.organizationIpaCode == orgIpaCode){\r",
+									"            pm.collectionVariables.set(\"organizationId\",org.organizationId)\r",
+									"        }\r",
+									"    });\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{p4paAuthBaseUrl}}/auth/userinfo",
+							"host": [
+								"{{p4paAuthBaseUrl}}"
+							],
+							"path": [
+								"auth",
+								"userinfo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "01_getPaymentsReportingList",
+			"item": [
+				{
+					"name": "getPaymentsReportingList",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm=instrumentPmMethod(pm);\r",
+									"\r",
+									"pm.test(\"PagopaPayments - getPaymentsReportingList - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{pagopaPaymentsInnerBaseUrl}}/paymentsReporting/{{organizationId}}",
+							"host": [
+								"{{pagopaPaymentsInnerBaseUrl}}"
+							],
+							"path": [
+								"paymentsReporting",
+								"{{organizationId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{accessToken}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "02_getTaxonomies",
+			"item": [
+				{
+					"name": "fetchTaxonomies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm=instrumentPmMethod(pm);\r",
+									"\r",
+									"pm.test(\"PagopaPayments - fetchTaxonomies - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Auth - fetchTaxonomies - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"\r",
+									"    pm.expect(jsonResponse.length).to.be.above(0);\r",
+									"\r",
+									"    jsonResponse.forEach(taxonomy => {\r",
+									"        pm.expect(taxonomy.organizationType).to.not.be.null;\r",
+									"        pm.expect(taxonomy.organizationTypeDescription).to.not.be.null;\r",
+									"        pm.expect(taxonomy.macroAreaCode).to.not.be.null;\r",
+									"        pm.expect(taxonomy.macroAreaName).to.not.be.null;\r",
+									"        pm.expect(taxonomy.macroAreaDescription).to.not.be.null;\r",
+									"        pm.expect(taxonomy.serviceTypeCode).to.not.be.null;\r",
+									"        pm.expect(taxonomy.serviceType).to.not.be.null;\r",
+									"        pm.expect(taxonomy.serviceTypeDescription).to.not.be.null;\r",
+									"        pm.expect(taxonomy.collectionReason).to.not.be.null;\r",
+									"        pm.expect(taxonomy.startDateValidity).to.not.be.null;\r",
+									"        pm.expect(taxonomy.endDateOfValidity).to.not.be.null;\r",
+									"        pm.expect(taxonomy.taxonomyCode).to.not.be.null;\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{pagopaPaymentsInnerBaseUrl}}/taxonomies/fetch",
+							"host": [
+								"{{pagopaPaymentsInnerBaseUrl}}"
+							],
+							"path": [
+								"taxonomies",
+								"fetch"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// START COMMON UTILITIES\r",
+					"\r",
+					"// global variable to use in order to skip tests\r",
+					"skipTests=false;\r",
+					"\r",
+					"// method to be invoked as first thing inside tests in order to instrument the \"pm\" variable:\r",
+					"// eg: pm = pm=instrumentPmMethod(pm);\r",
+					"instrumentPmMethod = (pm) => {\r",
+					"    const pmProxy = {\r",
+					"        get: function(pm, key) {\r",
+					"            if (key == 'test') {\r",
+					"                return (skipTests ? pm.test.skip : pm.test);\r",
+					"            }\r",
+					"            return pm[key];\r",
+					"        }\r",
+					"    };\r",
+					"\r",
+					"    return new Proxy(pm, pmProxy);\r",
+					"}\r",
+					"\r",
+					"// function to be used in order to retry the current request, configuring a maximum number of attempts and a fixed delay between each invoke\r",
+					"retryRequest = (pm, setTimeout, waitingMillis = 1000, maxAttempts = 30) => {\r",
+					"    if(!pm || !setTimeout){\r",
+					"        throw new Error(\"Invalid invoke to retryRequest function! Some required parameters are undefined: pm=\" + pm + \", setTimeout=\" + setTimeout)\r",
+					"    }\r",
+					"\r",
+					"    const retryVariableName = \"retry_\" + pm.info.requestId\r",
+					"    const attempt = (pm.variables.get(retryVariableName) ?? 0) + 1;\r",
+					"    if(attempt < maxAttempts) {\r",
+					"        console.info(pm.info.requestName + \" not ready, retrying [attempt \" + attempt + \"/\" + maxAttempts + \"] after \" + waitingMillis + \" ms\");\r",
+					"        pm.variables.set(retryVariableName, attempt)\r",
+					"        pm.execution.setNextRequest(pm.info.requestId);\r",
+					"        return setTimeout(()=>{}, waitingMillis);\r",
+					"    } else {\r",
+					"        pm.test(pm.info.requestName + \" not ready\", () => pm.expect.fail(attempt + \" attempts\"));\r",
+					"    }\r",
+					"}\r",
+					"\r",
+					"// function to be used in order to retry the current request until it returns a known response HTTP status code\r",
+					"retryWhenStatusCode = (pm, setTimeout, statusCode, waitingMillis, maxAttempts) => {\r",
+					"    if(pm.response.code == statusCode){\r",
+					"        console.log(\"Obtained \" + statusCode + \"! Performing retry...\")\r",
+					"        skipTests=true;\r",
+					"        return retryRequest(pm, setTimeout, waitingMillis, maxAttempts)\r",
+					"    }\r",
+					"}\r",
+					"\r",
+					"// XML utilities\r",
+					"xml2js = require('xml2js');\r",
+					"\r",
+					"parseXmlResponse = (response) => {\r",
+					"    let body;\r",
+					"    xml2js.parseString(response.text(), {\r",
+					"            ignoreAttrs: true, \r",
+					"            explicitArray: false,\r",
+					"        }, function (err, result) {\r",
+					"            if(err){\r",
+					"                console.error(err)\r",
+					"            }\r",
+					"        body = result;\r",
+					"    });\r",
+					"    return body;\r",
+					"};"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "organizationId",
+			"value": ""
+		}
+	]
+}

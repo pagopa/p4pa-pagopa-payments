@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings version="3.0"
+                xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+                xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+                xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <jaxws:bindings xmlns:jaxws="https://jakarta.ee/xml/ns/jaxws">
+        <jaxws:enableWrapperStyle>true</jaxws:enableWrapperStyle>
+        <jaxws:enableAsyncMapping>false</jaxws:enableAsyncMapping>
+    </jaxws:bindings>
+
+    <jaxb:bindings schemaLocation="nodeForPa.wsdl" node="/wsdl:definitions/wsdl:types/xs:schema">
+      <jaxb:globalBindings>
+        <xjc:simple />
+      </jaxb:globalBindings>
+      <jaxb:schemaBindings>
+        <jaxb:package name="it.gov.pagopa.pagopa_api.pa.nodeforpa" />
+      </jaxb:schemaBindings>
+    </jaxb:bindings>
+
+</jaxb:bindings>

@@ -2,7 +2,8 @@ HELP.md
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-#**/src/main/resources/application-local*.properties
+### Local development resources ###
+local-*.env
 
 ### STS ###
 .apt_generated

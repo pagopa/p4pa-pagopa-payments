@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PagoPaPaymentsErrorDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.event.Level;
@@ -84,26 +85,38 @@ public class PagopaPaymentsExceptionHandler {
   }
 
   private static String buildReturnedMessage(Exception ex) {
-    if (ex instanceof HttpMessageNotReadableException) {
-      if (ex.getCause() instanceof JsonMappingException jsonMappingException) {
-        return "Cannot parse body: " +
-          jsonMappingException.getPath().stream()
-            .map(JsonMappingException.Reference::getFieldName)
-            .collect(Collectors.joining(".")) +
-          ": " + jsonMappingException.getOriginalMessage();
+    switch (ex) {
+      case HttpMessageNotReadableException httpMessageNotReadableException -> {
+        if (httpMessageNotReadableException.getCause() instanceof JsonMappingException jsonMappingException) {
+          return "Cannot parse body. " +
+            jsonMappingException.getPath().stream()
+              .map(JsonMappingException.Reference::getFieldName)
+              .collect(Collectors.joining(".")) +
+            ": " + jsonMappingException.getOriginalMessage();
+        }
+        return "Required request body is missing";
       }
-      return "Required request body is missing";
-    } else if (ex instanceof MethodArgumentNotValidException methodArgumentNotValidException) {
-      return "Invalid request content:" +
-        methodArgumentNotValidException.getBindingResult()
-          .getAllErrors().stream()
-          .map(e -> " " +
-            (e instanceof FieldError fieldError ? fieldError.getField() : e.getObjectName()) +
-            ": " + e.getDefaultMessage())
-          .sorted()
-          .collect(Collectors.joining(";"));
-    } else {
-      return ex.getMessage();
+      case MethodArgumentNotValidException methodArgumentNotValidException -> {
+        return "Invalid request content." +
+          methodArgumentNotValidException.getBindingResult()
+            .getAllErrors().stream()
+            .map(e -> " " +
+              (e instanceof FieldError fieldError ? fieldError.getField() : e.getObjectName()) +
+              ": " + e.getDefaultMessage())
+            .sorted()
+            .collect(Collectors.joining(";"));
+      }
+      case ConstraintViolationException constraintViolationException -> {
+        return "Invalid request content." +
+          constraintViolationException.getConstraintViolations()
+            .stream()
+            .map(e -> " " + e.getPropertyPath() + ": " + e.getMessage())
+            .sorted()
+            .collect(Collectors.joining(";"));
+      }
+      default -> {
+        return ex.getMessage();
+      }
     }
   }
 

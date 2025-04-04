@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
+import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -169,7 +172,7 @@ class PagoPaPaymentsExceptionHandlerTest {
       "{\"notRequiredField\":\"notRequired\",\"lowerCaseAlphabeticField\":\"ABC\"}")
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("PAGOPA_PAYMENTS_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid request content: lowerCaseAlphabeticField: must match \"[a-z]+\"; requiredField: must not be null"));
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid request content. lowerCaseAlphabeticField: must match \"[a-z]+\"; requiredField: must not be null"));
   }
 
   @Test
@@ -178,7 +181,7 @@ class PagoPaPaymentsExceptionHandlerTest {
       "{\"notRequiredField\":\"notRequired\",\"dateTimeField\":\"2025-02-05\"}")
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("PAGOPA_PAYMENTS_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Cannot parse body: dateTimeField: Text '2025-02-05' could not be parsed at index 10"));
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Cannot parse body. dateTimeField: Text '2025-02-05' could not be parsed at index 10"));
   }
 
   @Test
@@ -192,14 +195,17 @@ class PagoPaPaymentsExceptionHandlerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("500 INTERNAL_SERVER_ERROR \"Error\""));
   }
 
+  private final ConstraintViolationException constraintViolationException = new ConstraintViolationException("Error", Set.of(ConstraintViolationImpl.forParameterValidation(
+    "error message template", Map.of(), Map.of(), "resolved message", null, null, null, null, PathImpl.createPathFromString("fieldName"), null, null, null
+  )));
   @Test
   void handleViolationException() throws Exception {
-    doThrow(new ConstraintViolationException("Error", Set.of())).when(testControllerSpy).testEndpoint(DATA, BODY);
+    doThrow(constraintViolationException).when(testControllerSpy).testEndpoint(DATA, BODY);
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("PAGOPA_PAYMENTS_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid request content. fieldName: resolved message"));
   }
 
 }

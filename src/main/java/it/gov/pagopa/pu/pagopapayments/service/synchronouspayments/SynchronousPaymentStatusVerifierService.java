@@ -34,8 +34,11 @@ public class SynchronousPaymentStatusVerifierService {
      */
 
     List<InstallmentDTO> payableInstallmentDTOList = installmentDTOList.stream().filter(i -> {
-      //if status is not UNPAID, the installment is not payable
-      if (!Objects.equals(i.getStatus(), InstallmentStatus.UNPAID))
+      //if status is not UNPAID, the installment is not payable (synchronous payment could ignore TO_SYNC status)
+      InstallmentStatus status = InstallmentStatus.TO_SYNC.equals(i.getStatus())
+        ? Objects.requireNonNull(i.getSyncStatus()).getSyncStatusTo()
+        : i.getStatus();
+      if (!Objects.equals(status, InstallmentStatus.UNPAID))
         return false;
       //only for getPayment (for verifyPayment, postalTransfer is not set):
       //if at least 1 transfer of the same organization that created the debt position

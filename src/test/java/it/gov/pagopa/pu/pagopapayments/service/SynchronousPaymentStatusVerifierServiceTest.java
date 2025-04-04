@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentSyncStatus;
 import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
@@ -48,6 +49,46 @@ class SynchronousPaymentStatusVerifierServiceTest {
 
     // Then
     Assertions.assertTrue(new ReflectionEquals(installmentDTO).matches(response));
+  }
+
+  @Test
+  void givenToSyncUnpaidInstallmentWhenVerifyPaymentStatusThenOk() {
+    // Given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
+    installmentDTO.setSyncStatus(new InstallmentSyncStatus(InstallmentStatus.DRAFT, InstallmentStatus.UNPAID));
+    InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    otherInstallmentDTO.setStatus(InstallmentStatus.EXPIRED);
+    List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, otherInstallmentDTO);
+    Boolean postalAccess = null;
+
+    // When
+    InstallmentDTO response = synchronousPaymentStatusVerifierService.verifyPaymentStatus(organization, installmentDTOList, "NAV", postalAccess);
+
+    // Then
+    Assertions.assertTrue(new ReflectionEquals(installmentDTO).matches(response));
+  }
+
+  @Test
+  void givenToSyncUnexpectedInstallmentWhenVerifyPaymentStatusThenOk() {
+    // Given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
+    installmentDTO.setSyncStatus(new InstallmentSyncStatus(InstallmentStatus.UNPAID, InstallmentStatus.PAID));
+    InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    otherInstallmentDTO.setStatus(InstallmentStatus.EXPIRED);
+    List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, otherInstallmentDTO);
+    Boolean postalAccess = null;
+
+    // When
+    PagoPaNodeFaultException response = Assertions.assertThrows(PagoPaNodeFaultException.class,
+      ()->synchronousPaymentStatusVerifierService.verifyPaymentStatus(organization, installmentDTOList, "NAV", postalAccess));
+
+    // Then
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO, response.getErrorCode());
+    Assertions.assertEquals(organization.getOrgFiscalCode(), response.getErrorEmitter());
   }
 
   @Test
@@ -173,7 +214,7 @@ class SynchronousPaymentStatusVerifierServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
+    installmentDTO.setStatus(InstallmentStatus.INVALID);
     InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     otherInstallmentDTO.setStatus(InstallmentStatus.CANCELLED);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, otherInstallmentDTO);

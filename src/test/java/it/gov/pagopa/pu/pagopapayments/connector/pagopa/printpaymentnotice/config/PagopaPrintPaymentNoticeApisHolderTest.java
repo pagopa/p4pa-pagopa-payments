@@ -46,6 +46,6 @@ class PagopaPrintPaymentNoticeApisHolderTest extends BaseApiHolderTest {
       () -> {
       },
       AUTH_TYPE.API_KEY,
-      "x-api-key");
+      "Ocp-Apim-Subscription-Key");
   }
 }

@@ -27,7 +27,7 @@ public class PagopaPrintPaymentNoticeApisHolder {
     this.clientConfig = clientConfig;
 
     if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("SEND"));
+      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("PRINT-PAYMENT-NOTICE"));
     }
   }
 

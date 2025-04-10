@@ -147,6 +147,7 @@ tasks.register("dependenciesBuild") {
     "openApiGenerateFILESHARE",
     "openApiGeneratePaCreatePosition",
     "openApiGenerateGPD",
+    "openApiGeneratePrintPaymentNoticeClient",
     "jaxbJavaGenPaForNode",
     "jaxbJavaGenNodeForPa"
   )
@@ -344,6 +345,28 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "generateConstructorWithAllArgs" to "true",
     "generatedConstructorWithRequiredArgs" to "true",
     "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+  ))
+  library.set("resttemplate")
+}
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGeneratePrintPaymentNoticeClient") {
+  group = "openapi"
+  description = "description"
+
+  generatorName.set("java")
+  inputSpec.set("$rootDir/openapi/pagopa-stampa-avvisi.openapi.json")
+  outputDir.set("$projectDir/build/generated")
+  apiPackage.set("it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.api")
+  modelPackage.set("it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto")
+  modelNameSuffix.set("DTO")
+  configOptions.set(mapOf(
+    "swaggerAnnotations" to "false",
+    "openApiNullable" to "false",
+    "dateLibrary" to "java17",
+    "useSpringBoot3" to "true",
+    "useJakartaEe" to "true",
+    "serializationLibrary" to "jackson",
+    "generateSupportingFiles" to "true"
   ))
   library.set("resttemplate")
 }

@@ -119,7 +119,7 @@ class BrokerEntityClientTest {
   @Test
   void whenGetBrokerApiKeyThenInvokeWithAccessToken() {
     // Given
-    Long brokerId = 0L;
+    Long brokerId = 1L;
     String accessToken = "ACCESSTOKEN";
     String expectedResult = "apiKey";
 
@@ -133,6 +133,24 @@ class BrokerEntityClientTest {
 
     // Then
     Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNoExistentBrokerIdWhenGetBrokerApiKeyThenNotFound() {
+    // Given
+    Long brokerId = 0L;
+    String accessToken = "ACCESSTOKEN";
+
+    Mockito.when(organizationApisHolder.getBrokerApi(accessToken))
+      .thenReturn(brokerApiMock);
+    Mockito.when(brokerApiMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    String result = brokerClient.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
+
+    // Then
+    Assertions.assertNull(result);
   }
 
 }

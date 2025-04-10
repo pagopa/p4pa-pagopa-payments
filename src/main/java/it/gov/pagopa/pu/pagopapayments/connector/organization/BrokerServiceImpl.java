@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization;
 
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
+import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.client.BrokerClient;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,11 @@ public class BrokerServiceImpl implements BrokerService {
   @Override
   public Broker getBrokerById(Long brokerId, String accessToken) {
     return brokerClient.getBrokerById(brokerId, accessToken);
+  }
+
+  @Override
+  public String getBrokerApiKey(Long brokerId, BrokerApiKeyType brokerApiKeyType, String accessToken) {
+    return brokerClient.getBrokerApiKey(brokerId, brokerApiKeyType, accessToken);
   }
 
 }

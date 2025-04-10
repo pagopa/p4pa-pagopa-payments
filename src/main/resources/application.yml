@@ -111,6 +111,12 @@ rest:
   pagopa-taxonomies:
     base-url: "\${PAGOPA_TAXONOMIES_BASE_URL:}"
     print-body-when-error: "\${PAGOPA_TAXONOMIES_PRINT_BODY_WHEN_ERROR:true}"
+  pagopa-print-payment-notice:
+    base-url: "\${PAGOPA_PRINT_PAYMENT_NOTICE_BASE_URL:}"
+    api-key: "\${PAGOPA_PRINT_PAYMENT_NOTICE_API_KEY:}"
+    max-attempts: "\${PAGOPA_PRINT_PAYMENT_NOTICE_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${PAGOPA_PRINT_PAYMENT_NOTICE_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${PAGOPA_PRINT_PAYMENT_NOTICE_PRINT_BODY_WHEN_ERROR:true}"
 
 springdoc:
   writer-with-default-pretty-printer: true

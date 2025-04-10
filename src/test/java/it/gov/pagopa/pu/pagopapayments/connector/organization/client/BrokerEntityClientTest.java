@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 import it.gov.pagopa.pu.organization.controller.generated.BrokerApi;
 import it.gov.pagopa.pu.organization.controller.generated.BrokerEntityControllerApi;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
+import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
 import org.junit.jupiter.api.AfterEach;
@@ -110,6 +111,43 @@ class BrokerEntityClientTest {
 
     // When
     Broker result = brokerClient.getBrokerById(brokerId, accessToken);
+
+    // Then
+    Assertions.assertNull(result);
+  }
+
+  @Test
+  void whenGetBrokerApiKeyThenInvokeWithAccessToken() {
+    // Given
+    Long brokerId = 1L;
+    String accessToken = "ACCESSTOKEN";
+    String expectedResult = "apiKey";
+
+    Mockito.when(organizationApisHolder.getBrokerApi(accessToken))
+      .thenReturn(brokerApiMock);
+    Mockito.when(brokerApiMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE))
+      .thenReturn(expectedResult);
+
+    // When
+    String result = brokerClient.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNoExistentBrokerIdWhenGetBrokerApiKeyThenNotFound() {
+    // Given
+    Long brokerId = 0L;
+    String accessToken = "ACCESSTOKEN";
+
+    Mockito.when(organizationApisHolder.getBrokerApi(accessToken))
+      .thenReturn(brokerApiMock);
+    Mockito.when(brokerApiMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    String result = brokerClient.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
 
     // Then
     Assertions.assertNull(result);

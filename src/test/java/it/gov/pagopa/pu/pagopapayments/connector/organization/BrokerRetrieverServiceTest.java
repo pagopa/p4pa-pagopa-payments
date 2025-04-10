@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization;
 
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
+import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.client.BrokerClient;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +53,22 @@ class BrokerRetrieverServiceTest {
 
     // When
     BrokerApiKeys result = service.getApiKeyByBrokerId(brokerId, accessToken);
+
+    // Then
+    assertSame(expected, result);
+  }
+
+  @Test
+  void givenBrokerIdWhenGetBrokerApiKeyThenOk() {
+    // Given
+    Long brokerId = 1L;
+    String accessToken = "accessToken";
+    String expected = "apiKey";
+
+    when(client.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken)).thenReturn(expected);
+
+    // When
+    String result = service.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
 
     // Then
     assertSame(expected, result);

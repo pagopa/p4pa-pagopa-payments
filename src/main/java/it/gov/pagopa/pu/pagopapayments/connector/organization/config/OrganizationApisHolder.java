@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.organization.controller.generated.BrokerApi;
 import it.gov.pagopa.pu.organization.controller.generated.BrokerEntityControllerApi;
 import it.gov.pagopa.pu.organization.controller.generated.OrganizationEntityControllerApi;
 import it.gov.pagopa.pu.organization.controller.generated.OrganizationSearchControllerApi;
-import it.gov.pagopa.pu.pagopapayments.config.RestTemplateConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;

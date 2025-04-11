@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config;
 
-import it.gov.pagopa.pu.pagopapayments.config.RestTemplateConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.ApiClient;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.api.NoticeGenerationRequestApisApi;
 import lombok.extern.slf4j.Slf4j;

@@ -16,7 +16,6 @@ public class ConversionUtils {
 
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
   private static final DatatypeFactory DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR;
-  public static final ZoneId ZONE_ID_ROME = ZoneId.of("Europe/Rome");
   public static final LocalDateTime MAX_EXPIRATION_DATE = LocalDateTime.of(2099, 12, 31, 23, 59, 59);
 
   static {
@@ -41,7 +40,7 @@ public class ConversionUtils {
       return null;
     }
     OffsetDateTime odt = OffsetDateTime.parse(xmlGregorianCalendar.toString());
-    ZoneOffset zoneOffset = ZONE_ID_ROME.getRules().getOffset(odt.toInstant());
+    ZoneOffset zoneOffset = Constants.ZONEID.getRules().getOffset(odt.toInstant());
     return odt.withOffsetSameInstant(zoneOffset);
   }
 
@@ -54,8 +53,8 @@ public class ConversionUtils {
 
   public static OffsetDateTime localDate2RomeMaxTime(LocalDate dueDate){
     return Optional.ofNullable(dueDate)
-      .map(dt -> dt.atTime(LocalTime.MAX).atZone(ConversionUtils.ZONE_ID_ROME).toOffsetDateTime())
-      .orElse(MAX_EXPIRATION_DATE.atZone(ConversionUtils.ZONE_ID_ROME).toOffsetDateTime());
+      .map(dt -> dt.atTime(LocalTime.MAX).atZone(Constants.ZONEID).toOffsetDateTime())
+      .orElse(MAX_EXPIRATION_DATE.atZone(Constants.ZONEID).toOffsetDateTime());
   }
 
   public static LocalDateTime atEndOfDay(LocalDate localDate) {

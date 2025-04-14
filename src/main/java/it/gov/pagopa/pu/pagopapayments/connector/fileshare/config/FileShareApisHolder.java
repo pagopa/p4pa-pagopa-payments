@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.fileshare.config;
 import it.gov.pagopa.pu.fileshare.controller.ApiClient;
 import it.gov.pagopa.pu.fileshare.controller.BaseApi;
 import it.gov.pagopa.pu.fileshare.controller.generated.IngestionFlowFileApi;
-import it.gov.pagopa.pu.pagopapayments.config.RestTemplateConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;

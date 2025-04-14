@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -94,7 +95,7 @@ class AcaDebtPositionMapperTest {
     Assertions.assertNotNull(newDebtPositionRequest);
     TestUtils.checkNotNullFields(newDebtPositionRequest);
 
-    Assertions.assertEquals(ConversionUtils.MAX_EXPIRATION_DATE.atZone(ConversionUtils.ZONE_ID_ROME).toOffsetDateTime(), newDebtPositionRequest.getExpirationDate());
+    Assertions.assertEquals(ConversionUtils.MAX_EXPIRATION_DATE.atZone(Constants.ZONEID).toOffsetDateTime(), newDebtPositionRequest.getExpirationDate());
     Assertions.assertEquals(toSync.getNav(), newDebtPositionRequest.getNav());
     Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
   }

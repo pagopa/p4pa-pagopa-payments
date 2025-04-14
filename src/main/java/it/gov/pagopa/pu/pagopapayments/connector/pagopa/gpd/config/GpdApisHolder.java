@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config;
 
 import it.gov.pagopa.nodo.gpd.controller.ApiClient;
 import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiApi;
-import it.gov.pagopa.pu.pagopapayments.config.RestTemplateConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;

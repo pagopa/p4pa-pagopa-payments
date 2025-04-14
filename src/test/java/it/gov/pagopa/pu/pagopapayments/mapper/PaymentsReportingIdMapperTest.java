@@ -2,23 +2,26 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import gov.telematici.pagamenti.ws.TipoIdRendicontazione;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
-import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.OffsetDateTime;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentsReportingIdMapperTest {
 
   @Test
-  void givenValidTipoIdRendicontazioneWhenMapThenReturnReportingIdDTO() {
+  void givenValidTipoIdRendicontazioneWhenMapThenReturnReportingIdDTO() throws DatatypeConfigurationException {
     // given
     TipoIdRendicontazione tipoIdRendicontazione = new TipoIdRendicontazione();
     tipoIdRendicontazione.setIdentificativoFlusso("flow1");
-    tipoIdRendicontazione.setDataOraFlusso(ConversionUtils.toXMLGregorianCalendar(OffsetDateTime.now()));
+    XMLGregorianCalendar xmlGregorianCalendar = DatatypeFactory.newInstance()
+      .newXMLGregorianCalendar("2025-04-11T11:16:13");
+    tipoIdRendicontazione.setDataOraFlusso(xmlGregorianCalendar);
 
     // when
     PaymentsReportingIdDTO result = PaymentsReportingIdMapper.map(tipoIdRendicontazione);

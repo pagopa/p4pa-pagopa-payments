@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.TimeZone;
 
 @Configuration
@@ -44,6 +45,7 @@ public class JsonConfig {
   private static SimpleModule configureDateTimeModule() {
     return new JavaTimeModule()
       .addSerializer(LocalDateTime.class, new LocalDateTimeToOffsetDateTimeSerializer())
-      .addDeserializer(LocalDateTime.class, new OffsetDateTimeToLocalDateTimeDeserializer());
+      .addDeserializer(LocalDateTime.class, new OffsetDateTimeToLocalDateTimeDeserializer())
+      .addDeserializer(OffsetDateTime.class, new LocalDateTimeToOffsetDateTimeDeserializer());
   }
 }

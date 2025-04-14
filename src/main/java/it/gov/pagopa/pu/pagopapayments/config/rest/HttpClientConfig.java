@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.config;
+package it.gov.pagopa.pu.pagopapayments.config.rest;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

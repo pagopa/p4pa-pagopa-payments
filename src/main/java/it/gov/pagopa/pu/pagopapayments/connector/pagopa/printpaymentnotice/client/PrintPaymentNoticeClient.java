@@ -20,15 +20,15 @@ public class PrintPaymentNoticeClient {
     this.brokerService = brokerService;
   }
 
-  public File generateNotice(Long brokerId, BrokerApiKeyType brokerApiKeyType, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO) {
-    String apiKey = getApiKeyFromBroker(brokerId, brokerApiKeyType);
+  public File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO) {
+    String apiKey = getApiKeyFromBroker(brokerId);
     return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
       .generateNotice(noticeGenerationRequestItemDTO, null, null);
   }
 
-  private String getApiKeyFromBroker(Long brokerId, BrokerApiKeyType brokerApiKeyType) {
-    String accessToken = SecurityUtils.getAccessToken();
-    return brokerService.getBrokerApiKey(brokerId, brokerApiKeyType, accessToken);
+  private String getApiKeyFromBroker(Long brokerId) {
+    String accessToken = SecurityUtils.getAccessToken(); // FIXME why should be used a new AccessToken? could be use session token instead?
+    return brokerService.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
   }
 
 }

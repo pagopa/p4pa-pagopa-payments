@@ -64,7 +64,7 @@ class PrintPaymentNoticeClientTest {
       .thenReturn(response);
 
     // When
-    File result = printPaymentNoticeClient.generateNotice(brokerId, BrokerApiKeyType.GENERATE_NOTICE, requestDTO);
+    File result = printPaymentNoticeClient.generateNotice(brokerId, requestDTO);
 
     // Then
     assertSame(response, result);

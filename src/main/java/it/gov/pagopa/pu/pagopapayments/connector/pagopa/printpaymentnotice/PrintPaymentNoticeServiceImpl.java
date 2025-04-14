@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice;
 
-import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.client.PrintPaymentNoticeClient;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,7 @@ public class PrintPaymentNoticeServiceImpl implements PrintPaymentNoticeService 
   }
 
   @Override
-  public File generateNotice(Long brokerId, BrokerApiKeyType brokerApiKeyType, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO) {
-    return printPaymentNoticeClient.generateNotice(brokerId, brokerApiKeyType, noticeGenerationRequestItemDTO);
+  public File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO) {
+    return printPaymentNoticeClient.generateNotice(brokerId, noticeGenerationRequestItemDTO);
   }
 }

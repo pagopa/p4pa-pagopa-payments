@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice;
 
-import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.client.PrintPaymentNoticeClient;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import org.junit.jupiter.api.AfterEach;
@@ -36,15 +35,14 @@ class PrintPaymentNoticeServiceTest {
   void whenGenerateNoticeThenInvokeClient() {
     // Given
     Long brokerId = 1L;
-    BrokerApiKeyType apiKeyType = BrokerApiKeyType.GENERATE_NOTICE;
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = new NoticeGenerationRequestItemDTO();
     File expectedResult = new File("path");
 
-    Mockito.when(clientMock.generateNotice(brokerId, apiKeyType, noticeGenerationRequestItemDTO))
+    Mockito.when(clientMock.generateNotice(brokerId, noticeGenerationRequestItemDTO))
       .thenReturn(expectedResult);
 
     // When
-    File result = service.generateNotice(brokerId, apiKeyType, noticeGenerationRequestItemDTO);
+    File result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO);
 
     // Then
     Assertions.assertSame(expectedResult, result);

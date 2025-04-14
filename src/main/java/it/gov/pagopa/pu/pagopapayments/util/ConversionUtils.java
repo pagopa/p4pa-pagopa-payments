@@ -39,9 +39,8 @@ public class ConversionUtils {
     if(xmlGregorianCalendar == null) {
       return null;
     }
-    OffsetDateTime odt = OffsetDateTime.parse(xmlGregorianCalendar.toString());
-    ZoneOffset zoneOffset = Constants.ZONEID.getRules().getOffset(odt.toInstant());
-    return odt.withOffsetSameInstant(zoneOffset);
+    Instant instant = xmlGregorianCalendar.toGregorianCalendar().toInstant();
+    return OffsetDateTime.ofInstant(instant, Constants.ZONEID);
   }
 
   public static OffsetDateTime toOffsetDateTime(Date date) {

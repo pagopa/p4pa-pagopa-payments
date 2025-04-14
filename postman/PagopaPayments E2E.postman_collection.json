@@ -43,12 +43,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{p4paAuthBaseUrl}}/auth/token?client_id=piattaforma-unitaria&grant_type=urn:ietf:params:oauth:grant-type:token-exchange&subject_token={{tokenExchange_subjectToken}}&subject_issuer={{tokenExchange_issuer}}&scope=openid&subject_token_type=urn:ietf:params:oauth:token-type:jwt",
+							"raw": "{{p4paAuthBaseUrl}}/oauth/token?client_id=piattaforma-unitaria&grant_type=urn:ietf:params:oauth:grant-type:token-exchange&subject_token={{tokenExchange_subjectToken}}&subject_issuer={{tokenExchange_issuer}}&scope=openid&subject_token_type=urn:ietf:params:oauth:token-type:jwt",
 							"host": [
 								"{{p4paAuthBaseUrl}}"
 							],
 							"path": [
-								"auth",
+								"oauth",
 								"token"
 							],
 							"query": [
@@ -124,12 +124,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{p4paAuthBaseUrl}}/auth/userinfo",
+							"raw": "{{p4paAuthBaseUrl}}/oauth/userinfo",
 							"host": [
 								"{{p4paAuthBaseUrl}}"
 							],
 							"path": [
-								"auth",
+								"oauth",
 								"userinfo"
 							]
 						}

@@ -2,7 +2,6 @@ package it.gov.pagopa.pu.pagopapayments.service.gpd;
 
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.GpdService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
@@ -37,14 +36,14 @@ public class GpdFacadeService {
   private void invokeCreatePositionImpl(String iud, DebtPositionDTO debtPositionDTO, String accessToken) {
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(debtPositionDTO.getOrganizationId(), accessToken);
     Organization organization = brokerForNodoPaDTO.getOrganization();
-    Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> debtPostionToSendGPD = gpdDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPositionDTO,organization);
+    Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> debtPositionToSendGPD = gpdDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPositionDTO,organization);
 
 
-    PaymentPositionModel newPaymentPositionModel = debtPostionToSendGPD.getRight();
-    GpdDebtPositionMapper.OPERATION operation = debtPostionToSendGPD.getLeft();
+    PaymentPositionModel newPaymentPositionModel = debtPositionToSendGPD.getRight();
+    GpdDebtPositionMapper.OPERATION operation = debtPositionToSendGPD.getLeft();
 
-    log.info("invoking GPD with operation [{}] for installment[{}/{}/{}]",
-      operation.name(), newPaymentPositionModel.getFiscalCode(), newPaymentPositionModel.getPaymentOption().getFirst().getIuv(), iud);
+    log.info("invoking GPD with operation [{}] for installment[{}/{}]",
+      operation.name(), newPaymentPositionModel.getPaymentOption().getFirst().getIuv(), iud);
 
     switch (operation) {
       case GpdDebtPositionMapper.OPERATION.DELETE:

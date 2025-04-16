@@ -5,5 +5,5 @@ import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generate
 import java.io.File;
 
 public interface PrintPaymentNoticeService {
-  File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO);
+  File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken);
 }

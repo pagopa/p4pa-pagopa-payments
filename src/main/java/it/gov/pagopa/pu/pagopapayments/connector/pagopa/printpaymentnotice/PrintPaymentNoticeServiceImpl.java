@@ -15,7 +15,7 @@ public class PrintPaymentNoticeServiceImpl implements PrintPaymentNoticeService 
   }
 
   @Override
-  public File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO) {
-    return printPaymentNoticeClient.generateNotice(brokerId, noticeGenerationRequestItemDTO);
+  public File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
+    return printPaymentNoticeClient.generateNotice(brokerId, noticeGenerationRequestItemDTO, accessToken);
   }
 }

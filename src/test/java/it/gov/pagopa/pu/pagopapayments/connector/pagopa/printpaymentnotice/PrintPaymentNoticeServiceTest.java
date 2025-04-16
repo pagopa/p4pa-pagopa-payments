@@ -38,11 +38,11 @@ class PrintPaymentNoticeServiceTest {
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = new NoticeGenerationRequestItemDTO();
     File expectedResult = new File("path");
 
-    Mockito.when(clientMock.generateNotice(brokerId, noticeGenerationRequestItemDTO))
+    Mockito.when(clientMock.generateNotice(brokerId, noticeGenerationRequestItemDTO, null))
       .thenReturn(expectedResult);
 
     // When
-    File result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO);
+    File result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO, null);
 
     // Then
     Assertions.assertSame(expectedResult, result);

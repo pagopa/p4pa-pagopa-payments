@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -42,10 +43,14 @@ public class PaForNodeRequestValidatorService {
         request.getIdBrokerPA(), broker.getBrokerFiscalCode());
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO, broker.getBrokerFiscalCode());
     }
-    if (!Objects.equals(request.getIdStation(), broker.getStationId())) {
-      log.warn("paymentRequestValidate [{}/{}]: invalid stationId for organization broker expected/actual[{}/{}]",
+    // sync brokers expects to receive RT on stationId, async brokers expects to receive RT on broadcastStationId. accepting both
+    List<String> expectedStations = List.of(
+      Objects.requireNonNullElse(broker.getStationId(), "NOTCONFIGUREDSTATIONID"),
+      Objects.requireNonNullElse(broker.getBroadcastStationId(), "NOTCONFIGUREBROADCASTSTATIONID"));
+    if (!expectedStations.contains(request.getIdStation())) {
+      log.warn("paymentRequestValidate [{}/{}]: invalid stationId for organization broker obtained[{}] expected one of {}",
         request.getFiscalCode(), request.getNoticeNumber(),
-        request.getIdStation(), broker.getStationId());
+        request.getIdStation(), expectedStations);
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_STAZIONE_INT_ERRATA, broker.getBrokerFiscalCode());
     }
     return organization;

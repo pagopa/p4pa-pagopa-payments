@@ -76,6 +76,32 @@ class PaForNodeRequestValidatorServiceTest {
   }
 
   @Test
+  void givenValidRequestOnBroadcastStationWhenPaForNodeRequestValidateThenOk() {
+    // Given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    organization.setBrokerId(broker.getBrokerId());
+    organization.setStatus(OrganizationStatus.ACTIVE);
+
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
+    Mockito.when(brokerServiceMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+
+    RetrievePaymentDTO request = RetrievePaymentDTO.builder()
+      .idStation(broker.getBroadcastStationId())
+      .fiscalCode(organization.getOrgFiscalCode())
+      .idPA(organization.getOrgFiscalCode())
+      .noticeNumber("NAV")
+      .idBrokerPA(broker.getBrokerFiscalCode())
+      .build();
+
+    // When
+    Organization response = paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN);
+
+    // Then
+    Assertions.assertTrue(new ReflectionEquals(organization).matches(response));
+  }
+
+  @Test
   void givenNotFoundOrgWhenPaForNodeRequestValidateThenFault() {
     // Given
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);

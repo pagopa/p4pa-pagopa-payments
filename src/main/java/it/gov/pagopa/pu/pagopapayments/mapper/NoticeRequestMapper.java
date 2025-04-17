@@ -12,6 +12,8 @@ import static it.gov.pagopa.pu.pagopapayments.util.Utilities.isFieldValid;
 
 @Component
 public class NoticeRequestMapper {
+  private NoticeRequestMapper() {
+  }
 
   public static DebtorDTO toDebtorDTO(PersonDTO person) {
     if (!isFieldValid(person.getAddress())) {
@@ -42,9 +44,6 @@ public class NoticeRequestMapper {
   }
 
   public static NoticeDTO toNoticeDTO(InstallmentDTO installment) {
-    if (installment == null) {
-      throw new IllegalArgumentException("InstallmentDTO cannot be null");
-    }
     NoticeDTO notice = new NoticeDTO();
     notice.setCode(installment.getNav());
     notice.setDueDate(installment.getDueDate() != null ? installment.getDueDate().toString() : null);

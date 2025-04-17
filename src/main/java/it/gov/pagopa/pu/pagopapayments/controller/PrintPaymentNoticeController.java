@@ -5,7 +5,11 @@ import it.gov.pagopa.pu.pagopapayments.controller.generated.PrintPaymentNoticeAp
 import it.gov.pagopa.pu.pagopapayments.service.printpaymentnotice.GenerateNoticeService;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,8 +27,19 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
 
   @Override
   public ResponseEntity<Resource> generateNotice(Long organizationId, String taxCode, String iuv, DebtPositionDTO debtPosition) {
-    log.info("invoking generateNotice, organizationId[{}], taxCode[{}], iuv[{}] debtPositionDTO[{}]", organizationId, taxCode, iuv, debtPosition);
-    File result = generateNoticeService.generateNotice(organizationId, taxCode, iuv, debtPosition, SecurityUtils.getAccessToken());
-    return null;
+    log.info("invoking generateNotice, organizationId[{}], taxCode[{}], iuv[{}] debtPositionId[{}]", organizationId, taxCode, iuv, debtPosition.getDebtPositionId());
+    File notice = generateNoticeService.generateNotice(organizationId, taxCode, iuv, debtPosition, SecurityUtils.getAccessToken());
+
+    Resource resource = new FileSystemResource(notice);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentDisposition(ContentDisposition.attachment()
+      .filename(notice.getName())
+      .build());
+
+    return ResponseEntity.ok()
+      .contentType(MediaType.APPLICATION_OCTET_STREAM)
+      .headers(headers)
+      .body(resource);
   }
 }

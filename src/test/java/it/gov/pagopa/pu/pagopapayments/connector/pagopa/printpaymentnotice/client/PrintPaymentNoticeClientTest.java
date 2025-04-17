@@ -31,6 +31,7 @@ class PrintPaymentNoticeClientTest {
   private BrokerService brokerServiceMock;
 
   private PrintPaymentNoticeClient printPaymentNoticeClient;
+  private static final String VALID_ACCESS_TOKEN = "VALID_ACCESS_TOKEN";
 
   @BeforeEach
   void setUp() {
@@ -56,7 +57,7 @@ class PrintPaymentNoticeClientTest {
     String apiKey = "apiKey";
     File response = new File("path");
 
-    Mockito.when(brokerServiceMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, null))
+    Mockito.when(brokerServiceMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNoticeGenerationRequestApisApiMap(apiKey))
       .thenReturn(noticeGenerationRequestApisApiMock);
@@ -64,7 +65,7 @@ class PrintPaymentNoticeClientTest {
       .thenReturn(response);
 
     // When
-    File result = printPaymentNoticeClient.generateNotice(brokerId, requestDTO, null);
+    File result = printPaymentNoticeClient.generateNotice(brokerId, requestDTO, VALID_ACCESS_TOKEN);
 
     // Then
     assertSame(response, result);

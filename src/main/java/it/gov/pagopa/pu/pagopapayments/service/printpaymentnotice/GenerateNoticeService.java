@@ -22,8 +22,6 @@ public class GenerateNoticeService {
 
   private final PrintPaymentNoticeService printPaymentNoticeService;
   private final OrganizationService organizationService;
-  private static final String TEMPLATE_SINGLE_INSTALMENT = GenerateNoticeTemplates.TEMPLATE_SINGLE_INSTALMENT.templateId();
-  private static final String TEMPLATE_SINGLE_INSTALMENT_POSTE = GenerateNoticeTemplates.TEMPLATE_SINGLE_INSTALMENT_POSTE.templateId();
 
   public GenerateNoticeService(
     PrintPaymentNoticeService printPaymentNoticeService, OrganizationService organizationService
@@ -55,8 +53,8 @@ public class GenerateNoticeService {
     noticeGenerationRequestItemDTO.data(noticeRequestDataDTO);
     noticeGenerationRequestItemDTO.setTemplateId(
       org.getIban() != null
-        ? TEMPLATE_SINGLE_INSTALMENT
-        : TEMPLATE_SINGLE_INSTALMENT_POSTE
+        ? GenerateNoticeTemplates.TEMPLATE_SINGLE_INSTALMENT.templateId()
+        : GenerateNoticeTemplates.TEMPLATE_SINGLE_INSTALMENT_POSTE.templateId()
     );
 
     return noticeGenerationRequestItemDTO;

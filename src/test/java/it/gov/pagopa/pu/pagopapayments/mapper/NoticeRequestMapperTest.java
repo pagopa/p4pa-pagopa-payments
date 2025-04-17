@@ -33,6 +33,7 @@ class NoticeRequestMapperTest {
     Assertions.assertEquals(installmentRequest.getDueDate().toString(), response.getDueDate());
     Assertions.assertEquals(installmentRequest.getAmountCents(), response.getPaymentAmount());
     Assertions.assertEquals(installmentRequest.getRemittanceInformation(), response.getSubject());
+    TestUtils.checkNotNullFields(response);
   }
 
   @Test
@@ -50,6 +51,7 @@ class NoticeRequestMapperTest {
     Assertions.assertNull(response.getDueDate());
     Assertions.assertEquals(installmentRequest.getAmountCents(), response.getPaymentAmount());
     Assertions.assertEquals(installmentRequest.getRemittanceInformation(), response.getSubject());
+    TestUtils.checkNotNullFields(response);
   }
 
   @Test
@@ -67,5 +69,6 @@ class NoticeRequestMapperTest {
     Assertions.assertEquals(NoticeRequestMapper.toNoticeDTO(installmentRequest), response.getNotice());
     Assertions.assertEquals(DebtorMapper.toDebtorDTO(personRequest), response.getDebtor());
     Assertions.assertEquals(orgFiscalCode, response.getCreditorInstitution().getTaxCode());
+    TestUtils.checkNotNullFields(response);
   }
 }

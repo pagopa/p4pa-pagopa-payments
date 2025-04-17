@@ -12,7 +12,6 @@ import it.gov.pagopa.pu.pagopapayments.mapper.NoticeRequestMapper;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeRequestDataDTO;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -195,12 +194,11 @@ class GenerateNoticeServiceTest {
     debtPosition.setPaymentOptions(List.of(paymentOption));
 
     // when
-    Pair<InstallmentDTO, PersonDTO> result = generateNoticeService.findInstallmentAndDebtorByIuv(debtPosition, TEST_IUV);
+    InstallmentDTO result = generateNoticeService.findInstallmentAndDebtorByIuv(debtPosition, TEST_IUV);
 
     // then
     assertNotNull(result);
-    assertEquals(installment, result.getLeft());
-    assertEquals(debtor, result.getRight());
+    assertEquals(installment, result);
   }
 
   @Test
@@ -216,7 +214,7 @@ class GenerateNoticeServiceTest {
     debtPosition.setPaymentOptions(List.of(paymentOption));
 
     // when
-    Pair<InstallmentDTO, PersonDTO> result = generateNoticeService.findInstallmentAndDebtorByIuv(debtPosition, TEST_IUV);
+   InstallmentDTO result = generateNoticeService.findInstallmentAndDebtorByIuv(debtPosition, TEST_IUV);
 
     // then
     assertNull(result);

@@ -1,10 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
+import io.micrometer.common.util.StringUtils;
 import it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.DebtorDTO;
 import org.springframework.stereotype.Component;
-
-import static it.gov.pagopa.pu.pagopapayments.util.Utilities.isFieldValid;
 
 @Component
 public class DebtorMapper {
@@ -12,19 +11,19 @@ public class DebtorMapper {
   }
 
   public static DebtorDTO toDebtorDTO(PersonDTO person) {
-    if (!isFieldValid(person.getAddress())) {
+    if (StringUtils.isBlank(person.getAddress())) {
       throw new IllegalArgumentException("Debtor address cannot be null or empty");
     }
-    if (!isFieldValid(person.getCivic())) {
+    if (StringUtils.isBlank(person.getCivic())) {
       throw new IllegalArgumentException("Debtor building Number cannot be null or empty");
     }
-    if (!isFieldValid(person.getLocation())) {
+    if (StringUtils.isBlank(person.getLocation())) {
       throw new IllegalArgumentException("Debtor city cannot be null or empty");
     }
-    if (!isFieldValid(person.getPostalCode())) {
+    if (StringUtils.isBlank(person.getPostalCode())) {
       throw new IllegalArgumentException("Debtor postal Code cannot be null or empty");
     }
-    if (!isFieldValid(person.getProvince())) {
+    if (StringUtils.isBlank(person.getProvince())) {
       throw new IllegalArgumentException("Debtor province cannot be null or empty");
     }
 

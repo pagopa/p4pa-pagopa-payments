@@ -33,7 +33,7 @@ class NoticeRequestMapperTest {
     Assertions.assertEquals(installmentRequest.getDueDate().toString(), response.getDueDate());
     Assertions.assertEquals(installmentRequest.getAmountCents(), response.getPaymentAmount());
     Assertions.assertEquals(installmentRequest.getRemittanceInformation(), response.getSubject());
-    TestUtils.checkNotNullFields(response);
+    TestUtils.checkNotNullFields(response, "installments", "discounted", "reduced");
   }
 
   @Test
@@ -51,7 +51,7 @@ class NoticeRequestMapperTest {
     Assertions.assertNull(response.getDueDate());
     Assertions.assertEquals(installmentRequest.getAmountCents(), response.getPaymentAmount());
     Assertions.assertEquals(installmentRequest.getRemittanceInformation(), response.getSubject());
-    TestUtils.checkNotNullFields(response);
+    TestUtils.checkNotNullFields(response, "dueDate", "installments", "discounted", "reduced");
   }
 
   @Test

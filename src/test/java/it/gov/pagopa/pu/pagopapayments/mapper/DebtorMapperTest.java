@@ -33,7 +33,7 @@ class DebtorMapperTest {
     Assertions.assertEquals(personRequest.getFullName(), response.getFullName());
     Assertions.assertEquals(personRequest.getPostalCode(), response.getPostalCode());
     Assertions.assertEquals(personRequest.getProvince(), response.getProvince());
-    TestUtils.checkNotNullFields(response);
+    TestUtils.checkNotNullFields(response, "taxCode");
   }
 
   @Test

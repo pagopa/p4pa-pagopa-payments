@@ -23,11 +23,11 @@ public class NoticeRequestMapper {
     return notice;
   }
 
-  public static NoticeRequestDataDTO toNoticeRequestDataDTO(String taxCode, InstallmentDTO installment, PersonDTO person) {
+  public static NoticeRequestDataDTO toNoticeRequestDataDTO(String orgFiscalCode, InstallmentDTO installment, PersonDTO person) {
     NoticeRequestDataDTO noticeRequestData = new NoticeRequestDataDTO();
 
     CreditorInstitutionDTO ci = new CreditorInstitutionDTO();
-    ci.setTaxCode(taxCode);
+    ci.setTaxCode(orgFiscalCode);
 
     noticeRequestData.setCreditorInstitution(ci);
     noticeRequestData.setDebtor(toDebtorDTO(person));

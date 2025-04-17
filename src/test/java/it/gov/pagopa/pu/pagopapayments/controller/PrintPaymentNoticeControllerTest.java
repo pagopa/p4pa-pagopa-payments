@@ -34,7 +34,6 @@ class PrintPaymentNoticeControllerTest {
   private GenerateNoticeService generateNoticeService;
 
   private static final Long ORG_ID = 1L;
-  private static final String TAX_CODE = "TAX123";
   private static final String IUV = "IUV123";
   private final PodamFactory podamFactory;
 
@@ -53,7 +52,6 @@ class PrintPaymentNoticeControllerTest {
 
     Mockito.when(generateNoticeService.generateNotice(
       Mockito.eq(ORG_ID),
-      Mockito.eq(TAX_CODE),
       Mockito.eq(IUV),
       Mockito.any(DebtPositionDTO.class),
       Mockito.anyString())
@@ -63,7 +61,6 @@ class PrintPaymentNoticeControllerTest {
 
     // When & Then
     mockMvc.perform(post("/printpaymentnotice/{organizationId}/generate", ORG_ID)
-        .param("taxCode", TAX_CODE)
         .param("iuv", IUV)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(debtPosition)))
@@ -72,7 +69,7 @@ class PrintPaymentNoticeControllerTest {
       .andExpect(content().bytes(Files.readAllBytes(tempFile)));
 
     Mockito.verify(generateNoticeService, Mockito.times(1)).generateNotice(
-      Mockito.eq(ORG_ID), Mockito.eq(TAX_CODE), Mockito.eq(IUV), Mockito.any(), Mockito.anyString()
+      Mockito.eq(ORG_ID), Mockito.eq(IUV), Mockito.any(), Mockito.anyString()
     );
     Files.deleteIfExists(tempFile);
   }

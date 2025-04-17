@@ -42,13 +42,6 @@
             "format" : "int64"
           }
         }, {
-          "name" : "taxCode",
-          "in" : "query",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
           "name" : "iuv",
           "in" : "query",
           "required" : true,

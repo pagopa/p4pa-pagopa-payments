@@ -28,13 +28,13 @@ public class GenerateNoticeService {
     this.organizationService = organizationService;
   }
 
-  public File generateNotice(Long organizationId, String taxCode, String iuv, DebtPositionDTO debtPosition, String accessToken) {
+  public File generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition, String accessToken) {
     Organization org = organizationService.getOrganizationById(organizationId, accessToken);
-    NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = generateNoticeRequest(org, taxCode, iuv, debtPosition);
+    NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = generateNoticeRequest(org, iuv, debtPosition);
     return printPaymentNoticeService.generateNotice(org.getBrokerId(), noticeGenerationRequestItemDTO, accessToken);
   }
 
-  private NoticeGenerationRequestItemDTO generateNoticeRequest(Organization org, String taxCode, String iuv, DebtPositionDTO debtPosition) {
+  private NoticeGenerationRequestItemDTO generateNoticeRequest(Organization org, String iuv, DebtPositionDTO debtPosition) {
     InstallmentDTO installment = findInstallmentAndDebtorByIuv(debtPosition, iuv);
     if (installment == null) {
       throw new IllegalArgumentException("No installment found for the provided IUV: " + iuv);
@@ -43,7 +43,7 @@ public class GenerateNoticeService {
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = new NoticeGenerationRequestItemDTO();
 
     NoticeRequestDataDTO noticeRequestDataDTO = NoticeRequestMapper.toNoticeRequestDataDTO(
-      taxCode,
+      org.getOrgFiscalCode(),
       installment,
       installment.getDebtor()
     );

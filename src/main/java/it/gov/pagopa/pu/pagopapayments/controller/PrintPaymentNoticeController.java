@@ -26,9 +26,9 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
   }
 
   @Override
-  public ResponseEntity<Resource> generateNotice(Long organizationId, String taxCode, String iuv, DebtPositionDTO debtPosition) {
-    log.info("invoking generateNotice, organizationId[{}], taxCode[{}], iuv[{}] debtPositionId[{}]", organizationId, taxCode, iuv, debtPosition.getDebtPositionId());
-    File notice = generateNoticeService.generateNotice(organizationId, taxCode, iuv, debtPosition, SecurityUtils.getAccessToken());
+  public ResponseEntity<Resource> generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition) {
+    log.info("invoking generateNotice, organizationId[{}], iuv[{}] debtPositionId[{}]", organizationId, iuv, debtPosition.getDebtPositionId());
+    File notice = generateNoticeService.generateNotice(organizationId, iuv, debtPosition, SecurityUtils.getAccessToken());
 
     Resource resource = new FileSystemResource(notice);
 

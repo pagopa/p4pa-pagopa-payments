@@ -57,15 +57,15 @@ class NoticeRequestMapperTest {
     //given
     InstallmentDTO installmentRequest = podamFactory.manufacturePojo(InstallmentDTO.class);
     PersonDTO personRequest = podamFactory.manufacturePojo(PersonDTO.class);
-    String taxCode = "999999982";
+    String orgFiscalCode = "999999982";
 
     //when
-    NoticeRequestDataDTO response = NoticeRequestMapper.toNoticeRequestDataDTO(taxCode, installmentRequest, personRequest);
+    NoticeRequestDataDTO response = NoticeRequestMapper.toNoticeRequestDataDTO(orgFiscalCode, installmentRequest, personRequest);
 
     //verify
     assertNotNull(response);
     Assertions.assertEquals(NoticeRequestMapper.toNoticeDTO(installmentRequest), response.getNotice());
     Assertions.assertEquals(DebtorMapper.toDebtorDTO(personRequest), response.getDebtor());
-    Assertions.assertEquals(taxCode, response.getCreditorInstitution().getTaxCode());
+    Assertions.assertEquals(orgFiscalCode, response.getCreditorInstitution().getTaxCode());
   }
 }

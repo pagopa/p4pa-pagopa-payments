@@ -42,7 +42,6 @@ class GenerateNoticeServiceTest {
 
   private static final String ACCESS_TOKEN = "access-token";
   private static final String TEST_IUV = "IUV123";
-  private static final String TEST_TAX_CODE = "99999999982";
 
   public GenerateNoticeServiceTest() {
     podamFactory = TestUtils.getPodamFactory();
@@ -65,7 +64,7 @@ class GenerateNoticeServiceTest {
     debtPosition.setPaymentOptions(List.of(paymentOption));
 
     NoticeRequestDataDTO noticeRequestData = NoticeRequestMapper.toNoticeRequestDataDTO(
-      TEST_TAX_CODE,
+      organization.getOrgFiscalCode(),
       installment,
       installment.getDebtor()
     );
@@ -86,7 +85,7 @@ class GenerateNoticeServiceTest {
     ).thenReturn(expectedFile);
 
     // when
-    File result = generateNoticeService.generateNotice(organizationId, TEST_TAX_CODE, TEST_IUV, debtPosition, ACCESS_TOKEN);
+    File result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
@@ -116,7 +115,7 @@ class GenerateNoticeServiceTest {
     debtPosition.setPaymentOptions(List.of(paymentOption));
 
     NoticeRequestDataDTO noticeRequestData = NoticeRequestMapper.toNoticeRequestDataDTO(
-      TEST_TAX_CODE,
+      organization.getOrgFiscalCode(),
       installment,
       installment.getDebtor()
     );
@@ -137,7 +136,7 @@ class GenerateNoticeServiceTest {
     ).thenReturn(expectedFile);
 
     // when
-    File result = generateNoticeService.generateNotice(organizationId, TEST_TAX_CODE, TEST_IUV, debtPosition, ACCESS_TOKEN);
+    File result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
@@ -171,7 +170,7 @@ class GenerateNoticeServiceTest {
     // when & then
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> generateNoticeService.generateNotice(organizationId, TEST_TAX_CODE, invalidIuv, debtPosition, ACCESS_TOKEN)
+      () -> generateNoticeService.generateNotice(organizationId, invalidIuv, debtPosition, ACCESS_TOKEN)
     );
 
     assertEquals("No installment found for the provided IUV: " + invalidIuv, exception.getMessage());

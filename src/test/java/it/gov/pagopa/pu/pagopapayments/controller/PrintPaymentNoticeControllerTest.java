@@ -14,8 +14,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.co.jemos.podam.api.PodamFactory;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -46,8 +46,8 @@ class PrintPaymentNoticeControllerTest {
   void givenValidInputWhenGenerateNoticeThenReturnFile() throws Exception {
     // Given
     String fileContent = "fake content";
-    File tempFile = File.createTempFile("notice", ".pdf");
-    Files.write(tempFile.toPath(), fileContent.getBytes());
+    Path tempFile = Files.createTempFile("notice", ".pdf");
+    Files.write(tempFile, fileContent.getBytes());
 
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
 
@@ -57,7 +57,7 @@ class PrintPaymentNoticeControllerTest {
       Mockito.eq(IUV),
       Mockito.any(DebtPositionDTO.class),
       Mockito.anyString())
-    ).thenReturn(tempFile);
+    ).thenReturn(tempFile.toFile());
 
     TestUtils.setFakeAccessTokenInContext();
 
@@ -68,12 +68,12 @@ class PrintPaymentNoticeControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(debtPosition)))
       .andExpect(status().isOk())
-      .andExpect(header().string("Content-Disposition", "attachment; filename=\"" + tempFile.getName() + "\""))
-      .andExpect(content().bytes(Files.readAllBytes(tempFile.toPath())));
+      .andExpect(header().string("Content-Disposition", "attachment; filename=\"" + tempFile.toFile().getName() + "\""))
+      .andExpect(content().bytes(Files.readAllBytes(tempFile)));
 
     Mockito.verify(generateNoticeService, Mockito.times(1)).generateNotice(
       Mockito.eq(ORG_ID), Mockito.eq(TAX_CODE), Mockito.eq(IUV), Mockito.any(), Mockito.anyString()
     );
-    Files.deleteIfExists(tempFile.toPath());
+    Files.deleteIfExists(tempFile);
   }
 }

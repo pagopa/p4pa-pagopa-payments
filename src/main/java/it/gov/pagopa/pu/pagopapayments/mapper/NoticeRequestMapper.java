@@ -20,6 +20,7 @@ public class NoticeRequestMapper {
     notice.setDueDate(installment.getDueDate() != null ? installment.getDueDate().toString() : null);
     notice.setPaymentAmount(installment.getAmountCents());
     notice.setSubject(installment.getRemittanceInformation());
+    notice.setInstallments(null);
     return notice;
   }
 

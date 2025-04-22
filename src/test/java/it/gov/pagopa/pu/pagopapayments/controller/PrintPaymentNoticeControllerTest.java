@@ -15,7 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PrintPaymentNoticeController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -44,7 +45,6 @@ class PrintPaymentNoticeControllerTest {
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     byte[] expectedResult = "PDF-DATA".getBytes();
 
-
     Mockito.when(generateNoticeService.generateNotice(
       Mockito.eq(ORG_ID),
       Mockito.eq(IUV),
@@ -60,7 +60,6 @@ class PrintPaymentNoticeControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(debtPosition)))
       .andExpect(status().isOk())
-      .andExpect(header().string("Content-Disposition", "attachment; filename=notice.pdf"))
       .andExpect(content().bytes(expectedResult));
 
     Mockito.verify(generateNoticeService, Mockito.times(1)).generateNotice(

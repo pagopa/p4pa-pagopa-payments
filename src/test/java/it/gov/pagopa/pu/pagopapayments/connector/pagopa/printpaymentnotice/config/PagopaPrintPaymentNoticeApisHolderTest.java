@@ -42,10 +42,11 @@ class PagopaPrintPaymentNoticeApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
         .generateNotice(new NoticeGenerationRequestItemDTO(), null, null),
-      new ParameterizedTypeReference<>() {},
-      () -> {
+      new ParameterizedTypeReference<>() {
       },
+      () -> {},
       AUTH_TYPE.API_KEY,
-      "Ocp-Apim-Subscription-Key");
+      "Ocp-Apim-Subscription-Key"
+    );
   }
 }

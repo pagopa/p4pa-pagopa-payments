@@ -32,7 +32,7 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentDisposition(ContentDisposition.attachment()
-      .filename("notice.pdf")
+      .filename("notice_" + iuv + ".pdf")
       .build());
 
     return ResponseEntity.ok()

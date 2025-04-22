@@ -491,6 +491,9 @@
             "type" : "string",
             "format" : "date-time"
           },
+          "updateOperatorExternalId" : {
+            "type" : "string"
+          },
           "paymentOptions" : {
             "type" : "array",
             "items" : {
@@ -599,6 +602,9 @@
           "updateDate" : {
             "type" : "string",
             "format" : "date-time"
+          },
+          "updateOperatorExternalId" : {
+            "type" : "string"
           }
         }
       },
@@ -644,6 +650,17 @@
           "paymentOptionIndex" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "creationDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updateDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updateOperatorExternalId" : {
+            "type" : "string"
           },
           "installments" : {
             "type" : "array",
@@ -741,6 +758,17 @@
           "transferIndex" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "creationDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updateDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updateOperatorExternalId" : {
+            "type" : "string"
           }
         }
       },

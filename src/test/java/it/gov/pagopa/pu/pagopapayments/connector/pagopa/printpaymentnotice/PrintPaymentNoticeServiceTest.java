@@ -20,6 +20,7 @@ class PrintPaymentNoticeServiceTest {
   private PrintPaymentNoticeClient clientMock;
 
   private PrintPaymentNoticeService service;
+  private static final String VALID_ACCESS_TOKEN = "VALID_ACCESS_TOKEN";
 
   @BeforeEach
   void init() {
@@ -38,11 +39,11 @@ class PrintPaymentNoticeServiceTest {
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = new NoticeGenerationRequestItemDTO();
     File expectedResult = new File("path");
 
-    Mockito.when(clientMock.generateNotice(brokerId, noticeGenerationRequestItemDTO))
+    Mockito.when(clientMock.generateNotice(brokerId, noticeGenerationRequestItemDTO, VALID_ACCESS_TOKEN))
       .thenReturn(expectedResult);
 
     // When
-    File result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO);
+    File result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO, VALID_ACCESS_TOKEN);
 
     // Then
     Assertions.assertSame(expectedResult, result);

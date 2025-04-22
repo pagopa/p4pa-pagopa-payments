@@ -20,11 +20,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 
-import java.io.File;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class GenerateNoticeServiceTest {
@@ -73,7 +71,7 @@ class GenerateNoticeServiceTest {
     noticeGenerationRequestItem.setData(noticeRequestData);
     noticeGenerationRequestItem.setTemplateId(GenerateNoticeTemplates.TEMPLATE_SINGLE_INSTALMENT.templateId());
 
-    File expectedFile = mock(File.class);
+    byte[] expectedResult = "PDF-DATA".getBytes();
 
     Mockito.when(organizationServiceMock.getOrganizationById(organizationId, ACCESS_TOKEN))
       .thenReturn(organization);
@@ -82,14 +80,14 @@ class GenerateNoticeServiceTest {
       organization.getBrokerId(),
       noticeGenerationRequestItem,
       ACCESS_TOKEN)
-    ).thenReturn(expectedFile);
+    ).thenReturn(expectedResult);
 
     // when
-    File result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
+    byte[] result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
-    assertEquals(expectedFile, result);
+    assertEquals(expectedResult, result);
 
     Mockito.verify(organizationServiceMock).getOrganizationById(organizationId, ACCESS_TOKEN);
     Mockito.verify(printPaymentNoticeServiceMock).generateNotice(
@@ -124,7 +122,7 @@ class GenerateNoticeServiceTest {
     noticeGenerationRequestItem.setData(noticeRequestData);
     noticeGenerationRequestItem.setTemplateId(GenerateNoticeTemplates.TEMPLATE_SINGLE_INSTALMENT_POSTE.templateId());
 
-    File expectedFile = mock(File.class);
+    byte[] expectedResult = "PDF-DATA".getBytes();
 
     Mockito.when(organizationServiceMock.getOrganizationById(organizationId, ACCESS_TOKEN))
       .thenReturn(organization);
@@ -133,14 +131,14 @@ class GenerateNoticeServiceTest {
       organization.getBrokerId(),
       noticeGenerationRequestItem,
       ACCESS_TOKEN)
-    ).thenReturn(expectedFile);
+    ).thenReturn(expectedResult);
 
     // when
-    File result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
+    byte[] result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
-    assertEquals(expectedFile, result);
+    assertEquals(expectedResult, result);
 
     Mockito.verify(organizationServiceMock).getOrganizationById(organizationId, ACCESS_TOKEN);
     Mockito.verify(printPaymentNoticeServiceMock).generateNotice(

@@ -12,8 +12,6 @@ import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generate
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-
 @Service
 @Slf4j
 public class GenerateNoticeService {
@@ -28,7 +26,7 @@ public class GenerateNoticeService {
     this.organizationService = organizationService;
   }
 
-  public File generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition, String accessToken) {
+  public byte[] generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition, String accessToken) {
     Organization org = organizationService.getOrganizationById(organizationId, accessToken);
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = generateNoticeRequest(org, iuv, debtPosition);
     return printPaymentNoticeService.generateNotice(org.getBrokerId(), noticeGenerationRequestItemDTO, accessToken);

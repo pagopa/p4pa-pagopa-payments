@@ -14,8 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.File;
-
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +53,7 @@ class PrintPaymentNoticeClientTest {
 
     Long brokerId = 1L;
     String apiKey = "apiKey";
-    File response = new File("path");
+    byte[] response = "PDF-DATA".getBytes();
 
     Mockito.when(brokerServiceMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
@@ -65,7 +63,7 @@ class PrintPaymentNoticeClientTest {
       .thenReturn(response);
 
     // When
-    File result = printPaymentNoticeClient.generateNotice(brokerId, requestDTO, VALID_ACCESS_TOKEN);
+    byte[] result = printPaymentNoticeClient.generateNotice(brokerId, requestDTO, VALID_ACCESS_TOKEN);
 
     // Then
     assertSame(response, result);

@@ -14,9 +14,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.co.jemos.podam.api.PodamFactory;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -44,18 +41,16 @@ class PrintPaymentNoticeControllerTest {
   @Test
   void givenValidInputWhenGenerateNoticeThenReturnFile() throws Exception {
     // Given
-    String fileContent = "fake content";
-    Path tempFile = Files.createTempFile("notice", ".pdf");
-    Files.write(tempFile, fileContent.getBytes());
-
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    byte[] expectedResult = "PDF-DATA".getBytes();
+
 
     Mockito.when(generateNoticeService.generateNotice(
       Mockito.eq(ORG_ID),
       Mockito.eq(IUV),
       Mockito.any(DebtPositionDTO.class),
       Mockito.anyString())
-    ).thenReturn(tempFile.toFile());
+    ).thenReturn(expectedResult);
 
     TestUtils.setFakeAccessTokenInContext();
 
@@ -65,12 +60,11 @@ class PrintPaymentNoticeControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(debtPosition)))
       .andExpect(status().isOk())
-      .andExpect(header().string("Content-Disposition", "attachment; filename=\"" + tempFile.toFile().getName() + "\""))
-      .andExpect(content().bytes(Files.readAllBytes(tempFile)));
+      .andExpect(header().string("Content-Disposition", "attachment; filename=notice.pdf"))
+      .andExpect(content().bytes(expectedResult));
 
     Mockito.verify(generateNoticeService, Mockito.times(1)).generateNotice(
       Mockito.eq(ORG_ID), Mockito.eq(IUV), Mockito.any(), Mockito.anyString()
     );
-    Files.deleteIfExists(tempFile);
   }
 }

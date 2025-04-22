@@ -4,8 +4,6 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.clien
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-
 @Service
 public class PrintPaymentNoticeServiceImpl implements PrintPaymentNoticeService {
   private final PrintPaymentNoticeClient printPaymentNoticeClient;
@@ -15,7 +13,7 @@ public class PrintPaymentNoticeServiceImpl implements PrintPaymentNoticeService 
   }
 
   @Override
-  public File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
+  public byte[] generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
     return printPaymentNoticeClient.generateNotice(brokerId, noticeGenerationRequestItemDTO, accessToken);
   }
 }

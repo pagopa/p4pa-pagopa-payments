@@ -59,7 +59,7 @@ class NoticeRequestMapperTest {
     //given
     InstallmentDTO installmentRequest = podamFactory.manufacturePojo(InstallmentDTO.class);
     PersonDTO personRequest = podamFactory.manufacturePojo(PersonDTO.class);
-    String orgFiscalCode = "999999982";
+    String orgFiscalCode = "99999999982";
 
     //when
     NoticeRequestDataDTO response = NoticeRequestMapper.toNoticeRequestDataDTO(orgFiscalCode, installmentRequest, personRequest);

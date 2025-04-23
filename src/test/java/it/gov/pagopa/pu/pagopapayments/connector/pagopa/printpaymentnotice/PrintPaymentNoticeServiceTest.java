@@ -11,8 +11,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.File;
-
 @ExtendWith(MockitoExtension.class)
 class PrintPaymentNoticeServiceTest {
 
@@ -37,13 +35,13 @@ class PrintPaymentNoticeServiceTest {
     // Given
     Long brokerId = 1L;
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = new NoticeGenerationRequestItemDTO();
-    File expectedResult = new File("path");
+    byte[] expectedResult = "PDF-DATA".getBytes();
 
     Mockito.when(clientMock.generateNotice(brokerId, noticeGenerationRequestItemDTO, VALID_ACCESS_TOKEN))
       .thenReturn(expectedResult);
 
     // When
-    File result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO, VALID_ACCESS_TOKEN);
+    byte[] result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO, VALID_ACCESS_TOKEN);
 
     // Then
     Assertions.assertSame(expectedResult, result);

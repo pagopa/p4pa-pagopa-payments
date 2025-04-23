@@ -48,6 +48,7 @@ public abstract class BaseApiHolderTest {
             : Long.class.equals(apiReturnedType.getType()) ? (T)Long.valueOf(0L)
               : apiReturnedType.getType().getTypeName().startsWith(List.class.getName()) ? (T)List.of()
               : Void.class.equals(apiReturnedType.getType()) ? (T)voidMock
+              : "byte[]".equals(apiReturnedType.getType().getTypeName()) ? (T) new byte[0]
               : (T)Mockito.mock(Class.forName(apiReturnedType.getType().getTypeName()));
 
           Mockito.doReturn(ResponseEntity.ok(expectedResult))

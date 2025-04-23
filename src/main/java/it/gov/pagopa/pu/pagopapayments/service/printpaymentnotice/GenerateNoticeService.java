@@ -5,14 +5,13 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.PrintPaymentNoticeService;
+import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.GenerateNoticeTemplates;
 import it.gov.pagopa.pu.pagopapayments.mapper.NoticeRequestMapper;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeRequestDataDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
 
 @Service
 @Slf4j
@@ -28,10 +27,14 @@ public class GenerateNoticeService {
     this.organizationService = organizationService;
   }
 
-  public File generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition, String accessToken) {
+  public NoticeDataDTO generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition, String accessToken) {
     Organization org = organizationService.getOrganizationById(organizationId, accessToken);
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = generateNoticeRequest(org, iuv, debtPosition);
-    return printPaymentNoticeService.generateNotice(org.getBrokerId(), noticeGenerationRequestItemDTO, accessToken);
+    byte[] noticeData = printPaymentNoticeService.generateNotice(org.getBrokerId(), noticeGenerationRequestItemDTO, accessToken);
+    return NoticeDataDTO.builder()
+      .notice(noticeData)
+      .fileName(org.getOrgFiscalCode() + "_" + iuv + ".pdf")
+      .build();
   }
 
   private NoticeGenerationRequestItemDTO generateNoticeRequest(Organization org, String iuv, DebtPositionDTO debtPosition) {

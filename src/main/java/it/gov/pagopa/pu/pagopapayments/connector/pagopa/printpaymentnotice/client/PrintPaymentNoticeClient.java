@@ -6,8 +6,6 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.confi
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-
 @Service
 public class PrintPaymentNoticeClient {
 
@@ -19,7 +17,7 @@ public class PrintPaymentNoticeClient {
     this.brokerService = brokerService;
   }
 
-  public File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
+  public byte[] generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
     String apiKey = getApiKeyFromBroker(brokerId, accessToken);
     return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
       .generateNotice(noticeGenerationRequestItemDTO, null, null);

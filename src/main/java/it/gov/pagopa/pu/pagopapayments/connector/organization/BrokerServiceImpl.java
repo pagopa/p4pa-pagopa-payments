@@ -28,7 +28,7 @@ public class BrokerServiceImpl implements BrokerService {
   }
 
   @Override
-  @Cacheable(cacheNames = CacheConfig.Fields.brokerApiKeyAndSegregationCodes, key = "#brokerId-#brokerApiKeyType", unless="#result == null")
+  @Cacheable(cacheNames = CacheConfig.Fields.brokerApiKeyAndSegregationCodes, key = "#brokerId + '-' + #brokerApiKeyType", unless="#result == null")
   public String getBrokerApiKey(Long brokerId, BrokerApiKeyType brokerApiKeyType, String accessToken) {
     return brokerClient.getBrokerApiKey(brokerId, brokerApiKeyType, accessToken);
   }

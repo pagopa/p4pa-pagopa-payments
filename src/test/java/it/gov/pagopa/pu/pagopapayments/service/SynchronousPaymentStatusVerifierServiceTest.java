@@ -235,6 +235,7 @@ class SynchronousPaymentStatusVerifierServiceTest {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
+    installmentDTO.setSyncStatus(new InstallmentSyncStatus(InstallmentStatus.UNPAID, InstallmentStatus.INVALID));
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
     Boolean postalAccess = null;
 

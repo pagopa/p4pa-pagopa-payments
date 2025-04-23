@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice;
 
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.client.PrintPaymentNoticeClient;
+import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveRequestDTO;
+import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveResourceDTO;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -42,6 +44,25 @@ class PrintPaymentNoticeServiceTest {
 
     // When
     byte[] result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO, VALID_ACCESS_TOKEN);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenGenerateNoticeMassiveThenInvokeClient() {
+    // Given
+    Long brokerId = 1L;
+    NoticeGenerationMassiveRequestDTO noticeMassive = new NoticeGenerationMassiveRequestDTO();
+    NoticeGenerationMassiveResourceDTO expectedResult = new NoticeGenerationMassiveResourceDTO();
+    expectedResult.setFolderId("123");
+    String idempotenceKey = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
+
+    Mockito.when(clientMock.generateNoticeMassive(brokerId, idempotenceKey, noticeMassive, VALID_ACCESS_TOKEN))
+      .thenReturn(expectedResult);
+
+    // When
+    NoticeGenerationMassiveResourceDTO result = service.generateNoticeMassive(brokerId, idempotenceKey, noticeMassive, VALID_ACCESS_TOKEN);
 
     // Then
     Assertions.assertSame(expectedResult, result);

@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
 import it.gov.pagopa.pu.pagopapayments.service.printpaymentnotice.GenerateNoticeService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Test;
@@ -44,13 +45,17 @@ class PrintPaymentNoticeControllerTest {
     // Given
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     byte[] expectedResult = "PDF-DATA".getBytes();
+    NoticeDataDTO noticeData = NoticeDataDTO.builder()
+      .notice(expectedResult)
+      .fileName("notice.pdf")
+        .build();
 
     Mockito.when(generateNoticeService.generateNotice(
       Mockito.eq(ORG_ID),
       Mockito.eq(IUV),
       Mockito.any(DebtPositionDTO.class),
       Mockito.anyString())
-    ).thenReturn(expectedResult);
+    ).thenReturn(noticeData);
 
     TestUtils.setFakeAccessTokenInContext();
 

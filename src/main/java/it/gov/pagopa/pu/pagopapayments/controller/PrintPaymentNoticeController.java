@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.controller.generated.PrintPaymentNoticeApi;
+import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
 import it.gov.pagopa.pu.pagopapayments.service.printpaymentnotice.GenerateNoticeService;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,13 +27,13 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
   @Override
   public ResponseEntity<Resource> generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition) {
     log.info("invoking generateNotice, organizationId[{}], iuv[{}] debtPositionId[{}]", organizationId, iuv, debtPosition.getDebtPositionId());
-    byte[] notice = generateNoticeService.generateNotice(organizationId, iuv, debtPosition, SecurityUtils.getAccessToken());
+    NoticeDataDTO notice = generateNoticeService.generateNotice(organizationId, iuv, debtPosition, SecurityUtils.getAccessToken());
 
-    Resource resource = new ByteArrayResource(notice);
+    Resource resource = new ByteArrayResource(notice.getNotice());
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentDisposition(ContentDisposition.attachment()
-      .filename("notice_" + iuv + ".pdf")
+      .filename(notice.getFileName())
       .build());
 
     return ResponseEntity.ok()

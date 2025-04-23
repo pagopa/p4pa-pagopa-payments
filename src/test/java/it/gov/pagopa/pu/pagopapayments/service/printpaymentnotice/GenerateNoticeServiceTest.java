@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.PrintPaymentNoticeService;
+import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.GenerateNoticeTemplates;
 import it.gov.pagopa.pu.pagopapayments.mapper.NoticeRequestMapper;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -50,6 +51,7 @@ class GenerateNoticeServiceTest {
     // given
     Long organizationId = 1L;
     Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setOrgFiscalCode("99999999982");
     organization.setIban("IT123456");
 
     InstallmentDTO installment = podamFactory.manufacturePojo(InstallmentDTO.class);
@@ -72,6 +74,10 @@ class GenerateNoticeServiceTest {
     noticeGenerationRequestItem.setTemplateId(GenerateNoticeTemplates.TEMPLATE_SINGLE_INSTALMENT.templateId());
 
     byte[] expectedResult = "PDF-DATA".getBytes();
+    NoticeDataDTO noticeData = NoticeDataDTO.builder()
+      .notice(expectedResult)
+      .fileName("99999999982_IUV123.pdf")
+      .build();
 
     Mockito.when(organizationServiceMock.getOrganizationById(organizationId, ACCESS_TOKEN))
       .thenReturn(organization);
@@ -83,11 +89,11 @@ class GenerateNoticeServiceTest {
     ).thenReturn(expectedResult);
 
     // when
-    byte[] result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
+    NoticeDataDTO result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
-    assertEquals(expectedResult, result);
+    assertEquals(noticeData, result);
 
     Mockito.verify(organizationServiceMock).getOrganizationById(organizationId, ACCESS_TOKEN);
     Mockito.verify(printPaymentNoticeServiceMock).generateNotice(
@@ -101,6 +107,7 @@ class GenerateNoticeServiceTest {
     // given
     Long organizationId = 1L;
     Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setOrgFiscalCode("99999999982");
     organization.setIban(null);
 
     InstallmentDTO installment = podamFactory.manufacturePojo(InstallmentDTO.class);
@@ -123,6 +130,10 @@ class GenerateNoticeServiceTest {
     noticeGenerationRequestItem.setTemplateId(GenerateNoticeTemplates.TEMPLATE_SINGLE_INSTALMENT_POSTE.templateId());
 
     byte[] expectedResult = "PDF-DATA".getBytes();
+    NoticeDataDTO noticeData = NoticeDataDTO.builder()
+      .notice(expectedResult)
+      .fileName("99999999982_IUV123.pdf")
+      .build();
 
     Mockito.when(organizationServiceMock.getOrganizationById(organizationId, ACCESS_TOKEN))
       .thenReturn(organization);
@@ -134,11 +145,11 @@ class GenerateNoticeServiceTest {
     ).thenReturn(expectedResult);
 
     // when
-    byte[] result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
+    NoticeDataDTO result = generateNoticeService.generateNotice(organizationId, TEST_IUV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
-    assertEquals(expectedResult, result);
+    assertEquals(noticeData, result);
 
     Mockito.verify(organizationServiceMock).getOrganizationById(organizationId, ACCESS_TOKEN);
     Mockito.verify(printPaymentNoticeServiceMock).generateNotice(

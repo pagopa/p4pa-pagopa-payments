@@ -179,6 +179,7 @@ openApiGenerate {
   modelPackage.set("it.gov.pagopa.pu.pagopapayments.dto.generated")
   typeMappings.set(mapOf(
     "DebtPositionDTO" to "it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO",
+    "NoticeGenerationMassiveResourceDTO" to "it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveResourceDTO",
     "InstallmentStatus" to "it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO.StatusEnum"
   ))
   configOptions.set(mapOf(

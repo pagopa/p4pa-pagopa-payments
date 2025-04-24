@@ -120,6 +120,67 @@
         } ]
       }
     },
+    "/printpaymentnotice/generateMassive" : {
+      "post" : {
+        "tags" : [ "print-payment-notice" ],
+        "operationId" : "generateMassive",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NoticeRequestMassiveDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Ok",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NoticeGenerationMassiveResourceDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NoticeGenerationMassiveResourceDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NoticeGenerationMassiveResourceDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/gpd/sync" : {
       "post" : {
         "tags" : [ "gpd" ],
@@ -774,6 +835,39 @@
             "type" : "string"
           }
         }
+      },
+      "NoticeGenerationMassiveResourceDTO" : {
+        "type" : "object",
+        "properties" : {
+          "folder_id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "NoticeRequestMassiveDTO" : {
+        "type" : "object",
+        "properties" : {
+          "debtPositions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DebtPositionDTO"
+            }
+          },
+          "organizationId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "iuvList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "requestId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "debtPositions", "organizationId", "requestId" ]
       },
       "TaxonomyDTO" : {
         "type" : "object",

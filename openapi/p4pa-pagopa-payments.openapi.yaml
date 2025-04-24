@@ -259,7 +259,6 @@ components:
       required:
         - debtPositions
         - organizationId
-        - iuvList
         - requestId
       type: object
       properties:

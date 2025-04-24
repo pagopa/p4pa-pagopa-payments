@@ -867,7 +867,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "debtPositions", "iuvList", "organizationId", "requestId" ]
+        "required" : [ "debtPositions", "organizationId", "requestId" ]
       },
       "TaxonomyDTO" : {
         "type" : "object",

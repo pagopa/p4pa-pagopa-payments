@@ -171,6 +171,28 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
+  /printpaymentnotice/generateMassive:
+    post:
+      tags:
+        - print-payment-notice
+      operationId: generateMassive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoticeRequestMassiveDTO'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: 'NoticeGenerationMassiveResourceDTO'
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
 security:
   - BearerAuth: []
 components:
@@ -233,6 +255,27 @@ components:
           type: string
         version:
             type: string
+    NoticeRequestMassiveDTO:
+      required:
+        - debtPositions
+        - organizationId
+        - iuvList
+        - requestId
+      type: object
+      properties:
+        debtPositions:
+          type: array
+          items:
+            type: "DebtPositionDTO"
+        organizationId:
+          type: integer
+          format: int64
+        iuvList:
+          type: array
+          items:
+            type: string
+        requestId:
+          type: string
   securitySchemes:
     BearerAuth:
       type: http

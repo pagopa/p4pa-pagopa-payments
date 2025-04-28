@@ -839,10 +839,11 @@
       "NoticeGenerationMassiveResourceDTO" : {
         "type" : "object",
         "properties" : {
-          "folder_id" : {
+          "folderId" : {
             "type" : "string"
           }
-        }
+        },
+        "required" : [ "folderId" ]
       },
       "NoticeRequestMassiveDTO" : {
         "type" : "object",

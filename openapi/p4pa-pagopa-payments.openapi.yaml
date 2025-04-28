@@ -275,6 +275,12 @@ components:
             type: string
         requestId:
           type: string
+    NoticeGenerationMassiveResourceDTO:
+      required:
+        - folderId
+      properties:
+        folderId:
+          type: string
   securitySchemes:
     BearerAuth:
       type: http

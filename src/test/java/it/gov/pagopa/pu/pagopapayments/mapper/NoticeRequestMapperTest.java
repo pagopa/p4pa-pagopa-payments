@@ -1,7 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeDTO;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeRequestDataDTO;
@@ -58,16 +57,14 @@ class NoticeRequestMapperTest {
   void givenValidInputWhenToNoticeRequestDataDTOThenOk() {
     //given
     InstallmentDTO installmentRequest = podamFactory.manufacturePojo(InstallmentDTO.class);
-    PersonDTO personRequest = podamFactory.manufacturePojo(PersonDTO.class);
     String orgFiscalCode = "99999999982";
 
     //when
-    NoticeRequestDataDTO response = NoticeRequestMapper.toNoticeRequestDataDTO(orgFiscalCode, installmentRequest, personRequest);
+    NoticeRequestDataDTO response = NoticeRequestMapper.toNoticeRequestDataDTO(orgFiscalCode, installmentRequest);
 
     //verify
     assertNotNull(response);
     Assertions.assertEquals(NoticeRequestMapper.toNoticeDTO(installmentRequest), response.getNotice());
-    Assertions.assertEquals(DebtorMapper.toDebtorDTO(personRequest), response.getDebtor());
     Assertions.assertEquals(orgFiscalCode, response.getCreditorInstitution().getTaxCode());
     TestUtils.checkNotNullFields(response);
   }

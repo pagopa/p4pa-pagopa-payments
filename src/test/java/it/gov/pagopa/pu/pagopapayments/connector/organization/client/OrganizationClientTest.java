@@ -1,8 +1,13 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import it.gov.pagopa.pu.organization.controller.generated.OrganizationApi;
 import it.gov.pagopa.pu.organization.controller.generated.OrganizationEntityControllerApi;
 import it.gov.pagopa.pu.organization.controller.generated.OrganizationSearchControllerApi;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -23,6 +28,8 @@ class OrganizationClientTest {
   private OrganizationEntityControllerApi organizationEntityControllerApiMock;
   @Mock
   private OrganizationSearchControllerApi organizationSearchControllerApiMock;
+  @Mock
+  private OrganizationApi organizationApiMock;
 
   private OrganizationClient organizationClient;
 
@@ -36,7 +43,8 @@ class OrganizationClientTest {
     Mockito.verifyNoMoreInteractions(
       organizationApisHolder,
       organizationEntityControllerApiMock,
-      organizationSearchControllerApiMock
+      organizationSearchControllerApiMock,
+      organizationApiMock
     );
   }
 
@@ -112,5 +120,42 @@ class OrganizationClientTest {
 
     // Then
     Assertions.assertNull(result);
+  }
+
+  @Test
+  void givenValidRequestWhenGetOrganizationApiKeyThenVerifyResponse() {
+    // Given
+    Long organizationId = 1L;
+    String accessToken = "ACCESSTOKEN";
+    String apiKey = "apiKey";
+
+    Mockito.when(organizationApisHolder.getOrganizationApi(accessToken))
+      .thenReturn(organizationApiMock);
+    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND))
+      .thenReturn(apiKey);
+
+    // When
+    String result = organizationClient.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
+
+    // Then
+    assertSame(apiKey, result);
+  }
+
+  @Test
+  void givenNotExistentOrganizationIdWhenGetOrganizationApiKeyThenReturnNull() {
+    // Given
+    Long organizationId = 1L;
+    String accessToken = "ACCESSTOKEN";
+
+    Mockito.when(organizationApisHolder.getOrganizationApi(accessToken))
+      .thenReturn(organizationApiMock);
+    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    String result = organizationClient.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
+
+    // Then
+    assertNull(result);
   }
 }

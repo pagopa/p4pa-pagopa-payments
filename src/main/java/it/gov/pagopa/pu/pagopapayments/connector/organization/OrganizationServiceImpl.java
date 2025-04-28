@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.client.OrganizationClient;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ public class OrganizationServiceImpl implements OrganizationService {
   }
 
   @Override
-  public String getOrganizationApiKey(Long organizationId, String accessToken) {
-    return organizationClient.getOrganizationApiKey(organizationId, accessToken);
+  public String getOrganizationApiKey(Long organizationId, OrganizationApiKeyType organizationApiKeyType, String accessToken) {
+    return organizationClient.getOrganizationApiKey(organizationId, organizationApiKeyType, accessToken);
   }
 }

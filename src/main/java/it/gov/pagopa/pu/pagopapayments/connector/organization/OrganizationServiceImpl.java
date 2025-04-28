@@ -22,4 +22,9 @@ public class OrganizationServiceImpl implements OrganizationService {
   public Organization getOrganizationByFiscalCode(String organizationFiscalCode, String accessToken) {
     return organizationClient.getOrganizationByFiscalCode(organizationFiscalCode, accessToken);
   }
+
+  @Override
+  public String getOrganizationApiKey(Long organizationId, String accessToken) {
+    return organizationClient.getOrganizationApiKey(organizationId, accessToken);
+  }
 }

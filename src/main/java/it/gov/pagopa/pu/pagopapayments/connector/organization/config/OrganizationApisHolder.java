@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.organization.controller.ApiClient;
 import it.gov.pagopa.pu.organization.controller.BaseApi;
 import it.gov.pagopa.pu.organization.controller.generated.BrokerApi;
 import it.gov.pagopa.pu.organization.controller.generated.BrokerEntityControllerApi;
+import it.gov.pagopa.pu.organization.controller.generated.OrganizationApi;
 import it.gov.pagopa.pu.organization.controller.generated.OrganizationEntityControllerApi;
 import it.gov.pagopa.pu.organization.controller.generated.OrganizationSearchControllerApi;
 import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
@@ -19,6 +20,7 @@ public class OrganizationApisHolder {
   private final OrganizationSearchControllerApi organizationSearchControllerApi;
   private final BrokerEntityControllerApi brokerEntityControllerApi;
   private final BrokerApi brokerApi;
+  private final OrganizationApi organizationApi;
 
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
@@ -40,6 +42,7 @@ public class OrganizationApisHolder {
     this.organizationSearchControllerApi = new OrganizationSearchControllerApi(apiClient);
     this.brokerEntityControllerApi = new BrokerEntityControllerApi(apiClient);
     this.brokerApi = new BrokerApi(apiClient);
+    this.organizationApi = new OrganizationApi(apiClient);
   }
 
   @PreDestroy
@@ -64,6 +67,10 @@ public class OrganizationApisHolder {
   public BrokerApi getBrokerApi(String accessToken) {
     bearerTokenHolder.set(accessToken);
     return getApi(accessToken, brokerApi);
+  }
+
+  public OrganizationApi getOrganizationApi(String accessToken) {
+    return getApi(accessToken, organizationApi);
   }
 
   private <T extends BaseApi> T getApi(String accessToken, T api) {

@@ -150,7 +150,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NoticeGenerationMassiveResourceDTO"
+                  "$ref" : "#/components/schemas/GeneratedNoticeMassiveFolderDTO"
                 }
               }
             }
@@ -160,7 +160,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NoticeGenerationMassiveResourceDTO"
+                  "$ref" : "#/components/schemas/GeneratedNoticeMassiveFolderDTO"
                 }
               }
             }
@@ -170,7 +170,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NoticeGenerationMassiveResourceDTO"
+                  "$ref" : "#/components/schemas/GeneratedNoticeMassiveFolderDTO"
                 }
               }
             }
@@ -836,13 +836,14 @@
           }
         }
       },
-      "NoticeGenerationMassiveResourceDTO" : {
+      "GeneratedNoticeMassiveFolderDTO" : {
         "type" : "object",
         "properties" : {
-          "folder_id" : {
+          "folderId" : {
             "type" : "string"
           }
-        }
+        },
+        "required" : [ "folderId" ]
       },
       "NoticeRequestMassiveDTO" : {
         "type" : "object",

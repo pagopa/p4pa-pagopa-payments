@@ -95,20 +95,19 @@ public class GenerateNoticeService {
     String templateId = getTemplateId(org);
 
     List<NoticeGenerationRequestItemDTO> notices = debtPositions.stream()
-      .flatMap(dp -> dp.getPaymentOptions().stream()
-        .flatMap(po -> po.getInstallments().stream())
-        .filter(filter)
-        .map(inst -> {
-          NoticeRequestDataDTO dataDTO = NoticeRequestMapper.toNoticeRequestDataDTO(
-            org.getOrgFiscalCode(),
-            inst
-          );
-          NoticeGenerationRequestItemDTO item = new NoticeGenerationRequestItemDTO();
-          item.setData(dataDTO);
-          item.setTemplateId(templateId);
-          return item;
-        })
-      )
+      .flatMap(dp -> dp.getPaymentOptions().stream())
+      .flatMap(po -> po.getInstallments().stream())
+      .filter(filter)
+      .map(inst -> {
+        NoticeRequestDataDTO dataDTO = NoticeRequestMapper.toNoticeRequestDataDTO(
+          org.getOrgFiscalCode(),
+          inst
+        );
+        NoticeGenerationRequestItemDTO item = new NoticeGenerationRequestItemDTO();
+        item.setData(dataDTO);
+        item.setTemplateId(templateId);
+        return item;
+      })
       .toList();
 
     requestMassive.setNotices(notices);

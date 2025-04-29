@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.PrintPaymentNoticeService;
 import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.NoticeRequestMassiveDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.GenerateNoticeTemplates;
 import it.gov.pagopa.pu.pagopapayments.mapper.NoticeRequestMapper;
@@ -267,7 +268,7 @@ class GenerateNoticeServiceTest {
       .thenReturn(resourceDTO);
 
     //when
-    NoticeGenerationMassiveResourceDTO result = generateNoticeService.generateNoticeMassive(request, ACCESS_TOKEN);
+    GeneratedNoticeMassiveFolderDTO result = generateNoticeService.generateNoticeMassive(request, ACCESS_TOKEN);
 
     //then
     assertEquals(1, requestMassive.getNotices().size());
@@ -321,7 +322,7 @@ class GenerateNoticeServiceTest {
       .thenReturn(resourceDTO);
 
     //when
-    NoticeGenerationMassiveResourceDTO result = generateNoticeService.generateNoticeMassive(request, ACCESS_TOKEN);
+    GeneratedNoticeMassiveFolderDTO result = generateNoticeService.generateNoticeMassive(request, ACCESS_TOKEN);
 
     //then
     assertEquals(1, requestMassive.getNotices().size());

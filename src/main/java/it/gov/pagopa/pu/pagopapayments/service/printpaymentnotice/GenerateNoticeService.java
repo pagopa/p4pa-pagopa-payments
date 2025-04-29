@@ -7,8 +7,10 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.PrintPaymentNoticeService;
 import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.NoticeRequestMassiveDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.GenerateNoticeTemplates;
+import it.gov.pagopa.pu.pagopapayments.mapper.GeneratedNoticeMassiveFolderMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.NoticeRequestMapper;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveRequestDTO;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveResourceDTO;
@@ -46,7 +48,7 @@ public class GenerateNoticeService {
       .build();
   }
 
-  public NoticeGenerationMassiveResourceDTO generateNoticeMassive(NoticeRequestMassiveDTO request, String accessToken) {
+  public GeneratedNoticeMassiveFolderDTO generateNoticeMassive(NoticeRequestMassiveDTO request, String accessToken) {
     Organization org = organizationService.getOrganizationById(request.getOrganizationId(), accessToken);
     NoticeGenerationMassiveResourceDTO response;
     NoticeGenerationMassiveRequestDTO requestMassive;
@@ -58,7 +60,7 @@ public class GenerateNoticeService {
     }
 
     response = printPaymentNoticeService.generateNoticeMassive(org.getBrokerId(), request.getRequestId(), requestMassive, accessToken);
-    return response;
+    return GeneratedNoticeMassiveFolderMapper.toGeneratedNoticeMassiveFolderDTO(response);
   }
 
   public NoticeGenerationRequestItemDTO generateNoticeRequest(Organization org, String iuv, DebtPositionDTO debtPosition) {

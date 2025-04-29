@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.controller.generated.PrintPaymentNoticeApi;
 import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.NoticeGenerationMassiveResourceDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.NoticeRequestMassiveDTO;
 import it.gov.pagopa.pu.pagopapayments.service.printpaymentnotice.GenerateNoticeService;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
@@ -27,11 +27,6 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
   }
 
   @Override
-  public ResponseEntity<NoticeGenerationMassiveResourceDTO> generateMassive(NoticeRequestMassiveDTO noticeRequestMassiveDTO) {
-    return PrintPaymentNoticeApi.super.generateMassive(noticeRequestMassiveDTO);
-  }
-
-  @Override
   public ResponseEntity<Resource> generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition) {
     log.info("invoking generateNotice, organizationId[{}], iuv[{}], debtPositionId[{}]", organizationId, iuv, debtPosition.getDebtPositionId());
     NoticeDataDTO notice = generateNoticeService.generateNotice(organizationId, iuv, debtPosition, SecurityUtils.getAccessToken());
@@ -48,5 +43,13 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
       .headers(headers)
       .body(resource);
 
+  }
+
+  @Override
+  public ResponseEntity<GeneratedNoticeMassiveFolderDTO> generateMassive(NoticeRequestMassiveDTO noticeRequestMassiveDTO) {
+    log.info("invoking generateMassive, organizationId[{}], requestId[{}]", noticeRequestMassiveDTO.getOrganizationId(), noticeRequestMassiveDTO.getRequestId());
+    GeneratedNoticeMassiveFolderDTO noticeMassive = generateNoticeService.generateNoticeMassive(noticeRequestMassiveDTO, SecurityUtils.getAccessToken());
+
+    return ResponseEntity.ok(noticeMassive);
   }
 }

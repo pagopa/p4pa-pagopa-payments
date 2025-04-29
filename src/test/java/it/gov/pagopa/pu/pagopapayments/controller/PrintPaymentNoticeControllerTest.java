@@ -3,6 +3,8 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.NoticeRequestMassiveDTO;
 import it.gov.pagopa.pu.pagopapayments.service.printpaymentnotice.GenerateNoticeService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Test;
@@ -69,6 +71,33 @@ class PrintPaymentNoticeControllerTest {
 
     Mockito.verify(generateNoticeService, Mockito.times(1)).generateNotice(
       Mockito.eq(ORG_ID), Mockito.eq(IUV), Mockito.any(), Mockito.anyString()
+    );
+  }
+
+  @Test
+  void givenValidInputWhenGenerateMassiveThenOk() throws Exception {
+    // Given
+    NoticeRequestMassiveDTO request = podamFactory.manufacturePojo(NoticeRequestMassiveDTO.class);
+    GeneratedNoticeMassiveFolderDTO response = GeneratedNoticeMassiveFolderDTO.builder()
+      .folderId("folderId")
+        .build();
+
+    Mockito.when(generateNoticeService.generateNoticeMassive(
+        Mockito.any(NoticeRequestMassiveDTO.class),
+        Mockito.anyString()))
+      .thenReturn(response);
+
+    TestUtils.setFakeAccessTokenInContext();
+
+    // When & Then
+    mockMvc.perform(post("/printpaymentnotice/generateMassive")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isOk())
+      .andReturn();
+
+    Mockito.verify(generateNoticeService, Mockito.times(1)).generateNoticeMassive(
+      Mockito.any(NoticeRequestMassiveDTO.class), Mockito.anyString()
     );
   }
 }

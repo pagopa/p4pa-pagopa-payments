@@ -188,7 +188,7 @@ paths:
           content:
             application/json:
               schema:
-                type: 'NoticeGenerationMassiveResourceDTO'
+                $ref: '#/components/schemas/GeneratedNoticeMassiveFolderDTO'
         "400":
           description: Invalid request
         "500":
@@ -275,7 +275,7 @@ components:
             type: string
         requestId:
           type: string
-    NoticeGenerationMassiveResourceDTO:
+    GeneratedNoticeMassiveFolderDTO:
       required:
         - folderId
       properties:

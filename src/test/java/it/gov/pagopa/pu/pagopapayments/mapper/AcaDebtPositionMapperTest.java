@@ -162,6 +162,25 @@ class AcaDebtPositionMapperTest {
     Assertions.assertEquals("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(
       installment.getIud(), debtPosition.getDebtPositionId()), response.getMessage());
   }
+
+  @Test
+  void givenFineWithStatusUnpayableWhenMapToPaymentPositionModelThenOk() {
+    //given
+    InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.UNPAYABLE, InstallmentStatus.UNPAID);
+
+    //when
+    Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(toSync.getIud(), debtPosition);
+
+    //verify
+    Assertions.assertNotNull(response);
+    NewDebtPositionRequest newDebtPositionRequest = response.getRight();
+    Assertions.assertNotNull(newDebtPositionRequest);
+    TestUtils.checkNotNullFields(newDebtPositionRequest);
+
+    Assertions.assertEquals(ConversionUtils.MAX_EXPIRATION_DATE.atZone(Constants.ZONEID).toOffsetDateTime(), newDebtPositionRequest.getExpirationDate());
+    Assertions.assertEquals(toSync.getNav(), newDebtPositionRequest.getNav());
+    Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
+  }
   //endregion
 
 }

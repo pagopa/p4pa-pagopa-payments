@@ -131,4 +131,22 @@ class GpdDebtPositionMapperTest {
       installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
   }
 
+  @Test
+  void givenFineWithStatusUnpayableWhenMapToPaymentPositionModelThenOk() {
+    //given
+    InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.UNPAYABLE, InstallmentStatus.UNPAID);
+
+    //when
+    Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
+
+    //verify
+    Assertions.assertNotNull(response);
+    PaymentPositionModel paymentPositionModel = response.getRight();
+    Assertions.assertNotNull(paymentPositionModel);
+    TestUtils.checkNotNullFields(paymentPositionModel, "payStandIn","streetName","civicNumber","postalCode","city","province","country","region","email","phone","officeName","validityDate","paymentDate","status");
+
+    Assertions.assertEquals(toSync.getIupdPagopa(), paymentPositionModel.getIupd());
+    Assertions.assertEquals(toSync.getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
+    Assertions.assertEquals(GpdDebtPositionMapper.OPERATION.CREATE, response.getLeft());
+  }
 }

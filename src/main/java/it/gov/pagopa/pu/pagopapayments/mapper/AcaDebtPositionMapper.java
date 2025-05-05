@@ -17,7 +17,7 @@ public class AcaDebtPositionMapper {
   public static final Set<InstallmentStatus> STATUS_TO_SEND_ACA = Set.of(InstallmentStatus.TO_SYNC);
   private static final Set<InstallmentStatus> SYNC_STATUS_TO_DELETE = Set.of(InstallmentStatus.CANCELLED, InstallmentStatus.INVALID, InstallmentStatus.EXPIRED);
   private static final Set<InstallmentStatus> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED);
-
+  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_INSERT = Set.of(InstallmentStatus.DRAFT, InstallmentStatus.UNPAYABLE);
 
   private boolean installment2sendAca(InstallmentDTO installment, Long organizationId) {
     if (!STATUS_TO_SEND_ACA.contains(installment.getStatus())) {
@@ -75,7 +75,7 @@ public class AcaDebtPositionMapper {
     } else if(SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
       syncStatus.getSyncStatusTo().equals(InstallmentStatus.UNPAID)){
       operation = OPERATION.UPDATE;
-    } else if(syncStatus.getSyncStatusFrom().equals(InstallmentStatus.DRAFT) &&
+    } else if(SYNC_STATUS_FROM_INSERT.contains(syncStatus.getSyncStatusFrom()) &&
       syncStatus.getSyncStatusTo().equals(InstallmentStatus.UNPAID)){
       operation = OPERATION.CREATE;
     } else {

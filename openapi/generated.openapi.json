@@ -779,6 +779,9 @@
           },
           "syncStatusTo" : {
             "$ref" : "#/components/schemas/InstallmentStatus"
+          },
+          "syncError" : {
+            "type" : "string"
           }
         }
       },

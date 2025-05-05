@@ -58,7 +58,7 @@ public class SynchronousPaymentService {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getFiscalCode());
     }
     Organization organization = paForNodeRequestValidatorService.paForNodeRequestValidate(request, accessToken);
-    //TODO - P4ADEV-2622 invoke retrieveNotificationFee
+    //TODO - P4ADEV-2622
     InstallmentDTO installment = getPayableDebtPositionByOrganizationAndNav(organization, request.getNoticeNumber(), request.getPostalTransfer(), accessToken);
     return Pair.of(installment, organization);
   }
@@ -68,7 +68,7 @@ public class SynchronousPaymentService {
     return synchronousPaymentStatusVerifierService.verifyPaymentStatus(organization, installmentDTOList, noticeNumber, postalTransfer);
   }
 
-  private long retrieveNotificationFee(Long organizationId, String nav){
+  public long retrieveNotificationFee(Long organizationId, String nav){
     String accessToken = authnService.getAccessToken();
     String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
     if(!sendAPIKey.isEmpty()){

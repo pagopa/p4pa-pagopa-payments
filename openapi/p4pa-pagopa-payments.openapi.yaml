@@ -216,9 +216,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SignedUrlResultDTO"
+                $ref: "#/components/schemas/SignedUrlResultDTO"
         "204":
           description: No content
         "400":

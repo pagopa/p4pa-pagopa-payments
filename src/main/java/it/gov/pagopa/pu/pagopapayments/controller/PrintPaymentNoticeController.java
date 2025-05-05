@@ -5,15 +5,13 @@ import it.gov.pagopa.pu.pagopapayments.controller.generated.PrintPaymentNoticeAp
 import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.NoticeRequestMassiveDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.SignedUrlResultDTO;
 import it.gov.pagopa.pu.pagopapayments.service.printpaymentnotice.GenerateNoticeService;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -22,7 +20,7 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
 
   private final GenerateNoticeService generateNoticeService;
 
-  public PrintPaymentNoticeController(GenerateNoticeService generateNoticeService){
+  public PrintPaymentNoticeController(GenerateNoticeService generateNoticeService) {
     this.generateNoticeService = generateNoticeService;
   }
 
@@ -52,4 +50,15 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
 
     return ResponseEntity.ok(noticeMassive);
   }
+
+  @Override
+  public ResponseEntity<SignedUrlResultDTO> getSignedUrl(Long organizationId, String folderId) {
+    log.info("invoking getSignedUrl, organizationId[{}], folderId[{}]", organizationId, folderId);
+    SignedUrlResultDTO response = generateNoticeService.getNoticeMassiveZip(organizationId, folderId, SecurityUtils.getAccessToken());
+    if (response != null) {
+      return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
 }

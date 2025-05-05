@@ -63,7 +63,7 @@ public class GenerateNoticeService {
     return GeneratedNoticeMassiveFolderMapper.toGeneratedNoticeMassiveFolderDTO(response);
   }
 
-  private SignedUrlResultDTO getNoticeMassiveZip(Long organizationId, String folderId, String accessToken) {
+  public SignedUrlResultDTO getNoticeMassiveZip(Long organizationId, String folderId, String accessToken) {
     Organization org = organizationService.getOrganizationById(organizationId, accessToken);
     GetGenerationRequestStatusResourceDTO folderStatus = printPaymentNoticeService.getFolderStatus(org.getBrokerId(), folderId, accessToken);
     SignedUrlResultDTO result = new SignedUrlResultDTO();

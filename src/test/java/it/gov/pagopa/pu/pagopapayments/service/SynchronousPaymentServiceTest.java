@@ -119,7 +119,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(organizationId, nav, VALID_ACCEESS_TOKEN)).thenReturn(mockResponse);
     Mockito.when(mockResponse.getTotalPrice()).thenReturn(expectedPrice);
 
-    long result = synchronousPaymentService.retrieveNotificationFee(organizationId, nav, VALID_ACCEESS_TOKEN);
+    long result = synchronousPaymentService.retrieveNotificationFeeCents(organizationId, nav, VALID_ACCEESS_TOKEN);
 
     Assertions.assertEquals(expectedPrice, result);
   }
@@ -132,7 +132,7 @@ class SynchronousPaymentServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(emptyApiKey);
 
-    long result = synchronousPaymentService.retrieveNotificationFee(organizationId, nav, VALID_ACCEESS_TOKEN);
+    long result = synchronousPaymentService.retrieveNotificationFeeCents(organizationId, nav, VALID_ACCEESS_TOKEN);
 
     Assertions.assertEquals(0, result);
   }

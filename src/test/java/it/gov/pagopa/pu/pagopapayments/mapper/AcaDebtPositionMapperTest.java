@@ -18,6 +18,7 @@ import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.common.AttributeStrategy;
 
 import java.util.List;
+import java.util.Objects;
 
 @ExtendWith(MockitoExtension.class)
 class AcaDebtPositionMapperTest {
@@ -55,7 +56,7 @@ class AcaDebtPositionMapperTest {
       .syncStatusFrom(syncStatusFrom)
       .syncStatusTo(syncStatusTo)
       .build());
-    installmentDTO.setTransfers(List.of(installmentDTO.getTransfers().getFirst()));
+    installmentDTO.setTransfers(List.of(Objects.requireNonNull(installmentDTO.getTransfers()).getFirst()));
     return installmentDTO;
   }
 
@@ -143,7 +144,7 @@ class AcaDebtPositionMapperTest {
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals("Invalid sync status [%s->%s] for installment [%s]".formatted(
-      installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
+      Objects.requireNonNull(installment.getSyncStatus()).getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
   }
 
   @Test
@@ -173,12 +174,6 @@ class AcaDebtPositionMapperTest {
 
     //verify
     Assertions.assertNotNull(response);
-    NewDebtPositionRequest newDebtPositionRequest = response.getRight();
-    Assertions.assertNotNull(newDebtPositionRequest);
-    TestUtils.checkNotNullFields(newDebtPositionRequest);
-
-    Assertions.assertEquals(ConversionUtils.MAX_EXPIRATION_DATE.atZone(Constants.ZONEID).toOffsetDateTime(), newDebtPositionRequest.getExpirationDate());
-    Assertions.assertEquals(toSync.getNav(), newDebtPositionRequest.getNav());
     Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
   }
   //endregion

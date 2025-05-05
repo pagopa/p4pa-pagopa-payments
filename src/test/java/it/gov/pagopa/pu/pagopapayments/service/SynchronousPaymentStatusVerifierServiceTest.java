@@ -57,7 +57,10 @@ class SynchronousPaymentStatusVerifierServiceTest {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
-    installmentDTO.setSyncStatus(new InstallmentSyncStatus(InstallmentStatus.DRAFT, InstallmentStatus.UNPAID));
+    installmentDTO.setSyncStatus(InstallmentSyncStatus.builder()
+      .syncStatusFrom(InstallmentStatus.DRAFT)
+      .syncStatusTo(InstallmentStatus.UNPAID)
+      .build());
     InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     otherInstallmentDTO.setStatus(InstallmentStatus.EXPIRED);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, otherInstallmentDTO);
@@ -76,7 +79,9 @@ class SynchronousPaymentStatusVerifierServiceTest {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
-    installmentDTO.setSyncStatus(new InstallmentSyncStatus(InstallmentStatus.UNPAID, InstallmentStatus.PAID));
+    installmentDTO.setSyncStatus(InstallmentSyncStatus.builder()
+      .syncStatusFrom(InstallmentStatus.UNPAID)
+      .syncStatusTo(InstallmentStatus.PAID).build());
     InstallmentDTO otherInstallmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     otherInstallmentDTO.setStatus(InstallmentStatus.EXPIRED);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO, otherInstallmentDTO);
@@ -235,7 +240,9 @@ class SynchronousPaymentStatusVerifierServiceTest {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     installmentDTO.setStatus(InstallmentStatus.TO_SYNC);
-    installmentDTO.setSyncStatus(new InstallmentSyncStatus(InstallmentStatus.UNPAID, InstallmentStatus.INVALID));
+    installmentDTO.setSyncStatus(InstallmentSyncStatus.builder()
+      .syncStatusFrom(InstallmentStatus.UNPAID)
+      .syncStatusTo(InstallmentStatus.INVALID).build());
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
     Boolean postalAccess = null;
 

@@ -68,8 +68,7 @@ public class SynchronousPaymentService {
     return synchronousPaymentStatusVerifierService.verifyPaymentStatus(organization, installmentDTOList, noticeNumber, postalTransfer);
   }
 
-  public long retrieveNotificationFee(Long organizationId, String nav){
-    String accessToken = authnService.getAccessToken();
+  public long retrieveNotificationFee(Long organizationId, String nav, String accessToken){
     String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
     if(!sendAPIKey.isEmpty()){
       NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);

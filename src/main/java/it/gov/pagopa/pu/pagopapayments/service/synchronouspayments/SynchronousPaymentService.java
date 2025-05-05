@@ -72,6 +72,7 @@ public class SynchronousPaymentService {
     String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
     if(!sendAPIKey.isEmpty()){
       NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);
+      log.debug("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);
       return Objects.requireNonNullElse(notificationPrice.getTotalPrice(), 0);
     } else {
       //TODO - P4ADEV-2694 if SENDApiKey doesn't exists call external third part API to retrieve notificationFee

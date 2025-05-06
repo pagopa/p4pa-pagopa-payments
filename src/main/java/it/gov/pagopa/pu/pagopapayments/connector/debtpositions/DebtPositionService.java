@@ -9,4 +9,5 @@ import java.util.List;
 public interface DebtPositionService {
   DebtPositionTypeOrg getDebtPositionTypeOrgById(Long debtPositionTypeOrgId, String accessToken);
   List<InstallmentDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOriginList, String accessToken);
+  InstallmentDTO updateInstallmentNotificationFee(Long organizationId, String nav, Long newFeeCents, String accessToken);
 }

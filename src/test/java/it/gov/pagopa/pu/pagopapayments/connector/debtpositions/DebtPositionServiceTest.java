@@ -75,4 +75,24 @@ class DebtPositionServiceTest {
     Assertions.assertSame(expectedResult, result);
   }
 
+  @Test
+  void whenUpdateInstallmentNotificationFeeThenInvokeClient(){
+    // Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String nav = "NAV";
+    Long newFeeCents = 100L;
+
+    InstallmentDTO expectedResult = new InstallmentDTO();
+
+    Mockito.when(clientMock.updateInstallmentNotificationFee(Mockito.same(organizationId),Mockito.same(nav),
+        Mockito.same(newFeeCents), Mockito.same(accessToken))).thenReturn(expectedResult);
+
+    // When
+    InstallmentDTO result = service.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
 }

@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.UpdateInstallmentNotificationFeeRequest;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,11 +47,20 @@ class DebtPositionsApisHolderTest extends BaseApiHolderTest {
                 apisHolder::unload);
     }
 
+    @Test
+    void whenGetInstallmentApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+      assertAuthenticationShouldBeSetInThreadSafeMode(
+        accessToken -> apisHolder.getInstallmentApi(accessToken)
+          .getInstallmentsByOrganizationIdAndNav(1L, "nav", null),
+        new ParameterizedTypeReference<>() {},
+        apisHolder::unload);
+    }
+
   @Test
-  void whenGetInstallmentApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+  void whenGetDebtPositionApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      accessToken -> apisHolder.getInstallmentApi(accessToken)
-        .getInstallmentsByOrganizationIdAndNav(1L, "nav", null),
+      accessToken -> apisHolder.getDebtPositionApi(accessToken)
+        .updateInstallmentNotificationFee(new UpdateInstallmentNotificationFeeRequest(1L, "NAV", 100L)),
       new ParameterizedTypeReference<>() {},
       apisHolder::unload);
   }

@@ -1,10 +1,12 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
+import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionApi;
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgEntityControllerApi;
 import it.gov.pagopa.pu.debtpositions.controller.generated.InstallmentApi;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.UpdateInstallmentNotificationFeeRequest;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -29,6 +31,8 @@ class DebtPositionClientTest {
   private DebtPositionsApisHolder apisHolderMock;
   @Mock
   private DebtPositionTypeOrgEntityControllerApi debtPositionTypeOrgEntityControllerApiMock;
+  @Mock
+  private DebtPositionApi debtPositionApiMock;
   @Mock
   private InstallmentApi installmentApiMock;
 
@@ -106,6 +110,28 @@ class DebtPositionClientTest {
 
     // When
     List<InstallmentDTO> result = client.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenUpdateInstallmentNotificationFeeThenInvokeApi(){
+    //Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String nav = "NAV";
+    Long newFeeCents = 100L;
+    UpdateInstallmentNotificationFeeRequest request = new UpdateInstallmentNotificationFeeRequest(organizationId, nav, newFeeCents);
+    InstallmentDTO expectedResult = new InstallmentDTO();
+
+    Mockito.when(apisHolderMock.getDebtPositionApi(accessToken))
+      .thenReturn(debtPositionApiMock);
+    Mockito.when(debtPositionApiMock.updateInstallmentNotificationFee(request))
+      .thenReturn(expectedResult);
+
+    // When
+    InstallmentDTO result = client.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

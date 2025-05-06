@@ -32,4 +32,12 @@ public class DebtPositionServiceImpl implements DebtPositionService {
                                                                      String accessToken){
     return client.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList, accessToken);
   }
+
+  @Override
+  public InstallmentDTO updateInstallmentNotificationFee(Long organizationId,
+    String nav,
+    Long newFeeCents, String accessToken) {
+    return client.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken);
+  }
+
 }

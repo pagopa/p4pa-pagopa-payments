@@ -69,7 +69,7 @@ public class GenerateNoticeService {
     SignedUrlResultDTO result = new SignedUrlResultDTO();
 
     GetGenerationRequestStatusResourceDTO.StatusEnum status = folderStatus.getStatus();
-    if (status == PROCESSED || status == PROCESSED_WITH_FAILURES || status == FAILED) {
+    if (PROCESSED.equals(status) || PROCESSED_WITH_FAILURES.equals(status) || FAILED.equals(status)) {
       GetSignedUrlResourceDTO signedUrlRes = printPaymentNoticeService.getFolderSignedUrlResource(org.getBrokerId(), folderId, accessToken);
       result.setNoticesInError(folderStatus.getNoticesInError());
       result.setProcessedNotices(folderStatus.getProcessedNotices());

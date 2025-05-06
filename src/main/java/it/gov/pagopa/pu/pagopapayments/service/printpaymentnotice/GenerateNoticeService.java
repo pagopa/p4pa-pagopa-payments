@@ -9,13 +9,11 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.Print
 import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.NoticeRequestMassiveDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.SignedUrlResultDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.GenerateNoticeTemplates;
 import it.gov.pagopa.pu.pagopapayments.mapper.GeneratedNoticeMassiveFolderMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.NoticeRequestMapper;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveRequestDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveResourceDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeRequestDataDTO;
+import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -23,6 +21,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+
+import static it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.GetGenerationRequestStatusResourceDTO.StatusEnum.*;
 
 @Service
 @Slf4j
@@ -61,6 +61,23 @@ public class GenerateNoticeService {
 
     response = printPaymentNoticeService.generateNoticeMassive(org.getBrokerId(), request.getRequestId(), requestMassive, accessToken);
     return GeneratedNoticeMassiveFolderMapper.toGeneratedNoticeMassiveFolderDTO(response);
+  }
+
+  public SignedUrlResultDTO getNoticeMassiveZip(Long organizationId, String folderId, String accessToken) {
+    Organization org = organizationService.getOrganizationById(organizationId, accessToken);
+    GetGenerationRequestStatusResourceDTO folderStatus = printPaymentNoticeService.getFolderStatus(org.getBrokerId(), folderId, accessToken);
+    SignedUrlResultDTO result = new SignedUrlResultDTO();
+
+    GetGenerationRequestStatusResourceDTO.StatusEnum status = folderStatus.getStatus();
+    if (PROCESSED.equals(status) || PROCESSED_WITH_FAILURES.equals(status) || FAILED.equals(status)) {
+      GetSignedUrlResourceDTO signedUrlRes = printPaymentNoticeService.getFolderSignedUrlResource(org.getBrokerId(), folderId, accessToken);
+      result.setNoticesInError(folderStatus.getNoticesInError());
+      result.setProcessedNotices(folderStatus.getProcessedNotices());
+      result.setSignedUrl(signedUrlRes.getSignedUrl());
+      return result;
+    }
+
+    return null;
   }
 
   public NoticeGenerationRequestItemDTO generateNoticeRequest(Organization org, String iuv, DebtPositionDTO debtPosition) {

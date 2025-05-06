@@ -7,13 +7,12 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.Print
 import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.NoticeRequestMassiveDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.SignedUrlResultDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.GenerateNoticeTemplates;
 import it.gov.pagopa.pu.pagopapayments.mapper.NoticeRequestMapper;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveRequestDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveResourceDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeRequestDataDTO;
+import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,9 +42,18 @@ class GenerateNoticeServiceTest {
   private static final String ACCESS_TOKEN = "access-token";
   private static final String TEST_IUV = "IUV123";
   private static final Long ORGANIZATION_ID = 1L;
+  private static final String FOLDER_ID = "folder-id";
 
   public GenerateNoticeServiceTest() {
     podamFactory = TestUtils.getPodamFactory();
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions(){
+    Mockito.verifyNoMoreInteractions(
+      printPaymentNoticeServiceMock,
+      organizationServiceMock
+    );
   }
 
   @Test
@@ -94,12 +102,6 @@ class GenerateNoticeServiceTest {
     // then
     assertNotNull(result);
     assertEquals(noticeData, result);
-
-    Mockito.verify(organizationServiceMock).getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN);
-    Mockito.verify(printPaymentNoticeServiceMock).generateNotice(
-      organization.getBrokerId(),
-      noticeGenerationRequestItem,
-      ACCESS_TOKEN);
   }
 
   @Test
@@ -148,12 +150,6 @@ class GenerateNoticeServiceTest {
     // then
     assertNotNull(result);
     assertEquals(noticeData, result);
-
-    Mockito.verify(organizationServiceMock).getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN);
-    Mockito.verify(printPaymentNoticeServiceMock).generateNotice(
-      organization.getBrokerId(),
-      noticeGenerationRequestItem,
-      ACCESS_TOKEN);
   }
 
   @Test
@@ -274,9 +270,6 @@ class GenerateNoticeServiceTest {
     assertEquals(1, requestMassive.getNotices().size());
     assertEquals("3" + TEST_IUV, requestMassive.getNotices().getFirst().getData().getNotice().getCode());
     assertNotNull(result);
-    Mockito.verify(organizationServiceMock).getOrganizationById(request.getOrganizationId(), ACCESS_TOKEN);
-    Mockito.verify(printPaymentNoticeServiceMock).generateNoticeMassive(
-      organization.getBrokerId(), request.getRequestId(), requestMassive, ACCESS_TOKEN);
   }
 
   @Test
@@ -328,9 +321,91 @@ class GenerateNoticeServiceTest {
     assertEquals(1, requestMassive.getNotices().size());
     assertEquals("3" + TEST_IUV, requestMassive.getNotices().getFirst().getData().getNotice().getCode());
     assertNotNull(result);
-    Mockito.verify(organizationServiceMock).getOrganizationById(request.getOrganizationId(), ACCESS_TOKEN);
-    Mockito.verify(printPaymentNoticeServiceMock).generateNoticeMassive(
-      organization.getBrokerId(), request.getRequestId(), requestMassive, ACCESS_TOKEN);
+  }
+
+  @Test
+  void givenValidRequestStatusPROCESSEDWhenGetNoticeMassiveZipThenOk() {
+    //given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    GetGenerationRequestStatusResourceDTO status = podamFactory.manufacturePojo(GetGenerationRequestStatusResourceDTO.class);
+    status.setStatus(GetGenerationRequestStatusResourceDTO.StatusEnum.PROCESSED);
+    GetSignedUrlResourceDTO signedUrl = podamFactory.manufacturePojo(GetSignedUrlResourceDTO.class);
+
+    Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
+      .thenReturn(organization);
+    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+      .thenReturn(status);
+    Mockito.when(printPaymentNoticeServiceMock.getFolderSignedUrlResource(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+      .thenReturn(signedUrl);
+
+    //when
+    SignedUrlResultDTO result = generateNoticeService.getNoticeMassiveZip(ORGANIZATION_ID, FOLDER_ID, ACCESS_TOKEN);
+
+    //then
+    assertNotNull(result);
+  }
+
+  @Test
+  void givenValidRequestStatusPROCESSED_WITH_FAILURESWhenGetNoticeMassiveZipThenOk() {
+    //given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    GetGenerationRequestStatusResourceDTO status = podamFactory.manufacturePojo(GetGenerationRequestStatusResourceDTO.class);
+    status.setStatus(GetGenerationRequestStatusResourceDTO.StatusEnum.PROCESSED_WITH_FAILURES);
+    GetSignedUrlResourceDTO signedUrl = podamFactory.manufacturePojo(GetSignedUrlResourceDTO.class);
+
+    Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
+      .thenReturn(organization);
+    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+      .thenReturn(status);
+    Mockito.when(printPaymentNoticeServiceMock.getFolderSignedUrlResource(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+      .thenReturn(signedUrl);
+
+    //when
+    SignedUrlResultDTO result = generateNoticeService.getNoticeMassiveZip(ORGANIZATION_ID, FOLDER_ID, ACCESS_TOKEN);
+
+    //then
+    assertNotNull(result);
+  }
+
+  @Test
+  void givenValidRequestStatusFAILEDWhenGetNoticeMassiveZipThenOk() {
+    //given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    GetGenerationRequestStatusResourceDTO status = podamFactory.manufacturePojo(GetGenerationRequestStatusResourceDTO.class);
+    status.setStatus(GetGenerationRequestStatusResourceDTO.StatusEnum.FAILED);
+    GetSignedUrlResourceDTO signedUrl = podamFactory.manufacturePojo(GetSignedUrlResourceDTO.class);
+
+    Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
+      .thenReturn(organization);
+    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+      .thenReturn(status);
+    Mockito.when(printPaymentNoticeServiceMock.getFolderSignedUrlResource(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+      .thenReturn(signedUrl);
+
+    //when
+    SignedUrlResultDTO result = generateNoticeService.getNoticeMassiveZip(ORGANIZATION_ID, FOLDER_ID, ACCESS_TOKEN);
+
+    //then
+    assertNotNull(result);
+  }
+
+  @Test
+  void givenValidRequestStatusPROCESSINGWhenGetNoticeMassiveZipThenNull() {
+    //given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    GetGenerationRequestStatusResourceDTO status = podamFactory.manufacturePojo(GetGenerationRequestStatusResourceDTO.class);
+    status.setStatus(GetGenerationRequestStatusResourceDTO.StatusEnum.PROCESSING);
+
+    Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
+      .thenReturn(organization);
+    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+      .thenReturn(status);
+
+    //when
+    SignedUrlResultDTO result = generateNoticeService.getNoticeMassiveZip(ORGANIZATION_ID, FOLDER_ID, ACCESS_TOKEN);
+
+    //then
+    assertNull(result);
   }
 }
 

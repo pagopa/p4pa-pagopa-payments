@@ -1,9 +1,10 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice;
 
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
-
-import java.io.File;
+import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
 
 public interface PrintPaymentNoticeService {
-  File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken);
+  byte[] generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken);
+  NoticeGenerationMassiveResourceDTO generateNoticeMassive(Long brokerId, String idempotencyKey, NoticeGenerationMassiveRequestDTO noticeMassive, String accessToken);
+  GetGenerationRequestStatusResourceDTO getFolderStatus(Long brokerId, String folderId, String accessToken);
+  GetSignedUrlResourceDTO getFolderSignedUrlResource(Long brokerId, String folderId, String accessToken);
 }

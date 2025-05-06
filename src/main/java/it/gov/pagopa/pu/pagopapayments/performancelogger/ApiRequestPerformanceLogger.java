@@ -3,7 +3,6 @@ package it.gov.pagopa.pu.pagopapayments.performancelogger;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +13,7 @@ import java.util.List;
  * It will execute {@link PerformanceLogger} on each Api request
  */
 @Service
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(-101) // Set in order to be executed after ServerHttpObservationFilter (which will handle traceId): configured through properties management.observations.http.server.filter.order
 public class ApiRequestPerformanceLogger implements Filter {
 
     private static final List<String> blackListPathPrefixList = List.of(

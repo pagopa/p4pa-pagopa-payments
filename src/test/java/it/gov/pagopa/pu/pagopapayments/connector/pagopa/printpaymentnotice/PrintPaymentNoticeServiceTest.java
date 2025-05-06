@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice;
 
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.client.PrintPaymentNoticeClient;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
+import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,8 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.File;
 
 @ExtendWith(MockitoExtension.class)
 class PrintPaymentNoticeServiceTest {
@@ -37,13 +35,66 @@ class PrintPaymentNoticeServiceTest {
     // Given
     Long brokerId = 1L;
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = new NoticeGenerationRequestItemDTO();
-    File expectedResult = new File("path");
+    byte[] expectedResult = "PDF-DATA".getBytes();
 
     Mockito.when(clientMock.generateNotice(brokerId, noticeGenerationRequestItemDTO, VALID_ACCESS_TOKEN))
       .thenReturn(expectedResult);
 
     // When
-    File result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO, VALID_ACCESS_TOKEN);
+    byte[] result = service.generateNotice(brokerId, noticeGenerationRequestItemDTO, VALID_ACCESS_TOKEN);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenGenerateNoticeMassiveThenInvokeClient() {
+    // Given
+    Long brokerId = 1L;
+    NoticeGenerationMassiveRequestDTO noticeMassive = new NoticeGenerationMassiveRequestDTO();
+    NoticeGenerationMassiveResourceDTO expectedResult = new NoticeGenerationMassiveResourceDTO();
+    expectedResult.setFolderId("123");
+    String idempotenceKey = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
+
+    Mockito.when(clientMock.generateNoticeMassive(brokerId, idempotenceKey, noticeMassive, VALID_ACCESS_TOKEN))
+      .thenReturn(expectedResult);
+
+    // When
+    NoticeGenerationMassiveResourceDTO result = service.generateNoticeMassive(brokerId, idempotenceKey, noticeMassive, VALID_ACCESS_TOKEN);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenGetFolderStatusThenInvokeClient() {
+    // Given
+    Long brokerId = 1L;
+    GetGenerationRequestStatusResourceDTO expectedResult = new GetGenerationRequestStatusResourceDTO();
+    String folderId = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
+
+    Mockito.when(clientMock.getFolderStatus(brokerId, folderId, VALID_ACCESS_TOKEN))
+      .thenReturn(expectedResult);
+
+    // When
+    GetGenerationRequestStatusResourceDTO result = service.getFolderStatus(brokerId, folderId, VALID_ACCESS_TOKEN);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenGetSignedUrlResourceDTOThenInvokeClient() {
+    // Given
+    Long brokerId = 1L;
+    GetSignedUrlResourceDTO expectedResult = new GetSignedUrlResourceDTO();
+    String folderId = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
+
+    Mockito.when(clientMock.getFolderSignedUrlResource(brokerId, folderId, VALID_ACCESS_TOKEN))
+      .thenReturn(expectedResult);
+
+    // When
+    GetSignedUrlResourceDTO result = service.getFolderSignedUrlResource(brokerId, folderId, VALID_ACCESS_TOKEN);
 
     // Then
     Assertions.assertSame(expectedResult, result);

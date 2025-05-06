@@ -120,6 +120,67 @@
         } ]
       }
     },
+    "/printpaymentnotice/generateMassive" : {
+      "post" : {
+        "tags" : [ "print-payment-notice" ],
+        "operationId" : "generateMassive",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NoticeRequestMassiveDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Ok",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GeneratedNoticeMassiveFolderDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GeneratedNoticeMassiveFolderDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GeneratedNoticeMassiveFolderDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/gpd/sync" : {
       "post" : {
         "tags" : [ "gpd" ],
@@ -268,6 +329,83 @@
                   "items" : {
                     "$ref" : "#/components/schemas/TaxonomyDTO"
                   }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/printpaymentnotice/{organizationId}/{folderId}/getSignedUrl" : {
+      "get" : {
+        "tags" : [ "print-payment-notice" ],
+        "operationId" : "getSignedUrl",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "folderId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Ok",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SignedUrlResultDTO"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "No content",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SignedUrlResultDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SignedUrlResultDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SignedUrlResultDTO"
                 }
               }
             }
@@ -494,6 +632,9 @@
           "updateOperatorExternalId" : {
             "type" : "string"
           },
+          "updateTraceId" : {
+            "type" : "string"
+          },
           "paymentOptions" : {
             "type" : "array",
             "items" : {
@@ -547,6 +688,9 @@
             "type" : "string"
           },
           "nav" : {
+            "type" : "string"
+          },
+          "iun" : {
             "type" : "string"
           },
           "dueDate" : {
@@ -605,6 +749,9 @@
           },
           "updateOperatorExternalId" : {
             "type" : "string"
+          },
+          "updateTraceId" : {
+            "type" : "string"
           }
         }
       },
@@ -620,6 +767,9 @@
           },
           "syncStatusTo" : {
             "$ref" : "#/components/schemas/InstallmentStatus"
+          },
+          "syncError" : {
+            "type" : "string"
           }
         }
       },
@@ -660,6 +810,9 @@
             "format" : "date-time"
           },
           "updateOperatorExternalId" : {
+            "type" : "string"
+          },
+          "updateTraceId" : {
             "type" : "string"
           },
           "installments" : {
@@ -769,8 +922,45 @@
           },
           "updateOperatorExternalId" : {
             "type" : "string"
+          },
+          "updateTraceId" : {
+            "type" : "string"
           }
         }
+      },
+      "GeneratedNoticeMassiveFolderDTO" : {
+        "type" : "object",
+        "properties" : {
+          "folderId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "folderId" ]
+      },
+      "NoticeRequestMassiveDTO" : {
+        "type" : "object",
+        "properties" : {
+          "debtPositions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DebtPositionDTO"
+            }
+          },
+          "organizationId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "iuvList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "requestId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "debtPositions", "organizationId", "requestId" ]
       },
       "TaxonomyDTO" : {
         "type" : "object",
@@ -814,6 +1004,26 @@
             "type" : "string"
           },
           "version" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SignedUrlResultDTO" : {
+        "type" : "object",
+        "properties" : {
+          "noticesInError" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "processedNotices" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "signedUrl" : {
             "type" : "string"
           }
         }

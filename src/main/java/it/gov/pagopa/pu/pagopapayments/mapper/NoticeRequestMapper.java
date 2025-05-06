@@ -1,7 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.CreditorInstitutionDTO;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeDTO;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeRequestDataDTO;
@@ -20,17 +19,18 @@ public class NoticeRequestMapper {
     notice.setDueDate(installment.getDueDate() != null ? installment.getDueDate().toString() : null);
     notice.setPaymentAmount(installment.getAmountCents());
     notice.setSubject(installment.getRemittanceInformation());
+    notice.setInstallments(null);
     return notice;
   }
 
-  public static NoticeRequestDataDTO toNoticeRequestDataDTO(String orgFiscalCode, InstallmentDTO installment, PersonDTO person) {
+  public static NoticeRequestDataDTO toNoticeRequestDataDTO(String orgFiscalCode, InstallmentDTO installment) {
     NoticeRequestDataDTO noticeRequestData = new NoticeRequestDataDTO();
 
     CreditorInstitutionDTO ci = new CreditorInstitutionDTO();
     ci.setTaxCode(orgFiscalCode);
 
     noticeRequestData.setCreditorInstitution(ci);
-    noticeRequestData.setDebtor(toDebtorDTO(person));
+    noticeRequestData.setDebtor(toDebtorDTO(installment.getDebtor()));
     noticeRequestData.setNotice(toNoticeDTO(installment));
 
     return noticeRequestData;

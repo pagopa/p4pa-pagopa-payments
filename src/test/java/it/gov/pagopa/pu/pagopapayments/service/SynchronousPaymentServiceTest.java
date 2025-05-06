@@ -2,17 +2,20 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
+import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
+import it.gov.pagopa.pu.pagopapayments.connector.send_notification.SendNotificationService;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentStatusVerifierService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import it.gov.pagopa.pu.sendnotification.dto.generated.NotificationPriceResponseV23DTO;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +38,10 @@ class SynchronousPaymentServiceTest {
   private PaForNodeRequestValidatorService paForNodeRequestValidatorServiceMock;
   @Mock
   private SynchronousPaymentStatusVerifierService synchronousPaymentStatusVerifierServiceMock;
+  @Mock
+  private OrganizationService organizationServiceMock;
+  @Mock
+  private SendNotificationService sendNotificationServiceMock;
 
   @InjectMocks
   private SynchronousPaymentService synchronousPaymentService;
@@ -47,12 +54,6 @@ class SynchronousPaymentServiceTest {
 
   private static final String VALID_ACCEESS_TOKEN = "VALID_ACCESS_TOKEN";
 
-
-  @BeforeEach
-  void setup() {
-    Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
-  }
-
   //region retrievePayment
 
   @Test
@@ -64,6 +65,7 @@ class SynchronousPaymentServiceTest {
     RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
     retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode());
 
+    Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN)).thenReturn(organization);
     Mockito.when(debtPositionServiceMock.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(),
         SynchronousPaymentService.ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
@@ -90,7 +92,7 @@ class SynchronousPaymentServiceTest {
     // Given
     RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
     retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode()+"XXX");
-
+    Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
     // When
     PagoPaNodeFaultException exception = Assertions.assertThrows(PagoPaNodeFaultException.class,()->synchronousPaymentService.retrievePayment(retrievePaymentDTO));
 
@@ -103,4 +105,36 @@ class SynchronousPaymentServiceTest {
 
   //endregion
 
+  //region retrieveNotificationFee
+  @Test
+  void givenApiKeyIsPresentWhenRetrieveNotificationFeeThenReturnNotificationPrice() {
+    Long organizationId = 1L;
+    String nav = "NAV";
+    String apiKey = "API-KEY";
+    int expectedPrice = 100;
+
+    NotificationPriceResponseV23DTO mockResponse = Mockito.mock(NotificationPriceResponseV23DTO.class);
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
+    Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(organizationId, nav, VALID_ACCEESS_TOKEN)).thenReturn(mockResponse);
+    Mockito.when(mockResponse.getTotalPrice()).thenReturn(expectedPrice);
+
+    long result = synchronousPaymentService.retrieveNotificationFeeCents(organizationId, nav, VALID_ACCEESS_TOKEN);
+
+    Assertions.assertEquals(expectedPrice, result);
+  }
+
+  @Test
+  void givenApiKeyAbsentWhenRetrieveNotificationFeeThenReturnNotificationPrice() {
+    Long organizationId = 1L;
+    String nav = "NAV";
+    String emptyApiKey = "";
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(emptyApiKey);
+
+    long result = synchronousPaymentService.retrieveNotificationFeeCents(organizationId, nav, VALID_ACCEESS_TOKEN);
+
+    Assertions.assertEquals(0, result);
+  }
+  //end region
 }

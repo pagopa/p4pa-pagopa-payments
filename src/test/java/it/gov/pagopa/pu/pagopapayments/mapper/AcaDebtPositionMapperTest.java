@@ -18,6 +18,7 @@ import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.common.AttributeStrategy;
 
 import java.util.List;
+import java.util.Objects;
 
 @ExtendWith(MockitoExtension.class)
 class AcaDebtPositionMapperTest {
@@ -55,7 +56,7 @@ class AcaDebtPositionMapperTest {
       .syncStatusFrom(syncStatusFrom)
       .syncStatusTo(syncStatusTo)
       .build());
-    installmentDTO.setTransfers(List.of(installmentDTO.getTransfers().getFirst()));
+    installmentDTO.setTransfers(List.of(Objects.requireNonNull(installmentDTO.getTransfers()).getFirst()));
     return installmentDTO;
   }
 
@@ -143,7 +144,7 @@ class AcaDebtPositionMapperTest {
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals("Invalid sync status [%s->%s] for installment [%s]".formatted(
-      installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
+      Objects.requireNonNull(installment.getSyncStatus()).getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
   }
 
   @Test
@@ -161,6 +162,19 @@ class AcaDebtPositionMapperTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(
       installment.getIud(), debtPosition.getDebtPositionId()), response.getMessage());
+  }
+
+  @Test
+  void givenFineWithStatusUnpayableWhenMapToPaymentPositionModelThenOk() {
+    //given
+    InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.UNPAYABLE, InstallmentStatus.UNPAID);
+
+    //when
+    Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(toSync.getIud(), debtPosition);
+
+    //verify
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
   }
   //endregion
 

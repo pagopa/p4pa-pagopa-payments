@@ -3,10 +3,8 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.clie
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config.PagopaPrintPaymentNoticeApisHolder;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
+import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
 
 @Service
 public class PrintPaymentNoticeClient {
@@ -19,14 +17,31 @@ public class PrintPaymentNoticeClient {
     this.brokerService = brokerService;
   }
 
-  public File generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
+  private String getApiKeyFromBroker(Long brokerId, String accessToken) {
+    return brokerService.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
+  }
+
+  public byte[] generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
     String apiKey = getApiKeyFromBroker(brokerId, accessToken);
     return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
       .generateNotice(noticeGenerationRequestItemDTO, null, null);
   }
 
-  private String getApiKeyFromBroker(Long brokerId, String accessToken) {
-    return brokerService.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
+  public NoticeGenerationMassiveResourceDTO generateNoticeMassive(Long brokerId, String idempotencyKey, NoticeGenerationMassiveRequestDTO noticeMassive, String accessToken) {
+    String apiKey = getApiKeyFromBroker(brokerId, accessToken);
+    return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
+      .generateNoticeMassiveRequest(idempotencyKey, noticeMassive, null);
   }
 
+  public GetGenerationRequestStatusResourceDTO getFolderStatus(Long brokerId, String folderId, String accessToken) {
+    String apiKey = getApiKeyFromBroker(brokerId, accessToken);
+    return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
+      .getFolderStatus(folderId, null);
+  }
+
+  public GetSignedUrlResourceDTO getFolderSignedUrlResource(Long brokerId, String folderId, String accessToken) {
+    String apiKey = getApiKeyFromBroker(brokerId, accessToken);
+    return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
+      .getFolderSignedUrlResource(folderId, null);
+  }
 }

@@ -53,13 +53,19 @@ public class SynchronousPaymentService {
   public Pair<InstallmentDTO, Organization> retrievePayment(RetrievePaymentDTO request) {
     String accessToken = authnService.getAccessToken();
     String requestIdMessage = request.getFiscalCode()+"/"+request.getNoticeNumber();
+    String nav = request.getNoticeNumber();
+
     if (!Objects.equals(request.getIdPA(), request.getFiscalCode())) {
       log.warn("paymentRequestValidate [{}]: unexpected idPA[{}]", requestIdMessage, request.getIdPA());
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getFiscalCode());
     }
     Organization organization = paForNodeRequestValidatorService.paForNodeRequestValidate(request, accessToken);
-    //TODO - P4ADEV-2622
-    InstallmentDTO installment = getPayableDebtPositionByOrganizationAndNav(organization, request.getNoticeNumber(), request.getPostalTransfer(), accessToken);
+    InstallmentDTO installment;
+    long notificationFeeCents = retrieveNotificationFeeCents(organization.getOrganizationId(), nav, accessToken);
+    if(notificationFeeCents>0)
+       installment = debtPositionService.updateInstallmentNotificationFee(organization.getOrganizationId(), nav, notificationFeeCents, accessToken);
+    else
+      installment = getPayableDebtPositionByOrganizationAndNav(organization, nav, request.getPostalTransfer(), accessToken);
     return Pair.of(installment, organization);
   }
 
@@ -70,7 +76,7 @@ public class SynchronousPaymentService {
 
   public long retrieveNotificationFeeCents(Long organizationId, String nav, String accessToken){
     String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
-    if(!sendAPIKey.isEmpty()){
+    if(sendAPIKey!=null && !sendAPIKey.isEmpty()){
       NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);
       log.info("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);
       return Objects.requireNonNullElse(notificationPrice.getTotalPrice(), 0);

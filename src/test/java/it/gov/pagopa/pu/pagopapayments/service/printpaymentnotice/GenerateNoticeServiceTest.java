@@ -87,7 +87,7 @@ class GenerateNoticeServiceTest {
       .fileName("99999999982_IUV123.pdf")
       .build();
 
-    Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationById(debtPosition.getOrganizationId(), ACCESS_TOKEN))
       .thenReturn(organization);
 
     Mockito.when(printPaymentNoticeServiceMock.generateNotice(
@@ -97,7 +97,7 @@ class GenerateNoticeServiceTest {
     ).thenReturn(expectedResult);
 
     // when
-    NoticeDataDTO result = generateNoticeService.generateNotice(ORGANIZATION_ID, TEST_IUV, debtPosition, ACCESS_TOKEN);
+    NoticeDataDTO result = generateNoticeService.generateNotice(TEST_IUV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
@@ -135,7 +135,7 @@ class GenerateNoticeServiceTest {
       .fileName("99999999982_IUV123.pdf")
       .build();
 
-    Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationById(debtPosition.getOrganizationId(), ACCESS_TOKEN))
       .thenReturn(organization);
 
     Mockito.when(printPaymentNoticeServiceMock.generateNotice(
@@ -145,7 +145,7 @@ class GenerateNoticeServiceTest {
     ).thenReturn(expectedResult);
 
     // when
-    NoticeDataDTO result = generateNoticeService.generateNotice(ORGANIZATION_ID, TEST_IUV, debtPosition, ACCESS_TOKEN);
+    NoticeDataDTO result = generateNoticeService.generateNotice(TEST_IUV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
@@ -166,17 +166,17 @@ class GenerateNoticeServiceTest {
 
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
 
-    Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationById(debtPosition.getOrganizationId(), ACCESS_TOKEN))
       .thenReturn(organization);
 
     // when & then
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> generateNoticeService.generateNotice(ORGANIZATION_ID, invalidIuv, debtPosition, ACCESS_TOKEN)
+      () -> generateNoticeService.generateNotice(invalidIuv, debtPosition, ACCESS_TOKEN)
     );
 
     assertEquals("No installment found for the provided IUV: " + invalidIuv, exception.getMessage());
-    Mockito.verify(organizationServiceMock).getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN);
+    Mockito.verify(organizationServiceMock).getOrganizationById(debtPosition.getOrganizationId(), ACCESS_TOKEN);
     Mockito.verifyNoInteractions(printPaymentNoticeServiceMock);
   }
 
@@ -257,7 +257,7 @@ class GenerateNoticeServiceTest {
 
     requestMassive.setNotices(List.of(noticeGenerationRequestItem));
 
-    Mockito.when(organizationServiceMock.getOrganizationById(request.getOrganizationId(), ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationById(request.getDebtPositions().getFirst().getOrganizationId(), ACCESS_TOKEN))
       .thenReturn(organization);
     Mockito.when(printPaymentNoticeServiceMock.generateNoticeMassive(
         organization.getBrokerId(), request.getRequestId(), requestMassive, ACCESS_TOKEN))
@@ -308,7 +308,7 @@ class GenerateNoticeServiceTest {
 
     requestMassive.setNotices(List.of(noticeGenerationRequestItem));
 
-    Mockito.when(organizationServiceMock.getOrganizationById(request.getOrganizationId(), ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationById(request.getDebtPositions().getFirst().getOrganizationId(), ACCESS_TOKEN))
       .thenReturn(organization);
     Mockito.when(printPaymentNoticeServiceMock.generateNoticeMassive(
         organization.getBrokerId(), request.getRequestId(), requestMassive, ACCESS_TOKEN))

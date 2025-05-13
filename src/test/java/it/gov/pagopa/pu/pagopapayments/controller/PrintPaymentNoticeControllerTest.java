@@ -56,7 +56,6 @@ class PrintPaymentNoticeControllerTest {
         .build();
 
     Mockito.when(generateNoticeService.generateNotice(
-      Mockito.eq(ORG_ID),
       Mockito.eq(IUV),
       Mockito.any(DebtPositionDTO.class),
       Mockito.anyString())
@@ -65,7 +64,7 @@ class PrintPaymentNoticeControllerTest {
     TestUtils.setFakeAccessTokenInContext();
 
     // When & Then
-    mockMvc.perform(post("/printpaymentnotice/{organizationId}/generate", ORG_ID)
+    mockMvc.perform(post("/printpaymentnotice/generate")
         .param("iuv", IUV)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(debtPosition)))
@@ -73,7 +72,7 @@ class PrintPaymentNoticeControllerTest {
       .andExpect(content().bytes(expectedResult));
 
     Mockito.verify(generateNoticeService, Mockito.times(1)).generateNotice(
-      Mockito.eq(ORG_ID), Mockito.eq(IUV), Mockito.any(), Mockito.anyString()
+      Mockito.eq(IUV), Mockito.any(), Mockito.anyString()
     );
   }
 

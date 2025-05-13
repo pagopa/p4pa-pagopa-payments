@@ -29,19 +29,11 @@
     "description" : "the taxonomies API"
   } ],
   "paths" : {
-    "/printpaymentnotice/{organizationId}/generate" : {
+    "/printpaymentnotice/generate" : {
       "post" : {
         "tags" : [ "print-payment-notice" ],
         "operationId" : "generateNotice",
         "parameters" : [ {
-          "name" : "organizationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
           "name" : "iuv",
           "in" : "query",
           "required" : true,
@@ -946,10 +938,6 @@
               "$ref" : "#/components/schemas/DebtPositionDTO"
             }
           },
-          "organizationId" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
           "iuvList" : {
             "type" : "array",
             "items" : {
@@ -960,7 +948,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "debtPositions", "organizationId", "requestId" ]
+        "required" : [ "debtPositions", "requestId" ]
       },
       "TaxonomyDTO" : {
         "type" : "object",

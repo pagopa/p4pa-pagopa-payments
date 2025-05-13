@@ -38,8 +38,8 @@ public class GenerateNoticeService {
     this.organizationService = organizationService;
   }
 
-  public NoticeDataDTO generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition, String accessToken) {
-    Organization org = organizationService.getOrganizationById(organizationId, accessToken);
+  public NoticeDataDTO generateNotice(String iuv, DebtPositionDTO debtPosition, String accessToken) {
+    Organization org = organizationService.getOrganizationById(debtPosition.getOrganizationId(), accessToken);
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = generateNoticeRequest(org, iuv, debtPosition);
     byte[] noticeData = printPaymentNoticeService.generateNotice(org.getBrokerId(), noticeGenerationRequestItemDTO, accessToken);
     return NoticeDataDTO.builder()
@@ -49,7 +49,7 @@ public class GenerateNoticeService {
   }
 
   public GeneratedNoticeMassiveFolderDTO generateNoticeMassive(NoticeRequestMassiveDTO request, String accessToken) {
-    Organization org = organizationService.getOrganizationById(request.getOrganizationId(), accessToken);
+    Organization org = organizationService.getOrganizationById(request.getDebtPositions().getFirst().getOrganizationId(), accessToken);
     NoticeGenerationMassiveResourceDTO response;
     NoticeGenerationMassiveRequestDTO requestMassive;
 

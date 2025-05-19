@@ -100,6 +100,11 @@ rest:
     max-attempts: "\${ORGANIZATION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
     wait-time-millis: "\${ORGANIZATION_WAIT_TIME_MILLIS:500}"
     print-body-when-error: "\${ORGANIZATION_PRINT_BODY_WHEN_ERROR:true}"
+  send-notification:
+    base-url: "\${SEND_NOTIFICATION_BASE_URL:}"
+    max-attempts: "\${SEND_NOTIFICATION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${SEND_NOTIFICATION_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${SEND_NOTIFICATION_PRINT_BODY_WHEN_ERROR:true}"
   pagopa-node-services:
     aca:
       base-url: "\${PAGOPA_NODE_ACA_BASE_URL:}"

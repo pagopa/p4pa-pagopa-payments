@@ -42,8 +42,7 @@ class OpenApiGeneratorTest {
       .andReturn();
 
     String openApiResult = result.getResponse().getContentAsString()
-      .replace("\r", "")
-      .replace("EntityModel", "");
+      .replace("\r", "");
 
     Assertions.assertTrue(openApiResult.startsWith("{\n  \"openapi\" : \"3."));
 

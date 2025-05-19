@@ -25,9 +25,9 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
   }
 
   @Override
-  public ResponseEntity<Resource> generateNotice(Long organizationId, String iuv, DebtPositionDTO debtPosition) {
-    log.info("invoking generateNotice, organizationId[{}], iuv[{}], debtPositionId[{}]", organizationId, iuv, debtPosition.getDebtPositionId());
-    NoticeDataDTO notice = generateNoticeService.generateNotice(organizationId, iuv, debtPosition, SecurityUtils.getAccessToken());
+  public ResponseEntity<Resource> generateNotice(String iuv, DebtPositionDTO debtPosition) {
+    log.info("invoking generateNotice, iuv[{}], debtPositionId[{}]", iuv, debtPosition.getDebtPositionId());
+    NoticeDataDTO notice = generateNoticeService.generateNotice(iuv, debtPosition, SecurityUtils.getAccessToken());
 
     Resource resource = new ByteArrayResource(notice.getNotice());
 
@@ -45,7 +45,7 @@ public class PrintPaymentNoticeController implements PrintPaymentNoticeApi {
 
   @Override
   public ResponseEntity<GeneratedNoticeMassiveFolderDTO> generateMassive(NoticeRequestMassiveDTO noticeRequestMassiveDTO) {
-    log.info("invoking generateMassive, organizationId[{}], requestId[{}]", noticeRequestMassiveDTO.getOrganizationId(), noticeRequestMassiveDTO.getRequestId());
+    log.info("invoking generateMassive, requestId[{}]", noticeRequestMassiveDTO.getRequestId());
     GeneratedNoticeMassiveFolderDTO noticeMassive = generateNoticeService.generateNoticeMassive(noticeRequestMassiveDTO, SecurityUtils.getAccessToken());
 
     return ResponseEntity.ok(noticeMassive);

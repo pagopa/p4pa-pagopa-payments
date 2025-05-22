@@ -179,5 +179,20 @@ class SynchronousPaymentServiceTest {
 
     Assertions.assertEquals(0, result);
   }
+
+  @Test
+  void givenApiKeyIsPresentWhenRetrieveNotificationPriceThrowsExceptionThenReturnZero() {
+    Long organizationId = 1L;
+    String nav = "NAV";
+    String apiKey = "API-KEY";
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
+    Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(organizationId, nav, VALID_ACCEESS_TOKEN))
+      .thenThrow(new RuntimeException("Not Found"));
+
+    long result = synchronousPaymentService.retrieveNotificationFeeCents(organizationId, nav, VALID_ACCEESS_TOKEN);
+
+    Assertions.assertEquals(0, result);
+  }
   //end region
 }

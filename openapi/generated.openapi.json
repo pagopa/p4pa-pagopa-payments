@@ -610,7 +610,7 @@
           "multiDebtor" : {
             "type" : "boolean"
           },
-          "flagPagoPaPayment" : {
+          "flagPuPagoPaPayment" : {
             "type" : "boolean"
           },
           "creationDate" : {
@@ -727,8 +727,8 @@
             "type" : "integer",
             "format" : "int64"
           },
-          "ingestionFlowFileGenerateAdvice" : {
-            "type" : "boolean"
+          "sourceFlowName" : {
+            "type" : "string"
           },
           "receiptId" : {
             "type" : "integer",

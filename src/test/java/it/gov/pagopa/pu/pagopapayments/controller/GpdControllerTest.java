@@ -32,7 +32,7 @@ class GpdControllerTest {
     .organizationId(1L)
     .description("descr")
     .debtPositionTypeOrgId(2L)
-    .flagPagoPaPayment(true)
+    .flagPuPagoPaPayment(true)
     .paymentOptions(List.of(PaymentOptionDTO.builder()
       .paymentOptionId(3L)
       .totalAmountCents(21_00L)

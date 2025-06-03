@@ -58,14 +58,15 @@ class FileShareClientTest {
         Mockito.same(organization.getOrganizationId()),
         Mockito.eq(IngestionFlowFileType.RECEIPT_PAGOPA),
         Mockito.eq(FileOrigin.PAGOPA),
-        Mockito.eq("RT_" + paSendRtDTO.getNoticeNumber() + ".xml"),
         Mockito.argThat(i -> {
           try {
             return Arrays.equals(i.getContentAsByteArray(), paSendRtDTO.getReceiptBytes());
           } catch (IOException e) {
             throw new RuntimeException(e);
           }
-        })))
+        }),
+        Mockito.eq("RT_" + paSendRtDTO.getNoticeNumber() + ".xml"),
+        Mockito.isNull()))
       .thenReturn(UploadIngestionFlowFileResponseDTO.builder()
         .ingestionFlowFileId(expectedResult)
         .build());
@@ -92,14 +93,15 @@ class FileShareClientTest {
         Mockito.same(organizationId),
         Mockito.eq(IngestionFlowFileType.PAYMENTS_REPORTING_PAGOPA),
         Mockito.eq(FileOrigin.PAGOPA),
-        Mockito.same(fileName),
         Mockito.argThat(i -> {
           try {
             return Arrays.equals(i.getContentAsByteArray(), paPaymentReportingDTO.getPaymentReportingBytes());
           } catch (IOException e) {
             throw new RuntimeException(e);
           }
-        })))
+        }),
+        Mockito.same(fileName),
+        Mockito.isNull()))
       .thenReturn(UploadIngestionFlowFileResponseDTO.builder()
         .ingestionFlowFileId(expectedResult)
         .build());

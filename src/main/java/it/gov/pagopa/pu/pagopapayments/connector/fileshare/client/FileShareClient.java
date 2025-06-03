@@ -33,8 +33,9 @@ public class FileShareClient {
         organization.getOrganizationId(),
         IngestionFlowFileType.RECEIPT_PAGOPA,
         FileOrigin.PAGOPA,
+        file,
         fileName,
-        file)
+        null)
       .getIngestionFlowFileId();
   }
 
@@ -50,8 +51,9 @@ public class FileShareClient {
         organizationId,
         IngestionFlowFileType.PAYMENTS_REPORTING_PAGOPA,
         FileOrigin.PAGOPA,
+        file,
         fileName,
-        file)
+        null)
       .getIngestionFlowFileId();
   }
 

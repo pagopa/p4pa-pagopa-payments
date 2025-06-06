@@ -44,7 +44,7 @@ class FileShareApisHolderTest extends BaseApiHolderTest {
     void whenGetIngestionFlowFileApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
         assertAuthenticationShouldBeSetInThreadSafeMode(
                 accessToken -> apisHolder.getIngestionFlowFileApi(accessToken)
-                        .uploadIngestionFlowFile(1L, IngestionFlowFileType.PAYMENTS_REPORTING, FileOrigin.PORTAL, "FILENAME", Mockito.mock(Resource.class)),
+                        .uploadIngestionFlowFile(1L, IngestionFlowFileType.PAYMENTS_REPORTING, FileOrigin.PORTAL, Mockito.mock(Resource.class), "FILENAME", null),
                 new ParameterizedTypeReference<>() {},
                 apisHolder::unload);
     }

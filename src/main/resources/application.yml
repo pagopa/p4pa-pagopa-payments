@@ -32,6 +32,7 @@ management:
     health:
       probes.enabled: true
       logging.slow-indicator-threshold: "\${HEALTH_ACTUATOR_LOGGER_TIMEOUT_DURATION:PT1S}"
+      show-details: "\${HEALTH_ACTUATOR_SHOW_DETAILS:when-authorized}"
       group:
         readiness.include: "*"
         liveness.include: livenessState,diskSpace,ping

@@ -573,6 +573,10 @@
         },
         "required" : [ "code", "message" ]
       },
+      "Action" : {
+        "type" : "string",
+        "enum" : [ "I", "M", "A" ]
+      },
       "DebtPositionDTO" : {
         "type" : "object",
         "properties" : {
@@ -726,6 +730,9 @@
           "ingestionFlowFileLineNumber" : {
             "type" : "integer",
             "format" : "int64"
+          },
+          "ingestionFlowFileAction" : {
+            "$ref" : "#/components/schemas/Action"
           },
           "sourceFlowName" : {
             "type" : "string"

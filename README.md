@@ -14,6 +14,9 @@ See [OpenAPI](openapi/generated.openapi.json), exposed through the following pat
 
 See [paForNode WSDL](src/main/resources/soap/wsdl/paForNode.wsdl), exposed through the following path:
 * `/soap/node/wsdl/PaForNode.wsdl`
+* Exposed to pagoPA `Nodo dei Pagamenti SPC` in order to:
+  * Returns payments data on synchronous scenario;
+  * Accept payment receipts (RT).
 
 See [Postman collection](/postman/PagopaPayments%20E2E.postman_collection.json) and [Postman Environment](https://pagopa.atlassian.net/wiki/spaces/SPAC/pages/1094615081/Environment+collection+postman).
 
@@ -31,6 +34,10 @@ See [Postman collection](/postman/PagopaPayments%20E2E.postman_collection.json) 
 * `paVerifyPaymentNotice`: To return payment data on synchronous scenario;
 * `paGetPaymentV2`: To confirm payment data on synchronous scenario;
 * `paSendRTV2`: To accept the receipt (RT) related to a paid installment.
+
+### 📌 Common HTTP status returned:
+* `401`: Invalid access token provided, thus a new login is required;
+* `403`: Trying to access a not authorized resource.
 
 ## 🔎 Monitoring
 See available actuator endpoints through the following path:

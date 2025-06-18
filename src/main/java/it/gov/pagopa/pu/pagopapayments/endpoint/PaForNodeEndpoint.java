@@ -9,14 +9,18 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
+import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
+import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
@@ -31,12 +35,14 @@ public class PaForNodeEndpoint {
   private final SynchronousPaymentService synchronousPaymentService;
   private final ReceiptService receiptService;
   private final PaSendRTMapper paSendRTMapper;
+  private final RegistryLogger registryLogger;
 
 
-  public PaForNodeEndpoint(SynchronousPaymentService synchronousPaymentService, ReceiptService receiptService, PaSendRTMapper paSendRTMapper) {
+  public PaForNodeEndpoint(SynchronousPaymentService synchronousPaymentService, ReceiptService receiptService, PaSendRTMapper paSendRTMapper, RegistryLogger registryLogger) {
     this.synchronousPaymentService = synchronousPaymentService;
     this.receiptService = receiptService;
     this.paSendRTMapper = paSendRTMapper;
+    this.registryLogger = registryLogger;
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paDemandPaymentNoticeRequest")
@@ -111,7 +117,30 @@ public class PaForNodeEndpoint {
     try {
       log.info("processing paSendRTV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getReceipt().getFiscalCode(), request.getReceipt().getNoticeNumber());
       PaSendRtDTO paSendRtDTO = paSendRTMapper.paSendRtV2Request2PaSendRtDTO(request);
-      receiptService.processReceivedReceipt(paSendRtDTO);
+      var registryLoggerResult = registryLogger.execute(
+        paSendRtDTO.getFiscalCode(),
+        paSendRtDTO.getIdBrokerPA(),
+        request.getReceipt().getIdPSP(),
+        request.getReceipt().getIdChannel(),
+        request.getReceipt().getPaymentMethod(),
+        null, // @TODO: no ccp in request
+        RegistryEventType.paSendRTV2,
+        request.getReceipt().getNoticeNumber(),
+        paSendRtDTO,
+        () -> {
+          receiptService.processReceivedReceipt(paSendRtDTO);
+          return Triple.of(null, null, RegistryEventOutcome.OK);
+        },
+        exception -> {
+          log.error("Error processing paSendRTV2 for notice [{}/{}]", paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber(), exception);
+          return Triple.of(null, exception, null);
+        }
+      );
+
+      if (registryLoggerResult.getMiddle() != null) {
+        throw registryLoggerResult.getMiddle();
+      }
+
       PaSendRTV2Response response = new PaSendRTV2Response();
       response.setOutcome(StOutcome.OK);
       return response;

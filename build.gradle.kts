@@ -46,6 +46,14 @@ val xmlSchemaVersion = "2.3.1"
 val podamVersion = "8.0.2.RELEASE"
 val caffeineVersion = "3.2.0"
 val httpClientVersion = "5.4.4"
+val springCloudDepsVersion = "2024.0.1"
+val springWolfAsyncApiVersion = "1.13.0"
+
+dependencyManagement {
+  imports {
+    mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudDepsVersion")
+  }
+}
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter")
@@ -55,6 +63,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("org.springframework.boot:spring-boot-starter-web-services")
+  implementation("org.springframework.cloud:spring-cloud-starter-stream-kafka")
   implementation("io.micrometer:micrometer-tracing-bridge-otel:$micrometerVersion")
   implementation("io.micrometer:micrometer-registry-prometheus")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion")
@@ -63,6 +72,9 @@ dependencies {
   implementation("org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion")
   implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
   implementation("org.apache.httpcomponents.client5:httpclient5:$httpClientVersion")
+  implementation("io.github.springwolf:springwolf-kafka:${springWolfAsyncApiVersion}")
+  implementation("io.github.springwolf:springwolf-ui:${springWolfAsyncApiVersion}")
+  implementation("io.github.springwolf:springwolf-cloud-stream:${springWolfAsyncApiVersion}")
 
   //webservice soap
   implementation("wsdl4j:wsdl4j:$wsdl4jVersion")

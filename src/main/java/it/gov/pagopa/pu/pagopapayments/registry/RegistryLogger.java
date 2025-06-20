@@ -3,10 +3,8 @@ package it.gov.pagopa.pu.pagopapayments.registry;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventCategory;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
 import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
-import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -38,27 +36,13 @@ public class RegistryLogger {
   }
 
   public <I, O> O execute(
-    String orgFiscalCode,
-    String brokerStationId,
-    String pspId,
-    String pspChannelId,
-    String paymentMethod,
-    String ccp,
-    RegistryEventType eventType,
-    String iuv,
+    RegistryContextData contextData,
     I request,
     Supplier<Triple<O, String, RegistryEventOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler
   ) {
     return this.execute(
-      orgFiscalCode,
-      brokerStationId,
-      pspId,
-      pspChannelId,
-      paymentMethod,
-      ccp,
-      eventType,
-      iuv,
+      contextData,
       request,
       requestHandler,
       exceptionHandler,
@@ -68,14 +52,7 @@ public class RegistryLogger {
   }
 
   public <I, O> O execute(
-    String orgFiscalCode,
-    String brokerStationId,
-    String pspId,
-    String pspChannelId,
-    String paymentMethod,
-    String ccp,
-    RegistryEventType eventType,
-    String iuv,
+    RegistryContextData contextData,
     I request,
     Supplier<Triple<O, String, RegistryEventOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler,
@@ -83,14 +60,7 @@ public class RegistryLogger {
     Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor
   ) {
     produceReqRegistryEvent(
-      orgFiscalCode,
-      brokerStationId,
-      pspId,
-      pspChannelId,
-      paymentMethod,
-      ccp,
-      eventType,
-      iuv,
+      contextData,
       request,
       registryBodyRequestExtraInfoRetriever
     );
@@ -100,15 +70,9 @@ public class RegistryLogger {
     } catch (Exception e) {
       response2outcome = Triple.of(exceptionHandler.apply(e), null, RegistryEventOutcome.KO);
     } finally {
+      contextData.setIuv(StringUtils.firstNonBlank(response2outcome.getMiddle(), contextData.getIuv()));
       produceRespRegistryEvent(
-        orgFiscalCode,
-        brokerStationId,
-        pspId,
-        pspChannelId,
-        paymentMethod,
-        ccp,
-        eventType,
-        StringUtils.firstNonBlank(response2outcome.getMiddle(), iuv),
+        contextData,
         response2outcome.getLeft(),
         response2outcome.getRight(),
         registryBodyResponseExtraInfoExtractor
@@ -118,14 +82,7 @@ public class RegistryLogger {
   }
 
   private <I> void produceReqRegistryEvent(
-    String orgFiscalCode,
-    String brokerStationId,
-    String pspId,
-    String pspChannelId,
-    String paymentMethod,
-    String ccp,
-    RegistryEventType eventType,
-    String iuv,
+    RegistryContextData contextData,
     I request,
     Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever
   ) {
@@ -145,34 +102,21 @@ public class RegistryLogger {
         body = jaxbTransformService.marshalling(request, (Class<I>) request.getClass());
       }
       produceRegistryEvent(
-        orgFiscalCode,
-        brokerStationId,
-        pspId,
-        pspChannelId,
-        paymentMethod,
-        ccp,
-        eventType,
-        iuv,
+        contextData,
         body,
         RegistryEventSubType.REQ,
         RegistryEventOutcome.OK
       );
     } catch (Exception e) {
-      log.error("Error producing request registry event for orgFiscalCode: {}, eventType: {}, iuv: {}", orgFiscalCode, eventType, iuv, e);
+      log.error("Error producing request registry event for orgFiscalCode: {}, eventType: {}, iuv: {}",
+        contextData.getOrgFiscalCode(), contextData.getEventType(), contextData.getIuv(), e);
       // In case of error in producing the request event, we do not throw an exception to avoid breaking the flow
       // but we log the error and continue with the response event.
     }
   }
 
   private <O> void produceRespRegistryEvent(
-    String orgFiscalCode,
-    String brokerStationId,
-    String pspId,
-    String pspChannelId,
-    String paymentMethod,
-    String ccp,
-    RegistryEventType eventType,
-    String iuv,
+    RegistryContextData contextData,
     O response,
     RegistryEventOutcome outcome,
     Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor
@@ -193,41 +137,28 @@ public class RegistryLogger {
         body = jaxbTransformService.marshalling(response, (Class<O>) response.getClass());
       }
       produceRegistryEvent(
-        orgFiscalCode,
-        brokerStationId,
-        pspId,
-        pspChannelId,
-        paymentMethod,
-        ccp,
-        eventType,
-        iuv,
+        contextData,
         body,
         RegistryEventSubType.RESP,
         outcome
       );
     } catch (Exception e) {
-      log.error("Error producing response registry event for orgFiscalCode: {}, eventType: {}, iuv: {}", orgFiscalCode, eventType, iuv, e);
+      log.error("Error producing response registry event for orgFiscalCode: {}, eventType: {}, iuv: {}",
+        contextData.getOrgFiscalCode(), contextData.getEventType(), contextData.getIuv(), e);
       // In case of error in producing the response event, we do not throw an exception to avoid breaking the flow
       // but we log the error.
     }
   }
 
   private void produceRegistryEvent(
-    String orgFiscalCode,
-    String brokerStationId,
-    String pspId,
-    String pspChannelId,
-    String paymentMethod,
-    String ccp,
-    RegistryEventType eventType,
-    String iuv,
+    RegistryContextData contextData,
     Object body,
     RegistryEventSubType eventSubType,
     RegistryEventOutcome outcome
   ) {
     String requestorId;
     String grantorId;
-    if (eventType.isExposedByPU() == RegistryEventSubType.REQ.equals(eventSubType)) {
+    if (contextData.getEventType().isExposedByPU() == RegistryEventSubType.REQ.equals(eventSubType)) {
       requestorId = NODE_ID;
       grantorId = PU_ID;
     } else {
@@ -236,19 +167,11 @@ public class RegistryLogger {
     }
 
     registryProducerService.notifyPagoPaEvent(
-      orgFiscalCode,
-      brokerStationId,
-      pspId,
-      pspChannelId,
-      paymentMethod,
-      ccp,
-      eventType,
+      contextData,
       eventSubType,
       RegistryEventCategory.INTERFACCIA,
       requestorId,
       grantorId,
-      iuv,
-      Utilities.iuv2Nav(iuv),
       outcome,
       body);
   }

@@ -15,6 +15,7 @@ import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
@@ -50,25 +51,25 @@ public class PaForNodeEndpoint {
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paDemandPaymentNoticeRequest")
   @ResponsePayload
-  public PaDemandPaymentNoticeResponse paDemandPaymentNotice(@RequestPayload PaDemandPaymentNoticeRequest request){
+  public PaDemandPaymentNoticeResponse paDemandPaymentNotice(@RequestPayload PaDemandPaymentNoticeRequest request) {
     log.info("processing paDemandPaymentNotice idPA[{}] servizio[{}/{}]", request.getIdPA(), request.getIdSoggettoServizio(), request.getIdServizio());
     return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdBrokerPA(), new PaDemandPaymentNoticeResponse());
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paVerifyPaymentNoticeReq")
   @ResponsePayload
-  public PaVerifyPaymentNoticeRes paVerifyPaymentNotice(@RequestPayload PaVerifyPaymentNoticeReq request){
+  public PaVerifyPaymentNoticeRes paVerifyPaymentNotice(@RequestPayload PaVerifyPaymentNoticeReq request) {
     long startTime = System.currentTimeMillis();
     try {
-    log.info("processing paVerifyPaymentNotice idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
+      log.info("processing paVerifyPaymentNotice idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
       RetrievePaymentDTO retrievePaymentDTO = PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(request);
       Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
       return PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
         installmentAndOrganization.getLeft(), installmentAndOrganization.getRight());
-    } catch(PagoPaNodeFaultException spe) {
+    } catch (PagoPaNodeFaultException spe) {
       log.error("Fault in paVerifyPaymentNotice [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
       return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaVerifyPaymentNoticeRes());
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("Error in paVerifyPaymentNotice [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
       return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaVerifyPaymentNoticeRes());
     } finally {
@@ -94,10 +95,10 @@ public class PaForNodeEndpoint {
       Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
       return PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
         installmentAndOrganization.getLeft(), installmentAndOrganization.getRight(), request.getTransferType());
-    } catch(PagoPaNodeFaultException spe) {
+    } catch (PagoPaNodeFaultException spe) {
       log.error("Fault in paGetPaymentV2 [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
       return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaGetPaymentV2Response());
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("Error in paGetPaymentV2 [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
       return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaGetPaymentV2Response());
     } finally {
@@ -116,15 +117,19 @@ public class PaForNodeEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paSendRTV2Request")
   @ResponsePayload
   public PaSendRTV2Response paSendRTV2(@RequestPayload PaSendRTV2Request request) {
+    RegistryContextData contextData = RegistryContextData.builder()
+      .orgFiscalCode(request.getReceipt().getFiscalCode())
+      .brokerStationId(request.getIdStation())
+      .pspId(request.getReceipt().getIdPSP())
+      .pspChannelId(request.getReceipt().getIdChannel())
+      .paymentMethod(request.getReceipt().getPaymentMethod())
+      .ccp(request.getReceipt().getReceiptId())
+      .eventType(RegistryEventType.paSendRTV2)
+      .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()))
+      .build();
+
     return registryLogger.execute(
-      request.getReceipt().getFiscalCode(),
-      request.getIdStation(),
-      request.getReceipt().getIdPSP(),
-      request.getReceipt().getIdChannel(),
-      request.getReceipt().getPaymentMethod(),
-      request.getReceipt().getReceiptId(),
-      RegistryEventType.paSendRTV2,
-      Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()),
+      contextData,
       request,
       () -> {
         log.info("processing paSendRTV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getReceipt().getFiscalCode(), request.getReceipt().getNoticeNumber());
@@ -150,7 +155,7 @@ public class PaForNodeEndpoint {
     );
   }
 
-  private <T extends CtResponse> T handleFault(PagoPaNodeFaults fault, String idFaultEmitter, T responseObj){
+  private <T extends CtResponse> T handleFault(PagoPaNodeFaults fault, String idFaultEmitter, T responseObj) {
     responseObj.setFault(new CtFaultBean());
     responseObj.getFault().setFaultCode(fault.code());
     responseObj.getFault().setDescription(fault.description());

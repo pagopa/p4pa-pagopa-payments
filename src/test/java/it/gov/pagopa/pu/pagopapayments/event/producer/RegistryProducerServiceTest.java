@@ -9,7 +9,10 @@ import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.dto.RegistryEventDTO;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +46,11 @@ class RegistryProducerServiceTest {
     registryProducerService = new RegistryProducerService(streamBridge, new ObjectMapper());
   }
 
+  @AfterEach
+  void clear(){
+    MDC.clear();
+  }
+
   @ParameterizedTest
   @ValueSource(strings = {"null", "string", "object"})
   void whenNotifyPagoPaEventThenSendMessage(String bodyType) throws JsonProcessingException {
@@ -52,12 +60,13 @@ class RegistryProducerServiceTest {
     var subType = RegistryEventSubType.REQ;
     String requestorId = "9cbb04c1-627b-4063-a09b-ee8f718bb9bd";
     String grantorId = "2add6c22-75bb-4fad-b186-56620a362def";
-    String iuv = "1234567890123456789012345678901234567890";
-    String nav = "212345678901234567890123456789012345678901234567890";
+    String iuv = "31234567890123456789012345678901234567890";
+    String nav = Utilities.iuv2Nav(iuv);
     String brokerStationId = "45428ef5-53ab-4690-a565-d13b0af64d5f";
     String pspId = "23e19e1b-fcb8-43c0-b643-9396394f10ca";
     String pspChannelId = "channel-12345";
     String paymentMethod = "creditCard";
+    String ccp = "ccp";
     RegistryEventOutcome outcome;
     Object body;
 
@@ -83,21 +92,24 @@ class RegistryProducerServiceTest {
     String traceId = "de59ed53-cfdb-450f-acd7-f1054a53b8b0";
     MDC.put("traceId", traceId);
 
+    RegistryContextData contextData = RegistryContextData.builder()
+      .orgFiscalCode(orgFiscalCode)
+      .brokerStationId(brokerStationId)
+      .pspId(pspId)
+      .pspChannelId(pspChannelId)
+      .paymentMethod(paymentMethod)
+      .ccp(ccp)
+      .eventType(eventType)
+      .iuv(iuv)
+      .build();
+
     // When
     registryProducerService.notifyPagoPaEvent(
-      orgFiscalCode,
-      brokerStationId,
-      pspId,
-      pspChannelId,
-      paymentMethod,
-      null,
-      eventType,
+      contextData,
       subType,
       RegistryEventCategory.INTERNO,
       requestorId,
       grantorId,
-      iuv,
-      nav,
       outcome,
       body
     );
@@ -122,14 +134,13 @@ class RegistryProducerServiceTest {
         Assertions.assertEquals(requestorId, payload.getRequestorId());
         Assertions.assertEquals(grantorId, payload.getGrantorId());
         Assertions.assertEquals(outcome.name(), payload.getOutcome().name());
+        Assertions.assertEquals(ccp, payload.getCcp());
         Assertions.assertEquals(serializedBody, payload.getBody());
         Assertions.assertTrue(OffsetDateTime.now().toEpochSecond() - payload.getDateTime().toEpochSecond() < 5);
 
         String[] ignoredFields = {};
         if(body == null) {
-          ignoredFields = new String[]{"body", "ccp"};
-        } else {
-          ignoredFields = new String[]{"ccp"};
+          ignoredFields = new String[]{"body"};
         }
         TestUtils.checkNotNullFields(payload, ignoredFields);
 

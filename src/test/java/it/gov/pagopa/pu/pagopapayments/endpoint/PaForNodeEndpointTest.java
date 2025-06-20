@@ -12,6 +12,7 @@ import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
@@ -55,25 +56,11 @@ class PaForNodeEndpointTest {
       registryLoggerMock);
   }
 
-  private void configureRegistryLoggerMock(String orgFiscalCode,
-                                           String brokerStationId,
-                                           String pspId,
-                                           String pspChannelId,
-                                           String paymentMethod,
-                                           String ccp,
-                                           RegistryEventType eventType,
-                                           String iuv,
-                                           Object request) {
+  private void configureRegistryLoggerMock(RegistryContextData contextData, Object request) {
     Object[] result = new Object[1];
     Exception[] exception = new Exception[1];
-    Mockito.when(registryLoggerMock.execute(Mockito.eq(orgFiscalCode),
-      Mockito.eq(brokerStationId),
-      Mockito.eq(pspId),
-      Mockito.eq(pspChannelId),
-      Mockito.eq(paymentMethod),
-      Mockito.eq(ccp),
-      Mockito.eq(eventType),
-      Mockito.eq(iuv),
+    Mockito.when(registryLoggerMock.execute(
+      Mockito.eq(contextData),
       Mockito.same(request),
       Mockito.argThat(i -> {
         try {
@@ -84,7 +71,7 @@ class PaForNodeEndpointTest {
         return true;
       }),
       Mockito.argThat(i -> {
-        if(exception[0]!=null) {
+        if (exception[0] != null) {
           result[0] = i.apply(exception[0]);
         }
         return true;
@@ -334,16 +321,18 @@ class PaForNodeEndpointTest {
 
     Mockito.when(paSendRTMapperMock.paSendRtV2Request2PaSendRtDTO(request)).thenReturn(paSendRtDTO);
 
-    configureRegistryLoggerMock(
-      request.getReceipt().getFiscalCode(),
-      request.getIdStation(),
-      request.getReceipt().getIdPSP(),
-      request.getReceipt().getIdChannel(),
-      request.getReceipt().getPaymentMethod(),
-      request.getReceipt().getReceiptId(),
-      RegistryEventType.paSendRTV2,
-      Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()),
-      request);
+    RegistryContextData expectedContextData = RegistryContextData.builder()
+      .orgFiscalCode(request.getReceipt().getFiscalCode())
+      .brokerStationId(request.getIdStation())
+      .pspId(request.getReceipt().getIdPSP())
+      .pspChannelId(request.getReceipt().getIdChannel())
+      .paymentMethod(request.getReceipt().getPaymentMethod())
+      .ccp(request.getReceipt().getReceiptId())
+      .eventType(RegistryEventType.paSendRTV2)
+      .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()))
+      .build();
+
+    configureRegistryLoggerMock(expectedContextData, request);
 
     return Pair.of(request, paSendRtDTO);
   }

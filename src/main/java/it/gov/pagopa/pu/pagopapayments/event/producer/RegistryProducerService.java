@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventCategory;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.dto.RegistryEventDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,23 +49,15 @@ public class RegistryProducerService {
   }
 
   public void notifyPagoPaEvent(
-    String orgFiscalCode,
-    String brokerStationId,
-    String pspId,
-    String pspChannelId,
-    String paymentMethod,
-    String ccp,
-    RegistryEventType eventType,
+    RegistryContextData contextData,
     RegistryEventSubType subType,
     RegistryEventCategory category,
     String requestorId,
     String grantorId,
-    String iuv,
-    String nav,
     RegistryEventOutcome outcome,
     Object body
   ) {
-    String registryId = String.join("-", eventType.name(), String.valueOf(System.currentTimeMillis()), UUID.randomUUID().toString());
+    String registryId = String.join("-", contextData.getEventType().name(), String.valueOf(System.currentTimeMillis()), UUID.randomUUID().toString());
     String traceId = Utilities.getTraceId();
 
     String bodyString = null;
@@ -82,17 +74,17 @@ public class RegistryProducerService {
           .registryOrigin(REGISTRY_ORIGIN)
           .registryType(REGISTRY_TYPE)
           .dateTime(OffsetDateTime.now())
-          .brokerStationId(brokerStationId)
-          .orgFiscalCode(orgFiscalCode)
-          .pspId(pspId)
-          .pspChannelId(pspChannelId)
-          .paymentMethod(paymentMethod)
-          .ccp(ccp)
-          .eventType(eventType)
+          .brokerStationId(contextData.getBrokerStationId())
+          .orgFiscalCode(contextData.getOrgFiscalCode())
+          .pspId(contextData.getPspId())
+          .pspChannelId(contextData.getPspChannelId())
+          .paymentMethod(contextData.getPaymentMethod())
+          .ccp(contextData.getCcp())
+          .eventType(contextData.getEventType())
           .eventSubType(subType)
           .eventCategory(category)
-          .iuv(iuv)
-          .nav(nav)
+          .iuv(contextData.getIuv())
+          .nav(Utilities.iuv2Nav(contextData.getIuv()))
           .requestorId(requestorId)
           .grantorId(grantorId)
           .outcome(outcome)

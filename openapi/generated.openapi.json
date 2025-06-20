@@ -331,167 +331,6 @@
         } ]
       }
     },
-    "/springwolf/ui-config" : {
-      "get" : {
-        "tags" : [ "ui-config-controller" ],
-        "operationId" : "getUiConfig",
-        "responses" : {
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
-                }
-              }
-            }
-          },
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/UiConfig"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/springwolf/docs" : {
-      "get" : {
-        "tags" : [ "async-api-controller" ],
-        "operationId" : "asyncApiYaml",
-        "parameters" : [ ],
-        "responses" : {
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
-                }
-              }
-            }
-          },
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/yaml" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              },
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/springwolf/docs/{group}" : {
-      "get" : {
-        "tags" : [ "async-api-controller" ],
-        "operationId" : "asyncApiYaml_1",
-        "parameters" : [ {
-          "name" : "group",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
-                }
-              }
-            }
-          },
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/yaml" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              },
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/springwolf/docs.yaml" : {
-      "get" : {
-        "tags" : [ "async-api-controller" ],
-        "operationId" : "asyncApiYaml_2",
-        "parameters" : [ ],
-        "responses" : {
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
-                }
-              }
-            }
-          },
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/yaml" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/springwolf/docs.json" : {
-      "get" : {
-        "tags" : [ "async-api-controller" ],
-        "operationId" : "asyncApiJson",
-        "parameters" : [ ],
-        "responses" : {
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
-                }
-              }
-            }
-          },
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/printpaymentnotice/{organizationId}/{folderId}/getSignedUrl" : {
       "get" : {
         "tags" : [ "print-payment-notice" ],
@@ -720,8 +559,7 @@
     "schemas" : {
       "CodeEnum" : {
         "type" : "string",
-        "enum" : [ "PAGOPA_PAYMENTS_NOT_FOUND", "PAGOPA_PAYMENTS_BAD_REQUEST", "PAGOPA_PAYMENTS_GENERIC_ERROR" ],
-        "title" : "CodeEnum"
+        "enum" : [ "PAGOPA_PAYMENTS_NOT_FOUND", "PAGOPA_PAYMENTS_BAD_REQUEST", "PAGOPA_PAYMENTS_GENERIC_ERROR" ]
       },
       "PagoPaPaymentsErrorDTO" : {
         "type" : "object",
@@ -733,13 +571,11 @@
             "type" : "string"
           }
         },
-        "required" : [ "code", "message" ],
-        "title" : "PagoPaPaymentsErrorDTO"
+        "required" : [ "code", "message" ]
       },
       "Action" : {
         "type" : "string",
-        "enum" : [ "I", "M", "A" ],
-        "title" : "Action"
+        "enum" : [ "I", "M", "A" ]
       },
       "DebtPositionDTO" : {
         "type" : "object",
@@ -801,23 +637,19 @@
               "$ref" : "#/components/schemas/PaymentOptionDTO"
             }
           }
-        },
-        "title" : "DebtPositionDTO"
+        }
       },
       "DebtPositionOrigin" : {
         "type" : "string",
-        "enum" : [ "ORDINARY", "ORDINARY_SIL", "SPONTANEOUS", "SPONTANEOUS_SIL", "SECONDARY_ORG", "RECEIPT_FILE", "RECEIPT_PAGOPA", "REPORTING_PAGOPA" ],
-        "title" : "DebtPositionOrigin"
+        "enum" : [ "ORDINARY", "ORDINARY_SIL", "SPONTANEOUS", "SPONTANEOUS_SIL", "SECONDARY_ORG", "RECEIPT_FILE", "RECEIPT_PAGOPA", "REPORTING_PAGOPA" ]
       },
       "DebtPositionStatus" : {
         "type" : "string",
-        "enum" : [ "TO_SYNC", "REPORTED", "PAID", "PARTIALLY_PAID", "CANCELLED", "EXPIRED", "UNPAID", "DRAFT" ],
-        "title" : "DebtPositionStatus"
+        "enum" : [ "TO_SYNC", "REPORTED", "PAID", "PARTIALLY_PAID", "CANCELLED", "EXPIRED", "UNPAID", "DRAFT" ]
       },
       "EntityTypeEnum" : {
         "type" : "string",
-        "enum" : [ "F", "G" ],
-        "title" : "EntityTypeEnum"
+        "enum" : [ "F", "G" ]
       },
       "InstallmentDTO" : {
         "type" : "object",
@@ -923,13 +755,11 @@
           "updateTraceId" : {
             "type" : "string"
           }
-        },
-        "title" : "InstallmentDTO"
+        }
       },
       "InstallmentStatus" : {
         "type" : "string",
-        "enum" : [ "TO_SYNC", "REPORTED", "PAID", "CANCELLED", "INVALID", "EXPIRED", "UNPAID", "UNPAYABLE", "DRAFT" ],
-        "title" : "InstallmentStatus"
+        "enum" : [ "TO_SYNC", "REPORTED", "PAID", "CANCELLED", "INVALID", "EXPIRED", "UNPAID", "UNPAYABLE", "DRAFT" ]
       },
       "InstallmentSyncStatus" : {
         "type" : "object",
@@ -943,8 +773,7 @@
           "syncError" : {
             "type" : "string"
           }
-        },
-        "title" : "InstallmentSyncStatus"
+        }
       },
       "PaymentOptionDTO" : {
         "type" : "object",
@@ -994,18 +823,15 @@
               "$ref" : "#/components/schemas/InstallmentDTO"
             }
           }
-        },
-        "title" : "PaymentOptionDTO"
+        }
       },
       "PaymentOptionStatus" : {
         "type" : "string",
-        "enum" : [ "TO_SYNC", "REPORTED", "PAID", "PARTIALLY_PAID", "CANCELLED", "INVALID", "EXPIRED", "UNPAID", "UNPAYABLE", "DRAFT" ],
-        "title" : "PaymentOptionStatus"
+        "enum" : [ "TO_SYNC", "REPORTED", "PAID", "PARTIALLY_PAID", "CANCELLED", "INVALID", "EXPIRED", "UNPAID", "UNPAYABLE", "DRAFT" ]
       },
       "PaymentOptionTypeEnum" : {
         "type" : "string",
-        "enum" : [ "SINGLE_INSTALLMENT", "REDUCED_SINGLE_INSTALLMENT", "INSTALLMENTS", "DOWN_PAYMENT" ],
-        "title" : "PaymentOptionTypeEnum"
+        "enum" : [ "SINGLE_INSTALLMENT", "REDUCED_SINGLE_INSTALLMENT", "INSTALLMENTS", "DOWN_PAYMENT" ]
       },
       "PersonDTO" : {
         "type" : "object",
@@ -1040,8 +866,7 @@
           "email" : {
             "type" : "string"
           }
-        },
-        "title" : "PersonDTO"
+        }
       },
       "TransferDTO" : {
         "type" : "object",
@@ -1103,8 +928,7 @@
           "updateTraceId" : {
             "type" : "string"
           }
-        },
-        "title" : "TransferDTO"
+        }
       },
       "GeneratedNoticeMassiveFolderDTO" : {
         "type" : "object",
@@ -1134,8 +958,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "debtPositions", "requestId" ],
-        "title" : "NoticeRequestMassiveDTO"
+        "required" : [ "debtPositions", "requestId" ]
       },
       "TaxonomyDTO" : {
         "type" : "object",
@@ -1182,42 +1005,6 @@
             "type" : "string"
           }
         }
-      },
-      "InitialConfig" : {
-        "type" : "object",
-        "properties" : {
-          "showBindings" : {
-            "type" : "boolean"
-          },
-          "showHeaders" : {
-            "type" : "boolean"
-          }
-        },
-        "title" : "InitialConfig"
-      },
-      "UiConfig" : {
-        "type" : "object",
-        "properties" : {
-          "initialConfig" : {
-            "$ref" : "#/components/schemas/InitialConfig"
-          },
-          "groups" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/UiConfigGroup"
-            }
-          }
-        },
-        "title" : "UiConfig"
-      },
-      "UiConfigGroup" : {
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string"
-          }
-        },
-        "title" : "UiConfigGroup"
       },
       "SignedUrlResultDTO" : {
         "type" : "object",

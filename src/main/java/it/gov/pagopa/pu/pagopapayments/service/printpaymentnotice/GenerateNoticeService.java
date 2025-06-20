@@ -40,16 +40,20 @@ public class GenerateNoticeService {
 
   public NoticeDataDTO generateNotice(String iuv, DebtPositionDTO debtPosition, String accessToken) {
     Organization org = organizationService.getOrganizationById(debtPosition.getOrganizationId(), accessToken);
-    NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = generateNoticeRequest(org, iuv, debtPosition);
-    byte[] noticeData = printPaymentNoticeService.generateNotice(org.getBrokerId(), noticeGenerationRequestItemDTO, accessToken);
+    NoticeGenerationRequestItemDTO noticeData = generateNoticeRequest(org, iuv, debtPosition);
+    log.info("generateNotice for broker with id[{}], notice code[{}] and templateId[{}]", org.getBrokerId(), noticeData.getData().getNotice().getCode(), noticeData.getTemplateId());
+
+    byte[] noticeGenerated = printPaymentNoticeService.generateNotice(org.getBrokerId(), noticeData, accessToken);
     return NoticeDataDTO.builder()
-      .notice(noticeData)
+      .notice(noticeGenerated)
       .fileName(org.getOrgFiscalCode() + "_" + iuv + ".pdf")
       .build();
   }
 
   public GeneratedNoticeMassiveFolderDTO generateNoticeMassive(NoticeRequestMassiveDTO request, String accessToken) {
     Organization org = organizationService.getOrganizationById(request.getDebtPositions().getFirst().getOrganizationId(), accessToken);
+    log.info("generateNoticeMassive - retrieved organization with id[{}]", org.getOrganizationId());
+
     NoticeGenerationMassiveResourceDTO response;
     NoticeGenerationMassiveRequestDTO requestMassive;
 
@@ -58,16 +62,22 @@ public class GenerateNoticeService {
     } else {
       requestMassive = generateMassiveFromIuvList(org, request.getDebtPositions(), request.getIuvList());
     }
+    log.info("calling generateNoticeMassive with brokerId[{}] and a list with [{}] notices", org.getBrokerId(), requestMassive.getNotices().size());
 
     response = printPaymentNoticeService.generateNoticeMassive(org.getBrokerId(), request.getRequestId(), requestMassive, accessToken);
+    log.info("generateNoticeMassive - retrieved folderId[{}]", response.getFolderId());
+
     return GeneratedNoticeMassiveFolderMapper.toGeneratedNoticeMassiveFolderDTO(response);
   }
 
   public SignedUrlResultDTO getNoticeMassiveZip(Long organizationId, String folderId, String accessToken) {
     Organization org = organizationService.getOrganizationById(organizationId, accessToken);
-    GetGenerationRequestStatusResourceDTO folderStatus = printPaymentNoticeService.getFolderStatus(org.getBrokerId(), folderId, accessToken);
-    SignedUrlResultDTO result = new SignedUrlResultDTO();
+    log.info("getNoticeMassiveZip - retrieved organization with id and calling getFolderStatus with brokerId[{}], folderId[{}]", org.getBrokerId(), folderId);
 
+    GetGenerationRequestStatusResourceDTO folderStatus = printPaymentNoticeService.getFolderStatus(org.getBrokerId(), folderId, accessToken);
+    log.info("getFolderStatus - noticesInError[{}], processedNotices [{}]", folderStatus.getNoticesInError(), folderStatus.getProcessedNotices());
+
+    SignedUrlResultDTO result = new SignedUrlResultDTO();
     GetGenerationRequestStatusResourceDTO.StatusEnum status = folderStatus.getStatus();
     if (PROCESSED.equals(status) || PROCESSED_WITH_FAILURES.equals(status) || FAILED.equals(status)) {
       GetSignedUrlResourceDTO signedUrlRes = printPaymentNoticeService.getFolderSignedUrlResource(org.getBrokerId(), folderId, accessToken);
@@ -100,10 +110,12 @@ public class GenerateNoticeService {
   }
 
   public NoticeGenerationMassiveRequestDTO generateMassiveFromUnpaid(Organization org, List<DebtPositionDTO> debtPositions) {
+    log.info("Generate massive notice from Installments in UNPAID status for Organization with id[{}]", org.getOrganizationId());
     return generateMassiveGeneric(org, debtPositions, inst -> Objects.equals(inst.getStatus(), InstallmentStatus.UNPAID));
   }
 
   public NoticeGenerationMassiveRequestDTO generateMassiveFromIuvList(Organization org, List<DebtPositionDTO> debtPositions, List<String> iuvList) {
+    log.info("Generate massive notice from Iuv list given in input [{}]", iuvList);
     return generateMassiveGeneric(org, debtPositions, inst -> iuvList.contains(inst.getIuv()));
   }
 
@@ -138,6 +150,7 @@ public class GenerateNoticeService {
   }
 
   public InstallmentDTO findInstallmentAndDebtorByIuv(DebtPositionDTO debtPosition, String iuv) {
+    log.info("findInstallmentAndDebtorByIuv on debtPosition with id[{}] and iuv iuv[{}]", debtPosition.getDebtPositionId(), iuv);
     return debtPosition.getPaymentOptions().stream()
       .flatMap(po -> po.getInstallments().stream())
       .filter(installment -> iuv.equals(installment.getIuv()))

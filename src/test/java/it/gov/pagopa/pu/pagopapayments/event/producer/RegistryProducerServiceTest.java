@@ -4,14 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventCategory;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.dto.RegistryEventDTO;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventSubType;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,23 +67,23 @@ class RegistryProducerServiceTest {
     String pspChannelId = "channel-12345";
     String paymentMethod = "creditCard";
     String ccp = "ccp";
-    RegistryEventOutcome outcome;
+    RegistryOutcome outcome;
     Object body;
 
     String serializedBody = switch (bodyType) {
       case "null" -> {
         body = null;
-        outcome = RegistryEventOutcome.OK;
+        outcome = RegistryOutcome.OK;
         yield null;
       }
       case "string" -> {
         body = "string body";
-        outcome = RegistryEventOutcome.KO;
+        outcome = RegistryOutcome.KO;
         yield (String) body;
       }
       case "object" -> {
         body = PaSendRtDTO.builder().build();
-        outcome = RegistryEventOutcome.OK;
+        outcome = RegistryOutcome.OK;
         yield objectMapper.writeValueAsString(body);
       }
       default ->

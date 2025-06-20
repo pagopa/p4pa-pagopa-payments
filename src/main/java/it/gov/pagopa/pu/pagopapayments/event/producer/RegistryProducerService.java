@@ -1,13 +1,13 @@
 package it.gov.pagopa.pu.pagopapayments.event.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventCategory;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.dto.RegistryEventDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventSubType;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -54,7 +54,7 @@ public class RegistryProducerService {
     RegistryEventCategory category,
     String requestorId,
     String grantorId,
-    RegistryEventOutcome outcome,
+    RegistryOutcome outcome,
     Object body
   ) {
     String registryId = String.join("-", contextData.getEventType().name(), String.valueOf(System.currentTimeMillis()), UUID.randomUUID().toString());

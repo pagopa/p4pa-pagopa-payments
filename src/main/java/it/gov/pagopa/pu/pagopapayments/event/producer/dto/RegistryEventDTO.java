@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.event.producer.dto;
 
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventCategory;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventSubType;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,6 +34,6 @@ public class RegistryEventDTO {
   private RegistryEventSubType eventSubType;
   private String requestorId;
   private String grantorId;
-  private RegistryEventOutcome outcome;
+  private RegistryOutcome outcome;
   private String body;
 }

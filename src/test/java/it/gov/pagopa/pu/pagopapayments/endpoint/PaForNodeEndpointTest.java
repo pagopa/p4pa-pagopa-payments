@@ -7,7 +7,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;

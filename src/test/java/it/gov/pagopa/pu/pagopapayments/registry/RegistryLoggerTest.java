@@ -1,12 +1,11 @@
 package it.gov.pagopa.pu.pagopapayments.registry;
 
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventCategory;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
 import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventSubType;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +46,7 @@ class RegistryLoggerTest {
     // When
     Object actualResponse = registryLogger.execute(
       contextData, request,
-      () -> Triple.of(null, blIuv, RegistryEventOutcome.OK),
+      () -> Triple.of(null, blIuv, RegistryOutcome.OK),
       e -> null
     );
 
@@ -60,7 +59,7 @@ class RegistryLoggerTest {
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.NODE_ID,
       RegistryLogger.PU_ID,
-      RegistryEventOutcome.OK,
+      RegistryOutcome.OK,
       xmlRequest
     );
 
@@ -71,7 +70,7 @@ class RegistryLoggerTest {
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
-      RegistryEventOutcome.OK,
+      RegistryOutcome.OK,
       null
     );
   }
@@ -89,7 +88,7 @@ class RegistryLoggerTest {
     // When
     Object actualResponse = registryLogger.execute(
       contextData, request,
-      () -> Triple.of(null, blIuv, RegistryEventOutcome.OK),
+      () -> Triple.of(null, blIuv, RegistryOutcome.OK),
       e -> null,
       () -> {
         // Simulate extra info retrieval
@@ -106,7 +105,7 @@ class RegistryLoggerTest {
       eq(RegistryEventCategory.INTERFACCIA),
       eq(RegistryLogger.NODE_ID),
       eq(RegistryLogger.PU_ID),
-      eq(RegistryEventOutcome.OK),
+      eq(RegistryOutcome.OK),
       argThat(o -> (o instanceof Map<?,?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
         m.containsKey(RegistryLogger.XML_BODY_KEY) && xmlRequest.equals(m.get(RegistryLogger.XML_BODY_KEY)))
@@ -119,7 +118,7 @@ class RegistryLoggerTest {
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
-      RegistryEventOutcome.OK,
+      RegistryOutcome.OK,
       null
     );
   }
@@ -135,7 +134,7 @@ class RegistryLoggerTest {
     // When
     Object actualResponse = registryLogger.execute(
       contextData, request,
-      () -> Triple.of(null, blIuv, RegistryEventOutcome.OK),
+      () -> Triple.of(null, blIuv, RegistryOutcome.OK),
       e -> null,
       () -> {
         // Simulate extra info retrieval
@@ -151,7 +150,7 @@ class RegistryLoggerTest {
       eq(RegistryEventCategory.INTERFACCIA),
       eq(RegistryLogger.NODE_ID),
       eq(RegistryLogger.PU_ID),
-      eq(RegistryEventOutcome.OK),
+      eq(RegistryOutcome.OK),
       argThat(o -> (o instanceof Map<?,?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
         !m.containsKey(RegistryLogger.XML_BODY_KEY) )
@@ -164,7 +163,7 @@ class RegistryLoggerTest {
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
-      RegistryEventOutcome.OK,
+      RegistryOutcome.OK,
       null
     );
   }
@@ -185,7 +184,7 @@ class RegistryLoggerTest {
     // When
     Object actualResponse = registryLogger.execute(
       contextData, request,
-      () -> Triple.of(response, blIuv, RegistryEventOutcome.OK),
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
       e -> null);
 
     // Then
@@ -197,7 +196,7 @@ class RegistryLoggerTest {
       eq(RegistryEventCategory.INTERFACCIA),
       eq(RegistryLogger.NODE_ID),
       eq(RegistryLogger.PU_ID),
-      eq(RegistryEventOutcome.OK),
+      eq(RegistryOutcome.OK),
       any()
     );
 
@@ -208,7 +207,7 @@ class RegistryLoggerTest {
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
-      RegistryEventOutcome.OK,
+      RegistryOutcome.OK,
       xmlResponse
     );
   }
@@ -229,7 +228,7 @@ class RegistryLoggerTest {
     // When
     Object actualResponse = registryLogger.execute(
       contextData, request,
-      () -> Triple.of(response, blIuv, RegistryEventOutcome.OK),
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
       e -> null,
       null, r -> {
         // Simulate extra info retrieval
@@ -245,7 +244,7 @@ class RegistryLoggerTest {
       eq(RegistryEventCategory.INTERFACCIA),
       eq(RegistryLogger.NODE_ID),
       eq(RegistryLogger.PU_ID),
-      eq(RegistryEventOutcome.OK),
+      eq(RegistryOutcome.OK),
       any()
     );
 
@@ -256,7 +255,7 @@ class RegistryLoggerTest {
       eq(RegistryEventCategory.INTERFACCIA),
       eq(RegistryLogger.PU_ID),
       eq(RegistryLogger.NODE_ID),
-      eq(RegistryEventOutcome.OK),
+      eq(RegistryOutcome.OK),
       argThat(o -> (o instanceof Map<?,?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
         m.containsKey(RegistryLogger.XML_BODY_KEY) && xmlResponse.equals(m.get(RegistryLogger.XML_BODY_KEY)))
@@ -277,7 +276,7 @@ class RegistryLoggerTest {
     // When
     Object actualResponse = registryLogger.execute(
       contextData, request,
-      () -> Triple.of(response, blIuv, RegistryEventOutcome.OK),
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
       e -> null,
       null, r -> {
         // Simulate extra info retrieval
@@ -293,7 +292,7 @@ class RegistryLoggerTest {
       eq(RegistryEventCategory.INTERFACCIA),
       eq(RegistryLogger.NODE_ID),
       eq(RegistryLogger.PU_ID),
-      eq(RegistryEventOutcome.OK),
+      eq(RegistryOutcome.OK),
       any()
     );
 
@@ -304,7 +303,7 @@ class RegistryLoggerTest {
       eq(RegistryEventCategory.INTERFACCIA),
       eq(RegistryLogger.PU_ID),
       eq(RegistryLogger.NODE_ID),
-      eq(RegistryEventOutcome.OK),
+      eq(RegistryOutcome.OK),
       argThat(o -> (o instanceof Map<?,?> m) &&
         m.containsKey("extraInfoKey") && ("extraInfoValue:"+response).equals(m.get("extraInfoKey")) &&
         !m.containsKey(RegistryLogger.XML_BODY_KEY))
@@ -340,7 +339,7 @@ class RegistryLoggerTest {
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.NODE_ID,
       RegistryLogger.PU_ID,
-      RegistryEventOutcome.OK,
+      RegistryOutcome.OK,
       xmlRequest);
 
     verify(registryProducerService).notifyPagoPaEvent(
@@ -349,7 +348,7 @@ class RegistryLoggerTest {
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
-      RegistryEventOutcome.KO,
+      RegistryOutcome.KO,
       xmlFallbackResponse);
   }
 
@@ -370,7 +369,7 @@ class RegistryLoggerTest {
     Object actualResponse = registryLogger.execute(
       contextData,
       request,
-      () -> Triple.of(response, blIuv, RegistryEventOutcome.OK),
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
       e -> null);
 
     // Then
@@ -382,7 +381,7 @@ class RegistryLoggerTest {
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.NODE_ID,
       RegistryLogger.PU_ID,
-      RegistryEventOutcome.OK,
+      RegistryOutcome.OK,
       xmlRequest);
 
     contextData.setIuv(blIuv);
@@ -392,7 +391,7 @@ class RegistryLoggerTest {
       eq(RegistryEventCategory.INTERFACCIA),
       eq(RegistryLogger.PU_ID),
       eq(RegistryLogger.NODE_ID),
-      eq(RegistryEventOutcome.OK),
+      eq(RegistryOutcome.OK),
       any());
   }
 
@@ -409,7 +408,7 @@ class RegistryLoggerTest {
     // When
     Object actualResponse = registryLogger.execute(
       contextData, request,
-      () -> Triple.of(null, blIuv, RegistryEventOutcome.OK),
+      () -> Triple.of(null, blIuv, RegistryOutcome.OK),
       e -> null);
 
     // Then
@@ -421,7 +420,7 @@ class RegistryLoggerTest {
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
-      RegistryEventOutcome.OK,
+      RegistryOutcome.OK,
       xmlRequest);
 
     contextData.setIuv(blIuv);
@@ -431,7 +430,7 @@ class RegistryLoggerTest {
       eq(RegistryEventCategory.INTERFACCIA),
       eq(RegistryLogger.NODE_ID),
       eq(RegistryLogger.PU_ID),
-      eq(RegistryEventOutcome.OK),
+      eq(RegistryOutcome.OK),
       any());
   }
 }

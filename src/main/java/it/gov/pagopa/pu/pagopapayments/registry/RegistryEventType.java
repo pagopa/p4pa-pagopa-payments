@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.enums;
+package it.gov.pagopa.pu.pagopapayments.registry;
 
 import lombok.Getter;
 

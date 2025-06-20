@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.registry;
 
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

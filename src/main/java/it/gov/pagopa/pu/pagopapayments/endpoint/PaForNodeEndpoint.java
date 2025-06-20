@@ -9,17 +9,17 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -137,7 +137,7 @@ public class PaForNodeEndpoint {
         receiptService.processReceivedReceipt(paSendRtDTO);
         PaSendRTV2Response resp = new PaSendRTV2Response();
         resp.setOutcome(StOutcome.OK);
-        return Triple.of(resp, null, RegistryEventOutcome.OK);
+        return Triple.of(resp, null, RegistryOutcome.OK);
       },
       e -> {
         PaSendRTV2Response resp;

@@ -1,10 +1,10 @@
 package it.gov.pagopa.pu.pagopapayments.registry;
 
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventCategory;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventOutcome;
-import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
 import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryEventSubType;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -37,7 +37,7 @@ public class RegistryLogger {
   public <I, O> O execute(
     RegistryContextData contextData,
     I request,
-    Supplier<Triple<O, String, RegistryEventOutcome>> requestHandler,
+    Supplier<Triple<O, String, RegistryOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler
   ) {
     return this.execute(
@@ -53,7 +53,7 @@ public class RegistryLogger {
   public <I, O> O execute(
     RegistryContextData contextData,
     I request,
-    Supplier<Triple<O, String, RegistryEventOutcome>> requestHandler,
+    Supplier<Triple<O, String, RegistryOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler,
     Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
     Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor
@@ -63,11 +63,11 @@ public class RegistryLogger {
       request,
       registryBodyRequestExtraInfoRetriever
     );
-    Triple<O, String, RegistryEventOutcome> response2outcome = Triple.of(null, null, RegistryEventOutcome.KO);
+    Triple<O, String, RegistryOutcome> response2outcome = Triple.of(null, null, RegistryOutcome.KO);
     try {
       response2outcome = requestHandler.get();
     } catch (Exception e) {
-      response2outcome = Triple.of(exceptionHandler.apply(e), null, RegistryEventOutcome.KO);
+      response2outcome = Triple.of(exceptionHandler.apply(e), null, RegistryOutcome.KO);
     } finally {
       contextData.setIuv(StringUtils.firstNonBlank(response2outcome.getMiddle(), contextData.getIuv()));
       produceRespRegistryEvent(
@@ -104,7 +104,7 @@ public class RegistryLogger {
         contextData,
         body,
         RegistryEventSubType.REQ,
-        RegistryEventOutcome.OK
+        RegistryOutcome.OK
       );
     } catch (Exception e) {
       log.error("Error producing request registry event for orgFiscalCode: {}, eventType: {}, iuv: {}",
@@ -117,7 +117,7 @@ public class RegistryLogger {
   private <O> void produceRespRegistryEvent(
     RegistryContextData contextData,
     O response,
-    RegistryEventOutcome outcome,
+    RegistryOutcome outcome,
     Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor
   ) {
     try {
@@ -153,7 +153,7 @@ public class RegistryLogger {
     RegistryContextData contextData,
     Object body,
     RegistryEventSubType eventSubType,
-    RegistryEventOutcome outcome
+    RegistryOutcome outcome
   ) {
     String requestorId;
     String grantorId;

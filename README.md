@@ -197,9 +197,10 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | KAFKA_REGISTRIES_PRODUCER_BATCH_SIZE               | Producer batch size                               | 16384                      |
 
 #### 🔑 keys
-| ENV                          | DESCRIPTION                                         | DEFAULT |
-|------------------------------|-----------------------------------------------------|---------|
-| JWT_TOKEN_PUBLIC_KEY         | p4pa-auth JWT public key                            |         |
+| ENV                    | DESCRIPTION                                                              | DEFAULT |
+|------------------------|--------------------------------------------------------------------------|---------|
+| JWT_TOKEN_PUBLIC_KEY   | p4pa-auth JWT public key                                                 |         |
+| AUTH_CLIENT_SECRET     | client_secret used on M2M authentication to get a technical access token |         |
 
 ## 🛠️ Getting Started
 

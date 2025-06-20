@@ -7,14 +7,19 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
+import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,18 +39,47 @@ class PaForNodeEndpointTest {
   private ReceiptService receiptServiceMock;
   @Mock
   private PaSendRTMapper paSendRTMapperMock;
+  @Mock
+  private RegistryLogger registryLoggerMock;
 
   @InjectMocks
   private PaForNodeEndpoint paForNodeEndpoint;
 
-  private final PodamFactory podamFactory;
+  private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
-  PaForNodeEndpointTest() {
-    podamFactory = TestUtils.getPodamFactory();
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      synchronousPaymentServiceMock,
+      receiptServiceMock,
+      paSendRTMapperMock,
+      registryLoggerMock);
+  }
+
+  private void configureRegistryLoggerMock(RegistryContextData contextData, Object request) {
+    Object[] result = new Object[1];
+    Exception[] exception = new Exception[1];
+    Mockito.when(registryLoggerMock.execute(
+      Mockito.eq(contextData),
+      Mockito.same(request),
+      Mockito.argThat(i -> {
+        try {
+          result[0] = i.get().getLeft();
+        } catch (Exception e) {
+          exception[0] = e;
+        }
+        return true;
+      }),
+      Mockito.argThat(i -> {
+        if (exception[0] != null) {
+          result[0] = i.apply(exception[0]);
+        }
+        return true;
+      })
+    )).thenAnswer(i -> result[0]);
   }
 
   //region paDemandPaymentNotice
-
   @Test
   void givenAnyWhenPaDemandPaymentNoticeThenFault() {
     // given
@@ -86,8 +120,6 @@ class PaForNodeEndpointTest {
       // verify
       Assertions.assertEquals(paVerifyPaymentNoticeRes, response);
       Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(paVerifyPaymentNoticeReq), Mockito.times(1));
-      mapperMock.verify(() -> PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(installmentDTO, organization), Mockito.times(1));
     }
   }
 
@@ -109,8 +141,6 @@ class PaForNodeEndpointTest {
       Assertions.assertNotNull(response.getFault());
       Assertions.assertEquals(PagoPaNodeFaults.PAA_SEMANTICA.code(), response.getFault().getFaultCode());
       Assertions.assertEquals("EMITTER", response.getFault().getId());
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(paVerifyPaymentNoticeReq), Mockito.times(1));
     }
   }
 
@@ -132,8 +162,6 @@ class PaForNodeEndpointTest {
       Assertions.assertNotNull(response.getFault());
       Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
       Assertions.assertEquals(paVerifyPaymentNoticeReq.getIdPA(), response.getFault().getId());
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(paVerifyPaymentNoticeReq), Mockito.times(1));
     }
   }
 
@@ -188,8 +216,6 @@ class PaForNodeEndpointTest {
       // verify
       Assertions.assertEquals(paGetPaymentV2Response, response);
       Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request), Mockito.times(1));
-      mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, paGetPaymentV2Request.getTransferType()), Mockito.times(1));
     }
   }
 
@@ -220,9 +246,6 @@ class PaForNodeEndpointTest {
 
       // verify
       Assertions.assertEquals(paGetPaymentV2Response, response);
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request), Mockito.times(1));
-      mapperMock.verify(() -> PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, paGetPaymentV2Request.getTransferType()), Mockito.times(1));
     }
   }
 
@@ -244,8 +267,6 @@ class PaForNodeEndpointTest {
       Assertions.assertNotNull(response.getFault());
       Assertions.assertEquals(PagoPaNodeFaults.PAA_SEMANTICA.code(), response.getFault().getFaultCode());
       Assertions.assertEquals("EMITTER", response.getFault().getId());
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request), Mockito.times(1));
     }
   }
 
@@ -267,8 +288,6 @@ class PaForNodeEndpointTest {
       Assertions.assertNotNull(response.getFault());
       Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
       Assertions.assertEquals(paGetPaymentReq.getIdPA(), response.getFault().getId());
-      Mockito.verify(synchronousPaymentServiceMock, Mockito.times(1)).retrievePayment(retrievePaymentDTO);
-      mapperMock.verify(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentReq), Mockito.times(1));
     }
   }
 
@@ -294,15 +313,38 @@ class PaForNodeEndpointTest {
   //endregion
 
   //region paSendRTV2
+  private Pair<PaSendRTV2Request, PaSendRtDTO> configurePaSendRTV2Request() {
+    PaSendRTV2Request request = podamFactory.manufacturePojo(PaSendRTV2Request.class);
+    request.setReceipt(podamFactory.manufacturePojo(CtReceiptV2.class));
+    request.getReceipt().setNoticeNumber("3123456");
+    PaSendRtDTO paSendRtDTO = podamFactory.manufacturePojo(PaSendRtDTO.class);
+
+    Mockito.when(paSendRTMapperMock.paSendRtV2Request2PaSendRtDTO(request)).thenReturn(paSendRtDTO);
+
+    RegistryContextData expectedContextData = RegistryContextData.builder()
+      .orgFiscalCode(request.getReceipt().getFiscalCode())
+      .brokerStationId(request.getIdStation())
+      .pspId(request.getReceipt().getIdPSP())
+      .pspChannelId(request.getReceipt().getIdChannel())
+      .paymentMethod(request.getReceipt().getPaymentMethod())
+      .ccp(request.getReceipt().getReceiptId())
+      .eventType(RegistryEventType.paSendRTV2)
+      .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()))
+      .build();
+
+    configureRegistryLoggerMock(expectedContextData, request);
+
+    return Pair.of(request, paSendRtDTO);
+  }
 
   @Test
   void givenValidPaSendRTV2RequestWhenPaSendRTV2ThenOk() {
     // given
-    PaSendRTV2Request request = podamFactory.manufacturePojo(PaSendRTV2Request.class);
-    PaSendRtDTO paSendRtDTO  = podamFactory.manufacturePojo(PaSendRtDTO.class);
+    Pair<PaSendRTV2Request, PaSendRtDTO> request2mapped = configurePaSendRTV2Request();
+    PaSendRTV2Request request = request2mapped.getLeft();
+    PaSendRtDTO requestMapped = request2mapped.getValue();
 
-    Mockito.when(paSendRTMapperMock.paSendRtV2Request2PaSendRtDTO(request)).thenReturn(paSendRtDTO);
-    Mockito.when(receiptServiceMock.processReceivedReceipt(paSendRtDTO)).thenReturn(1L);
+    Mockito.when(receiptServiceMock.processReceivedReceipt(requestMapped)).thenReturn(1L);
 
     // when
     PaSendRTV2Response response = paForNodeEndpoint.paSendRTV2(request);
@@ -311,18 +353,16 @@ class PaForNodeEndpointTest {
     Assertions.assertNotNull(response);
     Assertions.assertNull(response.getFault());
     Assertions.assertEquals(StOutcome.OK, response.getOutcome());
-    Mockito.verify(paSendRTMapperMock, Mockito.times(1)).paSendRtV2Request2PaSendRtDTO(request);
-    Mockito.verify(receiptServiceMock, Mockito.times(1)).processReceivedReceipt(paSendRtDTO);
   }
 
   @Test
   void givenInvalidPaSendRTV2RequestWhenPaSendRTV2ThenFault() {
     // given
-    PaSendRTV2Request request = podamFactory.manufacturePojo(PaSendRTV2Request.class);
-    PaSendRtDTO paSendRtDTO  = podamFactory.manufacturePojo(PaSendRtDTO.class);
+    Pair<PaSendRTV2Request, PaSendRtDTO> request2mapped = configurePaSendRTV2Request();
+    PaSendRTV2Request request = request2mapped.getLeft();
+    PaSendRtDTO requestMapped = request2mapped.getValue();
 
-    Mockito.when(paSendRTMapperMock.paSendRtV2Request2PaSendRtDTO(request)).thenReturn(paSendRtDTO);
-    Mockito.doThrow(new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SEMANTICA, "EMITTER")).when(receiptServiceMock).processReceivedReceipt(paSendRtDTO);
+    Mockito.doThrow(new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SEMANTICA, "EMITTER")).when(receiptServiceMock).processReceivedReceipt(requestMapped);
 
     // when
     PaSendRTV2Response response = paForNodeEndpoint.paSendRTV2(request);
@@ -332,18 +372,16 @@ class PaForNodeEndpointTest {
     Assertions.assertNotNull(response.getFault());
     Assertions.assertEquals(PagoPaNodeFaults.PAA_SEMANTICA.code(), response.getFault().getFaultCode());
     Assertions.assertEquals("EMITTER", response.getFault().getId());
-    Mockito.verify(paSendRTMapperMock, Mockito.times(1)).paSendRtV2Request2PaSendRtDTO(request);
-    Mockito.verify(receiptServiceMock, Mockito.times(1)).processReceivedReceipt(paSendRtDTO);
   }
 
   @Test
   void givenSystemErrorWhenPaSendRTV2ThenFault() {
     // given
-    PaSendRTV2Request request = podamFactory.manufacturePojo(PaSendRTV2Request.class);
-    PaSendRtDTO paSendRtDTO  = podamFactory.manufacturePojo(PaSendRtDTO.class);
+    Pair<PaSendRTV2Request, PaSendRtDTO> request2mapped = configurePaSendRTV2Request();
+    PaSendRTV2Request request = request2mapped.getLeft();
+    PaSendRtDTO requestMapped = request2mapped.getValue();
 
-    Mockito.when(paSendRTMapperMock.paSendRtV2Request2PaSendRtDTO(request)).thenReturn(paSendRtDTO);
-    Mockito.doThrow(new RuntimeException("RUNTIME EXCEPTION")).when(receiptServiceMock).processReceivedReceipt(paSendRtDTO);
+    Mockito.doThrow(new RuntimeException("RUNTIME EXCEPTION")).when(receiptServiceMock).processReceivedReceipt(requestMapped);
 
     // when
     PaSendRTV2Response response = paForNodeEndpoint.paSendRTV2(request);
@@ -353,8 +391,6 @@ class PaForNodeEndpointTest {
     Assertions.assertNotNull(response.getFault());
     Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR.code(), response.getFault().getFaultCode());
     Assertions.assertEquals(request.getIdPA(), response.getFault().getId());
-    Mockito.verify(paSendRTMapperMock, Mockito.times(1)).paSendRtV2Request2PaSendRtDTO(request);
-    Mockito.verify(receiptServiceMock, Mockito.times(1)).processReceivedReceipt(paSendRtDTO);
   }
 
   //endregion

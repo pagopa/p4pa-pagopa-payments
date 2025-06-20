@@ -24,7 +24,6 @@ public class RegistryLogger {
 
   public static final String SKIP_XML_BODY_KEY = "skipXmlBody";
   public static final String XML_BODY_KEY = "xmlBody";
-  public static final String IUV_SEPARATOR = ",";
 
   private final JAXBTransformService jaxbTransformService;
 

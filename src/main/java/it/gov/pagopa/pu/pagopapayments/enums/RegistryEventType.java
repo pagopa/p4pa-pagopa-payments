@@ -1,5 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum RegistryEventType {
   paVerifyPaymentNotice(true, true),
   paGetPaymentV2(true, true),
@@ -8,17 +11,7 @@ public enum RegistryEventType {
   createPosition(false, false),
   updatePosition(false, false),
   deletePosition(false, false),
-  fetchPaymentReporting(false, true),
-  paaSILChiediStatoImportFlusso(true, true),
-  paaSILAutorizzaImportFlusso(true, true),
-  paaSILImportaDovuto(true, true),
-  paaSILInviaDovuti(true, true),
-  paaSILInviaCarrelloDovuti(true, true),
-  paaSILPrenotaExportFlusso(true, true),
-  pivotSILChiediStatoImportFlussoTesoreria(true, true),
-  pivotSILChiediStatoImportFlusso(true, true),
-  pivotSILAutorizzaImportFlussoTesoreria(true, true),
-  pivotSILAutorizzaImportFlusso(true, true);
+  fetchPaymentReporting(false, true);
 
   private final boolean exposedByPU;
   private final boolean isSOAP;
@@ -26,9 +19,5 @@ public enum RegistryEventType {
   RegistryEventType(boolean exposedByPU, boolean isSOAP) {
     this.exposedByPU = exposedByPU;
     this.isSOAP = isSOAP;
-  }
-
-  public boolean isExposedByPU() {
-    return exposedByPU;
   }
 }

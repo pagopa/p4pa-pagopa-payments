@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.dto.RegistryEventDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.util.IdentityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +51,7 @@ public class RegistryProducerService {
     }
   }
 
-  public void notifySilEvent(
+  public void notifyPagoPaEvent(
     String orgFiscalCode,
     String brokerStationId,
     String pspId,
@@ -68,7 +69,7 @@ public class RegistryProducerService {
     Object body
   ) {
     String registryId = String.join("-", eventType.name(), String.valueOf(System.currentTimeMillis()), UUID.randomUUID().toString());
-    String traceId = MDC.get("traceId");
+    String traceId = IdentityUtils.getTraceId();
 
     String bodyString = null;
     if (body instanceof String bodyAsString) {

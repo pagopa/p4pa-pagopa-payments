@@ -25,7 +25,7 @@ import org.springframework.messaging.Message;
 import java.time.OffsetDateTime;
 
 @ExtendWith(MockitoExtension.class)
-public class RegistryProducerServiceTest {
+class RegistryProducerServiceTest {
 
   @Mock
   private StreamBridge streamBridge;
@@ -45,7 +45,7 @@ public class RegistryProducerServiceTest {
 
   @ParameterizedTest
   @ValueSource(strings = {"null", "string", "object"})
-  void whenNotifySilEventThenSendMessage(String bodyType) throws JsonProcessingException {
+  void whenNotifyPagoPaEventThenSendMessage(String bodyType) throws JsonProcessingException {
     // Given
     String orgFiscalCode = "68216521868";
     var eventType = RegistryEventType.paSendRTV2;
@@ -84,7 +84,7 @@ public class RegistryProducerServiceTest {
     MDC.put("traceId", traceId);
 
     // When
-    registryProducerService.notifySilEvent(
+    registryProducerService.notifyPagoPaEvent(
       orgFiscalCode,
       brokerStationId,
       pspId,
@@ -93,7 +93,7 @@ public class RegistryProducerServiceTest {
       null,
       eventType,
       subType,
-      RegistryEventCategory.INTERNAL,
+      RegistryEventCategory.INTERNO,
       requestorId,
       grantorId,
       iuv,

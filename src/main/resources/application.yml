@@ -42,7 +42,7 @@ spring:
           registryProducer-out-0:
             producer:
               configuration:
-                client.id: pu-sil
+                client.id: pu-pagopapayments
                 connections.max.idle.ms: "\${KAFKA_REGISTRY_PRODUCER_CONNECTION_MAX_IDLE_TIME:180000}"
                 retry.backoff.ms: "\${KAFKA_REGISTRY_PRODUCER_RETRY_MS:\${KAFKA_RETRY_MS:10000}}"
                 linger.ms: "\${KAFKA_REGISTRY_PRODUCER_LINGER_MS:\${KAFKA_LINGER_MS:2}}"
@@ -50,7 +50,7 @@ spring:
 
 springwolf:
   docket:
-    base-package: it.gov.pagopa.pu.sil.event
+    base-package: it.gov.pagopa.pu.pagopapayments.event
     info:
       title: "\${spring.application.name}"
       version: "\${spring.application.version}"

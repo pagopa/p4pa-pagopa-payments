@@ -18,6 +18,7 @@ import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
+import it.gov.pagopa.pu.pagopapayments.util.IdentityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -25,6 +26,8 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
+
+import java.util.Objects;
 
 @Endpoint
 @Slf4j
@@ -114,46 +117,45 @@ public class PaForNodeEndpoint {
   @ResponsePayload
   public PaSendRTV2Response paSendRTV2(@RequestPayload PaSendRTV2Request request) {
     long startTime = System.currentTimeMillis();
-    try {
-      log.info("processing paSendRTV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getReceipt().getFiscalCode(), request.getReceipt().getNoticeNumber());
-      PaSendRtDTO paSendRtDTO = paSendRTMapper.paSendRtV2Request2PaSendRtDTO(request);
-      var registryLoggerResult = registryLogger.execute(
-        paSendRtDTO.getFiscalCode(),
-        paSendRtDTO.getIdBrokerPA(),
-        request.getReceipt().getIdPSP(),
-        request.getReceipt().getIdChannel(),
-        request.getReceipt().getPaymentMethod(),
-        null, // @TODO: no ccp in request
-        RegistryEventType.paSendRTV2,
-        request.getReceipt().getNoticeNumber(),
-        paSendRtDTO,
-        () -> {
-          receiptService.processReceivedReceipt(paSendRtDTO);
-          return Triple.of(null, null, RegistryEventOutcome.OK);
-        },
-        exception -> {
-          log.error("Error processing paSendRTV2 for notice [{}/{}]", paSendRtDTO.getFiscalCode(), paSendRtDTO.getNoticeNumber(), exception);
-          return Triple.of(null, exception, null);
+
+    var response = registryLogger.execute(
+      request.getReceipt().getFiscalCode(),
+      request.getIdStation(),
+      request.getReceipt().getIdPSP(),
+      request.getReceipt().getIdChannel(),
+      request.getReceipt().getPaymentMethod(),
+      request.getReceipt().getReceiptId(),
+      RegistryEventType.paSendRTV2,
+      IdentityUtils.numeroAvvisoToIuvValidator(request.getReceipt().getNoticeNumber()),
+      request,
+      () -> {
+        log.info("processing paSendRTV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getReceipt().getFiscalCode(), request.getReceipt().getNoticeNumber());
+        PaSendRtDTO paSendRtDTO = paSendRTMapper.paSendRtV2Request2PaSendRtDTO(request);
+        receiptService.processReceivedReceipt(paSendRtDTO);
+        PaSendRTV2Response resp = new PaSendRTV2Response();
+        resp.setOutcome(StOutcome.OK);
+        return Triple.of(resp, null, RegistryEventOutcome.OK);
+      },
+      e -> {
+        PaSendRTV2Response resp;
+        RegistryEventOutcome outcome = RegistryEventOutcome.KO;
+
+        if (Objects.requireNonNull(e) instanceof PagoPaNodeFaultException spe) {
+          log.error("Fault in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), spe.getErrorCode());
+          resp = handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaSendRTV2Response());
+        } else {
+          log.error("Error in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), request.getReceipt().getReceiptId(), e);
+          resp = handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaSendRTV2Response());
         }
-      );
 
-      if (registryLoggerResult.getMiddle() != null) {
-        throw registryLoggerResult.getMiddle();
+        return resp;
       }
+    );
 
-      PaSendRTV2Response response = new PaSendRTV2Response();
-      response.setOutcome(StOutcome.OK);
-      return response;
-    } catch(PagoPaNodeFaultException spe) {
-      log.error("Fault in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), spe.getErrorCode());
-      return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaSendRTV2Response());
-    } catch(Exception e) {
-      log.error("Error in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), request.getReceipt().getReceiptId(), e);
-      return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaSendRTV2Response());
-    } finally {
-      long elapsed = System.currentTimeMillis() - startTime;
-      log.info("SOAP WS paSendRTV2, elapsed time[{}]", elapsed);
-    }
+    long elapsed = System.currentTimeMillis() - startTime;
+    log.info("SOAP WS paSendRTV2, elapsed time[{}]", elapsed);
+
+    return response;
   }
 
   private <T extends CtResponse> T handleFault(PagoPaNodeFaults fault, String idFaultEmitter, T responseObj){

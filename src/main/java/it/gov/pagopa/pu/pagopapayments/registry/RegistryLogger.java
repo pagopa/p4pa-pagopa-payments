@@ -234,7 +234,7 @@ public class RegistryLogger {
       grantorId = RegistryProducerService.PU_ID;
     }
 
-    registryProducerService.notifySilEvent(
+    registryProducerService.notifyPagoPaEvent(
       orgFiscalCode,
       brokerStationId,
       pspId,
@@ -243,7 +243,7 @@ public class RegistryLogger {
       ccp,
       eventType,
       eventSubType,
-      RegistryEventCategory.INTERFACE,
+      RegistryEventCategory.INTERFACCIA,
       requestorId,
       grantorId,
       iuv,

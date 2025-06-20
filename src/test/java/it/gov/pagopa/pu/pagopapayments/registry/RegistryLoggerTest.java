@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
 import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
-import it.gov.pagopa.pu.pagopapayments.util.IdentityUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,10 +74,10 @@ class RegistryLoggerTest {
       eventType,
       RegistryEventSubType.REQ,
       RegistryEventCategory.INTERFACCIA,
-      RegistryProducerService.NODE_ID,
-      RegistryProducerService.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
       iuv,
-      IdentityUtils.iuv2Nav(iuv),
+      Utilities.iuv2Nav(iuv),
       RegistryEventOutcome.OK,
       xmlRequest
     );

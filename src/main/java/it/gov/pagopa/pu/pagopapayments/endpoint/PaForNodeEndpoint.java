@@ -18,7 +18,7 @@ import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
-import it.gov.pagopa.pu.pagopapayments.util.IdentityUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -116,9 +116,7 @@ public class PaForNodeEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paSendRTV2Request")
   @ResponsePayload
   public PaSendRTV2Response paSendRTV2(@RequestPayload PaSendRTV2Request request) {
-    long startTime = System.currentTimeMillis();
-
-    var response = registryLogger.execute(
+    return registryLogger.execute(
       request.getReceipt().getFiscalCode(),
       request.getIdStation(),
       request.getReceipt().getIdPSP(),
@@ -126,7 +124,7 @@ public class PaForNodeEndpoint {
       request.getReceipt().getPaymentMethod(),
       request.getReceipt().getReceiptId(),
       RegistryEventType.paSendRTV2,
-      IdentityUtils.numeroAvvisoToIuvValidator(request.getReceipt().getNoticeNumber()),
+      Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()),
       request,
       () -> {
         log.info("processing paSendRTV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getReceipt().getFiscalCode(), request.getReceipt().getNoticeNumber());
@@ -138,7 +136,6 @@ public class PaForNodeEndpoint {
       },
       e -> {
         PaSendRTV2Response resp;
-        RegistryEventOutcome outcome = RegistryEventOutcome.KO;
 
         if (Objects.requireNonNull(e) instanceof PagoPaNodeFaultException spe) {
           log.error("Fault in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), spe.getErrorCode());
@@ -151,11 +148,6 @@ public class PaForNodeEndpoint {
         return resp;
       }
     );
-
-    long elapsed = System.currentTimeMillis() - startTime;
-    log.info("SOAP WS paSendRTV2, elapsed time[{}]", elapsed);
-
-    return response;
   }
 
   private <T extends CtResponse> T handleFault(PagoPaNodeFaults fault, String idFaultEmitter, T responseObj){

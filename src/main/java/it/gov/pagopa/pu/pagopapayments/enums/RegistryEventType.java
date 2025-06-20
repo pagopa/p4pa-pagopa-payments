@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.enums;
 import lombok.Getter;
 
 @Getter
+@SuppressWarnings("java:S115") // Suppressing constant naming warning: this is required to match with the api name
 public enum RegistryEventType {
   paVerifyPaymentNotice(true, true),
   paGetPaymentV2(true, true),

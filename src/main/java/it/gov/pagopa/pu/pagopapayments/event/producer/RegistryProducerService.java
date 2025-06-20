@@ -7,9 +7,8 @@ import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.dto.RegistryEventDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
-import it.gov.pagopa.pu.pagopapayments.util.IdentityUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
@@ -26,8 +25,6 @@ import java.util.function.Supplier;
 @Component
 @Slf4j
 public class RegistryProducerService {
-  public static final String PU_ID = "piattaformaunitaria";
-  public static final String NODE_ID = "NodoDeiPagamentiSPC";
   public static final String REGISTRY_ORIGIN = "pagopa-payments";
   public static final String REGISTRY_TYPE = "REGISTRY_PAGOPA";
 
@@ -69,7 +66,7 @@ public class RegistryProducerService {
     Object body
   ) {
     String registryId = String.join("-", eventType.name(), String.valueOf(System.currentTimeMillis()), UUID.randomUUID().toString());
-    String traceId = IdentityUtils.getTraceId();
+    String traceId = Utilities.getTraceId();
 
     String bodyString = null;
     if (body instanceof String bodyAsString) {

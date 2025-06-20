@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventSubType;
 import it.gov.pagopa.pu.pagopapayments.enums.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
 import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
-import it.gov.pagopa.pu.pagopapayments.util.IdentityUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -20,6 +20,9 @@ import java.util.function.Supplier;
 @Service
 @Slf4j
 public class RegistryLogger {
+
+  public static final String PU_ID = "piattaformaunitaria";
+  public static final String NODE_ID = "NodoDeiPagamentiSPC";
 
   public static final String SKIP_XML_BODY_KEY = "skipXmlBody";
   public static final String XML_BODY_KEY = "xmlBody";
@@ -133,10 +136,12 @@ public class RegistryLogger {
         if (bodyMap.containsKey(SKIP_XML_BODY_KEY)) {
           bodyMap.remove(SKIP_XML_BODY_KEY);
         } else if (request != null) {
+          //noinspection unchecked: it will necessarily be the right class
           bodyMap.put(XML_BODY_KEY, jaxbTransformService.marshalling(request, (Class<I>) request.getClass()));
         }
         body = bodyMap;
       } else if (request != null) {
+        //noinspection unchecked: it will necessarily be the right class
         body = jaxbTransformService.marshalling(request, (Class<I>) request.getClass());
       }
       produceRegistryEvent(
@@ -179,10 +184,12 @@ public class RegistryLogger {
         if (bodyMap.containsKey(SKIP_XML_BODY_KEY)) {
           bodyMap.remove(SKIP_XML_BODY_KEY);
         } else if (response != null) {
+          //noinspection unchecked: it will necessarily be the right class
           bodyMap.put(XML_BODY_KEY, jaxbTransformService.marshalling(response, (Class<O>) response.getClass()));
         }
         body = bodyMap;
       } else if (response != null) {
+        //noinspection unchecked: it will necessarily be the right class
         body = jaxbTransformService.marshalling(response, (Class<O>) response.getClass());
       }
       produceRegistryEvent(
@@ -220,18 +227,12 @@ public class RegistryLogger {
   ) {
     String requestorId;
     String grantorId;
-    if (eventType.isExposedByPU() && RegistryEventSubType.REQ.equals(eventSubType)) {
-      requestorId = RegistryProducerService.NODE_ID;
-      grantorId = RegistryProducerService.PU_ID;
-    } else if (eventType.isExposedByPU() && RegistryEventSubType.RESP.equals(eventSubType)) {
-      requestorId = RegistryProducerService.PU_ID;
-      grantorId = RegistryProducerService.NODE_ID;
-    } else if (RegistryEventSubType.REQ.equals(eventSubType)) {
-      requestorId = RegistryProducerService.PU_ID;
-      grantorId = RegistryProducerService.NODE_ID;
+    if (eventType.isExposedByPU() == RegistryEventSubType.REQ.equals(eventSubType)) {
+      requestorId = NODE_ID;
+      grantorId = PU_ID;
     } else {
-      requestorId = RegistryProducerService.NODE_ID;
-      grantorId = RegistryProducerService.PU_ID;
+      requestorId = PU_ID;
+      grantorId = NODE_ID;
     }
 
     registryProducerService.notifyPagoPaEvent(
@@ -247,7 +248,7 @@ public class RegistryLogger {
       requestorId,
       grantorId,
       iuv,
-      IdentityUtils.iuv2Nav(iuv),
+      Utilities.iuv2Nav(iuv),
       outcome,
       body);
   }

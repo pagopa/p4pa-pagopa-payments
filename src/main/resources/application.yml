@@ -20,7 +20,7 @@ spring:
             spring.cloud.stream.kafka.binder:
               brokers: "\${KAFKA_BINDER_BROKER:}"
               configuration:
-                sasl.jaas.config: "\${KAFKA_REGISTRY_PRODUCER_SASL_JAAS_CONFIG:}"
+                sasl.jaas.config: "\${KAFKA_REGISTRIES_PRODUCER_SASL_JAAS_CONFIG:}"
                 key.serializer: org.apache.kafka.common.serialization.StringSerializer
       bindings:
         registryProducer-out-0:
@@ -43,10 +43,10 @@ spring:
             producer:
               configuration:
                 client.id: pu-pagopapayments
-                connections.max.idle.ms: "\${KAFKA_REGISTRY_PRODUCER_CONNECTION_MAX_IDLE_TIME:180000}"
-                retry.backoff.ms: "\${KAFKA_REGISTRY_PRODUCER_RETRY_MS:\${KAFKA_RETRY_MS:10000}}"
-                linger.ms: "\${KAFKA_REGISTRY_PRODUCER_LINGER_MS:\${KAFKA_LINGER_MS:2}}"
-                batch.size: "\${KAFKA_REGISTRY_PRODUCER_BATCH_SIZE:\${KAFKA_BATCH_SIZE:16384}}"
+                connections.max.idle.ms: "\${KAFKA_REGISTRIES_PRODUCER_CONNECTION_MAX_IDLE_TIME:180000}"
+                retry.backoff.ms: "\${KAFKA_REGISTRIES_PRODUCER_RETRY_MS:\${KAFKA_RETRY_MS:10000}}"
+                linger.ms: "\${KAFKA_REGISTRIES_PRODUCER_LINGER_MS:\${KAFKA_LINGER_MS:2}}"
+                batch.size: "\${KAFKA_REGISTRIES_PRODUCER_BATCH_SIZE:\${KAFKA_BATCH_SIZE:16384}}"
 
 springwolf:
   docket:
@@ -70,7 +70,7 @@ management:
       - X-user-id
   observations:
     http.server:
-        filter.order: -100
+      filter.order: -100
   endpoints:
     jmx:
       exposure.include: "*"

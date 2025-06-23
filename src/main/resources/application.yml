@@ -26,7 +26,7 @@ spring:
         registryProducer-out-0:
           binder: kafka-registry-producer
           content-type: "\${KAFKA_CONTENT_TYPE:application/json}"
-          destination: "\${KAFKA_TOPIC_REGISTRY:p4pa-payhub-registries-evh}"
+          destination: "\${KAFKA_TOPIC_REGISTRIES:p4pa-payhub-registries-evh}"
       kafka:
         binder:
           auto-create-topics: false

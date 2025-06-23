@@ -2,13 +2,13 @@ import java.util.*
 
 plugins {
   java
-  id("org.springframework.boot") version "3.5.0"
+  id("org.springframework.boot") version "3.5.3"
   id("io.spring.dependency-management") version "1.1.7"
   jacoco
-  id("org.sonarqube") version "6.1.0.5360"
+  id("org.sonarqube") version "6.2.0.5505"
   id("com.github.ben-manes.versions") version "0.52.0"
   id("org.openapi.generator") version "7.13.0"
-  id("org.ajoberstar.grgit") version "5.3.0"
+  id("org.ajoberstar.grgit") version "5.3.2"
   //code generation for soap webservices classes (via jaxb)
   id("com.intershop.gradle.jaxb") version "7.0.1"
   id("com.gorylenko.gradle-git-properties") version "2.5.0"
@@ -44,8 +44,16 @@ val activationVersion = "2.1.3"
 val wsdl4jVersion = "1.6.3"
 val xmlSchemaVersion = "2.3.1"
 val podamVersion = "8.0.2.RELEASE"
-val caffeineVersion = "3.2.0"
+val caffeineVersion = "3.2.1"
 val httpClientVersion = "5.5"
+val springCloudDepsVersion = "2024.0.1"
+val springWolfAsyncApiVersion = "1.13.0"
+
+dependencyManagement {
+  imports {
+    mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudDepsVersion")
+  }
+}
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter")
@@ -55,6 +63,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("org.springframework.boot:spring-boot-starter-web-services")
+  implementation("org.springframework.cloud:spring-cloud-starter-stream-kafka")
   implementation("io.micrometer:micrometer-tracing-bridge-otel:$micrometerVersion")
   implementation("io.micrometer:micrometer-registry-prometheus")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion")
@@ -63,6 +72,9 @@ dependencies {
   implementation("org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion")
   implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
   implementation("org.apache.httpcomponents.client5:httpclient5:$httpClientVersion")
+  implementation("io.github.springwolf:springwolf-kafka:${springWolfAsyncApiVersion}")
+  implementation("io.github.springwolf:springwolf-ui:${springWolfAsyncApiVersion}")
+  implementation("io.github.springwolf:springwolf-cloud-stream:${springWolfAsyncApiVersion}")
 
   //webservice soap
   implementation("wsdl4j:wsdl4j:$wsdl4jVersion")
@@ -150,7 +162,8 @@ tasks.register("dependenciesBuild") {
     "openApiGeneratePrintPaymentNoticeClient",
     "openApiGenerateSENDNOTIFICATION",
     "jaxbJavaGenPaForNode",
-    "jaxbJavaGenNodeForPa"
+    "jaxbJavaGenNodeForPa",
+    "openApiGenerateREGISTRIES"
   )
 }
 
@@ -411,6 +424,30 @@ jaxb {
       schema = file("$rootDir/src/main/resources/soap/wsdl/nodeForPa.wsdl")
       bindings = layout.files("$rootDir/src/main/resources/soap/wsdl/nodeForPa.xjb")
     }
+  }
+
+  tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateREGISTRIES") {
+    group = "openapi"
+    description = "description"
+
+    generatorName.set("java")
+    remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-registries/refs/heads/$targetEnv/openapi/generated.openapi.json")
+    outputDir.set("$projectDir/build/generated")
+    apiPackage.set("it.gov.pagopa.pu.registries.controller.generated")
+    modelPackage.set("it.gov.pagopa.pu.registries.dto.generated")
+    configOptions.set(mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
+      "dateLibrary" to "java8",
+      "useSpringBoot3" to "true",
+      "useJakartaEe" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    ))
+    library.set("resttemplate")
   }
 }
 

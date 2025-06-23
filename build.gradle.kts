@@ -2,13 +2,13 @@ import java.util.*
 
 plugins {
   java
-  id("org.springframework.boot") version "3.5.0"
+  id("org.springframework.boot") version "3.5.3"
   id("io.spring.dependency-management") version "1.1.7"
   jacoco
-  id("org.sonarqube") version "6.1.0.5360"
+  id("org.sonarqube") version "6.2.0.5505"
   id("com.github.ben-manes.versions") version "0.52.0"
   id("org.openapi.generator") version "7.13.0"
-  id("org.ajoberstar.grgit") version "5.3.0"
+  id("org.ajoberstar.grgit") version "5.3.2"
   //code generation for soap webservices classes (via jaxb)
   id("com.intershop.gradle.jaxb") version "7.0.1"
   id("com.gorylenko.gradle-git-properties") version "2.5.0"
@@ -44,7 +44,7 @@ val activationVersion = "2.1.3"
 val wsdl4jVersion = "1.6.3"
 val xmlSchemaVersion = "2.3.1"
 val podamVersion = "8.0.2.RELEASE"
-val caffeineVersion = "3.2.0"
+val caffeineVersion = "3.2.1"
 val httpClientVersion = "5.5"
 val springCloudDepsVersion = "2024.0.1"
 val springWolfAsyncApiVersion = "1.13.0"

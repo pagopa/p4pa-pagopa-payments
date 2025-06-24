@@ -647,10 +647,6 @@
         "type" : "string",
         "enum" : [ "TO_SYNC", "REPORTED", "PAID", "PARTIALLY_PAID", "CANCELLED", "EXPIRED", "UNPAID", "DRAFT" ]
       },
-      "EntityTypeEnum" : {
-        "type" : "string",
-        "enum" : [ "F", "G" ]
-      },
       "InstallmentDTO" : {
         "type" : "object",
         "properties" : {
@@ -837,7 +833,7 @@
         "type" : "object",
         "properties" : {
           "entityType" : {
-            "$ref" : "#/components/schemas/EntityTypeEnum"
+            "$ref" : "#/components/schemas/PersonEntityType"
           },
           "fiscalCode" : {
             "type" : "string"
@@ -867,6 +863,10 @@
             "type" : "string"
           }
         }
+      },
+      "PersonEntityType" : {
+        "type" : "string",
+        "enum" : [ "F", "G" ]
       },
       "TransferDTO" : {
         "type" : "object",

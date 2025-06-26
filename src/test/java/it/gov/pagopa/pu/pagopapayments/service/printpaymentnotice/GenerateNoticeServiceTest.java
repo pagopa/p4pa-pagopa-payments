@@ -233,7 +233,7 @@ class GenerateNoticeServiceTest {
     NoticeGenerationMassiveRequestDTO requestMassive = new NoticeGenerationMassiveRequestDTO();
 
     InstallmentDTO installment = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installment.setStatus(InstallmentStatus.UNPAID);
+    installment.setStatus(InstallmentStatus.TO_SYNC);
     installment.setNav("3" + TEST_IUV);
     InstallmentDTO secondInstallment = podamFactory.manufacturePojo(InstallmentDTO.class);
     secondInstallment.setStatus(InstallmentStatus.PAID);

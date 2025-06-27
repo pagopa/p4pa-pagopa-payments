@@ -38,6 +38,24 @@ public class RegistryLogger {
     RegistryContextData contextData,
     I request,
     Supplier<Triple<O, String, RegistryOutcome>> requestHandler,
+    Function<Exception, O> exceptionHandler,
+    boolean throwException
+  ) {
+    return this.execute(
+      contextData,
+      request,
+      requestHandler,
+      exceptionHandler,
+      null,
+      null,
+      throwException
+    );
+  }
+
+  public <I, O> O execute(
+    RegistryContextData contextData,
+    I request,
+    Supplier<Triple<O, String, RegistryOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler
   ) {
     return this.execute(
@@ -46,7 +64,8 @@ public class RegistryLogger {
       requestHandler,
       exceptionHandler,
       null,
-      null
+      null,
+      false
     );
   }
 
@@ -56,7 +75,8 @@ public class RegistryLogger {
     Supplier<Triple<O, String, RegistryOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler,
     Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
-    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor,
+    boolean throwException
   ) {
     produceReqRegistryEvent(
       contextData,
@@ -67,6 +87,9 @@ public class RegistryLogger {
     try {
       response2outcome = requestHandler.get();
     } catch (Exception e) {
+      if (throwException) {
+        throw e;
+      }
       response2outcome = Triple.of(exceptionHandler.apply(e), null, RegistryOutcome.KO);
     } finally {
       contextData.setIuv(StringUtils.firstNonBlank(response2outcome.getMiddle(), contextData.getIuv()));

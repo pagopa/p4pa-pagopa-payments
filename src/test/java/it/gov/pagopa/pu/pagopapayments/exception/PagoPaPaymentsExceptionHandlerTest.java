@@ -137,7 +137,7 @@ class PagoPaPaymentsExceptionHandlerTest {
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isConflict())
-      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("PAGOPA_PAYMENTS_GENERIC_ERROR"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("PAGOPA_PAYMENTS_NOT_PAYABLE"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
   }
 

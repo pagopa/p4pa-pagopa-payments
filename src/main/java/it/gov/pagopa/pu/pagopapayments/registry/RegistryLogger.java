@@ -68,7 +68,6 @@ public class RegistryLogger {
       response2outcome = requestHandler.get();
     } catch (Exception e) {
       if (exceptionHandler == null) {
-        response2outcome = Triple.of(null, null, RegistryOutcome.KO);
         throw e;
       }
       response2outcome = Triple.of(exceptionHandler.apply(e), null, RegistryOutcome.KO);
@@ -126,11 +125,11 @@ public class RegistryLogger {
   ) {
     try {
       Object body = null;
-      if (registryBodyResponseExtraInfoExtractor != null) {
+      if (registryBodyResponseExtraInfoExtractor != null && response != null) {
         Map<String, Object> bodyMap = new HashMap<>(registryBodyResponseExtraInfoExtractor.apply(response));
         if (bodyMap.containsKey(SKIP_XML_BODY_KEY)) {
           bodyMap.remove(SKIP_XML_BODY_KEY);
-        } else if (response != null) {
+        } else {
           //noinspection unchecked: it will necessarily be the right class
           bodyMap.put(XML_BODY_KEY, jaxbTransformService.marshalling(response, (Class<O>) response.getClass()));
         }

@@ -5,19 +5,27 @@ import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtFaultBean;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.connector.soap.mapper.NodoChiediFlussoRendicontazioneMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLoggerTest;
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.SoapMessage;
@@ -36,10 +44,31 @@ import static org.mockito.Mockito.*;
 class NodeForPaClientImplTest {
 
   @Mock
-  private WebServiceTemplate webServiceTemplate;
+  private WebServiceTemplate webServiceTemplateMock;
+  @Mock
+  private NodoChiediFlussoRendicontazioneMapper fetchPaymentsReportingRequestMapperMock;
+  @Mock
+  private RegistryLogger registryLoggerMock;
 
-  @InjectMocks
   private NodeForPaClientImpl nodeForPaClient;
+
+  @BeforeEach
+  void init(){
+    this.nodeForPaClient = new NodeForPaClientImpl("http://localhost", new Jaxb2Marshaller(), fetchPaymentsReportingRequestMapperMock, registryLoggerMock);
+    nodeForPaClient.setWebServiceTemplate(webServiceTemplateMock);
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions(){
+    Mockito.verifyNoMoreInteractions(
+      webServiceTemplateMock,
+      fetchPaymentsReportingRequestMapperMock,
+      registryLoggerMock);
+  }
+
+  private void configureRegistryLoggerMock(RegistryContextData contextData, Object request) {
+    RegistryLoggerTest.configureRegistryLoggerMock(registryLoggerMock, contextData, request, false, true);
+  }
 
   private static final Broker BROKER = new Broker()
     .brokerFiscalCode("brokerCode")
@@ -57,53 +86,46 @@ class NodeForPaClientImplTest {
     .brokerApiKeys(BROKER_API_KEYS)
     .build();
 
-
-
   @Test
-  void nodoChiediElencoFlussiRendicontazione_whenValidRequest_thenReturnResponse() {
+  void givenValidRequestWhenGetPaymentsReportingListThenReturnResponse() {
     NodoChiediElencoFlussiRendicontazioneRisposta response = new NodoChiediElencoFlussiRendicontazioneRisposta();
     response.setElencoFlussiRendicontazione(new TipoElencoFlussiRendicontazione());
     response.getElencoFlussiRendicontazione().getIdRendicontaziones().add(new TipoIdRendicontazione());
 
-    doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
+    doReturn(response).when(webServiceTemplateMock).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
 
     List<PaymentsReportingIdDTO> reportingList = nodeForPaClient.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
 
     Assertions.assertNotNull(reportingList);
     Assertions.assertFalse(reportingList.isEmpty());
-    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
   }
 
   @Test
-  void nodoChiediElencoFlussiRendicontazione_whenWebServiceTemplateThrowsException_thenThrowException() {
-    doThrow(new RuntimeException("WebService error")).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
+  void givenWebServiceTemplateThrowsExceptionWhenGetPaymentsReportingListThenThrowException() {
+    doThrow(new RuntimeException("WebService error")).when(webServiceTemplateMock).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
 
     RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> nodeForPaClient.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO));
     Assertions.assertEquals("WebService error", exception.getMessage());
-    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
   }
 
   @Test
-  void nodoChiediElencoFlussiRendicontazione_whenFaultCodeIsPPT_DOMINIO_SCONOSCIUTO_thenReturnEmptyList() {
+  void givenFaultCodeIsPPT_DOMINIO_SCONOSCIUTOWhenGetPaymentsReportingListThenReturnEmptyList() {
     NodoChiediElencoFlussiRendicontazioneRisposta response = new NodoChiediElencoFlussiRendicontazioneRisposta();
     response.setFault(new CtFaultBean());
     response.getFault().setFaultCode("PPT_DOMINIO_SCONOSCIUTO");
 
-    doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
+    doReturn(response).when(webServiceTemplateMock).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
 
     List<PaymentsReportingIdDTO> reportingList = nodeForPaClient.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
 
     Assertions.assertNotNull(reportingList);
     Assertions.assertTrue(reportingList.isEmpty());
-    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediElencoFlussiRendicontazione.class), any(WebServiceMessageCallback.class));
   }
 
-
   @Test
-  void getMessageCallback_whenCalled_thenSetsSoapActionAndApiKey() throws IOException, TransformerException {
+  void whenGetMessageCallbackThenSetsSoapActionAndApiKey() throws IOException, TransformerException {
     String apiKey = "testApiKey";
     String soapAction = "testSoapAction";
-    NodeForPaClientImpl client = new NodeForPaClientImpl();
 
     SoapMessage soapMessageMock = mock(SoapMessage.class);
     TransportContext transportContextMock = mock(TransportContext.class);
@@ -112,7 +134,7 @@ class NodeForPaClientImplTest {
     when(transportContextMock.getConnection()).thenReturn(httpUrlConnectionMock);
     TransportContextHolder.setTransportContext(transportContextMock);
 
-    WebServiceMessageCallback callback = client.getMessageCallback(apiKey, soapAction);
+    WebServiceMessageCallback callback = nodeForPaClient.getMessageCallback(apiKey, soapAction);
     callback.doWithMessage(soapMessageMock);
 
     verify(soapMessageMock, times(1)).setSoapAction(soapAction);
@@ -120,43 +142,67 @@ class NodeForPaClientImplTest {
   }
 
   @Test
-  void uploadOfPaymentReporting_whenValidRequest_thenReturnPaPaymentReportingDTO() {
+  void givenValidRequestWhenFetchPaymentReportingThenReturnPaPaymentReportingDTO() {
     NodoChiediFlussoRendicontazioneRisposta response = new NodoChiediFlussoRendicontazioneRisposta();
     ClassLoader classLoader = getClass().getClassLoader();
     DataSource dataSource = new FileDataSource(classLoader.getResource("nodeForPaClientImplTest.xml").getFile());
     DataHandler dataHandler = new DataHandler(dataSource);
     response.setXmlRendicontazione(dataHandler);
 
-    doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+    String reportingId = "reportingId";
+    configureFetchPaymentsReportingMocks(reportingId);
 
-    PaPaymentReportingDTO result = nodeForPaClient.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId");
+    doReturn(response).when(webServiceTemplateMock).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+
+    PaPaymentReportingDTO result = nodeForPaClient.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, reportingId);
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("brokerCode", result.getIdBrokerPA());
     Assertions.assertEquals("stationId", result.getIdStation());
     Assertions.assertEquals("orgFiscalCode", result.getFiscalCode());
-    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
   }
 
   @Test
-  void uploadOfPaymentReporting_whenResponseHasFault_thenThrowException() {
+  void givenResponseHasFaultWhenFetchPaymentReportingThenThrowException() {
     NodoChiediFlussoRendicontazioneRisposta response = new NodoChiediFlussoRendicontazioneRisposta();
     response.setFault(new CtFaultBean());
     response.getFault().setFaultCode("faultCode");
 
-    doReturn(response).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+    String reportingId = "reportingId";
+    configureFetchPaymentsReportingMocks(reportingId);
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> nodeForPaClient.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId"));
+    doReturn(response).when(webServiceTemplateMock).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> nodeForPaClient.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, reportingId));
     Assertions.assertEquals("Error during the call to the payment node faultCode", exception.getMessage());
-    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
   }
 
   @Test
-  void uploadOfPaymentReporting_whenWebServiceTemplateThrowsException_thenThrowException() {
-    doThrow(new RuntimeException("WebService error")).when(webServiceTemplate).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+  void givenWebServiceTemplateThrowsExceptionWhenFetchPaymentReportingThenThrowException() {
+    String reportingId = "reportingId";
+    configureFetchPaymentsReportingMocks(reportingId);
 
-    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> nodeForPaClient.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, "reportingId"));
+    doThrow(new RuntimeException("WebService error")).when(webServiceTemplateMock).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+
+    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> nodeForPaClient.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, reportingId));
     Assertions.assertEquals("WebService error", exception.getMessage());
-    verify(webServiceTemplate, times(1)).marshalSendAndReceive(any(NodoChiediFlussoRendicontazione.class), any(WebServiceMessageCallback.class));
+  }
+
+  private void configureFetchPaymentsReportingMocks(String reportingId) {
+    NodoChiediFlussoRendicontazione expectedRequest = new NodoChiediFlussoRendicontazione();
+    expectedRequest.setIdentificativoDominio(BROKER_FOR_NODO_PA_DTO.getOrganization().getOrgFiscalCode());
+    expectedRequest.setIdentificativoIntermediarioPA(BROKER_FOR_NODO_PA_DTO.getBroker().getBrokerFiscalCode());
+    expectedRequest.setIdentificativoStazioneIntermediarioPA(BROKER_FOR_NODO_PA_DTO.getBroker().getStationId());
+    expectedRequest.setIdentificativoFlusso(reportingId);
+
+    when(fetchPaymentsReportingRequestMapperMock.createFlussoRendicontazioneRequest(Mockito.same(BROKER_FOR_NODO_PA_DTO), Mockito.endsWith(reportingId)))
+      .thenReturn(expectedRequest);
+
+    RegistryContextData expectedContextData = RegistryContextData.builder()
+      .orgFiscalCode(BROKER_FOR_NODO_PA_DTO.getOrganization().getOrgFiscalCode())
+      .brokerStationId(BROKER_FOR_NODO_PA_DTO.getBroker().getStationId())
+      .eventType(RegistryEventType.fetchPaymentReporting)
+      .build();
+    configureRegistryLoggerMock(expectedContextData, expectedRequest);
   }
 }

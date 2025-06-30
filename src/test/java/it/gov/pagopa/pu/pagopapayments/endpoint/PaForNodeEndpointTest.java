@@ -7,13 +7,14 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
-import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLoggerTest;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -57,26 +58,7 @@ class PaForNodeEndpointTest {
   }
 
   private void configureRegistryLoggerMock(RegistryContextData contextData, Object request) {
-    Object[] result = new Object[1];
-    Exception[] exception = new Exception[1];
-    Mockito.when(registryLoggerMock.execute(
-      Mockito.eq(contextData),
-      Mockito.same(request),
-      Mockito.argThat(i -> {
-        try {
-          result[0] = i.get().getLeft();
-        } catch (Exception e) {
-          exception[0] = e;
-        }
-        return true;
-      }),
-      Mockito.argThat(i -> {
-        if (exception[0] != null) {
-          result[0] = i.apply(exception[0]);
-        }
-        return true;
-      })
-    )).thenAnswer(i -> result[0]);
+    RegistryLoggerTest.configureRegistryLoggerMock(registryLoggerMock, contextData, request, false, false);
   }
 
   //region paDemandPaymentNotice

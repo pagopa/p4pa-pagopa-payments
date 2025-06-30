@@ -9,12 +9,17 @@ import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -22,7 +27,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RegistryLoggerTest {
+public class RegistryLoggerTest {
 
   @Mock
   private JAXBTransformService jaxbTransformService;
@@ -106,7 +111,7 @@ class RegistryLoggerTest {
       eq(RegistryLogger.NODE_ID),
       eq(RegistryLogger.PU_ID),
       eq(RegistryOutcome.OK),
-      argThat(o -> (o instanceof Map<?,?> m) &&
+      argThat(o -> (o instanceof Map<?, ?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
         m.containsKey(RegistryLogger.XML_BODY_KEY) && xmlRequest.equals(m.get(RegistryLogger.XML_BODY_KEY)))
     );
@@ -151,9 +156,9 @@ class RegistryLoggerTest {
       eq(RegistryLogger.NODE_ID),
       eq(RegistryLogger.PU_ID),
       eq(RegistryOutcome.OK),
-      argThat(o -> (o instanceof Map<?,?> m) &&
+      argThat(o -> (o instanceof Map<?, ?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
-        !m.containsKey(RegistryLogger.XML_BODY_KEY) )
+        !m.containsKey(RegistryLogger.XML_BODY_KEY))
     );
 
     contextData.setIuv(blIuv);
@@ -256,7 +261,7 @@ class RegistryLoggerTest {
       eq(RegistryLogger.PU_ID),
       eq(RegistryLogger.NODE_ID),
       eq(RegistryOutcome.OK),
-      argThat(o -> (o instanceof Map<?,?> m) &&
+      argThat(o -> (o instanceof Map<?, ?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
         m.containsKey(RegistryLogger.XML_BODY_KEY) && xmlResponse.equals(m.get(RegistryLogger.XML_BODY_KEY)))
     );
@@ -280,7 +285,7 @@ class RegistryLoggerTest {
       e -> null,
       null, r -> {
         // Simulate extra info retrieval
-        return Map.of("extraInfoKey", "extraInfoValue:"+r, RegistryLogger.SKIP_XML_BODY_KEY, true);
+        return Map.of("extraInfoKey", "extraInfoValue:" + r, RegistryLogger.SKIP_XML_BODY_KEY, true);
       });
 
     // Then
@@ -304,8 +309,8 @@ class RegistryLoggerTest {
       eq(RegistryLogger.PU_ID),
       eq(RegistryLogger.NODE_ID),
       eq(RegistryOutcome.OK),
-      argThat(o -> (o instanceof Map<?,?> m) &&
-        m.containsKey("extraInfoKey") && ("extraInfoValue:"+response).equals(m.get("extraInfoKey")) &&
+      argThat(o -> (o instanceof Map<?, ?> m) &&
+        m.containsKey("extraInfoKey") && ("extraInfoValue:" + response).equals(m.get("extraInfoKey")) &&
         !m.containsKey(RegistryLogger.XML_BODY_KEY))
     );
   }
@@ -432,5 +437,63 @@ class RegistryLoggerTest {
       eq(RegistryLogger.PU_ID),
       eq(RegistryOutcome.OK),
       any());
+  }
+
+  public static void configureRegistryLoggerMock(RegistryLogger registryLoggerMock, RegistryContextData contextData, Object request, boolean withExtraInfoReq, boolean withExtraInfoResp) {
+    Object[] result = new Object[1];
+    Exception[] exception = new Exception[1];
+    ArgumentMatcher<Supplier<Triple<Object, String, RegistryOutcome>>> requestHandler = i -> {
+      try {
+        result[0] = i.get().getLeft();
+      } catch (Exception e) {
+        exception[0] = e;
+      }
+      return true;
+    };
+    ArgumentMatcher<Function<Exception, Object>> exceptionHandler = i -> {
+      if (exception[0] != null && i != null) {
+        result[0] = i.apply(exception[0]);
+        exception[0] = null;
+      }
+      return true;
+    };
+
+    Answer<Object> answer = i -> {
+      if(exception[0] != null) {
+        throw exception[0];
+      } else {
+        return result[0];
+      }
+    };
+
+    if (withExtraInfoReq || withExtraInfoResp) {
+      when(registryLoggerMock.execute(
+        eq(contextData),
+        same(request),
+        argThat(requestHandler),
+        argThat(exceptionHandler),
+        withExtraInfoReq
+          ? argThat(requestExtraInfoRetriever -> {
+          requestExtraInfoRetriever.get();
+          return true;
+        })
+          : isNull(),
+        withExtraInfoResp
+          ? argThat(responseExtraInfoExtractor -> {
+          if (result[0] != null) {
+            responseExtraInfoExtractor.apply(result[0]);
+          }
+          return true;
+        })
+          : isNull()
+      )).thenAnswer(answer);
+    } else {
+      Mockito.when(registryLoggerMock.execute(
+        Mockito.eq(contextData),
+        Mockito.same(request),
+        Mockito.argThat(requestHandler),
+        Mockito.argThat(exceptionHandler)
+      )).thenAnswer(answer);
+    }
   }
 }

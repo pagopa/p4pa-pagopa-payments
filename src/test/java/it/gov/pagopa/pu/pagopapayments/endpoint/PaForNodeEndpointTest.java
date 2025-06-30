@@ -219,6 +219,7 @@ class PaForNodeEndpointTest {
     try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
       // given
       PaGetPaymentV2Request paGetPaymentV2Request = podamFactory.manufacturePojo(PaGetPaymentV2Request.class);
+      paGetPaymentV2Request.getQrCode().setNoticeNumber("3NAV");
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
       InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
       Organization organization = podamFactory.manufacturePojo(Organization.class);
@@ -231,6 +232,14 @@ class PaForNodeEndpointTest {
         t.setStampProvincialResidence(null);
         t.setStampType(null);
       });
+
+      RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
+        .eventType(RegistryEventType.paGetPaymentV2)
+        .orgFiscalCode(paGetPaymentV2Request.getIdPA())
+        .brokerStationId(paGetPaymentV2Request.getIdStation())
+        .iuv("NAV")
+        .build();
+      configureRegistryLoggerMock(expectedRegistryContextData, paGetPaymentV2Request);
 
       mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request)).thenReturn(retrievePaymentDTO);
       Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
@@ -250,6 +259,7 @@ class PaForNodeEndpointTest {
     try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
       // given
       PaGetPaymentV2Request paGetPaymentV2Request = podamFactory.manufacturePojo(PaGetPaymentV2Request.class);
+      paGetPaymentV2Request.getQrCode().setNoticeNumber("3NAV");
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
       InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
       Organization organization = podamFactory.manufacturePojo(Organization.class);
@@ -262,6 +272,14 @@ class PaForNodeEndpointTest {
         t.setStampProvincialResidence(null);
         t.setStampType(null);
       });
+
+      RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
+        .eventType(RegistryEventType.paGetPaymentV2)
+        .orgFiscalCode(paGetPaymentV2Request.getIdPA())
+        .brokerStationId(paGetPaymentV2Request.getIdStation())
+        .iuv("NAV")
+        .build();
+      configureRegistryLoggerMock(expectedRegistryContextData, paGetPaymentV2Request);
 
       mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request)).thenReturn(retrievePaymentDTO);
       Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenReturn(Pair.of(installmentDTO, organization));
@@ -280,7 +298,16 @@ class PaForNodeEndpointTest {
     try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
       // given
       PaGetPaymentV2Request paGetPaymentV2Request = podamFactory.manufacturePojo(PaGetPaymentV2Request.class);
+      paGetPaymentV2Request.getQrCode().setNoticeNumber("3NAV");
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+
+      RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
+        .eventType(RegistryEventType.paGetPaymentV2)
+        .orgFiscalCode(paGetPaymentV2Request.getIdPA())
+        .brokerStationId(paGetPaymentV2Request.getIdStation())
+        .iuv("NAV")
+        .build();
+      configureRegistryLoggerMock(expectedRegistryContextData, paGetPaymentV2Request);
 
       mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentV2Request)).thenReturn(retrievePaymentDTO);
       Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenThrow(new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SEMANTICA, "EMITTER"));
@@ -301,7 +328,16 @@ class PaForNodeEndpointTest {
     try (MockedStatic<PaGetPaymentMapper> mapperMock = Mockito.mockStatic(PaGetPaymentMapper.class)) {
       // given
       PaGetPaymentV2Request paGetPaymentReq = podamFactory.manufacturePojo(PaGetPaymentV2Request.class);
+      paGetPaymentReq.getQrCode().setNoticeNumber("3NAV");
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+
+      RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
+        .eventType(RegistryEventType.paGetPaymentV2)
+        .orgFiscalCode(paGetPaymentReq.getIdPA())
+        .brokerStationId(paGetPaymentReq.getIdStation())
+        .iuv("NAV")
+        .build();
+      configureRegistryLoggerMock(expectedRegistryContextData, paGetPaymentReq);
 
       mapperMock.when(() -> PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(paGetPaymentReq)).thenReturn(retrievePaymentDTO);
       Mockito.when(synchronousPaymentServiceMock.retrievePayment(retrievePaymentDTO)).thenThrow(new RuntimeException("RUNTIME EXCEPTION"));

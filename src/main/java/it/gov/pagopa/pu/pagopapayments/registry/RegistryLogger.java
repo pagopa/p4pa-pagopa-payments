@@ -67,6 +67,10 @@ public class RegistryLogger {
     try {
       response2outcome = requestHandler.get();
     } catch (Exception e) {
+      if (exceptionHandler == null) {
+        response2outcome = Triple.of(null, null, RegistryOutcome.KO);
+        throw e;
+      }
       response2outcome = Triple.of(exceptionHandler.apply(e), null, RegistryOutcome.KO);
     } finally {
       contextData.setIuv(StringUtils.firstNonBlank(response2outcome.getMiddle(), contextData.getIuv()));

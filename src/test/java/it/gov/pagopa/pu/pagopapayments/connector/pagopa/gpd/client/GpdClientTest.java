@@ -3,8 +3,9 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.client;
 import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiApi;
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config.GpdApisHolder;
-import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
+import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,12 +21,15 @@ class GpdClientTest {
 
   @Mock
   private GpdApisHolder gpdApisHolderMock;
-  @Mock
-  private RegistryLogger registryLoggerMock;
 
   @Mock
   private DebtPositionsApiApi debtPositionsApiMock;
+  @Mock
+  private JAXBTransformService jaxbTransformService;
+  @Mock
+  private RegistryProducerService registryProducerService;
 
+  private RegistryLogger registryLogger;
   private GpdClient gpdClient;
 
   private static final String TEST_API_KEY = "test-api-key";
@@ -35,7 +39,8 @@ class GpdClientTest {
 
   @BeforeEach
   void setUp() {
-    gpdClient = new GpdClient(gpdApisHolderMock, registryLoggerMock);
+    registryLogger = new RegistryLogger(jaxbTransformService, registryProducerService);
+    gpdClient = new GpdClient(gpdApisHolderMock, registryLogger);
   }
 
   @AfterEach
@@ -50,8 +55,6 @@ class GpdClientTest {
   void createPosition_ShouldCallGpdApiClient() {
     PaymentPositionModel paymentPositionModel = new PaymentPositionModel();
 
-    when(registryLoggerMock.execute(any(RegistryContextData.class), any(PaymentPositionModel.class), any(), isNull()))
-        .thenReturn(paymentPositionModel);
     when(gpdApisHolderMock.getGpdApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
 
     gpdClient.createPosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, paymentPositionModel);
@@ -63,8 +66,6 @@ class GpdClientTest {
   void updatePosition_ShouldCallGpdApiClient() {
     PaymentPositionModel paymentPositionModel = new PaymentPositionModel();
 
-    when(registryLoggerMock.execute(any(RegistryContextData.class), any(PaymentPositionModel.class), any(), isNull()))
-      .thenReturn(paymentPositionModel);
     when(gpdApisHolderMock.getGpdApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
 
     gpdClient.updatePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
@@ -74,8 +75,6 @@ class GpdClientTest {
 
   @Test
   void deletePosition_ShouldCallGpdApiClient() {
-    when(registryLoggerMock.execute(any(RegistryContextData.class), any(String.class), any(), isNull()))
-      .thenReturn("success");
     when(gpdApisHolderMock.getGpdApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
 
     gpdClient.deletePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD);

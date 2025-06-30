@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.exception;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PagoPaPaymentsErrorDTO;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PagoPaPaymentsErrorDTO.CodeEnum;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -61,7 +62,7 @@ public class PagopaPaymentsExceptionHandler {
 
   @ExceptionHandler({NotPayableSilActualizedAmountException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleNotPayableSilActualizedAmountException(RuntimeException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.CONFLICT, PagoPaPaymentsErrorDTO.CodeEnum.PAGOPA_PAYMENTS_GENERIC_ERROR);
+    return handleException(ex, request, HttpStatus.CONFLICT, CodeEnum.PAGOPA_PAYMENTS_NOT_PAYABLE);
   }
 
   static ResponseEntity<PagoPaPaymentsErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, PagoPaPaymentsErrorDTO.CodeEnum errorEnum) {

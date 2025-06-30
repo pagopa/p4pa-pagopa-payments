@@ -59,6 +59,11 @@ public class PagopaPaymentsExceptionHandler {
     return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, PagoPaPaymentsErrorDTO.CodeEnum.PAGOPA_PAYMENTS_GENERIC_ERROR);
   }
 
+  @ExceptionHandler({NotPayableSilActualizedAmountException.class})
+  public ResponseEntity<PagoPaPaymentsErrorDTO> handleNotPayableSilActualizedAmountException(RuntimeException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.CONFLICT, PagoPaPaymentsErrorDTO.CodeEnum.PAGOPA_PAYMENTS_GENERIC_ERROR);
+  }
+
   static ResponseEntity<PagoPaPaymentsErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, PagoPaPaymentsErrorDTO.CodeEnum errorEnum) {
     logException(ex, request, httpStatus);
 

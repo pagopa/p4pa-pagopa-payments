@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -32,7 +33,7 @@ public class DebtPositionClient {
     }
   }
 
-  public List<InstallmentDTO> getDebtPositionsByOrganizationIdAndNav(
+  public List<InstallmentDTO> getInstallmentsByOrganizationIdAndNav(
     Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOriginList, String accessToken) {
     return debtPositionsApisHolder
       .getInstallmentApi(accessToken)

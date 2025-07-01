@@ -12,7 +12,8 @@ public enum RegistryEventType {
   createPosition(false, false),
   updatePosition(false, false),
   deletePosition(false, false),
-  fetchPaymentReporting(false, true);
+  fetchPaymentReporting(false, true),
+  paCreatePosition(false, false);
 
   private final boolean exposedByPU;
   private final boolean isSOAP;

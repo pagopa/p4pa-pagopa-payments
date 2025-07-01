@@ -13,7 +13,7 @@ public enum RegistryEventType {
   updatePosition(false, false),
   deletePosition(false, false),
   fetchPaymentReporting(false, true),
-  paCreatePosition(false, false);
+  ACA_paCreatePosition(false, false);
 
   private final boolean exposedByPU;
   private final boolean isSOAP;

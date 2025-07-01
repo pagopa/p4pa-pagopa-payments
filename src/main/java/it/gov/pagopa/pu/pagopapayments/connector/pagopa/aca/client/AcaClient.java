@@ -26,7 +26,7 @@ public class AcaClient {
   public DebtPositionResponse paCreatePosition(NewDebtPositionRequest request, String apiKey, String segregationCodes) {
     RegistryContextData contextData = RegistryContextData.builder()
       .orgFiscalCode(request.getEntityFiscalCode())
-      .eventType(RegistryEventType.paCreatePosition)
+      .eventType(RegistryEventType.ACA_paCreatePosition)
       .iuv(request.getIuv())
       .build();
 

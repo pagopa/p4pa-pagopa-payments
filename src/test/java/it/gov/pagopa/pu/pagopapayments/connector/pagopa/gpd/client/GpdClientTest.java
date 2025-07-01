@@ -3,6 +3,9 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.client;
 import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiApi;
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config.GpdApisHolder;
+import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +24,12 @@ class GpdClientTest {
 
   @Mock
   private DebtPositionsApiApi debtPositionsApiMock;
+  @Mock
+  private JAXBTransformService jaxbTransformService;
+  @Mock
+  private RegistryProducerService registryProducerService;
 
+  private RegistryLogger registryLogger;
   private GpdClient gpdClient;
 
   private static final String TEST_API_KEY = "test-api-key";
@@ -31,7 +39,8 @@ class GpdClientTest {
 
   @BeforeEach
   void setUp() {
-    gpdClient = new GpdClient(gpdApisHolderMock);
+    registryLogger = new RegistryLogger(jaxbTransformService, registryProducerService);
+    gpdClient = new GpdClient(gpdApisHolderMock, registryLogger);
   }
 
   @AfterEach
@@ -41,6 +50,7 @@ class GpdClientTest {
       debtPositionsApiMock
     );
   }
+
   @Test
   void createPosition_ShouldCallGpdApiClient() {
     PaymentPositionModel paymentPositionModel = new PaymentPositionModel();

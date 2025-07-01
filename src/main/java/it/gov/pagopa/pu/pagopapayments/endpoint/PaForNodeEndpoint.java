@@ -59,23 +59,35 @@ public class PaForNodeEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paVerifyPaymentNoticeReq")
   @ResponsePayload
   public PaVerifyPaymentNoticeRes paVerifyPaymentNotice(@RequestPayload PaVerifyPaymentNoticeReq request) {
-    long startTime = System.currentTimeMillis();
-    try {
-      log.info("processing paVerifyPaymentNotice idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
-      RetrievePaymentDTO retrievePaymentDTO = PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(request);
-      Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
-      return PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
-        installmentAndOrganization.getLeft(), installmentAndOrganization.getRight());
-    } catch (PagoPaNodeFaultException spe) {
-      log.error("Fault in paVerifyPaymentNotice [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
-      return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaVerifyPaymentNoticeRes());
-    } catch (Exception e) {
-      log.error("Error in paVerifyPaymentNotice [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
-      return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaVerifyPaymentNoticeRes());
-    } finally {
-      long elapsed = System.currentTimeMillis() - startTime;
-      log.info("SOAP WS paVerifyPaymentNotice, elapsed time[{}]", elapsed);
-    }
+    RegistryContextData contextData = RegistryContextData.builder()
+      .orgFiscalCode(request.getIdPA())
+      .brokerStationId(request.getIdStation())
+      .eventType(RegistryEventType.paVerifyPaymentNotice)
+      .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber()))
+      .build();
+
+    return registryLogger.execute(
+      contextData,
+      request,
+      () -> {
+        log.info("processing paVerifyPaymentNotice idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
+        RetrievePaymentDTO retrievePaymentDTO = PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(request);
+        Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
+        return Triple.of(
+          PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
+            installmentAndOrganization.getLeft(), installmentAndOrganization.getRight()),
+          null,
+          RegistryOutcome.OK);
+      },
+      e -> {
+        if (e instanceof PagoPaNodeFaultException spe) {
+          log.error("Fault in paVerifyPaymentNotice [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
+          return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaVerifyPaymentNoticeRes());
+        } else {
+          log.error("Error in paVerifyPaymentNotice [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
+          return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaVerifyPaymentNoticeRes());
+        }
+      });
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paGetPaymentReq")
@@ -88,23 +100,35 @@ public class PaForNodeEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paGetPaymentV2Request")
   @ResponsePayload
   public PaGetPaymentV2Response paGetPaymentV2(@RequestPayload PaGetPaymentV2Request request) {
-    long startTime = System.currentTimeMillis();
-    try {
-      log.info("processing paGetPaymentV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
-      RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(request);
-      Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
-      return PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-        installmentAndOrganization.getLeft(), installmentAndOrganization.getRight(), request.getTransferType());
-    } catch (PagoPaNodeFaultException spe) {
-      log.error("Fault in paGetPaymentV2 [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
-      return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaGetPaymentV2Response());
-    } catch (Exception e) {
-      log.error("Error in paGetPaymentV2 [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
-      return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaGetPaymentV2Response());
-    } finally {
-      long elapsed = System.currentTimeMillis() - startTime;
-      log.info("SOAP WS paGetPaymentV2, elapsed time[{}]", elapsed);
-    }
+    RegistryContextData contextData = RegistryContextData.builder()
+      .orgFiscalCode(request.getIdPA())
+      .brokerStationId(request.getIdStation())
+      .eventType(RegistryEventType.paGetPaymentV2)
+      .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber()))
+      .build();
+
+    return registryLogger.execute(
+      contextData,
+      request,
+      () -> {
+        log.info("processing paGetPaymentV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
+        RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(request);
+        Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
+        return Triple.of(
+          PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+            installmentAndOrganization.getLeft(), installmentAndOrganization.getRight(), request.getTransferType()),
+          null,
+          RegistryOutcome.OK);
+      },
+      e -> {
+        if (e instanceof PagoPaNodeFaultException spe) {
+          log.error("Fault in paGetPaymentV2 [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
+          return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaGetPaymentV2Response());
+        } else {
+          log.error("Error in paGetPaymentV2 [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
+          return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaGetPaymentV2Response());
+        }
+      });
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paSendRTReq")

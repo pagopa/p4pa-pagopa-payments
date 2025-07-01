@@ -155,6 +155,10 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | SEND_NOTIFICATION_MAX_ATTEMPTS          | SendNotification API max attempts                  | 3       |
 | SEND_NOTIFICATION_WAIT_TIME_MILLIS      | SendNotification retry waiting time (milliseconds) | 500     |
 | SEND_NOTIFICATION_PRINT_BODY_WHEN_ERROR | To print body when an error occurs                 | true    |
+| PU_SIL_BASE_URL                         | PuSil microservice URL                             |         |
+| PU_SIL_MAX_ATTEMPTS                     | PuSil API max attempts                             | 3       |
+| PU_SIL_WAIT_TIME_MILLIS                 | PuSil retry waiting time (milliseconds)            | 500     |
+| PU_SIL_PRINT_BODY_WHEN_ERROR            | To print body when an error occurs                 | true    |
 
 ##### 🌍 External services
 | ENV                                               | DESCRIPTION                                                 | DEFAULT |

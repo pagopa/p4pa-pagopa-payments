@@ -132,6 +132,16 @@ class PagoPaPaymentsExceptionHandlerTest {
   }
 
   @Test
+  void handleNotPayableSilActualizedAmountException() throws Exception {
+    doThrow(new NotPayableSilActualizedAmountException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isConflict())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("PAGOPA_PAYMENTS_NOT_PAYABLE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
+  }
+
+  @Test
   void handleGenericServletException() throws Exception {
     doThrow(new ServletException("Error"))
       .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());

@@ -4,6 +4,9 @@ import it.gov.pagopa.nodo.pacreateposition.controller.generated.AcaApi;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.DebtPositionResponse;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config.AcaApisHolder;
+import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,12 +23,18 @@ class AcaClientTest {
   private AcaApisHolder acaApisHolderMock;
   @Mock
   private AcaApi acaApiMock;
+  @Mock
+  private JAXBTransformService jaxbTransformService;
+  @Mock
+  private RegistryProducerService registryProducerService;
 
+  private RegistryLogger registryLogger;
   private AcaClient acaClient;
 
   @BeforeEach
   void setUp() {
-    acaClient = new AcaClient(acaApisHolderMock);
+    registryLogger = new RegistryLogger(jaxbTransformService, registryProducerService);
+    acaClient = new AcaClient(acaApisHolderMock, registryLogger);
   }
 
   @AfterEach

@@ -109,7 +109,7 @@ class DebtPositionClientTest {
 
 
     // When
-    List<InstallmentDTO> result = client.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList, accessToken);
+    List<InstallmentDTO> result = client.getInstallmentsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

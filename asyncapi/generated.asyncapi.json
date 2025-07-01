@@ -161,7 +161,8 @@
           "createPosition",
           "updatePosition",
           "deletePosition",
-          "fetchPaymentReporting"
+          "fetchPaymentReporting",
+          "paCreatePosition"
         ],
         "examples": [
           "\"paVerifyPaymentNotice\""

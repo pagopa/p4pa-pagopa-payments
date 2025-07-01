@@ -117,7 +117,9 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
         if (out.getFault() == null) {
           try (InputStream inputStream = out.getXmlRendicontazione().getInputStream()) {
             xmlBytes[0] = inputStream.readAllBytes();
-            return Map.of("xml", new String(xmlBytes[0]));
+            return Map.of(
+              RegistryLogger.SKIP_PAYLOAD_KEY, true,
+              "xml", new String(xmlBytes[0]));
           } catch (Exception e) {
             xmlReadingException[0] = e;
           }

@@ -113,7 +113,7 @@ public class RegistryLoggerTest {
       eq(RegistryOutcome.OK),
       argThat(o -> (o instanceof Map<?, ?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
-        m.containsKey(RegistryLogger.XML_BODY_KEY) && xmlRequest.equals(m.get(RegistryLogger.XML_BODY_KEY)))
+        m.containsKey(RegistryLogger.PAYLOAD_KEY) && xmlRequest.equals(m.get(RegistryLogger.PAYLOAD_KEY)))
     );
 
     contextData.setIuv(blIuv);
@@ -143,7 +143,7 @@ public class RegistryLoggerTest {
       e -> null,
       () -> {
         // Simulate extra info retrieval
-        return Map.of("extraInfoKey", "extraInfoValue", RegistryLogger.SKIP_XML_BODY_KEY, true);
+        return Map.of("extraInfoKey", "extraInfoValue", RegistryLogger.SKIP_PAYLOAD_KEY, true);
       }, null);
 
     // Then
@@ -158,7 +158,7 @@ public class RegistryLoggerTest {
       eq(RegistryOutcome.OK),
       argThat(o -> (o instanceof Map<?, ?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
-        !m.containsKey(RegistryLogger.XML_BODY_KEY))
+        !m.containsKey(RegistryLogger.PAYLOAD_KEY))
     );
 
     contextData.setIuv(blIuv);
@@ -263,7 +263,7 @@ public class RegistryLoggerTest {
       eq(RegistryOutcome.OK),
       argThat(o -> (o instanceof Map<?, ?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
-        m.containsKey(RegistryLogger.XML_BODY_KEY) && xmlResponse.equals(m.get(RegistryLogger.XML_BODY_KEY)))
+        m.containsKey(RegistryLogger.PAYLOAD_KEY) && xmlResponse.equals(m.get(RegistryLogger.PAYLOAD_KEY)))
     );
   }
 
@@ -285,7 +285,7 @@ public class RegistryLoggerTest {
       e -> null,
       null, r -> {
         // Simulate extra info retrieval
-        return Map.of("extraInfoKey", "extraInfoValue:" + r, RegistryLogger.SKIP_XML_BODY_KEY, true);
+        return Map.of("extraInfoKey", "extraInfoValue:" + r, RegistryLogger.SKIP_PAYLOAD_KEY, true);
       });
 
     // Then
@@ -311,7 +311,7 @@ public class RegistryLoggerTest {
       eq(RegistryOutcome.OK),
       argThat(o -> (o instanceof Map<?, ?> m) &&
         m.containsKey("extraInfoKey") && ("extraInfoValue:" + response).equals(m.get("extraInfoKey")) &&
-        !m.containsKey(RegistryLogger.XML_BODY_KEY))
+        !m.containsKey(RegistryLogger.PAYLOAD_KEY))
     );
   }
 

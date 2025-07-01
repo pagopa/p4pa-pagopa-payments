@@ -1,10 +1,12 @@
 package it.gov.pagopa.pu.pagopapayments.registry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
 import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryEventSubType;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
+import jakarta.xml.bind.annotation.XmlType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -22,14 +25,15 @@ public class RegistryLogger {
   public static final String PU_ID = "piattaformaunitaria";
   public static final String NODE_ID = "NodoDeiPagamentiSPC";
 
-  public static final String SKIP_XML_BODY_KEY = "skipXmlBody";
-  public static final String XML_BODY_KEY = "xmlBody";
+  public static final String SKIP_PAYLOAD_KEY = "skipPayload";
+  public static final String PAYLOAD_KEY = "payload";
 
+  private final ObjectMapper objectMapper;
   private final JAXBTransformService jaxbTransformService;
-
   private final RegistryProducerService registryProducerService;
 
-  public RegistryLogger(JAXBTransformService jaxbTransformService, RegistryProducerService registryProducerService) {
+  public RegistryLogger(ObjectMapper objectMapper, JAXBTransformService jaxbTransformService, RegistryProducerService registryProducerService) {
+    this.objectMapper = objectMapper;
     this.jaxbTransformService = jaxbTransformService;
     this.registryProducerService = registryProducerService;
   }
@@ -89,19 +93,12 @@ public class RegistryLogger {
     Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever
   ) {
     try {
-      Object body = null;
+      Object body;
       if (registryBodyRequestExtraInfoRetriever != null) {
         Map<String, Object> bodyMap = new HashMap<>(registryBodyRequestExtraInfoRetriever.get());
-        if (bodyMap.containsKey(SKIP_XML_BODY_KEY)) {
-          bodyMap.remove(SKIP_XML_BODY_KEY);
-        } else if (request != null) {
-          //noinspection unchecked: it will necessarily be the right class
-          bodyMap.put(XML_BODY_KEY, jaxbTransformService.marshalling(request, (Class<I>) request.getClass()));
-        }
-        body = bodyMap;
-      } else if (request != null) {
-        //noinspection unchecked: it will necessarily be the right class
-        body = jaxbTransformService.marshalling(request, (Class<I>) request.getClass());
+        body = bodyMap2Body(request, bodyMap);
+      } else {
+        body = serializePayload(request);
       }
       produceRegistryEvent(
         contextData,
@@ -124,19 +121,12 @@ public class RegistryLogger {
     Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor
   ) {
     try {
-      Object body = null;
+      Object body;
       if (registryBodyResponseExtraInfoExtractor != null && response != null) {
         Map<String, Object> bodyMap = new HashMap<>(registryBodyResponseExtraInfoExtractor.apply(response));
-        if (bodyMap.containsKey(SKIP_XML_BODY_KEY)) {
-          bodyMap.remove(SKIP_XML_BODY_KEY);
-        } else {
-          //noinspection unchecked: it will necessarily be the right class
-          bodyMap.put(XML_BODY_KEY, jaxbTransformService.marshalling(response, (Class<O>) response.getClass()));
-        }
-        body = bodyMap;
-      } else if (response != null) {
-        //noinspection unchecked: it will necessarily be the right class
-        body = jaxbTransformService.marshalling(response, (Class<O>) response.getClass());
+        body = bodyMap2Body(response, bodyMap);
+      } else {
+        body = serializePayload(response);
       }
       produceRegistryEvent(
         contextData,
@@ -147,8 +137,40 @@ public class RegistryLogger {
     } catch (Exception e) {
       log.error("Error producing response registry event for orgFiscalCode: {}, eventType: {}, iuv: {}",
         contextData.getOrgFiscalCode(), contextData.getEventType(), contextData.getIuv(), e);
-      // In case of error in producing the response event, we do not throw an exception to avoid breaking the flow
+      // In case of error in producing the response event, we do not throw an exception to avoid breaking the flow,
       // but we log the error.
+    }
+  }
+
+  private <I> Object bodyMap2Body(I payload, Map<String, Object> bodyMap) {
+    Object body;
+    if (bodyMap.containsKey(SKIP_PAYLOAD_KEY)) {
+      bodyMap.remove(SKIP_PAYLOAD_KEY);
+    } else if (payload != null) {
+      bodyMap.put(PAYLOAD_KEY, serializePayload(payload));
+    }
+    if(bodyMap.size()==1){
+      Object justBody = bodyMap.get(PAYLOAD_KEY);
+      body = Objects.requireNonNullElse(justBody, bodyMap);
+    } else {
+      body = bodyMap;
+    }
+    return body;
+  }
+
+  private <I> String serializePayload(I payload) {
+    if(payload!=null) {
+      try {
+        if (payload.getClass().getAnnotation(XmlType.class) != null) {
+          //noinspection unchecked: it will necessarily be the right class
+          return jaxbTransformService.marshalling(payload, (Class<I>) payload.getClass());
+        } else return objectMapper.writeValueAsString(payload);
+      } catch (Exception e) {
+        log.error("Cannot deserialize payload", e);
+        return payload.toString();
+      }
+    } else {
+      return null;
     }
   }
 

@@ -26,7 +26,7 @@ public class GpdServiceImpl implements GpdService {
   }
 
   @Override
-  public void paDeletePosition(String apiKey, String organizationfiscalcode, String iupd) {
-    client.deletePosition(apiKey, organizationfiscalcode, iupd);
+  public void paDeletePosition(String apiKey, String organizationfiscalcode, String iupd, PaymentPositionModel paymentPositionModel) {
+    client.deletePosition(apiKey, organizationfiscalcode, iupd, paymentPositionModel);
   }
 }

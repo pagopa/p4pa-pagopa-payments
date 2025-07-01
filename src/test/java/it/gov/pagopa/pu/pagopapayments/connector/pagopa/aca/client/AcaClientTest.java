@@ -40,17 +40,17 @@ class AcaClientTest {
   void givenValidDebtPositionWhenPaCreatePositionThenOk(){
     //given
     String apiKey = "apiKey";
-    String segregatioCode = "01";
+    String segregationCode = "01";
     NewDebtPositionRequest request = new NewDebtPositionRequest();
     DebtPositionResponse expectedResponse = new DebtPositionResponse();
 
     Mockito.when(acaApisHolderMock.getAcaApiClientByApiKey(apiKey))
       .thenReturn(acaApiMock);
-    Mockito.when(acaApiMock.newDebtPosition(Mockito.same(request), Mockito.same(segregatioCode)))
+    Mockito.when(acaApiMock.newDebtPosition(Mockito.same(request), Mockito.same(segregationCode)))
       .thenReturn(expectedResponse);
 
     //when
-    DebtPositionResponse response = acaClient.paCreatePosition(request, apiKey, segregatioCode);
+    DebtPositionResponse response = acaClient.paCreatePosition(request, apiKey, segregationCode);
 
     //verify
     Assertions.assertSame(expectedResponse, response);

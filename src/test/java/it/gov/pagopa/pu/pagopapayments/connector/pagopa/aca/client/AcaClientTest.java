@@ -57,7 +57,7 @@ class AcaClientTest {
 
     RegistryContextData contextData = RegistryContextData.builder()
       .orgFiscalCode(request.getPaFiscalCode())
-      .eventType(RegistryEventType.newDebtPosition)
+      .eventType(RegistryEventType.ACA_newDebtPosition)
       .iuv(request.getIuv())
       .build();
     RegistryLoggerTest.configureRegistryLoggerMock(registryLoggerMock, contextData, request, false, false);

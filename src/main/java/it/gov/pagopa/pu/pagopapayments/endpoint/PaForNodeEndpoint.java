@@ -62,7 +62,7 @@ public class PaForNodeEndpoint {
     RegistryContextData contextData = RegistryContextData.builder()
       .orgFiscalCode(request.getIdPA())
       .brokerStationId(request.getIdStation())
-      .eventType(RegistryEventType.paVerifyPaymentNotice)
+      .eventType(RegistryEventType.PaForNode_paVerifyPaymentNotice)
       .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber()))
       .build();
 
@@ -103,7 +103,7 @@ public class PaForNodeEndpoint {
     RegistryContextData contextData = RegistryContextData.builder()
       .orgFiscalCode(request.getIdPA())
       .brokerStationId(request.getIdStation())
-      .eventType(RegistryEventType.paGetPaymentV2)
+      .eventType(RegistryEventType.PaForNode_paGetPaymentV2)
       .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber()))
       .build();
 
@@ -148,7 +148,7 @@ public class PaForNodeEndpoint {
       .pspChannelId(request.getReceipt().getIdChannel())
       .paymentMethod(request.getReceipt().getPaymentMethod())
       .ccp(request.getReceipt().getReceiptId())
-      .eventType(RegistryEventType.paSendRTV2)
+      .eventType(RegistryEventType.PaForNode_paSendRTV2)
       .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()))
       .build();
 

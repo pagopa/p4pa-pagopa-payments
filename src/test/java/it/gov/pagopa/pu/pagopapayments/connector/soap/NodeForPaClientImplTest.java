@@ -201,7 +201,7 @@ class NodeForPaClientImplTest {
     RegistryContextData expectedContextData = RegistryContextData.builder()
       .orgFiscalCode(BROKER_FOR_NODO_PA_DTO.getOrganization().getOrgFiscalCode())
       .brokerStationId(BROKER_FOR_NODO_PA_DTO.getBroker().getStationId())
-      .eventType(RegistryEventType.fetchPaymentReporting)
+      .eventType(RegistryEventType.NodeForPa_fetchPaymentReporting)
       .build();
     configureRegistryLoggerMock(expectedContextData, expectedRequest);
   }

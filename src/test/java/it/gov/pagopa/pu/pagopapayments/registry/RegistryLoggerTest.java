@@ -60,11 +60,17 @@ public class RegistryLoggerTest {
       registryProducerServiceMock);
   }
 
+  private RegistryContextData buildRegistryContextData(RegistryEventType registryEventType) {
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(registryEventType);
+    return contextData;
+  }
+
   @Test
   void testProduceRegistryEvent_JSON() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     String requestPayload = "REQUEST_PAYLOAD";
     String responsePayload = "RESPONSE_PAYLOAD";
@@ -108,8 +114,8 @@ public class RegistryLoggerTest {
   @Test
   void testProduceRegistryEvent_XML() {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     String xmlRequest = "<xml>mockRequest</xml>";
     String xmlResponse = "<xml>mockResponse</xml>";
@@ -151,10 +157,55 @@ public class RegistryLoggerTest {
   }
 
   @Test
+  void testProduceRegistryEvent_exposedByPuFalse() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.ACA_newDebtPosition);
+
+    String blIuv = "businessLogicIUV";
+    String requestPayload = "REQUEST_PAYLOAD";
+    String responsePayload = "RESPONSE_PAYLOAD";
+    Object request = new Object();
+    Object response = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+    when(objectMapperMock.writeValueAsString(same(response))).thenReturn(responsePayload);
+
+    // When
+    Object actualResponse = registryLogger.execute(
+      contextData, request,
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
+      e -> null);
+
+    // Then
+    assertSame(response, actualResponse);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.OK,
+      requestPayload
+    );
+
+    contextData.setIuv(blIuv);
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      responsePayload
+    );
+  }
+
+  @Test
   void testProduceRegistryEvent_exceptionDuringSerialization() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     Object request = "ORIGINALREQUEST";
     Object response = "ORIGINALRESPONSE";
@@ -196,8 +247,8 @@ public class RegistryLoggerTest {
   @Test
   void testProduceRegistryEvent_NoResponsePayload() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     String payload = "PAYLOAD";
     Object request = new Object();
@@ -240,8 +291,8 @@ public class RegistryLoggerTest {
   @Test
   void testProduceRegistryEventWithExtraInfo() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     String requestPayload = "REQUEST_PAYLOAD";
     String responsePayload = "RESPONSE_PAYLOAD";
@@ -296,8 +347,8 @@ public class RegistryLoggerTest {
   @Test
   void testProduceRegistryEvent_withEmptyExtraInfo() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     String requestPayload = "REQUEST_PAYLOAD";
     String responsePayload = "RESPONSE_PAYLOAD";
@@ -345,8 +396,8 @@ public class RegistryLoggerTest {
   @Test
   void testProduceRegistryEvent_withEmptyExtraInfo_noResponse() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     String requestPayload = "REQUEST_PAYLOAD";
     Object request = new Object();
@@ -391,8 +442,8 @@ public class RegistryLoggerTest {
   @Test
   void testProduceRegistryEvent_withExtraInfo_skipXmlBody() {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     Object request = new Object();
     Object response = new Object();
@@ -443,8 +494,8 @@ public class RegistryLoggerTest {
   @Test
   void testProduceRegistryEvent_withExtraInfo_noResponsePayload() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     String requestPayload = "REQUEST_PAYLOAD";
     Object request = new Object();
@@ -494,8 +545,8 @@ public class RegistryLoggerTest {
   @Test
   void testProduceRegistryEvent_withJustRequestExtraInfo() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     String requestPayload = "REQUEST_PAYLOAD";
     String responsePayload = "RESPONSE_PAYLOAD";
@@ -545,8 +596,8 @@ public class RegistryLoggerTest {
   @Test
   void testExecuteWithException() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String requestPayload = "REQUESTPAYLOAD";
     Object request = new Object();
     Object fallbackResponse = new Object();
@@ -588,8 +639,8 @@ public class RegistryLoggerTest {
   @Test
   void testExecuteWithException_handlerReThrowIt() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String requestPayload = "REQUESTPAYLOAD";
     Object request = new Object();
     String exceptionMessage = "Mock Exception";
@@ -633,8 +684,8 @@ public class RegistryLoggerTest {
   @Test
   void testExecuteWithException_noExceptionHandler() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String requestPayload = "REQUESTPAYLOAD";
     Object request = new Object();
 
@@ -675,8 +726,8 @@ public class RegistryLoggerTest {
   @Test
   void testExecuteWithException_noExceptionHandler_RestClientResponseException() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String requestPayload = "REQUESTPAYLOAD";
     Object request = new Object();
 
@@ -721,8 +772,8 @@ public class RegistryLoggerTest {
   @Test
   void testExceptionDuringEventProducer() throws JsonProcessingException {
     // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
     String blIuv = "businessLogicIUV";
     String requestPayload = "REQUEST_PAYLOAD";
     String responsePayload = "RESPONSE_PAYLOAD";

@@ -59,7 +59,7 @@ class GpdClientTest {
 
   @Test
   void createPosition_ShouldCallGpdApiClient() {
-    PaymentPositionModel paymentPositionModel = configureMocks(RegistryEventType.createPosition, null);
+    PaymentPositionModel paymentPositionModel = configureMocks(RegistryEventType.GPD_createPosition, null);
 
     gpdClient.createPosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, paymentPositionModel);
 
@@ -68,7 +68,7 @@ class GpdClientTest {
 
   @Test
   void updatePosition_ShouldCallGpdApiClient() {
-    PaymentPositionModel paymentPositionModel = configureMocks(RegistryEventType.updatePosition, null);
+    PaymentPositionModel paymentPositionModel = configureMocks(RegistryEventType.GPD_updatePosition, null);
 
     gpdClient.updatePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 
@@ -77,7 +77,7 @@ class GpdClientTest {
 
   @Test
   void deletePosition_ShouldCallGpdApiClient() {
-    PaymentPositionModel paymentPositionModel = configureMocks(RegistryEventType.deletePosition, IUPD);
+    PaymentPositionModel paymentPositionModel = configureMocks(RegistryEventType.GPD_deletePosition, IUPD);
 
     gpdClient.deletePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 

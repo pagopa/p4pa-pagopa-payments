@@ -30,7 +30,7 @@ public class GpdClient {
     registryLogger.execute(
       getRegistryContextDataFromPaymentPositionModel(
         organizationfiscalcode,
-        RegistryEventType.createPosition,
+        RegistryEventType.GPD_createPosition,
         paymentPositionModel
       ),
       paymentPositionModel,
@@ -47,7 +47,7 @@ public class GpdClient {
     registryLogger.execute(
       getRegistryContextDataFromPaymentPositionModel(
         organizationfiscalcode,
-        RegistryEventType.updatePosition,
+        RegistryEventType.GPD_updatePosition,
         paymentPositionModel
       ),
       paymentPositionModel,
@@ -64,7 +64,7 @@ public class GpdClient {
     registryLogger.execute(
       getRegistryContextDataFromPaymentPositionModel(
         organizationfiscalcode,
-        RegistryEventType.deletePosition,
+        RegistryEventType.GPD_deletePosition,
         paymentPositionModel
       ),
       iupd,

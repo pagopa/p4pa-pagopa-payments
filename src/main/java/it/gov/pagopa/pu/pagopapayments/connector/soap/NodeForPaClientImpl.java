@@ -95,7 +95,7 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
       .orgFiscalCode(request.getIdentificativoDominio())
       .pspId(request.getIdentificativoPSP())
       .brokerStationId(request.getIdentificativoStazioneIntermediarioPA())
-      .eventType(RegistryEventType.fetchPaymentReporting)
+      .eventType(RegistryEventType.NodeForPa_fetchPaymentReporting)
       .build();
 
     byte[][] xmlBytes = new byte[1][];

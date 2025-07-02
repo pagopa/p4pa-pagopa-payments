@@ -93,7 +93,7 @@ class PaForNodeEndpointTest {
       PaVerifyPaymentNoticeRes paVerifyPaymentNoticeRes = podamFactory.manufacturePojo(PaVerifyPaymentNoticeRes.class);
 
       RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
-        .eventType(RegistryEventType.paVerifyPaymentNotice)
+        .eventType(RegistryEventType.PaForNode_paVerifyPaymentNotice)
         .orgFiscalCode(paVerifyPaymentNoticeReq.getIdPA())
         .brokerStationId(paVerifyPaymentNoticeReq.getIdStation())
         .iuv("NAV")
@@ -122,7 +122,7 @@ class PaForNodeEndpointTest {
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
 
       RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
-        .eventType(RegistryEventType.paVerifyPaymentNotice)
+        .eventType(RegistryEventType.PaForNode_paVerifyPaymentNotice)
         .orgFiscalCode(paVerifyPaymentNoticeReq.getIdPA())
         .brokerStationId(paVerifyPaymentNoticeReq.getIdStation())
         .iuv("NAV")
@@ -152,7 +152,7 @@ class PaForNodeEndpointTest {
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
 
       RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
-        .eventType(RegistryEventType.paVerifyPaymentNotice)
+        .eventType(RegistryEventType.PaForNode_paVerifyPaymentNotice)
         .orgFiscalCode(paVerifyPaymentNoticeReq.getIdPA())
         .brokerStationId(paVerifyPaymentNoticeReq.getIdStation())
         .iuv("NAV")
@@ -216,7 +216,7 @@ class PaForNodeEndpointTest {
       });
 
       RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
-        .eventType(RegistryEventType.paGetPaymentV2)
+        .eventType(RegistryEventType.PaForNode_paGetPaymentV2)
         .orgFiscalCode(paGetPaymentV2Request.getIdPA())
         .brokerStationId(paGetPaymentV2Request.getIdStation())
         .iuv("NAV")
@@ -256,7 +256,7 @@ class PaForNodeEndpointTest {
       });
 
       RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
-        .eventType(RegistryEventType.paGetPaymentV2)
+        .eventType(RegistryEventType.PaForNode_paGetPaymentV2)
         .orgFiscalCode(paGetPaymentV2Request.getIdPA())
         .brokerStationId(paGetPaymentV2Request.getIdStation())
         .iuv("NAV")
@@ -284,7 +284,7 @@ class PaForNodeEndpointTest {
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
 
       RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
-        .eventType(RegistryEventType.paGetPaymentV2)
+        .eventType(RegistryEventType.PaForNode_paGetPaymentV2)
         .orgFiscalCode(paGetPaymentV2Request.getIdPA())
         .brokerStationId(paGetPaymentV2Request.getIdStation())
         .iuv("NAV")
@@ -314,7 +314,7 @@ class PaForNodeEndpointTest {
       RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
 
       RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
-        .eventType(RegistryEventType.paGetPaymentV2)
+        .eventType(RegistryEventType.PaForNode_paGetPaymentV2)
         .orgFiscalCode(paGetPaymentReq.getIdPA())
         .brokerStationId(paGetPaymentReq.getIdStation())
         .iuv("NAV")
@@ -372,7 +372,7 @@ class PaForNodeEndpointTest {
       .pspChannelId(request.getReceipt().getIdChannel())
       .paymentMethod(request.getReceipt().getPaymentMethod())
       .ccp(request.getReceipt().getReceiptId())
-      .eventType(RegistryEventType.paSendRTV2)
+      .eventType(RegistryEventType.PaForNode_paSendRTV2)
       .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()))
       .build();
 

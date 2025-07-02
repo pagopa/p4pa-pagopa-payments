@@ -56,7 +56,7 @@ class RegistryProducerServiceTest {
   void whenNotifyPagoPaEventThenSendMessage(String bodyType) throws JsonProcessingException {
     // Given
     String orgFiscalCode = "68216521868";
-    var eventType = RegistryEventType.paSendRTV2;
+    var eventType = RegistryEventType.PaForNode_paSendRTV2;
     var subType = RegistryEventSubType.REQ;
     String requestorId = "9cbb04c1-627b-4063-a09b-ee8f718bb9bd";
     String grantorId = "2add6c22-75bb-4fad-b186-56620a362def";

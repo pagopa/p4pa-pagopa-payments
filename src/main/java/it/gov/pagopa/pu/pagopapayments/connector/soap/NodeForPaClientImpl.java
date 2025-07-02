@@ -4,18 +4,19 @@ import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazione;
 import gov.telematici.pagamenti.ws.NodoChiediElencoFlussiRendicontazioneRisposta;
 import gov.telematici.pagamenti.ws.NodoChiediFlussoRendicontazione;
 import gov.telematici.pagamenti.ws.NodoChiediFlussoRendicontazioneRisposta;
-import it.gov.pagopa.pu.organization.dto.generated.Broker;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.connector.soap.mapper.NodoChiediFlussoRendicontazioneMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingIdMapper;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.SoapMessage;
@@ -23,11 +24,34 @@ import org.springframework.ws.transport.context.TransportContext;
 import org.springframework.ws.transport.context.TransportContextHolder;
 import org.springframework.ws.transport.http.HttpUrlConnection;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 @Slf4j
 public class NodeForPaClientImpl extends WebServiceGatewaySupport implements NodeForPaClient {
 
   public static final String HEADER_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key";
   public static final String ERROR_MESSAGE = "Error during the call to the payment node ";
+
+  private final RegistryLogger registryLogger;
+  private final NodoChiediFlussoRendicontazioneMapper fetchPaymentsReportingRequestMapper;
+
+  public NodeForPaClientImpl(
+    String defaultUri,
+    Jaxb2Marshaller marshaller,
+    NodoChiediFlussoRendicontazioneMapper fetchPaymentsReportingRequestMapper,
+    RegistryLogger registryLogger
+  ) {
+    this.registryLogger = registryLogger;
+    this.fetchPaymentsReportingRequestMapper = fetchPaymentsReportingRequestMapper;
+
+    setDefaultUri(defaultUri);
+    setMarshaller(marshaller);
+    setUnmarshaller(marshaller);
+  }
 
   @Override
   public List<PaymentsReportingIdDTO> getPaymentsReportingList(BrokerForNodoPaDTO brokerForNodoPaDTO) {
@@ -53,23 +77,9 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
   }
 
 public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId) {
-  NodoChiediFlussoRendicontazione request = createFlussoRendicontazioneRequest(brokerForNodoPaDTO, reportingId);
+  NodoChiediFlussoRendicontazione request = fetchPaymentsReportingRequestMapper.createFlussoRendicontazioneRequest(brokerForNodoPaDTO, reportingId);
 
-  NodoChiediFlussoRendicontazioneRisposta response = (NodoChiediFlussoRendicontazioneRisposta)
-    getWebServiceTemplate().marshalSendAndReceive(request, getMessageCallback(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey(), "nodoChiediFlussoRendicontazione"));
-
-  if (response.getFault() != null) {
-    throw new ApplicationException(ERROR_MESSAGE + response.getFault().getFaultCode());
-  }
-  byte[] bytes;
-  try (InputStream inputStream = response.getXmlRendicontazione().getInputStream()) {
-    bytes = inputStream.readAllBytes();
-  }
-  catch (Exception e) {
-    throw new ApplicationException(ERROR_MESSAGE + e.getMessage());
-  }
-
-
+  byte[] bytes = fetchPaymentReporting(brokerForNodoPaDTO, request);
 
   return PaPaymentReportingDTO.builder()
     .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
@@ -78,6 +88,52 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
     .fiscalCode(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
     .paymentReportingBytes(bytes)
     .build();
+  }
+
+  private byte[] fetchPaymentReporting(BrokerForNodoPaDTO brokerForNodoPaDTO, NodoChiediFlussoRendicontazione request) {
+    RegistryContextData contextData = RegistryContextData.builder()
+      .orgFiscalCode(request.getIdentificativoDominio())
+      .pspId(request.getIdentificativoPSP())
+      .brokerStationId(request.getIdentificativoStazioneIntermediarioPA())
+      .eventType(RegistryEventType.NodeForPa_fetchPaymentReporting)
+      .build();
+
+    byte[][] xmlBytes = new byte[1][];
+    Exception[] xmlReadingException = new Exception[1];
+    NodoChiediFlussoRendicontazioneRisposta response = registryLogger.execute(
+      contextData,
+      request,
+      () -> {
+        NodoChiediFlussoRendicontazioneRisposta out = (NodoChiediFlussoRendicontazioneRisposta)
+          getWebServiceTemplate().marshalSendAndReceive(request, getMessageCallback(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey(), "nodoChiediFlussoRendicontazione"));
+        return Triple.of(out, null,
+          out.getFault()==null
+            ? RegistryOutcome.OK
+          : RegistryOutcome.KO);
+      },
+      null,
+      null,
+      out -> {
+        if (out.getFault() == null) {
+          try (InputStream inputStream = out.getXmlRendicontazione().getInputStream()) {
+            xmlBytes[0] = inputStream.readAllBytes();
+            return Map.of(
+              RegistryLogger.SKIP_PAYLOAD_KEY, true,
+              "xml", new String(xmlBytes[0]));
+          } catch (Exception e) {
+            xmlReadingException[0] = e;
+          }
+        }
+        return Map.of();
+      });
+
+    if (response.getFault() != null) {
+      throw new ApplicationException(ERROR_MESSAGE + response.getFault().getFaultCode());
+    }
+    if(xmlReadingException[0] != null){
+      throw new ApplicationException(ERROR_MESSAGE + xmlReadingException[0].getMessage());
+    }
+    return xmlBytes[0];
   }
 
   private NodoChiediElencoFlussiRendicontazione createElencoFlussiRendicontazioneRequest(BrokerForNodoPaDTO brokerForNodoPaDTO) {
@@ -99,20 +155,6 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
       HttpUrlConnection connection = (HttpUrlConnection) context.getConnection();
       connection.addRequestHeader(HEADER_SUBSCRIPTION_KEY, apiKey);
     };
-  }
-
-  private static NodoChiediFlussoRendicontazione createFlussoRendicontazioneRequest(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId) {
-    Broker broker = brokerForNodoPaDTO.getBroker();
-    Organization organization = brokerForNodoPaDTO.getOrganization();
-
-    NodoChiediFlussoRendicontazione request = new NodoChiediFlussoRendicontazione();
-    request.setIdentificativoDominio(organization.getOrgFiscalCode());
-    request.setPassword("password");
-    request.setIdentificativoIntermediarioPA(broker.getBrokerFiscalCode());
-    request.setIdentificativoStazioneIntermediarioPA(broker.getStationId());
-    request.setIdentificativoPSP(null);
-    request.setIdentificativoFlusso(reportingId);
-    return request;
   }
 
 }

@@ -59,7 +59,10 @@ class GpdFacadeServiceTest {
     //verify
     Mockito.verify(gpdDebtPositionMapperMock, Mockito.times(1)).mapToNewPaymentPositionModel("IUD", debtPosition, organization);
     Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken());
-    Mockito.verify(gpdServiceMock, Mockito.times(1)).paCreatePosition(VALID_GPD_KEY, organization.getOrgFiscalCode(), paymentPositionModelAndOperation.getRight());
+    Mockito.verify(gpdServiceMock, Mockito.times(1)).paCreatePosition(
+      VALID_GPD_KEY,
+      organization.getOrgFiscalCode(),
+      paymentPositionModelAndOperation.getRight());
   }
 
   @Test
@@ -86,7 +89,11 @@ class GpdFacadeServiceTest {
     //verify
     Mockito.verify(gpdDebtPositionMapperMock, Mockito.times(1)).mapToNewPaymentPositionModel("IUD", debtPosition, organization);
     Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken());
-    Mockito.verify(gpdServiceMock, Mockito.times(1)).paUpdatePosition(Mockito.eq(VALID_GPD_KEY),Mockito.eq(organization.getOrgFiscalCode()),Mockito.anyString(),Mockito.same(paymentPositionModelAndOperation.getRight()));
+    Mockito.verify(gpdServiceMock, Mockito.times(1)).paUpdatePosition(
+      Mockito.eq(VALID_GPD_KEY),
+      Mockito.eq(organization.getOrgFiscalCode()),
+      Mockito.eq(paymentPositionModelAndOperation.getRight().getIupd()),
+      Mockito.same(paymentPositionModelAndOperation.getRight()));
   }
   @Test
   void givenValidDebtPositionWhenSyncDeleteThenOk() {
@@ -112,7 +119,11 @@ class GpdFacadeServiceTest {
     //verify
     Mockito.verify(gpdDebtPositionMapperMock, Mockito.times(1)).mapToNewPaymentPositionModel("IUD", debtPosition, organization);
     Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken());
-    Mockito.verify(gpdServiceMock, Mockito.times(1)).paDeletePosition(Mockito.eq(VALID_GPD_KEY),Mockito.eq(organization.getOrgFiscalCode()),Mockito.anyString());
+    Mockito.verify(gpdServiceMock, Mockito.times(1)).paDeletePosition(
+      Mockito.eq(VALID_GPD_KEY),
+      Mockito.eq(organization.getOrgFiscalCode()),
+      Mockito.eq(paymentPositionModelAndOperation.getRight().getIupd()),
+      Mockito.same(paymentPositionModelAndOperation.getRight()));
   }
 
 

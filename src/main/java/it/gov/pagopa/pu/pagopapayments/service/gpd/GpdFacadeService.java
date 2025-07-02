@@ -47,7 +47,7 @@ public class GpdFacadeService {
 
     switch (operation) {
       case GpdDebtPositionMapper.OPERATION.DELETE:
-        gpdService.paDeletePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd());
+        gpdService.paDeletePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd(), newPaymentPositionModel);
         break;
       case GpdDebtPositionMapper.OPERATION.UPDATE:
         gpdService.paUpdatePosition(brokerForNodoPaDTO.getBrokerApiKeys().getGpdKey(), organization.getOrgFiscalCode(), newPaymentPositionModel.getIupd(),newPaymentPositionModel);

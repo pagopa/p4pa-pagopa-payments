@@ -2,6 +2,8 @@ package it.gov.pagopa.pu.pagopapayments.config;
 
 import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClient;
 import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClientImpl;
+import it.gov.pagopa.pu.pagopapayments.connector.soap.mapper.NodoChiediFlussoRendicontazioneMapper;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,18 +18,13 @@ public class SoapWebServiceClientConfig {
   private String nodeForPaUrl;
 
   @Bean
-  public NodeForPaClient getNodeForPaClient() {
+  public NodeForPaClient getNodeForPaClient(NodoChiediFlussoRendicontazioneMapper mapper, RegistryLogger registryLogger) {
     Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
     // this package must match the package in the <jaxbJavaGenXXXX> task specified in build.gradle.kts
     // (i.e. in the XXX.xjb file corresponding to the WSDL)
     marshaller.setContextPath("gov.telematici.pagamenti.ws");
-    NodeForPaClientImpl client = new NodeForPaClientImpl();
-    client.setDefaultUri(nodeForPaUrl);
-    client.setMarshaller(marshaller);
-    client.setUnmarshaller(marshaller);
 
-
-    return client;
+    return new NodeForPaClientImpl(nodeForPaUrl, marshaller, mapper, registryLogger);
   }
 
 }

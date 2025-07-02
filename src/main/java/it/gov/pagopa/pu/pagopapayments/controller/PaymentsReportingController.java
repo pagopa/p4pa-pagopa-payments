@@ -5,6 +5,8 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.service.paymentsreporting.PaymentsReportingService;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +33,7 @@ public class PaymentsReportingController implements PaymentsReportingApi {
   public ResponseEntity<Long> fetchPaymentReporting(Long organizationId, String flowId, String fileName){
     log.info("invoking uploadPaymentsReporting, organizationId[{}], flowId[{}], fileName[{}]", organizationId, flowId, fileName);
     Long result = paymentsReportingService.fetchPaymentReporting(organizationId, flowId, fileName, SecurityUtils.getAccessToken());
-    return ResponseEntity.ok(result);
+    return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).body(result);
   }
 
 }

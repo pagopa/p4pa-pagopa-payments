@@ -65,11 +65,11 @@ class DebtPositionServiceTest {
     List<DebtPositionOrigin> debtPositionOriginList = debtPositionOrigin==null ? null :
       (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionOrigin.valueOf(debtPositionOrigin)));
 
-    Mockito.when(clientMock.getDebtPositionsByOrganizationIdAndNav(Mockito.same(organizationId), Mockito.same(nav), Mockito.same(debtPositionOriginList), Mockito.same(accessToken)))
+    Mockito.when(clientMock.getInstallmentsByOrganizationIdAndNav(Mockito.same(organizationId), Mockito.same(nav), Mockito.same(debtPositionOriginList), Mockito.same(accessToken)))
       .thenReturn(expectedResult);
 
     // When
-    List<InstallmentDTO> result = service.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList, accessToken);
+    List<InstallmentDTO> result = service.getInstallmentsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

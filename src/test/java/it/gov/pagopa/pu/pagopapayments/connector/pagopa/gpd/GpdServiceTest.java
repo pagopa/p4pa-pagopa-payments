@@ -41,7 +41,7 @@ class GpdServiceTest {
 
   @Test
   void testPaDeletePosition() {
-    gpdService.paDeletePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD);
-    verify(gpdClientMock, times(1)).deletePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD);
+    gpdService.paDeletePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL);
+    verify(gpdClientMock, times(1)).deletePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL);
   }
 }

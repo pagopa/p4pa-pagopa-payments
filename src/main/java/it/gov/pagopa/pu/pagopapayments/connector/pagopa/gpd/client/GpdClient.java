@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config.GpdApisHolder
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
@@ -59,14 +60,13 @@ public class GpdClient {
     );
   }
 
-  public void deletePosition(String apiKey, String organizationfiscalcode, String iupd) {
-    RegistryContextData contextData = RegistryContextData.builder()
-      .orgFiscalCode(organizationfiscalcode)
-      .eventType(RegistryEventType.deletePosition)
-      .build();
-
+  public void deletePosition(String apiKey, String organizationfiscalcode, String iupd, PaymentPositionModel paymentPositionModel) {
     registryLogger.execute(
-      contextData,
+      getRegistryContextDataFromPaymentPositionModel(
+        organizationfiscalcode,
+        RegistryEventType.deletePosition,
+        paymentPositionModel
+      ),
       iupd,
       () -> {
         String response = gpdApisHolder.getGpdApiClientByApiKey(apiKey)
@@ -87,7 +87,7 @@ public class GpdClient {
     if (paymentPositionModel.getPaymentOption() != null) {
       iuvConcat = paymentPositionModel.getPaymentOption().stream()
         .map(PaymentOptionModel::getIuv)
-        .collect(Collectors.joining(","));
+        .collect(Collectors.joining(Utilities.IUV_SEPARATOR));
     }
 
     return RegistryContextData.builder()

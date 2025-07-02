@@ -1,5 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.registry;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import it.gov.pagopa.pagopa_api.pa.pafornode.PaSendRTV2Request;
+import it.gov.pagopa.pagopa_api.pa.pafornode.PaSendRTV2Response;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
 import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -7,10 +11,11 @@ import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryEventSubType;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import org.apache.commons.lang3.tuple.Triple;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,23 +35,130 @@ import static org.mockito.Mockito.*;
 public class RegistryLoggerTest {
 
   @Mock
-  private JAXBTransformService jaxbTransformService;
+  private ObjectMapper objectMapperMock;
   @Mock
-  private RegistryProducerService registryProducerService;
-  @InjectMocks
+  private JAXBTransformService jaxbTransformServiceMock;
+  @Mock
+  private RegistryProducerService registryProducerServiceMock;
+
   private RegistryLogger registryLogger;
 
   private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
+  @BeforeEach
+  void init(){
+    registryLogger = new RegistryLogger(objectMapperMock, jaxbTransformServiceMock, registryProducerServiceMock);
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions(){
+    Mockito.verifyNoMoreInteractions(
+      objectMapperMock,
+      jaxbTransformServiceMock,
+      registryProducerServiceMock);
+  }
+
   @Test
-  void testProduceReqRegistryEvent() {
+  void testProduceRegistryEvent_JSON() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String blIuv = "businessLogicIUV";
+    String requestPayload = "REQUEST_PAYLOAD";
+    String responsePayload = "RESPONSE_PAYLOAD";
+    Object request = new Object();
+    Object response = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+    when(objectMapperMock.writeValueAsString(same(response))).thenReturn(responsePayload);
+
+    // When
+    Object actualResponse = registryLogger.execute(
+      contextData, request,
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
+      e -> null);
+
+    // Then
+    assertEquals(response, actualResponse);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      eq(contextData),
+      eq(RegistryEventSubType.REQ),
+      eq(RegistryEventCategory.INTERFACCIA),
+      eq(RegistryLogger.NODE_ID),
+      eq(RegistryLogger.PU_ID),
+      eq(RegistryOutcome.OK),
+      any()
+    );
+
+    contextData.setIuv(blIuv);
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.OK,
+      responsePayload
+    );
+  }
+
+  @Test
+  void testProduceRegistryEvent_XML() {
     // Given
     RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
     contextData.setEventType(RegistryEventType.paSendRTV2);
     String blIuv = "businessLogicIUV";
     String xmlRequest = "<xml>mockRequest</xml>";
+    String xmlResponse = "<xml>mockResponse</xml>";
+    PaSendRTV2Request request = new PaSendRTV2Request();
+    PaSendRTV2Response response = new PaSendRTV2Response();
+
+    when(jaxbTransformServiceMock.marshalling(same(request), eq(PaSendRTV2Request.class))).thenReturn(xmlRequest);
+    when(jaxbTransformServiceMock.marshalling(same(response), eq(PaSendRTV2Response.class))).thenReturn(xmlResponse);
+
+    // When
+    Object actualResponse = registryLogger.execute(
+      contextData, request,
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
+      e -> null);
+
+    // Then
+    assertEquals(response, actualResponse);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      eq(contextData),
+      eq(RegistryEventSubType.REQ),
+      eq(RegistryEventCategory.INTERFACCIA),
+      eq(RegistryLogger.NODE_ID),
+      eq(RegistryLogger.PU_ID),
+      eq(RegistryOutcome.OK),
+      any()
+    );
+
+    contextData.setIuv(blIuv);
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.OK,
+      xmlResponse
+    );
+  }
+
+  @Test
+  void testProduceRegistryEvent_NoResponsePayload() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String blIuv = "businessLogicIUV";
+    String payload = "PAYLOAD";
     Object request = new Object();
-    when(jaxbTransformService.marshalling(eq(request), any())).thenReturn(xmlRequest);
+
+    when(objectMapperMock.writeValueAsString(same(request)))
+      .thenReturn(payload);
 
     // When
     Object actualResponse = registryLogger.execute(
@@ -58,18 +170,18 @@ public class RegistryLoggerTest {
     // Then
     assertNull(actualResponse);
 
-    verify(registryProducerService).notifyPagoPaEvent(
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
       contextData,
       RegistryEventSubType.REQ,
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.NODE_ID,
       RegistryLogger.PU_ID,
       RegistryOutcome.OK,
-      xmlRequest
+      payload
     );
 
     contextData.setIuv(blIuv);
-    verify(registryProducerService).notifyPagoPaEvent(
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
       contextData,
       RegistryEventSubType.RESP,
       RegistryEventCategory.INTERFACCIA,
@@ -81,14 +193,172 @@ public class RegistryLoggerTest {
   }
 
   @Test
-  void testProduceReqRegistryEventWithExtraInfo() {
+  void testProduceRegistryEventWithExtraInfo() throws JsonProcessingException {
     // Given
     RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
     contextData.setEventType(RegistryEventType.paSendRTV2);
     String blIuv = "businessLogicIUV";
-    String xmlRequest = "<xml>mockRequest</xml>";
+    String requestPayload = "REQUEST_PAYLOAD";
+    String responsePayload = "RESPONSE_PAYLOAD";
     Object request = new Object();
-    when(jaxbTransformService.marshalling(eq(request), any())).thenReturn(xmlRequest);
+    Object response = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+    when(objectMapperMock.writeValueAsString(same(response))).thenReturn(responsePayload);
+
+    // When
+    Object actualResponse = registryLogger.execute(
+      contextData, request,
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
+      e -> null,
+      () -> {
+        // Simulate extra info retrieval
+        return Map.of("extraInfoKey", "extraInfoValue");
+      },
+      r -> {
+        // Simulate extra info retrieval
+        return Map.of("extraInfoKey", "extraInfoValue");
+      });
+
+    // Then
+    assertEquals(response, actualResponse);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      eq(contextData),
+      eq(RegistryEventSubType.REQ),
+      eq(RegistryEventCategory.INTERFACCIA),
+      eq(RegistryLogger.NODE_ID),
+      eq(RegistryLogger.PU_ID),
+      eq(RegistryOutcome.OK),
+      argThat(o -> (o instanceof Map<?, ?> m) &&
+        m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
+        m.containsKey(RegistryLogger.PAYLOAD_KEY) && requestPayload.equals(m.get(RegistryLogger.PAYLOAD_KEY))));
+
+    contextData.setIuv(blIuv);
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      eq(contextData),
+      eq(RegistryEventSubType.RESP),
+      eq(RegistryEventCategory.INTERFACCIA),
+      eq(RegistryLogger.PU_ID),
+      eq(RegistryLogger.NODE_ID),
+      eq(RegistryOutcome.OK),
+      argThat(o -> (o instanceof Map<?, ?> m) &&
+        m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
+        m.containsKey(RegistryLogger.PAYLOAD_KEY) && responsePayload.equals(m.get(RegistryLogger.PAYLOAD_KEY)))
+    );
+  }
+
+  @Test
+  void testProduceRegistryEvent_withEmptyExtraInfo() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String blIuv = "businessLogicIUV";
+    String requestPayload = "REQUEST_PAYLOAD";
+    String responsePayload = "RESPONSE_PAYLOAD";
+    Object request = new Object();
+    Object response = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+    when(objectMapperMock.writeValueAsString(same(response))).thenReturn(responsePayload);
+
+    // When
+    Object actualResponse = registryLogger.execute(
+      contextData, request,
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
+      e -> null,
+      Map::of,
+      r -> {
+        // Simulate extra info retrieval
+        return Map.of();
+      });
+
+    // Then
+    assertEquals(response, actualResponse);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      requestPayload
+    );
+
+    contextData.setIuv(blIuv);
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.OK,
+      responsePayload);
+  }
+
+  @Test
+  void testProduceRegistryEvent_withExtraInfo_skipXmlBody() {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String blIuv = "businessLogicIUV";
+    Object request = new Object();
+    Object response = new Object();
+
+    // When
+    Object actualResponse = registryLogger.execute(
+      contextData, request,
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
+      e -> null,
+      () -> {
+        // Simulate extra info retrieval
+        return Map.of("extraInfoKey", "extraInfoValue", RegistryLogger.SKIP_PAYLOAD_KEY, true);
+      },
+      r -> {
+        // Simulate extra info retrieval
+        return Map.of("extraInfoKey", "extraInfoValue:" + r, RegistryLogger.SKIP_PAYLOAD_KEY, true);
+      });
+
+    // Then
+    assertEquals(response, actualResponse);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      eq(contextData),
+      eq(RegistryEventSubType.REQ),
+      eq(RegistryEventCategory.INTERFACCIA),
+      eq(RegistryLogger.NODE_ID),
+      eq(RegistryLogger.PU_ID),
+      eq(RegistryOutcome.OK),
+      argThat(o -> (o instanceof Map<?, ?> m) &&
+        m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
+        !m.containsKey(RegistryLogger.PAYLOAD_KEY))
+    );
+
+    contextData.setIuv(blIuv);
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      eq(contextData),
+      eq(RegistryEventSubType.RESP),
+      eq(RegistryEventCategory.INTERFACCIA),
+      eq(RegistryLogger.PU_ID),
+      eq(RegistryLogger.NODE_ID),
+      eq(RegistryOutcome.OK),
+      argThat(o -> (o instanceof Map<?, ?> m) &&
+        m.containsKey("extraInfoKey") && ("extraInfoValue:" + response).equals(m.get("extraInfoKey")) &&
+        !m.containsKey(RegistryLogger.PAYLOAD_KEY))
+    );
+  }
+
+  @Test
+  void testProduceRegistryEvent_withExtraInfo_noResponsePayload() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String blIuv = "businessLogicIUV";
+    String requestPayload = "REQUEST_PAYLOAD";
+    Object request = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
 
     // When
     Object actualResponse = registryLogger.execute(
@@ -104,7 +374,7 @@ public class RegistryLoggerTest {
     // Then
     assertNull(actualResponse);
 
-    verify(registryProducerService).notifyPagoPaEvent(
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
       eq(contextData),
       eq(RegistryEventSubType.REQ),
       eq(RegistryEventCategory.INTERFACCIA),
@@ -113,11 +383,10 @@ public class RegistryLoggerTest {
       eq(RegistryOutcome.OK),
       argThat(o -> (o instanceof Map<?, ?> m) &&
         m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
-        m.containsKey(RegistryLogger.PAYLOAD_KEY) && xmlRequest.equals(m.get(RegistryLogger.PAYLOAD_KEY)))
-    );
+        m.containsKey(RegistryLogger.PAYLOAD_KEY) && requestPayload.equals(m.get(RegistryLogger.PAYLOAD_KEY))));
 
     contextData.setIuv(blIuv);
-    verify(registryProducerService).notifyPagoPaEvent(
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
       contextData,
       RegistryEventSubType.RESP,
       RegistryEventCategory.INTERFACCIA,
@@ -129,203 +398,17 @@ public class RegistryLoggerTest {
   }
 
   @Test
-  void testProduceReqRegistryEventWithExtraInfoSkipXmlBody() {
+  void testExecuteWithException() throws JsonProcessingException {
     // Given
     RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
     contextData.setEventType(RegistryEventType.paSendRTV2);
-    String blIuv = "businessLogicIUV";
-    Object request = new Object();
-
-    // When
-    Object actualResponse = registryLogger.execute(
-      contextData, request,
-      () -> Triple.of(null, blIuv, RegistryOutcome.OK),
-      e -> null,
-      () -> {
-        // Simulate extra info retrieval
-        return Map.of("extraInfoKey", "extraInfoValue", RegistryLogger.SKIP_PAYLOAD_KEY, true);
-      }, null);
-
-    // Then
-    assertNull(actualResponse);
-
-    verify(registryProducerService).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.REQ),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryOutcome.OK),
-      argThat(o -> (o instanceof Map<?, ?> m) &&
-        m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
-        !m.containsKey(RegistryLogger.PAYLOAD_KEY))
-    );
-
-    contextData.setIuv(blIuv);
-    verify(registryProducerService).notifyPagoPaEvent(
-      contextData,
-      RegistryEventSubType.RESP,
-      RegistryEventCategory.INTERFACCIA,
-      RegistryLogger.PU_ID,
-      RegistryLogger.NODE_ID,
-      RegistryOutcome.OK,
-      null
-    );
-  }
-
-  @Test
-  void testProduceRespRegistryEvent() {
-    // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
-    String blIuv = "businessLogicIUV";
-    String xmlRequest = "<xml>mockRequest</xml>";
-    String xmlResponse = "<xml>mockResponse</xml>";
-    Object request = new Object();
-    Object response = new Object();
-    when(jaxbTransformService.marshalling(eq(request), any())).thenReturn(xmlRequest);
-    when(jaxbTransformService.marshalling(eq(response), any())).thenReturn(xmlResponse);
-
-    // When
-    Object actualResponse = registryLogger.execute(
-      contextData, request,
-      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
-      e -> null);
-
-    // Then
-    assertEquals(response, actualResponse);
-
-    verify(registryProducerService).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.REQ),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryOutcome.OK),
-      any()
-    );
-
-    contextData.setIuv(blIuv);
-    verify(registryProducerService).notifyPagoPaEvent(
-      contextData,
-      RegistryEventSubType.RESP,
-      RegistryEventCategory.INTERFACCIA,
-      RegistryLogger.PU_ID,
-      RegistryLogger.NODE_ID,
-      RegistryOutcome.OK,
-      xmlResponse
-    );
-  }
-
-  @Test
-  void testProduceRespRegistryEventWithExtraInfo() {
-    // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
-    String blIuv = "businessLogicIUV";
-    String xmlRequest = "<xml>mockRequest</xml>";
-    String xmlResponse = "<xml>mockResponse</xml>";
-    Object request = new Object();
-    Object response = new Object();
-    when(jaxbTransformService.marshalling(eq(request), any())).thenReturn(xmlRequest);
-    when(jaxbTransformService.marshalling(eq(response), any())).thenReturn(xmlResponse);
-
-    // When
-    Object actualResponse = registryLogger.execute(
-      contextData, request,
-      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
-      e -> null,
-      null, r -> {
-        // Simulate extra info retrieval
-        return Map.of("extraInfoKey", "extraInfoValue");
-      });
-
-    // Then
-    assertEquals(response, actualResponse);
-
-    verify(registryProducerService).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.REQ),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryOutcome.OK),
-      any()
-    );
-
-    contextData.setIuv(blIuv);
-    verify(registryProducerService).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.RESP),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryOutcome.OK),
-      argThat(o -> (o instanceof Map<?, ?> m) &&
-        m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
-        m.containsKey(RegistryLogger.PAYLOAD_KEY) && xmlResponse.equals(m.get(RegistryLogger.PAYLOAD_KEY)))
-    );
-  }
-
-  @Test
-  void testProduceRespRegistryEventWithExtraInfoSkipXmlBody() {
-    // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
-    String blIuv = "businessLogicIUV";
-    String xmlRequest = "<xml>mockRequest</xml>";
-    Object request = new Object();
-    Object response = new Object();
-    when(jaxbTransformService.marshalling(eq(request), any())).thenReturn(xmlRequest);
-
-    // When
-    Object actualResponse = registryLogger.execute(
-      contextData, request,
-      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
-      e -> null,
-      null, r -> {
-        // Simulate extra info retrieval
-        return Map.of("extraInfoKey", "extraInfoValue:" + r, RegistryLogger.SKIP_PAYLOAD_KEY, true);
-      });
-
-    // Then
-    assertEquals(response, actualResponse);
-
-    verify(registryProducerService).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.REQ),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryOutcome.OK),
-      any()
-    );
-
-    contextData.setIuv(blIuv);
-    verify(registryProducerService).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.RESP),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryOutcome.OK),
-      argThat(o -> (o instanceof Map<?, ?> m) &&
-        m.containsKey("extraInfoKey") && ("extraInfoValue:" + response).equals(m.get("extraInfoKey")) &&
-        !m.containsKey(RegistryLogger.PAYLOAD_KEY))
-    );
-  }
-
-  @Test
-  void testExecuteWithException() {
-    // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.paSendRTV2);
-    String xmlRequest = "<xml>mockRequest</xml>";
+    String requestPayload = "REQUESTPAYLOAD";
     Object request = new Object();
     Object fallbackResponse = new Object();
-    String xmlFallbackResponse = "mockFallbackResponse";
-    when(jaxbTransformService.marshalling(eq(request), any())).thenReturn(xmlRequest);
-    when(jaxbTransformService.marshalling(eq(fallbackResponse), any())).thenReturn(xmlFallbackResponse);
+    String fallbackPayload = "FALLBACKPAYLOAD";
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+    when(objectMapperMock.writeValueAsString(same(fallbackResponse))).thenReturn(fallbackPayload);
 
     // When
     Object actualResponse = registryLogger.execute(
@@ -338,36 +421,40 @@ public class RegistryLoggerTest {
     // Then
     assertEquals(fallbackResponse, actualResponse);
 
-    verify(registryProducerService).notifyPagoPaEvent(
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
       contextData,
       RegistryEventSubType.REQ,
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.NODE_ID,
       RegistryLogger.PU_ID,
       RegistryOutcome.OK,
-      xmlRequest);
+      requestPayload);
 
-    verify(registryProducerService).notifyPagoPaEvent(
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
       contextData,
       RegistryEventSubType.RESP,
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
       RegistryOutcome.KO,
-      xmlFallbackResponse);
+      fallbackPayload);
   }
 
   @Test
-  void testNotifySilEventException() {
+  void testExceptionDuringEventProducer() throws JsonProcessingException {
     // Given
     RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
     contextData.setEventType(RegistryEventType.paSendRTV2);
     String blIuv = "businessLogicIUV";
-    String xmlRequest = "<xml>mockRequest</xml>";
+    String requestPayload = "REQUEST_PAYLOAD";
+    String responsePayload = "RESPONSE_PAYLOAD";
     Object request = new Object();
     Object response = new Object();
-    when(jaxbTransformService.marshalling(eq(request), any())).thenReturn(xmlRequest);
-    doThrow(new RuntimeException("simulated exception")).when(registryProducerService).notifyPagoPaEvent(
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+    when(objectMapperMock.writeValueAsString(same(response))).thenReturn(responsePayload);
+
+    doThrow(new RuntimeException("simulated exception")).when(registryProducerServiceMock).notifyPagoPaEvent(
       any(), any(), any(), any(), any(), any(), any());
 
     // When
@@ -380,63 +467,24 @@ public class RegistryLoggerTest {
     // Then
     assertEquals(response, actualResponse);
 
-    verify(registryProducerService).notifyPagoPaEvent(
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
       contextData,
       RegistryEventSubType.REQ,
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.NODE_ID,
       RegistryLogger.PU_ID,
       RegistryOutcome.OK,
-      xmlRequest);
+      requestPayload);
 
     contextData.setIuv(blIuv);
-    verify(registryProducerService).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.RESP),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryOutcome.OK),
-      any());
-  }
-
-  @Test
-  void testProduceReqRegistryClientEvent() {
-    // Given
-    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
-    contextData.setEventType(RegistryEventType.createPosition);
-    String blIuv = "businessLogicIUV";
-    String xmlRequest = "<xml>mockRequest</xml>";
-    Object request = new Object();
-    when(jaxbTransformService.marshalling(eq(request), any())).thenReturn(xmlRequest);
-
-    // When
-    Object actualResponse = registryLogger.execute(
-      contextData, request,
-      () -> Triple.of(null, blIuv, RegistryOutcome.OK),
-      e -> null);
-
-    // Then
-    assertNull(actualResponse);
-
-    verify(registryProducerService).notifyPagoPaEvent(
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
       contextData,
-      RegistryEventSubType.REQ,
+      RegistryEventSubType.RESP,
       RegistryEventCategory.INTERFACCIA,
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
       RegistryOutcome.OK,
-      xmlRequest);
-
-    contextData.setIuv(blIuv);
-    verify(registryProducerService).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.RESP),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryOutcome.OK),
-      any());
+      responsePayload);
   }
 
   public static void configureRegistryLoggerMock(RegistryLogger registryLoggerMock, RegistryContextData contextData, Object request, boolean withExtraInfoReq, boolean withExtraInfoResp) {

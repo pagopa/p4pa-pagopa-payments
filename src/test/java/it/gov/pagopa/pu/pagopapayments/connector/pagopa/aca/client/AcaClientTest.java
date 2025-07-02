@@ -4,9 +4,11 @@ import it.gov.pagopa.nodo.pacreateposition.controller.generated.AcaApi;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.DebtPositionResponse;
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config.AcaApisHolder;
-import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
-import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLoggerTest;
+import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.co.jemos.podam.api.PodamFactory;
 
 @ExtendWith(MockitoExtension.class)
 class AcaClientTest {
@@ -24,24 +27,23 @@ class AcaClientTest {
   @Mock
   private AcaApi acaApiMock;
   @Mock
-  private JAXBTransformService jaxbTransformService;
-  @Mock
-  private RegistryProducerService registryProducerService;
+  private RegistryLogger registryLoggerMock;
 
-  private RegistryLogger registryLogger;
   private AcaClient acaClient;
+
+  private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   @BeforeEach
   void setUp() {
-    registryLogger = new RegistryLogger(jaxbTransformService, registryProducerService);
-    acaClient = new AcaClient(acaApisHolderMock, registryLogger);
+    acaClient = new AcaClient(acaApisHolderMock, registryLoggerMock);
   }
 
   @AfterEach
   void verifyNoMoreInteractions(){
     Mockito.verifyNoMoreInteractions(
       acaApisHolderMock,
-      acaApiMock
+      acaApiMock,
+      registryLoggerMock
     );
   }
 
@@ -50,8 +52,15 @@ class AcaClientTest {
     //given
     String apiKey = "apiKey";
     String segregationCode = "01";
-    NewDebtPositionRequest request = new NewDebtPositionRequest();
+    NewDebtPositionRequest request = podamFactory.manufacturePojo(NewDebtPositionRequest.class);
     DebtPositionResponse expectedResponse = new DebtPositionResponse();
+
+    RegistryContextData contextData = RegistryContextData.builder()
+      .orgFiscalCode(request.getPaFiscalCode())
+      .eventType(RegistryEventType.newDebtPosition)
+      .iuv(request.getIuv())
+      .build();
+    RegistryLoggerTest.configureRegistryLoggerMock(registryLoggerMock, contextData, request, false, false);
 
     Mockito.when(acaApisHolderMock.getAcaApiClientByApiKey(apiKey))
       .thenReturn(acaApiMock);

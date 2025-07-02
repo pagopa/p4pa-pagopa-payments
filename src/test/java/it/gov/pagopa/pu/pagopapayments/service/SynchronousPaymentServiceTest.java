@@ -13,6 +13,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.pu_sil.PuSilService;
 import it.gov.pagopa.pu.pagopapayments.connector.send_notification.SendNotificationService;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
+import it.gov.pagopa.pu.pagopapayments.exception.NotPayableSilActualizedAmountException;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentStatusVerifierService;
@@ -310,6 +311,23 @@ class SynchronousPaymentServiceTest {
     Assertions.assertEquals(0, result);
   }
 
+  @Test
+  void givenFlagAmountActualizationTrueAndThrowsNotPayableSilActualizedAmountException_whenRetrieveNotificationFee_thenThrowPagoPaNodeFaultException() {
+    Long organizationId = 1L;
+    String nav = "NAV";
+    DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
+    debtPositionTypeOrg.setFlagAmountActualization(true);
+    debtPositionTypeOrg.setAmountActualizationOrgSilServiceId(999L);
+
+    Mockito.when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(
+        organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
+      .thenReturn(debtPositionTypeOrg);
+    Mockito.when(puSilServiceMock.getAmountUpdates(999L, nav, VALID_ACCEESS_TOKEN))
+      .thenThrow(new NotPayableSilActualizedAmountException("Not payable"));
+
+    Assertions.assertThrows(PagoPaNodeFaultException.class, () ->
+      synchronousPaymentService.retrieveNotificationFeeCents(organizationId, nav, VALID_ACCEESS_TOKEN));
+  }
     //end pu-sil region
   //end region
 }

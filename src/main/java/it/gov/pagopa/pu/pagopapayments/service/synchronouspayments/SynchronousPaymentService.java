@@ -1,17 +1,22 @@
 package it.gov.pagopa.pu.pagopapayments.service.synchronouspayments;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
+import it.gov.pagopa.pu.pagopapayments.connector.pu_sil.PuSilService;
 import it.gov.pagopa.pu.pagopapayments.connector.send_notification.SendNotificationService;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.service.PaForNodeRequestValidatorService;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
+import it.gov.pagopa.pu.pusil.dto.generated.AmountUpdatesDTO;
 import it.gov.pagopa.pu.sendnotification.dto.generated.NotificationPriceResponseV23DTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -35,19 +40,21 @@ public class SynchronousPaymentService {
   private final AuthnService authnService;
   private final OrganizationService organizationService;
   private final SendNotificationService sendNotificationService;
+  private final PuSilService puSilService;
 
   public SynchronousPaymentService(DebtPositionService debtPositionService,
                                    PaForNodeRequestValidatorService paForNodeRequestValidatorService,
                                    SynchronousPaymentStatusVerifierService synchronousPaymentStatusVerifierService,
                                    AuthnService authnService,
     OrganizationService organizationService,
-    SendNotificationService sendNotificationService) {
+    SendNotificationService sendNotificationService, PuSilService puSilService) {
     this.debtPositionService = debtPositionService;
     this.paForNodeRequestValidatorService = paForNodeRequestValidatorService;
     this.synchronousPaymentStatusVerifierService = synchronousPaymentStatusVerifierService;
     this.authnService = authnService;
     this.organizationService = organizationService;
     this.sendNotificationService = sendNotificationService;
+    this.puSilService = puSilService;
   }
 
   public Pair<InstallmentDTO, Organization> retrievePayment(RetrievePaymentDTO request) {
@@ -86,8 +93,22 @@ public class SynchronousPaymentService {
         return 0;
       }
     } else {
-      //TODO - P4ADEV-2694 if SENDApiKey doesn't exists call external third part API to retrieve notificationFee
-      return 0;
+      try{
+        List<DebtPositionDTO> debtPositionDTOList = debtPositionService.getDebtPositionsByOrganizationIdAndIuv(organizationId,
+          Utilities.nav2Iuv(nav), ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
+        DebtPositionTypeOrg debtPositionTypeOrg = debtPositionService.getDebtPositionTypeOrgById(debtPositionDTOList.getFirst().getDebtPositionTypeOrgId(), accessToken);
+        if(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId()!=null)
+        {
+          log.info("Retrieve notification fee from pu-sil by OrgSilServiceId {} and nav {}", debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav);
+          AmountUpdatesDTO amountUpdatesDTO = puSilService.getAmountUpdates(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav, accessToken);
+          if (amountUpdatesDTO.getNotificationFee()!=null && amountUpdatesDTO.getNotificationFee()>0)
+            return amountUpdatesDTO.getNotificationFee();
+        }
+      } catch (Exception e) {
+        log.warn("Failed to retrieve notification fee from pu-sil: {}", e.getMessage());
+        return 0;
+      }
     }
+    return 0;
   }
 }

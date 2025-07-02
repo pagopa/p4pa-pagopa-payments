@@ -44,4 +44,9 @@ public class DebtPositionClient {
     UpdateInstallmentNotificationFeeRequest request = new UpdateInstallmentNotificationFeeRequest(organizationId, nav, newFeeCents);
     return debtPositionsApisHolder.getDebtPositionApi(accessToken).updateInstallmentNotificationFee(request);
   }
+
+  public List<DebtPositionDTO> getDebtPositionsByOrganizationIdAndIuv(Long organizationId, String iuv, List<DebtPositionOrigin> debtPositionOriginList, String accessToken) {
+    return debtPositionsApisHolder.getDebtPositionApi(accessToken)
+      .getDebtPositionsByOrganizationIdAndIuv(organizationId, iuv, debtPositionOriginList);
+  }
 }

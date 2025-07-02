@@ -82,13 +82,13 @@ public class RegistryLoggerTest {
     assertSame(response, actualResponse);
 
     verify(registryProducerServiceMock).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.REQ),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryOutcome.OK),
-      any()
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      requestPayload
     );
 
     contextData.setIuv(blIuv);
@@ -127,13 +127,13 @@ public class RegistryLoggerTest {
     assertSame(response, actualResponse);
 
     verify(registryProducerServiceMock).notifyPagoPaEvent(
-      eq(contextData),
-      eq(RegistryEventSubType.REQ),
-      eq(RegistryEventCategory.INTERFACCIA),
-      eq(RegistryLogger.NODE_ID),
-      eq(RegistryLogger.PU_ID),
-      eq(RegistryOutcome.OK),
-      any()
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      xmlRequest
     );
 
     contextData.setIuv(blIuv);
@@ -145,6 +145,49 @@ public class RegistryLoggerTest {
       RegistryLogger.NODE_ID,
       RegistryOutcome.OK,
       xmlResponse
+    );
+  }
+
+  @Test
+  void testProduceRegistryEvent_exceptionDuringSerialization() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String blIuv = "businessLogicIUV";
+    Object request = "ORIGINALREQUEST";
+    Object response = "ORIGINALRESPONSE";
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenThrow(new RuntimeException("DUMMY"));
+    when(objectMapperMock.writeValueAsString(same(response))).thenThrow(new RuntimeException("DUMMY"));
+
+    // When
+    Object actualResponse = registryLogger.execute(
+      contextData, request,
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
+      e -> null);
+
+    // Then
+    assertSame(response, actualResponse);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      request
+    );
+
+    contextData.setIuv(blIuv);
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.OK,
+      response
     );
   }
 
@@ -298,6 +341,52 @@ public class RegistryLoggerTest {
   }
 
   @Test
+  void testProduceRegistryEvent_withEmptyExtraInfo_noResponse() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String blIuv = "businessLogicIUV";
+    String requestPayload = "REQUEST_PAYLOAD";
+    Object request = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+
+    // When
+    Object actualResponse = registryLogger.execute(
+      contextData, request,
+      () -> Triple.of(null, blIuv, RegistryOutcome.OK),
+      e -> null,
+      Map::of,
+      r -> {
+        // Simulate extra info retrieval
+        return Map.of();
+      });
+
+    // Then
+    assertNull(actualResponse);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      requestPayload
+    );
+
+    contextData.setIuv(blIuv);
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.OK,
+      null);
+  }
+
+  @Test
   void testProduceRegistryEvent_withExtraInfo_skipXmlBody() {
     // Given
     RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
@@ -369,7 +458,10 @@ public class RegistryLoggerTest {
         // Simulate extra info retrieval
         return Map.of("extraInfoKey", "extraInfoValue");
       },
-      null);
+      r -> {
+        // Simulate extra info retrieval
+        return Map.of("extraInfoKey", "extraInfoValue:" + r);
+      });
 
     // Then
     assertNull(actualResponse);

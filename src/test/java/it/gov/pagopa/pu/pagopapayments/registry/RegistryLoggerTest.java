@@ -12,6 +12,7 @@ import it.gov.pagopa.pu.registries.dto.generated.RegistryEventSubType;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,8 +27,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -79,7 +79,7 @@ public class RegistryLoggerTest {
       e -> null);
 
     // Then
-    assertEquals(response, actualResponse);
+    assertSame(response, actualResponse);
 
     verify(registryProducerServiceMock).notifyPagoPaEvent(
       eq(contextData),
@@ -124,7 +124,7 @@ public class RegistryLoggerTest {
       e -> null);
 
     // Then
-    assertEquals(response, actualResponse);
+    assertSame(response, actualResponse);
 
     verify(registryProducerServiceMock).notifyPagoPaEvent(
       eq(contextData),
@@ -221,7 +221,7 @@ public class RegistryLoggerTest {
       });
 
     // Then
-    assertEquals(response, actualResponse);
+    assertSame(response, actualResponse);
 
     verify(registryProducerServiceMock).notifyPagoPaEvent(
       eq(contextData),
@@ -274,7 +274,7 @@ public class RegistryLoggerTest {
       });
 
     // Then
-    assertEquals(response, actualResponse);
+    assertSame(response, actualResponse);
 
     verify(registryProducerServiceMock).notifyPagoPaEvent(
       contextData,
@@ -321,7 +321,7 @@ public class RegistryLoggerTest {
       });
 
     // Then
-    assertEquals(response, actualResponse);
+    assertSame(response, actualResponse);
 
     verify(registryProducerServiceMock).notifyPagoPaEvent(
       eq(contextData),
@@ -398,6 +398,57 @@ public class RegistryLoggerTest {
   }
 
   @Test
+  void testProduceRegistryEvent_withJustRequestExtraInfo() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String blIuv = "businessLogicIUV";
+    String requestPayload = "REQUEST_PAYLOAD";
+    String responsePayload = "RESPONSE_PAYLOAD";
+    Object request = new Object();
+    Object response = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+    when(objectMapperMock.writeValueAsString(same(response))).thenReturn(responsePayload);
+
+    // When
+    Object actualResponse = registryLogger.execute(
+      contextData, request,
+      () -> Triple.of(response, blIuv, RegistryOutcome.OK),
+      e -> null,
+      () -> {
+        // Simulate extra info retrieval
+        return Map.of("extraInfoKey", "extraInfoValue");
+      },
+      null);
+
+    // Then
+    assertSame(response, actualResponse);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      eq(contextData),
+      eq(RegistryEventSubType.REQ),
+      eq(RegistryEventCategory.INTERFACCIA),
+      eq(RegistryLogger.NODE_ID),
+      eq(RegistryLogger.PU_ID),
+      eq(RegistryOutcome.OK),
+      argThat(o -> (o instanceof Map<?, ?> m) &&
+        m.containsKey("extraInfoKey") && "extraInfoValue".equals(m.get("extraInfoKey")) &&
+        m.containsKey(RegistryLogger.PAYLOAD_KEY) && requestPayload.equals(m.get(RegistryLogger.PAYLOAD_KEY))));
+
+    contextData.setIuv(blIuv);
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.OK,
+      responsePayload
+    );
+  }
+
+  @Test
   void testExecuteWithException() throws JsonProcessingException {
     // Given
     RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
@@ -419,7 +470,7 @@ public class RegistryLoggerTest {
       e -> fallbackResponse);
 
     // Then
-    assertEquals(fallbackResponse, actualResponse);
+    assertSame(fallbackResponse, actualResponse);
 
     verify(registryProducerServiceMock).notifyPagoPaEvent(
       contextData,
@@ -438,6 +489,47 @@ public class RegistryLoggerTest {
       RegistryLogger.NODE_ID,
       RegistryOutcome.KO,
       fallbackPayload);
+  }
+
+  @Test
+  void testExecuteWithException_noExceptionHandler() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String requestPayload = "REQUESTPAYLOAD";
+    Object request = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+
+    RuntimeException expectedException = new RuntimeException("Mock Exception");
+    // When
+    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> registryLogger.execute(
+      contextData, request,
+      () -> {
+        throw expectedException;
+      },
+      null));
+
+    // Then
+    assertSame(expectedException, exception);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      requestPayload);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.KO,
+      null);
   }
 
   @Test

@@ -1,11 +1,14 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
+import it.gov.pagopa.pu.pagopapayments.connector.pu_sil.PuSilService;
 import it.gov.pagopa.pu.pagopapayments.connector.send_notification.SendNotificationService;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
@@ -13,6 +16,7 @@ import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentStatusVerifierService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import it.gov.pagopa.pu.pusil.dto.generated.AmountUpdatesDTO;
 import it.gov.pagopa.pu.sendnotification.dto.generated.NotificationPriceResponseV23DTO;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
@@ -42,6 +46,8 @@ class SynchronousPaymentServiceTest {
   private OrganizationService organizationServiceMock;
   @Mock
   private SendNotificationService sendNotificationServiceMock;
+  @Mock
+  private PuSilService puSilServiceMock;
 
   @InjectMocks
   private SynchronousPaymentService synchronousPaymentService;
@@ -194,5 +200,55 @@ class SynchronousPaymentServiceTest {
 
     Assertions.assertEquals(0, result);
   }
+
+    //pu-sil region
+    @Test
+    void givenNoApiKeyAndSilReturnsFeeGreaterThanZeroWhenRetrieveNotificationFeeThenReturnSilFee() {
+      Long organizationId = 1L;
+      String nav = "301000000020147277";
+      String noApiKey = null;
+      long expectedFee = 150L;
+
+      DebtPositionDTO debtPositionDTO = podamFactory.manufacturePojo(DebtPositionDTO.class);
+      debtPositionDTO.setDebtPositionTypeOrgId(123L);
+
+      DebtPositionTypeOrg typeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
+      typeOrg.setAmountActualizationOrgSilServiceId(999L);
+
+      AmountUpdatesDTO amountUpdates = podamFactory.manufacturePojo(AmountUpdatesDTO.class);
+      amountUpdates.setNotificationFee(expectedFee);
+
+      Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+        .thenReturn(noApiKey);
+      Mockito.when(debtPositionServiceMock.getDebtPositionsByOrganizationIdAndIuv(
+          Mockito.eq(organizationId), Mockito.any(), Mockito.any(), Mockito.eq(VALID_ACCEESS_TOKEN)))
+        .thenReturn(List.of(debtPositionDTO));
+      Mockito.when(debtPositionServiceMock.getDebtPositionTypeOrgById(123L, VALID_ACCEESS_TOKEN))
+        .thenReturn(typeOrg);
+      Mockito.when(puSilServiceMock.getAmountUpdates(999L, nav, VALID_ACCEESS_TOKEN))
+        .thenReturn(amountUpdates);
+
+      long result = synchronousPaymentService.retrieveNotificationFeeCents(organizationId, nav, VALID_ACCEESS_TOKEN);
+
+      Assertions.assertEquals(expectedFee, result);
+    }
+
+  @Test
+  void givenNoApiKeyAndExceptionInTryBlockWhenRetrieveNotificationFeeThenReturnZero() {
+    Long organizationId = 1L;
+    String nav = "301000000020147277";
+    String noApiKey = null;
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+      .thenReturn(noApiKey);
+    Mockito.when(debtPositionServiceMock.getDebtPositionsByOrganizationIdAndIuv(
+        Mockito.eq(organizationId), Mockito.any(), Mockito.any(), Mockito.eq(VALID_ACCEESS_TOKEN)))
+      .thenThrow(new RuntimeException("Error"));
+
+    long result = synchronousPaymentService.retrieveNotificationFeeCents(organizationId, nav, VALID_ACCEESS_TOKEN);
+
+    Assertions.assertEquals(0, result);
+  }
+    //end pu-sil region
   //end region
 }

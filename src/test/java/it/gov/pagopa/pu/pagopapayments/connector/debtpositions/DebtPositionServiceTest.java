@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -90,6 +91,28 @@ class DebtPositionServiceTest {
 
     // When
     InstallmentDTO result = service.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = "ORDINARY")
+  @NullAndEmptySource
+  void whenGetDebtPositionsByOrganizationIdAndIuvThenInvokeClient(String debtPositionOrigin){
+    // Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String iuv = "IUV";
+    List<DebtPositionDTO> expectedResult = List.of();
+    List<DebtPositionOrigin> debtPositionOriginList = debtPositionOrigin==null ? null :
+      (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionOrigin.valueOf(debtPositionOrigin)));
+
+    Mockito.when(clientMock.getDebtPositionsByOrganizationIdAndIuv(Mockito.same(organizationId),Mockito.same(iuv),
+      Mockito.same(debtPositionOriginList), Mockito.same(accessToken))).thenReturn(expectedResult);
+
+    // When
+    List<DebtPositionDTO> result = service.getDebtPositionsByOrganizationIdAndIuv(organizationId, iuv, debtPositionOriginList, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

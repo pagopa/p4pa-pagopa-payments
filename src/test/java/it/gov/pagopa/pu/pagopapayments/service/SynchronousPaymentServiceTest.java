@@ -312,7 +312,7 @@ class SynchronousPaymentServiceTest {
   }
 
   @Test
-  void givenFlagAmountActualizationTrueAndThrowsNotPayableSilActualizedAmountException_whenRetrieveNotificationFee_thenThrowPagoPaNodeFaultException() {
+  void givenFlagAmountActualizationTrueAndThrowsNotPayableSilActualizedAmountExceptionWhenRetrieveNotificationFeeThenThrowPagoPaNodeFaultException() {
     Long organizationId = 1L;
     String nav = "NAV";
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);

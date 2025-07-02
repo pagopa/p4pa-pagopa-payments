@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.service.synchronouspayments;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -13,9 +12,9 @@ import it.gov.pagopa.pu.pagopapayments.connector.pu_sil.PuSilService;
 import it.gov.pagopa.pu.pagopapayments.connector.send_notification.SendNotificationService;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
+import it.gov.pagopa.pu.pagopapayments.exception.NotPayableSilActualizedAmountException;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.service.PaForNodeRequestValidatorService;
-import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import it.gov.pagopa.pu.pusil.dto.generated.AmountUpdatesDTO;
 import it.gov.pagopa.pu.sendnotification.dto.generated.NotificationPriceResponseV23DTO;
 import lombok.extern.slf4j.Slf4j;
@@ -82,21 +81,9 @@ public class SynchronousPaymentService {
   }
 
   public long retrieveNotificationFeeCents(Long organizationId, String nav, String accessToken){
-    String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
-    if(sendAPIKey!=null && !sendAPIKey.isEmpty()){
+    DebtPositionTypeOrg debtPositionTypeOrg = debtPositionService.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
+    if(debtPositionTypeOrg!=null && Boolean.TRUE.equals(debtPositionTypeOrg.getFlagAmountActualization())) {
       try{
-        NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);
-        log.info("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);
-        return Objects.requireNonNullElse(notificationPrice.getTotalPrice(), 0);
-      } catch (Exception e) {
-        log.warn("Failed to retrieve notification price for organizationId {} and nav {}: {}", organizationId, nav, e.getMessage());
-        return 0;
-      }
-    } else {
-      try{
-        List<DebtPositionDTO> debtPositionDTOList = debtPositionService.getDebtPositionsByOrganizationIdAndIuv(organizationId,
-          Utilities.nav2Iuv(nav), ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
-        DebtPositionTypeOrg debtPositionTypeOrg = debtPositionService.getDebtPositionTypeOrgById(debtPositionDTOList.getFirst().getDebtPositionTypeOrgId(), accessToken);
         if(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId()!=null)
         {
           log.info("Retrieve notification fee from pu-sil by OrgSilServiceId {} and nav {}", debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav);
@@ -104,9 +91,23 @@ public class SynchronousPaymentService {
           if (amountUpdatesDTO.getNotificationFee()!=null && amountUpdatesDTO.getNotificationFee()>0)
             return amountUpdatesDTO.getNotificationFee();
         }
-      } catch (Exception e) {
+      }catch (NotPayableSilActualizedAmountException e){
+        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_DOVUTO_NON_PAGABILE, nav);
+      }catch (Exception e){
         log.warn("Failed to retrieve notification fee from pu-sil: {}", e.getMessage());
         return 0;
+      }
+    } else {
+      String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
+      if(sendAPIKey!=null && !sendAPIKey.isEmpty()){
+        try{
+          NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);
+          log.info("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);
+          return Objects.requireNonNullElse(notificationPrice.getTotalPrice(), 0);
+        } catch (Exception e) {
+          log.warn("Failed to retrieve notification price for organizationId {} and nav {}: {}", organizationId, nav, e.getMessage());
+          return 0;
+        }
       }
     }
     return 0;

@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -99,20 +98,20 @@ class DebtPositionServiceTest {
   @ParameterizedTest
   @ValueSource(strings = "ORDINARY")
   @NullAndEmptySource
-  void whenGetDebtPositionsByOrganizationIdAndIuvThenInvokeClient(String debtPositionOrigin){
+  void whenFindDebtPositionTypeOrgByOrgIdAndNavAndOriginsThenInvokeClient(String debtPositionOrigin){
     // Given
     String accessToken = "ACCESSTOKEN";
     Long organizationId = 1L;
-    String iuv = "IUV";
-    List<DebtPositionDTO> expectedResult = List.of();
+    String nav = "NAV";
+    DebtPositionTypeOrg expectedResult = new DebtPositionTypeOrg();
     List<DebtPositionOrigin> debtPositionOriginList = debtPositionOrigin==null ? null :
       (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionOrigin.valueOf(debtPositionOrigin)));
 
-    Mockito.when(clientMock.getDebtPositionsByOrganizationIdAndIuv(Mockito.same(organizationId),Mockito.same(iuv),
+    Mockito.when(clientMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(Mockito.same(organizationId),Mockito.same(nav),
       Mockito.same(debtPositionOriginList), Mockito.same(accessToken))).thenReturn(expectedResult);
 
     // When
-    List<DebtPositionDTO> result = service.getDebtPositionsByOrganizationIdAndIuv(organizationId, iuv, debtPositionOriginList, accessToken);
+    DebtPositionTypeOrg result = service.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

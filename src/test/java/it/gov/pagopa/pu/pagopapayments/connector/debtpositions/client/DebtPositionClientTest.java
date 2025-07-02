@@ -2,8 +2,8 @@ package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionApi;
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgEntityControllerApi;
+import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgSearchControllerApi;
 import it.gov.pagopa.pu.debtpositions.controller.generated.InstallmentApi;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -33,6 +33,8 @@ class DebtPositionClientTest {
   @Mock
   private DebtPositionTypeOrgEntityControllerApi debtPositionTypeOrgEntityControllerApiMock;
   @Mock
+  private DebtPositionTypeOrgSearchControllerApi debtPositionTypeOrgSearchControllerApiMock;
+  @Mock
   private DebtPositionApi debtPositionApiMock;
   @Mock
   private InstallmentApi installmentApiMock;
@@ -50,6 +52,7 @@ class DebtPositionClientTest {
     Mockito.verifyNoMoreInteractions(
       apisHolderMock,
       debtPositionTypeOrgEntityControllerApiMock,
+      debtPositionTypeOrgSearchControllerApiMock,
       installmentApiMock
       );
   }
@@ -141,22 +144,22 @@ class DebtPositionClientTest {
   @ParameterizedTest
   @ValueSource(strings = "ORDINARY")
   @NullAndEmptySource
-  void whenGetDebtPositionsByOrganizationIdAndIuvThenInvokeApi(String debtPositionOrigin){
+  void whenCrudDebtPositionTypeOrgsFindDebtPositionTypeOrgByOrgIdAndNavAndOriginsThenInvokeApi(String debtPositionOrigin){
     //Given
     String accessToken = "ACCESSTOKEN";
     Long organizationId = 1L;
-    String iuv = "IUV";
+    String nav = "NAV";
     List<DebtPositionOrigin> debtPositionOriginList = debtPositionOrigin==null ? null :
       (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionOrigin.valueOf(debtPositionOrigin)));
-    List<DebtPositionDTO> expectedResult = List.of();
+    DebtPositionTypeOrg expectedResult = new DebtPositionTypeOrg();
 
-    Mockito.when(apisHolderMock.getDebtPositionApi(accessToken))
-      .thenReturn(debtPositionApiMock);
-    Mockito.when(debtPositionApiMock.getDebtPositionsByOrganizationIdAndIuv(organizationId, iuv, debtPositionOriginList))
+    Mockito.when(apisHolderMock.getDebtPositionTypeOrgSearchControllerApi(accessToken))
+      .thenReturn(debtPositionTypeOrgSearchControllerApiMock);
+    Mockito.when(debtPositionTypeOrgSearchControllerApiMock.crudDebtPositionTypeOrgsFindDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList))
       .thenReturn(expectedResult);
 
     // When
-    List<DebtPositionDTO> result = client.getDebtPositionsByOrganizationIdAndIuv(organizationId, iuv, debtPositionOriginList, accessToken);
+    DebtPositionTypeOrg result = client.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

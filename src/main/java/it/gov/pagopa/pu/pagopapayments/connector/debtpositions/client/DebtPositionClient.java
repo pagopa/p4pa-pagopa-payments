@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -45,8 +44,9 @@ public class DebtPositionClient {
     return debtPositionsApisHolder.getDebtPositionApi(accessToken).updateInstallmentNotificationFee(request);
   }
 
-  public List<DebtPositionDTO> getDebtPositionsByOrganizationIdAndIuv(Long organizationId, String iuv, List<DebtPositionOrigin> debtPositionOriginList, String accessToken) {
-    return debtPositionsApisHolder.getDebtPositionApi(accessToken)
-      .getDebtPositionsByOrganizationIdAndIuv(organizationId, iuv, debtPositionOriginList);
+  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOriginList, String accessToken) {
+    return debtPositionsApisHolder.getDebtPositionTypeOrgSearchControllerApi(accessToken)
+      .crudDebtPositionTypeOrgsFindDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList);
+
   }
 }

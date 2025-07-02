@@ -83,31 +83,40 @@ public class SynchronousPaymentService {
   public long retrieveNotificationFeeCents(Long organizationId, String nav, String accessToken){
     DebtPositionTypeOrg debtPositionTypeOrg = debtPositionService.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
     if(debtPositionTypeOrg!=null && Boolean.TRUE.equals(debtPositionTypeOrg.getFlagAmountActualization())) {
-      try{
-        if(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId()!=null)
-        {
-          log.info("Retrieve notification fee from pu-sil by OrgSilServiceId {} and nav {}", debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav);
-          AmountUpdatesDTO amountUpdatesDTO = puSilService.getAmountUpdates(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav, accessToken);
-          if (amountUpdatesDTO.getNotificationFee()!=null && amountUpdatesDTO.getNotificationFee()>0)
-            return amountUpdatesDTO.getNotificationFee();
-        }
-      }catch (NotPayableSilActualizedAmountException e){
-        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_DOVUTO_NON_PAGABILE, nav);
-      }catch (Exception e){
-        log.warn("Failed to retrieve notification fee from pu-sil: {}", e.getMessage());
-        return 0;
-      }
+        return retrieveNotificationFeeCentsFromPuSil(debtPositionTypeOrg, nav, accessToken);
     } else {
-      String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
-      if(sendAPIKey!=null && !sendAPIKey.isEmpty()){
-        try{
-          NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);
-          log.info("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);
-          return Objects.requireNonNullElse(notificationPrice.getTotalPrice(), 0);
-        } catch (Exception e) {
-          log.warn("Failed to retrieve notification price for organizationId {} and nav {}: {}", organizationId, nav, e.getMessage());
-          return 0;
-        }
+        return retrieveNotificationFeeCentsFromSend(organizationId, nav, accessToken);
+    }
+  }
+
+  private long retrieveNotificationFeeCentsFromPuSil(DebtPositionTypeOrg debtPositionTypeOrg, String nav, String accessToken) {
+    try{
+      if(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId()!=null)
+      {
+        log.info("Retrieve notification fee from pu-sil by OrgSilServiceId {} and nav {}", debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav);
+        AmountUpdatesDTO amountUpdatesDTO = puSilService.getAmountUpdates(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav, accessToken);
+        if (amountUpdatesDTO.getNotificationFee()!=null && amountUpdatesDTO.getNotificationFee()>0)
+          return amountUpdatesDTO.getNotificationFee();
+      }
+    }catch (NotPayableSilActualizedAmountException e){
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_DOVUTO_NON_PAGABILE, nav);
+    }catch (Exception e){
+      log.warn("Failed to retrieve notification fee from pu-sil: {}", e.getMessage());
+      return 0;
+    }
+    return 0;
+  }
+
+  private long retrieveNotificationFeeCentsFromSend(Long organizationId, String nav, String accessToken) {
+    String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
+    if(sendAPIKey!=null && !sendAPIKey.isEmpty()){
+      try{
+        NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);
+        log.info("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);
+        return Objects.requireNonNullElse(notificationPrice.getTotalPrice(), 0);
+      } catch (Exception e) {
+        log.warn("Failed to retrieve notification price for organizationId {} and nav {}: {}", organizationId, nav, e.getMessage());
+        return 0;
       }
     }
     return 0;

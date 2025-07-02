@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -68,20 +69,28 @@ public class RegistryLogger {
       registryBodyRequestExtraInfoRetriever
     );
     Triple<O, String, RegistryOutcome> response2outcome = Triple.of(null, null, RegistryOutcome.KO);
+    Exception blException = null;
     try {
       response2outcome = requestHandler.get();
     } catch (Exception e) {
       if (exceptionHandler == null) {
+        blException = e;
         throw e;
       }
-      response2outcome = Triple.of(exceptionHandler.apply(e), null, RegistryOutcome.KO);
+      try {
+        response2outcome = Triple.of(exceptionHandler.apply(e), null, RegistryOutcome.KO);
+      } catch (Exception e2) {
+        blException = e2;
+        throw e2;
+      }
     } finally {
       contextData.setIuv(StringUtils.firstNonBlank(response2outcome.getMiddle(), contextData.getIuv()));
       produceRespRegistryEvent(
         contextData,
         response2outcome.getLeft(),
         response2outcome.getRight(),
-        registryBodyResponseExtraInfoExtractor
+        registryBodyResponseExtraInfoExtractor,
+        blException
       );
     }
     return response2outcome.getLeft();
@@ -118,13 +127,21 @@ public class RegistryLogger {
     RegistryContextData contextData,
     O response,
     RegistryOutcome outcome,
-    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor
-  ) {
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor,
+    Exception blException) {
     try {
       Object body;
       if (registryBodyResponseExtraInfoExtractor != null && response != null) {
         Map<String, Object> bodyMap = new HashMap<>(registryBodyResponseExtraInfoExtractor.apply(response));
         body = bodyMap2Body(response, bodyMap);
+      } else if (blException != null) {
+        if(blException instanceof RestClientResponseException httpStatusCodeException){
+          body = Map.of(
+            "status", httpStatusCodeException.getStatusCode().value(),
+            "body", httpStatusCodeException.getResponseBodyAsString());
+        } else {
+          body = Map.of("exceptionMessage", blException.getMessage());
+        }
       } else {
         body = serializePayload(response);
       }
@@ -149,7 +166,7 @@ public class RegistryLogger {
     } else if (payload != null) {
       bodyMap.put(PAYLOAD_KEY, serializePayload(payload));
     }
-    if(bodyMap.size()==1){
+    if (bodyMap.size() == 1) {
       Object justBody = bodyMap.get(PAYLOAD_KEY);
       body = Objects.requireNonNullElse(justBody, bodyMap);
     } else {
@@ -159,7 +176,7 @@ public class RegistryLogger {
   }
 
   private <I> String serializePayload(I payload) {
-    if(payload!=null) {
+    if (payload != null) {
       try {
         if (payload.getClass().getAnnotation(XmlType.class) != null) {
           //noinspection unchecked: it will necessarily be the right class

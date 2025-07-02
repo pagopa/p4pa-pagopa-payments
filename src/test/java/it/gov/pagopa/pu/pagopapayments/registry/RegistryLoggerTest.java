@@ -21,8 +21,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.web.client.RestClientResponseException;
 import uk.co.jemos.podam.api.PodamFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -584,6 +586,51 @@ public class RegistryLoggerTest {
   }
 
   @Test
+  void testExecuteWithException_handlerReThrowIt() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String requestPayload = "REQUESTPAYLOAD";
+    Object request = new Object();
+    String exceptionMessage = "Mock Exception";
+    RuntimeException expectedException = new RuntimeException(exceptionMessage);
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+
+    // When
+    RuntimeException resultException = assertThrows(RuntimeException.class, () -> registryLogger.execute(
+      contextData, request,
+      () -> {
+        throw expectedException;
+      },
+      e -> {
+        throw (RuntimeException) e;
+      })
+    );
+
+    // Then
+    assertSame(expectedException, resultException);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      requestPayload);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.KO,
+      Map.of("exceptionMessage", exceptionMessage));
+  }
+
+  @Test
   void testExecuteWithException_noExceptionHandler() throws JsonProcessingException {
     // Given
     RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
@@ -593,7 +640,8 @@ public class RegistryLoggerTest {
 
     when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
 
-    RuntimeException expectedException = new RuntimeException("Mock Exception");
+    String exceptionMessage = "Mock Exception";
+    RuntimeException expectedException = new RuntimeException(exceptionMessage);
     // When
     RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> registryLogger.execute(
       contextData, request,
@@ -621,7 +669,53 @@ public class RegistryLoggerTest {
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
       RegistryOutcome.KO,
-      null);
+      Map.of("exceptionMessage", exceptionMessage));
+  }
+
+  @Test
+  void testExecuteWithException_noExceptionHandler_RestClientResponseException() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = podamFactory.manufacturePojo(RegistryContextData.class);
+    contextData.setEventType(RegistryEventType.paSendRTV2);
+    String requestPayload = "REQUESTPAYLOAD";
+    Object request = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+
+    String body = "BODY";
+    RestClientResponseException expectedException = new RestClientResponseException("message", 500, "Server Error", null,
+      body.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+    // When
+    RestClientResponseException exception = Assertions.assertThrows(RestClientResponseException.class, () -> registryLogger.execute(
+      contextData, request,
+      () -> {
+        throw expectedException;
+      },
+      null));
+
+    // Then
+    assertSame(expectedException, exception);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      requestPayload);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.KO,
+      Map.of(
+        "status", 500,
+        "body", body
+        ));
   }
 
   @Test

@@ -40,4 +40,13 @@ public class DebtPositionServiceImpl implements DebtPositionService {
     return client.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken);
   }
 
+  @Override
+  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(
+    Long organizationId,
+    String nav, List<DebtPositionOrigin> debtPositionOriginList,
+    String accessToken) {
+    return client.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList, accessToken);
+  }
+
+
 }

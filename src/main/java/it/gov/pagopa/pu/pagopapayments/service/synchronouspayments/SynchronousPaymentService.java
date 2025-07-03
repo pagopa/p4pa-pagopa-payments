@@ -98,7 +98,8 @@ public class SynchronousPaymentService {
         if (amountUpdatesDTO.getNotificationFee()!=null && amountUpdatesDTO.getNotificationFee()>0)
           return amountUpdatesDTO.getNotificationFee();
       }else {
-        log.error("Failed to retrieve notification fee from pu-sil because OrgSilServiceId is null");
+        log.error("Failed to retrieve notification fee from pu-sil because amountActualizationOrgSilServiceId is null"
+                + " on debtPositionTypeOrgId {}", debtPositionTypeOrg.getDebtPositionTypeOrgId());
       }
     }catch (NotPayableSilActualizedAmountException e){
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_DOVUTO_NON_PAGABILE, nav);

@@ -97,6 +97,8 @@ public class SynchronousPaymentService {
         AmountUpdatesDTO amountUpdatesDTO = puSilService.getAmountUpdates(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav, accessToken);
         if (amountUpdatesDTO.getNotificationFee()!=null && amountUpdatesDTO.getNotificationFee()>0)
           return amountUpdatesDTO.getNotificationFee();
+      }else {
+        log.error("Failed to retrieve notification fee from pu-sil because OrgSilServiceId is null");
       }
     }catch (NotPayableSilActualizedAmountException e){
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_DOVUTO_NON_PAGABILE, nav);

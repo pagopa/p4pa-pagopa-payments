@@ -165,4 +165,29 @@ class DebtPositionClientTest {
     Assertions.assertSame(expectedResult, result);
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = "ORDINARY")
+  @NullAndEmptySource
+  void givenNotExistentDebtPositionTypeOrgCrudDebtPositionTypeOrgsFindDebtPositionTypeOrgByOrgIdAndNavAndOriginsThenNull(String debtPositionOrigin){
+    //Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String nav = "NAV";
+    List<DebtPositionOrigin> debtPositionOriginList = debtPositionOrigin==null ? null :
+      (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionOrigin.valueOf(debtPositionOrigin)));
+
+    Mockito.when(apisHolderMock.getDebtPositionTypeOrgSearchControllerApi(accessToken))
+      .thenReturn(debtPositionTypeOrgSearchControllerApiMock);
+
+    Mockito.when(debtPositionTypeOrgSearchControllerApiMock
+        .crudDebtPositionTypeOrgsFindDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    DebtPositionTypeOrg result = client.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList, accessToken);
+
+    // Then
+    Assertions.assertNull(result);
+  }
+
 }

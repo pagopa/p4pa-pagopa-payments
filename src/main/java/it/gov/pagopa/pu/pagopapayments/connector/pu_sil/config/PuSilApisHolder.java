@@ -1,10 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pu_sil.config;
 
 import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
-
 import it.gov.pagopa.pu.pusil.controller.ApiClient;
 import it.gov.pagopa.pu.pusil.controller.BaseApi;
-import it.gov.pagopa.pu.pusil.controller.generated.AmountUpdatesApi;
+import it.gov.pagopa.pu.pusil.controller.generated.ActualizationApi;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class PuSilApisHolder {
 
-  private final AmountUpdatesApi amountUpdatesApi;
+  private final ActualizationApi actualizationApi;
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
 
@@ -31,7 +30,7 @@ public class PuSilApisHolder {
       restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("PU_SIL"));
     }
 
-    this.amountUpdatesApi = new AmountUpdatesApi(apiClient);
+    this.actualizationApi = new ActualizationApi(apiClient);
   }
 
   @PreDestroy
@@ -39,9 +38,9 @@ public class PuSilApisHolder {
     bearerTokenHolder.remove();
   }
 
-  /** It will return a {@link AmountUpdatesApi} instrumented with the provided accessToken. Use null if auth is not required */
-  public AmountUpdatesApi getAmountUpdatesApi(String accessToken){
-    return getApi(accessToken, amountUpdatesApi);
+  /** It will return a {@link ActualizationApi} instrumented with the provided accessToken. Use null if auth is not required */
+  public ActualizationApi getActualizationApi(String accessToken){
+    return getApi(accessToken, actualizationApi);
   }
 
   private <T extends BaseApi> T getApi(String accessToken, T api) {

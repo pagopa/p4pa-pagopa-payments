@@ -39,10 +39,10 @@ class PuSilApisHolderTest extends BaseApiHolderTest {
   }
 
   @Test
-  void whenGetAmountUpdatesApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+  void whenGetActualizationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      accessToken -> puSilApisHolder.getAmountUpdatesApi(accessToken)
-        .getAmountUpdates(1L, "NAV"),
+      accessToken -> puSilApisHolder.getActualizationApi(accessToken)
+        .actualize(1L, "NAV"),
       new ParameterizedTypeReference<>() {},
       puSilApisHolder::unload
     );

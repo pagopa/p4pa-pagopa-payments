@@ -1,15 +1,15 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pu_sil;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import it.gov.pagopa.pu.pagopapayments.connector.pu_sil.client.PuSilClient;
-import it.gov.pagopa.pu.pusil.dto.generated.AmountUpdatesDTO;
+import it.gov.pagopa.pu.pusil.dto.generated.ActualizationResultDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 @ExtendWith(MockitoExtension.class)
 class PuSilServiceImplTest {
@@ -24,17 +24,17 @@ class PuSilServiceImplTest {
   }
 
   @Test
-  void whenGetAmountUpdatesThenInvokeClient(){
+  void whenActualizeThenInvokeClient(){
     Long orgSilServiceId = 1L;
     String nav = "NAV";
     String accessToken = "access_token";
-    AmountUpdatesDTO expectedResponse = new AmountUpdatesDTO();
+    ActualizationResultDTO expectedResponse = new ActualizationResultDTO();
 
-    Mockito.when(puSilClientMock.getAmountUpdates(orgSilServiceId, nav, accessToken))
+    Mockito.when(puSilClientMock.actualize(orgSilServiceId, nav, accessToken))
       .thenReturn(expectedResponse);
 
-    AmountUpdatesDTO response = puSilService
-      .getAmountUpdates(orgSilServiceId, nav, accessToken);
+    ActualizationResultDTO response = puSilService
+      .actualize(orgSilServiceId, nav, accessToken);
 
     assertSame(expectedResponse,response);
   }

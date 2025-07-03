@@ -15,7 +15,7 @@ import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.NotPayableSilActualizedAmountException;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.service.PaForNodeRequestValidatorService;
-import it.gov.pagopa.pu.pusil.dto.generated.AmountUpdatesDTO;
+import it.gov.pagopa.pu.pusil.dto.generated.ActualizationResultDTO;
 import it.gov.pagopa.pu.sendnotification.dto.generated.NotificationPriceResponseV23DTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -94,9 +94,9 @@ public class SynchronousPaymentService {
       if(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId()!=null)
       {
         log.info("Retrieve notification fee from pu-sil by OrgSilServiceId {} and nav {}", debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav);
-        AmountUpdatesDTO amountUpdatesDTO = puSilService.getAmountUpdates(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav, accessToken);
-        if (amountUpdatesDTO.getNotificationFee()!=null && amountUpdatesDTO.getNotificationFee()>0)
-          return amountUpdatesDTO.getNotificationFee();
+        ActualizationResultDTO amountUpdatesDTO = puSilService.actualize(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav, accessToken);
+        if (amountUpdatesDTO.getNotificationFeeCents()!=null && amountUpdatesDTO.getNotificationFeeCents()>0)
+          return amountUpdatesDTO.getNotificationFeeCents();
       }else {
         log.error("Failed to retrieve notification fee from pu-sil because amountActualizationOrgSilServiceId is null"
                 + " on debtPositionTypeOrgId {}", debtPositionTypeOrg.getDebtPositionTypeOrgId());

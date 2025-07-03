@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pu_sil.client;
 
 import it.gov.pagopa.pu.pagopapayments.connector.pu_sil.config.PuSilApisHolder;
 import it.gov.pagopa.pu.pagopapayments.exception.NotPayableSilActualizedAmountException;
-import it.gov.pagopa.pu.pusil.dto.generated.AmountUpdatesDTO;
+import it.gov.pagopa.pu.pusil.dto.generated.ActualizationResultDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -17,11 +17,11 @@ public class PuSilClient {
     this.apisHolder = apisHolder;
   }
 
-  public AmountUpdatesDTO getAmountUpdates(Long orgSilServiceId, String nav, String accessToken) {
+  public ActualizationResultDTO actualize(Long orgSilServiceId, String nav, String accessToken) {
     try {
-      return apisHolder.getAmountUpdatesApi(accessToken).getAmountUpdates(orgSilServiceId, nav);
+      return apisHolder.getActualizationApi(accessToken).actualize(orgSilServiceId, nav);
     } catch (HttpClientErrorException.Conflict e) {
-      throw new NotPayableSilActualizedAmountException("Error when invoke getAmountUpdates", e);
+      throw new NotPayableSilActualizedAmountException("Error when invoke actualize", e);
     }
   }
 }

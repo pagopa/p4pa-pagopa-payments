@@ -95,4 +95,26 @@ class DebtPositionServiceTest {
     Assertions.assertSame(expectedResult, result);
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = "ORDINARY")
+  @NullAndEmptySource
+  void whenFindDebtPositionTypeOrgByOrgIdAndNavAndOriginsThenInvokeClient(String debtPositionOrigin){
+    // Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String nav = "NAV";
+    DebtPositionTypeOrg expectedResult = new DebtPositionTypeOrg();
+    List<DebtPositionOrigin> debtPositionOriginList = debtPositionOrigin==null ? null :
+      (debtPositionOrigin.isEmpty() ? List.of() : List.of(DebtPositionOrigin.valueOf(debtPositionOrigin)));
+
+    Mockito.when(clientMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(Mockito.same(organizationId),Mockito.same(nav),
+      Mockito.same(debtPositionOriginList), Mockito.same(accessToken))).thenReturn(expectedResult);
+
+    // When
+    DebtPositionTypeOrg result = service.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
 }

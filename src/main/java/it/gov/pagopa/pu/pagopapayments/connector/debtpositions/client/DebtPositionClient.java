@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -43,5 +42,16 @@ public class DebtPositionClient {
   public InstallmentDTO updateInstallmentNotificationFee(Long organizationId, String nav, Long newFeeCents, String accessToken) {
     UpdateInstallmentNotificationFeeRequest request = new UpdateInstallmentNotificationFeeRequest(organizationId, nav, newFeeCents);
     return debtPositionsApisHolder.getDebtPositionApi(accessToken).updateInstallmentNotificationFee(request);
+  }
+
+  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOriginList, String accessToken) {
+    try {
+      return debtPositionsApisHolder.getDebtPositionTypeOrgSearchControllerApi(accessToken)
+        .crudDebtPositionTypeOrgsFindDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList);
+    } catch (HttpClientErrorException.NotFound e) {
+      log.info("Cannot find DeptPositionTypeOrg having orgId {}, nav {} and origins {}",
+        organizationId, nav, debtPositionOriginList);
+      return null;
+    }
   }
 }

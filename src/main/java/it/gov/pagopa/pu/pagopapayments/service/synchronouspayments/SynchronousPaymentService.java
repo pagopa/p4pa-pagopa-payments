@@ -67,7 +67,7 @@ public class SynchronousPaymentService {
     }
     Organization organization = paForNodeRequestValidatorService.paForNodeRequestValidate(request, accessToken);
     InstallmentDTO installment;
-    long notificationFeeCents = retrieveNotificationFeeCents(organization.getOrganizationId(), nav, accessToken);
+    long notificationFeeCents = retrieveNotificationFeeCents(organization, nav, accessToken);
     if(notificationFeeCents>0)
        installment = debtPositionService.updateInstallmentNotificationFee(organization.getOrganizationId(), nav, notificationFeeCents, accessToken);
     else
@@ -80,12 +80,13 @@ public class SynchronousPaymentService {
     return synchronousPaymentStatusVerifierService.verifyPaymentStatus(organization, installmentDTOList, noticeNumber, postalTransfer);
   }
 
-  public long retrieveNotificationFeeCents(Long organizationId, String nav, String accessToken){
-    DebtPositionTypeOrg debtPositionTypeOrg = debtPositionService.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
+  public long retrieveNotificationFeeCents(Organization organization, String nav, String accessToken){
+    DebtPositionTypeOrg debtPositionTypeOrg = debtPositionService.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
     if(debtPositionTypeOrg!=null && Boolean.TRUE.equals(debtPositionTypeOrg.getFlagAmountActualization())) {
-        return retrieveNotificationFeeCentsFromPuSil(debtPositionTypeOrg, nav, accessToken);
+        String orgAccessToken = authnService.getAccessToken(organization.getIpaCode());
+        return retrieveNotificationFeeCentsFromPuSil(debtPositionTypeOrg, nav, orgAccessToken);
     } else {
-        return retrieveNotificationFeeCentsFromSend(organizationId, nav, accessToken);
+        return retrieveNotificationFeeCentsFromSend(organization.getOrganizationId(), nav, accessToken);
     }
   }
 

@@ -85,7 +85,7 @@ management:
       show-details: "\${HEALTH_ACTUATOR_SHOW_DETAILS:when-authorized}"
       group:
         readiness.include: "*"
-        liveness.include: livenessState,diskSpace,ping
+        liveness.include: livenessState,diskSpace,ping,binders
     prometheus:
       enabled: true
   metrics:

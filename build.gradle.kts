@@ -179,12 +179,6 @@ springBoot {
   mainClass.value("it.gov.pagopa.pu.pagopapayments.PagoPaPaymentsApplication")
 }
 
-var targetEnv = when (Objects.requireNonNullElse(System.getProperty("targetBranch"), grgit.branch.current().name)) {
-  "uat" -> "uat"
-  "main" -> "main"
-  else -> "develop"
-}
-
 openApiGenerate {
   generatorName.set("spring")
   inputSpec.set("$rootDir/openapi/p4pa-pagopa-payments.openapi.yaml")
@@ -209,6 +203,12 @@ openApiGenerate {
   ))
 }
 
+var targetEnv = when (Objects.requireNonNullElse(System.getProperty("targetBranch"), grgit.branch.current().name)) {
+  "uat" -> "uat"
+  "main" -> "main"
+  else -> "develop"
+}
+
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateP4PAAUTH") {
   group = "openapi"
   description = "description"
@@ -226,6 +226,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "serializableModel" to "true",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
+    "useBeanValidation" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true",
     "generateConstructorWithAllArgs" to "true",
@@ -252,8 +254,11 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "swaggerAnnotations" to "false",
     "openApiNullable" to "false",
     "dateLibrary" to "java8",
+    "serializableModel" to "true",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
+    "useBeanValidation" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true",
     "generateConstructorWithAllArgs" to "true",
@@ -277,8 +282,11 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "swaggerAnnotations" to "false",
     "openApiNullable" to "false",
     "dateLibrary" to "java8",
+    "serializableModel" to "true",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
+    "useBeanValidation" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true",
     "generateConstructorWithAllArgs" to "true",
@@ -305,8 +313,11 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "swaggerAnnotations" to "false",
     "openApiNullable" to "false",
     "dateLibrary" to "java8",
+    "serializableModel" to "true",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
+    "useBeanValidation" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true",
     "useAbstractionForFiles" to "true",
@@ -331,8 +342,10 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "swaggerAnnotations" to "false",
     "openApiNullable" to "false",
     "dateLibrary" to "java8",
+    "serializableModel" to "true",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true",
     "generateConstructorWithAllArgs" to "true",
@@ -359,8 +372,10 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "swaggerAnnotations" to "false",
     "openApiNullable" to "false",
     "dateLibrary" to "java8",
+    "serializableModel" to "true",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true",
     "generateConstructorWithAllArgs" to "true",
@@ -384,9 +399,10 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   configOptions.set(mapOf(
     "swaggerAnnotations" to "false",
     "openApiNullable" to "false",
-    "dateLibrary" to "java17",
+    "dateLibrary" to "java8",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true"
   ))
@@ -406,8 +422,11 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "swaggerAnnotations" to "false",
     "openApiNullable" to "false",
     "dateLibrary" to "java8",
+    "serializableModel" to "true",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
+    "useBeanValidation" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true",
     "generateConstructorWithAllArgs" to "true",
@@ -431,8 +450,11 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "swaggerAnnotations" to "false",
     "openApiNullable" to "false",
     "dateLibrary" to "java8",
+    "serializableModel" to "true",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
+    "useBeanValidation" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true",
     "generateConstructorWithAllArgs" to "true",
@@ -459,6 +481,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "serializableModel" to "true",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
+    "useOneOfInterfaces" to "true",
+    "useBeanValidation" to "true",
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true",
     "generateConstructorWithAllArgs" to "true",

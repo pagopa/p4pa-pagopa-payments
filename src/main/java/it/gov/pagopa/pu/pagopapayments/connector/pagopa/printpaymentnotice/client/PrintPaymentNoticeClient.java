@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config.PagopaPrintPaymentNoticeApisHolder;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class PrintPaymentNoticeClient {
@@ -18,7 +19,11 @@ public class PrintPaymentNoticeClient {
   }
 
   private String getApiKeyFromBroker(Long brokerId, String accessToken) {
-    return brokerService.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
+    String brokerApiKey = brokerService.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
+    if(!StringUtils.hasText(brokerApiKey)){
+      throw new IllegalStateException("Broker " + brokerId + " has not GENERATE_NOTICE apiKey configured!");
+    }
+    return brokerApiKey;
   }
 
   public byte[] generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {

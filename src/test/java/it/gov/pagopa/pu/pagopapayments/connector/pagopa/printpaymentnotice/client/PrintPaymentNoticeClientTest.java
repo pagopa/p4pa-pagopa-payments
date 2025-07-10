@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.confi
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.api.NoticeGenerationRequestApisApi;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -134,5 +135,18 @@ class PrintPaymentNoticeClientTest {
 
     // Then
     assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNoApiKeyWhenGetFolderSignedUrlResourceThenThrowInvalidStateException() {
+    // Given
+    Long brokerId = 1L;
+    String folderId = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
+
+    Mockito.when(brokerServiceMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
+      .thenReturn(null);
+
+    // When, Then
+    Assertions.assertThrows(IllegalStateException.class, () -> printPaymentNoticeClient.getFolderSignedUrlResource(brokerId, folderId, VALID_ACCESS_TOKEN));
   }
 }

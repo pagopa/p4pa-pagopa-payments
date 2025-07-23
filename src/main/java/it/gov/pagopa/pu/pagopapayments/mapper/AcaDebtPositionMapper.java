@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -56,7 +57,7 @@ public class AcaDebtPositionMapper {
           .description(installment.getRemittanceInformation())
           .amount(installment.getAmountCents().intValue())
           .expirationDate(ConversionUtils.localDate2RomeMaxTime(installment.getDueDate()))
-          .switchToExpired(installment.getDueDate()!=null)
+          .switchToExpired(Optional.ofNullable(installment.getSwitchToExpired()).orElse(false))
           .payStandIn(true));
       }).findAny().orElseThrow(() -> new InvalidValueException("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));
   }

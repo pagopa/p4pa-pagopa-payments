@@ -91,7 +91,7 @@ class GenerateNoticeServiceTest {
       .thenReturn(organization);
 
     Mockito.when(printPaymentNoticeServiceMock.generateNotice(
-      organization.getBrokerId(),
+      organization.getOrganizationId(),
       noticeGenerationRequestItem,
       ACCESS_TOKEN)
     ).thenReturn(expectedResult);
@@ -139,7 +139,7 @@ class GenerateNoticeServiceTest {
       .thenReturn(organization);
 
     Mockito.when(printPaymentNoticeServiceMock.generateNotice(
-      organization.getBrokerId(),
+      organization.getOrganizationId(),
       noticeGenerationRequestItem,
       ACCESS_TOKEN)
     ).thenReturn(expectedResult);
@@ -260,7 +260,7 @@ class GenerateNoticeServiceTest {
     Mockito.when(organizationServiceMock.getOrganizationById(request.getDebtPositions().getFirst().getOrganizationId(), ACCESS_TOKEN))
       .thenReturn(organization);
     Mockito.when(printPaymentNoticeServiceMock.generateNoticeMassive(
-        organization.getBrokerId(), request.getRequestId(), requestMassive, ACCESS_TOKEN))
+        organization.getOrganizationId(), request.getRequestId(), requestMassive, ACCESS_TOKEN))
       .thenReturn(resourceDTO);
 
     //when
@@ -311,7 +311,7 @@ class GenerateNoticeServiceTest {
     Mockito.when(organizationServiceMock.getOrganizationById(request.getDebtPositions().getFirst().getOrganizationId(), ACCESS_TOKEN))
       .thenReturn(organization);
     Mockito.when(printPaymentNoticeServiceMock.generateNoticeMassive(
-        organization.getBrokerId(), request.getRequestId(), requestMassive, ACCESS_TOKEN))
+        organization.getOrganizationId(), request.getRequestId(), requestMassive, ACCESS_TOKEN))
       .thenReturn(resourceDTO);
 
     //when
@@ -333,9 +333,9 @@ class GenerateNoticeServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
       .thenReturn(organization);
-    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getOrganizationId(), FOLDER_ID, ACCESS_TOKEN))
       .thenReturn(status);
-    Mockito.when(printPaymentNoticeServiceMock.getFolderSignedUrlResource(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+    Mockito.when(printPaymentNoticeServiceMock.getFolderSignedUrlResource(organization.getOrganizationId(), FOLDER_ID, ACCESS_TOKEN))
       .thenReturn(signedUrl);
 
     //when
@@ -355,9 +355,9 @@ class GenerateNoticeServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
       .thenReturn(organization);
-    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getOrganizationId(), FOLDER_ID, ACCESS_TOKEN))
       .thenReturn(status);
-    Mockito.when(printPaymentNoticeServiceMock.getFolderSignedUrlResource(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+    Mockito.when(printPaymentNoticeServiceMock.getFolderSignedUrlResource(organization.getOrganizationId(), FOLDER_ID, ACCESS_TOKEN))
       .thenReturn(signedUrl);
 
     //when
@@ -377,9 +377,9 @@ class GenerateNoticeServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
       .thenReturn(organization);
-    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getOrganizationId(), FOLDER_ID, ACCESS_TOKEN))
       .thenReturn(status);
-    Mockito.when(printPaymentNoticeServiceMock.getFolderSignedUrlResource(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+    Mockito.when(printPaymentNoticeServiceMock.getFolderSignedUrlResource(organization.getOrganizationId(), FOLDER_ID, ACCESS_TOKEN))
       .thenReturn(signedUrl);
 
     //when
@@ -398,7 +398,7 @@ class GenerateNoticeServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationById(ORGANIZATION_ID, ACCESS_TOKEN))
       .thenReturn(organization);
-    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getBrokerId(), FOLDER_ID, ACCESS_TOKEN))
+    Mockito.when(printPaymentNoticeServiceMock.getFolderStatus(organization.getOrganizationId(), FOLDER_ID, ACCESS_TOKEN))
       .thenReturn(status);
 
     //when

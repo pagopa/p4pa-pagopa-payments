@@ -6,6 +6,8 @@ import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generate
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeRequestDataDTO;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 import static it.gov.pagopa.pu.pagopapayments.mapper.DebtorMapper.toDebtorDTO;
 
 @Component
@@ -16,7 +18,7 @@ public class NoticeRequestMapper {
   public static NoticeDTO toNoticeDTO(InstallmentDTO installment) {
     NoticeDTO notice = new NoticeDTO();
     notice.setCode(installment.getNav());
-    notice.setDueDate(installment.getDueDate() != null ? installment.getDueDate().toString() : null);
+    notice.setDueDate(Boolean.TRUE.equals(installment.getSwitchToExpired()) ? Objects.requireNonNull(installment.getDueDate()).toString() : null);
     notice.setPaymentAmount(installment.getAmountCents());
     notice.setSubject(installment.getRemittanceInformation());
     notice.setInstallments(null);

@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.client;
 
-import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
-import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config.PagopaPrintPaymentNoticeApisHolder;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
 import org.springframework.stereotype.Service;
@@ -11,41 +11,41 @@ import org.springframework.util.StringUtils;
 public class PrintPaymentNoticeClient {
 
   private final PagopaPrintPaymentNoticeApisHolder apisHolder;
-  private final BrokerService brokerService;
+  private final OrganizationService organizationService;
 
-  public PrintPaymentNoticeClient(PagopaPrintPaymentNoticeApisHolder apisHolder, BrokerService brokerService) {
+  public PrintPaymentNoticeClient(PagopaPrintPaymentNoticeApisHolder apisHolder, OrganizationService organizationService) {
     this.apisHolder = apisHolder;
-    this.brokerService = brokerService;
+    this.organizationService = organizationService;
   }
 
-  private String getApiKeyFromBroker(Long brokerId, String accessToken) {
-    String brokerApiKey = brokerService.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
-    if(!StringUtils.hasText(brokerApiKey)){
-      throw new IllegalStateException("Broker " + brokerId + " has not GENERATE_NOTICE apiKey configured!");
+  private String getApiKeyFromOrganizationOrBroker(Long organizationId, String accessToken) {
+    String orgOrBrokerApiKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, accessToken);
+    if(!StringUtils.hasText(orgOrBrokerApiKey)){
+      throw new IllegalStateException("Organization " + organizationId + " has not GENERATE_NOTICE apiKey configured!");
     }
-    return brokerApiKey;
+    return orgOrBrokerApiKey;
   }
 
-  public byte[] generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
-    String apiKey = getApiKeyFromBroker(brokerId, accessToken);
+  public byte[] generateNotice(Long organizationId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
+    String apiKey = getApiKeyFromOrganizationOrBroker(organizationId, accessToken);
     return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
       .generateNotice(noticeGenerationRequestItemDTO, null, null);
   }
 
-  public NoticeGenerationMassiveResourceDTO generateNoticeMassive(Long brokerId, String idempotencyKey, NoticeGenerationMassiveRequestDTO noticeMassive, String accessToken) {
-    String apiKey = getApiKeyFromBroker(brokerId, accessToken);
+  public NoticeGenerationMassiveResourceDTO generateNoticeMassive(Long organizationId, String idempotencyKey, NoticeGenerationMassiveRequestDTO noticeMassive, String accessToken) {
+    String apiKey = getApiKeyFromOrganizationOrBroker(organizationId, accessToken);
     return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
       .generateNoticeMassiveRequest(idempotencyKey, noticeMassive, null);
   }
 
-  public GetGenerationRequestStatusResourceDTO getFolderStatus(Long brokerId, String folderId, String accessToken) {
-    String apiKey = getApiKeyFromBroker(brokerId, accessToken);
+  public GetGenerationRequestStatusResourceDTO getFolderStatus(Long organizationId, String folderId, String accessToken) {
+    String apiKey = getApiKeyFromOrganizationOrBroker(organizationId, accessToken);
     return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
       .getFolderStatus(folderId, null);
   }
 
-  public GetSignedUrlResourceDTO getFolderSignedUrlResource(Long brokerId, String folderId, String accessToken) {
-    String apiKey = getApiKeyFromBroker(brokerId, accessToken);
+  public GetSignedUrlResourceDTO getFolderSignedUrlResource(Long organizationId, String folderId, String accessToken) {
+    String apiKey = getApiKeyFromOrganizationOrBroker(organizationId, accessToken);
     return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
       .getFolderSignedUrlResource(folderId, null);
   }

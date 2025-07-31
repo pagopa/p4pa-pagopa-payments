@@ -41,9 +41,9 @@ public class GenerateNoticeService {
   public NoticeDataDTO generateNotice(String iuv, DebtPositionDTO debtPosition, String accessToken) {
     Organization org = organizationService.getOrganizationById(debtPosition.getOrganizationId(), accessToken);
     NoticeGenerationRequestItemDTO noticeData = generateNoticeRequest(org, iuv, debtPosition);
-    log.info("generateNotice for broker with id[{}], notice code[{}] and templateId[{}]", org.getBrokerId(), noticeData.getData().getNotice().getCode(), noticeData.getTemplateId());
+    log.info("generateNotice for organization with id[{}], notice code[{}] and templateId[{}]", org.getOrganizationId(), noticeData.getData().getNotice().getCode(), noticeData.getTemplateId());
 
-    byte[] noticeGenerated = printPaymentNoticeService.generateNotice(org.getBrokerId(), noticeData, accessToken);
+    byte[] noticeGenerated = printPaymentNoticeService.generateNotice(org.getOrganizationId(), noticeData, accessToken);
     return NoticeDataDTO.builder()
       .notice(noticeGenerated)
       .fileName(org.getOrgFiscalCode() + "_" + iuv + ".pdf")
@@ -62,9 +62,9 @@ public class GenerateNoticeService {
     } else {
       requestMassive = generateMassiveFromIuvList(org, request.getDebtPositions(), request.getIuvList());
     }
-    log.info("calling generateNoticeMassive with brokerId[{}] and a list with [{}] notices", org.getBrokerId(), requestMassive.getNotices().size());
+    log.info("calling generateNoticeMassive with organizationId[{}] and a list with [{}] notices", org.getOrganizationId(), requestMassive.getNotices().size());
 
-    response = printPaymentNoticeService.generateNoticeMassive(org.getBrokerId(), request.getRequestId(), requestMassive, accessToken);
+    response = printPaymentNoticeService.generateNoticeMassive(org.getOrganizationId(), request.getRequestId(), requestMassive, accessToken);
     log.info("generateNoticeMassive - retrieved folderId[{}]", response.getFolderId());
 
     return GeneratedNoticeMassiveFolderMapper.toGeneratedNoticeMassiveFolderDTO(response);
@@ -72,15 +72,15 @@ public class GenerateNoticeService {
 
   public SignedUrlResultDTO getNoticeMassiveZip(Long organizationId, String folderId, String accessToken) {
     Organization org = organizationService.getOrganizationById(organizationId, accessToken);
-    log.info("getNoticeMassiveZip - retrieved organization with id and calling getFolderStatus with brokerId[{}], folderId[{}]", org.getBrokerId(), folderId);
+    log.info("getNoticeMassiveZip - retrieved organization with id and calling getFolderStatus with organizationId[{}], folderId[{}]", org.getOrganizationId(), folderId);
 
-    GetGenerationRequestStatusResourceDTO folderStatus = printPaymentNoticeService.getFolderStatus(org.getBrokerId(), folderId, accessToken);
+    GetGenerationRequestStatusResourceDTO folderStatus = printPaymentNoticeService.getFolderStatus(org.getOrganizationId(), folderId, accessToken);
     log.info("getFolderStatus - noticesInError[{}], processedNotices [{}]", folderStatus.getNoticesInError(), folderStatus.getProcessedNotices());
 
     SignedUrlResultDTO result = new SignedUrlResultDTO();
     GetGenerationRequestStatusResourceDTO.StatusEnum status = folderStatus.getStatus();
     if (PROCESSED.equals(status) || PROCESSED_WITH_FAILURES.equals(status) || FAILED.equals(status)) {
-      GetSignedUrlResourceDTO signedUrlRes = printPaymentNoticeService.getFolderSignedUrlResource(org.getBrokerId(), folderId, accessToken);
+      GetSignedUrlResourceDTO signedUrlRes = printPaymentNoticeService.getFolderSignedUrlResource(org.getOrganizationId(), folderId, accessToken);
       result.setNoticesInError(folderStatus.getNoticesInError());
       result.setProcessedNotices(folderStatus.getProcessedNotices());
       result.setSignedUrl(signedUrlRes.getSignedUrl());

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -47,7 +48,7 @@ public class GpdDebtPositionMapper {
           .province(debtor.getProvince())
           .country(debtor.getNation())
           .email(debtor.getEmail())
-          .switchToExpired(installment.getDueDate() != null)
+          .switchToExpired(Optional.ofNullable(installment.getSwitchToExpired()).orElse(false))
           .companyName(org.getOrgName())
           .paymentOption(List.of(getPaymentOption(installment)))
           .validityDate(debtPosition.getValidityDate() != null ? debtPosition.getValidityDate().atStartOfDay().toString() : null)

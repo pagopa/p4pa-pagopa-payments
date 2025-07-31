@@ -9,12 +9,14 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.UpdateInstallmentNotificationFeeRequest;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
+import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
@@ -139,6 +141,50 @@ class DebtPositionClientTest {
 
     // Then
     Assertions.assertSame(expectedResult, result);
+  }
+
+  private Exception createException(String type) {
+    return switch (type) {
+      case "NotFoundException" ->
+        HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null);
+      case "ConflictException" ->
+        HttpClientErrorException.create(HttpStatus.CONFLICT, "Conflict", null, null, null);
+      case "PreconditionFailedException" ->
+        HttpClientErrorException.create(HttpStatus.PRECONDITION_FAILED, "PreconditionFailed", null, null, null);
+      case "InternalServerErrorException" ->
+        HttpClientErrorException.create(HttpStatus.INTERNAL_SERVER_ERROR, "InternalServerError", null, null, null);
+      default ->
+        throw new IllegalArgumentException("Unknown exception type: " + type);
+    };
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "NotFoundException, 'PAA_PAGAMENTO_SCONOSCIUTO'",
+    "ConflictException, 'PAA_PAGAMENTO_DUPLICATO'",
+    "PreconditionFailedException, 'PAA_PAGAMENTO_SCADUTO'",
+    "InternalServerErrorException, 'PAA_SYSTEM_ERROR'"
+  })
+  void whenUpdateInstallmentNotificationFeeWithErrorThenException(String exceptionType, String errorMessage){
+    //Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String nav = "NAV";
+    Long newFeeCents = 100L;
+    UpdateInstallmentNotificationFeeRequest request = new UpdateInstallmentNotificationFeeRequest(organizationId, nav, newFeeCents);
+
+    Mockito.when(apisHolderMock.getDebtPositionApi(accessToken))
+      .thenReturn(debtPositionApiMock);
+    Exception mockedException = createException(exceptionType);
+    Mockito.when(debtPositionApiMock.updateInstallmentNotificationFee(request))
+      .thenThrow(mockedException);
+
+    // When
+    PagoPaNodeFaultException exception = Assertions.assertThrows(PagoPaNodeFaultException.class,
+      () -> client.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken));
+
+    // Then
+    Assertions.assertEquals(errorMessage, exception.getErrorCode().code());
   }
 
   @ParameterizedTest

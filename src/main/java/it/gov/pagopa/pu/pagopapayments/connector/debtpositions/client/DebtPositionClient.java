@@ -5,7 +5,10 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.UpdateInstallmentNotificationFeeRequest;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
+import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
+import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -41,7 +44,18 @@ public class DebtPositionClient {
 
   public InstallmentDTO updateInstallmentNotificationFee(Long organizationId, String nav, Long newFeeCents, String accessToken) {
     UpdateInstallmentNotificationFeeRequest request = new UpdateInstallmentNotificationFeeRequest(organizationId, nav, newFeeCents);
-    return debtPositionsApisHolder.getDebtPositionApi(accessToken).updateInstallmentNotificationFee(request);
+    try {
+      return debtPositionsApisHolder.getDebtPositionApi(accessToken).updateInstallmentNotificationFee(request);
+    } catch (HttpClientErrorException.NotFound e) {
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO, nav);
+    } catch (HttpClientErrorException.Conflict e) {
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO, nav);
+    } catch (HttpClientErrorException ex) {
+      if(ex.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
+        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO, nav);
+      }
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, nav);
+    }
   }
 
   public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOriginList, String accessToken) {

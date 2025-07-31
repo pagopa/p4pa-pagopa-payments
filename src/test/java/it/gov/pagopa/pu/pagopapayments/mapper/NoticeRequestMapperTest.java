@@ -22,6 +22,7 @@ class NoticeRequestMapperTest {
   void givenValidInstallmentWhenToNoticeDTOThenOk() {
     //given
     InstallmentDTO installmentRequest = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentRequest.setSwitchToExpired(Boolean.TRUE);
 
     //when
     NoticeDTO response = NoticeRequestMapper.toNoticeDTO(installmentRequest);
@@ -39,7 +40,7 @@ class NoticeRequestMapperTest {
   void givenValidInstallmentWithNullDueDateWhenToNoticeDTOThenOk() {
     //given
     InstallmentDTO installmentRequest = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installmentRequest.setDueDate(null);
+    installmentRequest.setSwitchToExpired(Boolean.FALSE);
 
     //when
     NoticeDTO response = NoticeRequestMapper.toNoticeDTO(installmentRequest);

@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.client;
 
-import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
-import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config.PagopaPrintPaymentNoticeApisHolder;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.api.NoticeGenerationRequestApisApi;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
@@ -26,21 +26,21 @@ class PrintPaymentNoticeClientTest {
   private NoticeGenerationRequestApisApi noticeGenerationRequestApisApiMock;
 
   @Mock
-  private BrokerService brokerServiceMock;
+  private OrganizationService organizationServiceMock;
 
   private PrintPaymentNoticeClient printPaymentNoticeClient;
   private static final String VALID_ACCESS_TOKEN = "VALID_ACCESS_TOKEN";
 
   @BeforeEach
   void setUp() {
-    printPaymentNoticeClient = new PrintPaymentNoticeClient(apisHolder, brokerServiceMock);
+    printPaymentNoticeClient = new PrintPaymentNoticeClient(apisHolder, organizationServiceMock);
   }
 
   @AfterEach
   void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(
       apisHolder,
-      brokerServiceMock
+      organizationServiceMock
     );
   }
 
@@ -51,11 +51,11 @@ class PrintPaymentNoticeClientTest {
     requestDTO.setData(new NoticeRequestDataDTO());
     requestDTO.setTemplateId("TemplateSingleInstalment");
 
-    Long brokerId = 1L;
+    Long organizationId = 1L;
     String apiKey = "apiKey";
     byte[] response = "PDF-DATA".getBytes();
 
-    Mockito.when(brokerServiceMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNoticeGenerationRequestApisApiMap(apiKey))
       .thenReturn(noticeGenerationRequestApisApiMock);
@@ -63,7 +63,7 @@ class PrintPaymentNoticeClientTest {
       .thenReturn(response);
 
     // When
-    byte[] result = printPaymentNoticeClient.generateNotice(brokerId, requestDTO, VALID_ACCESS_TOKEN);
+    byte[] result = printPaymentNoticeClient.generateNotice(organizationId, requestDTO, VALID_ACCESS_TOKEN);
 
     // Then
     assertSame(response, result);
@@ -72,14 +72,14 @@ class PrintPaymentNoticeClientTest {
   @Test
   void givenValidRequestWhenGenerateNoticeMassiveThenVerifyResponse() {
     // Given
-    Long brokerId = 1L;
+    Long organizationId = 1L;
     String apiKey = "apiKey";
     NoticeGenerationMassiveRequestDTO noticeMassive = new NoticeGenerationMassiveRequestDTO();
     NoticeGenerationMassiveResourceDTO expectedResult = new NoticeGenerationMassiveResourceDTO();
     expectedResult.setFolderId("123");
     String idempotenceKey = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
 
-    Mockito.when(brokerServiceMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNoticeGenerationRequestApisApiMap(apiKey))
       .thenReturn(noticeGenerationRequestApisApiMock);
@@ -87,7 +87,7 @@ class PrintPaymentNoticeClientTest {
       .thenReturn(expectedResult);
 
     // When
-    NoticeGenerationMassiveResourceDTO result = printPaymentNoticeClient.generateNoticeMassive(brokerId, idempotenceKey, noticeMassive, VALID_ACCESS_TOKEN);
+    NoticeGenerationMassiveResourceDTO result = printPaymentNoticeClient.generateNoticeMassive(organizationId, idempotenceKey, noticeMassive, VALID_ACCESS_TOKEN);
 
     // Then
     assertSame(expectedResult, result);
@@ -96,12 +96,12 @@ class PrintPaymentNoticeClientTest {
   @Test
   void givenValidRequestWhenGetFolderStatusThenVerifyResponse() {
     // Given
-    Long brokerId = 1L;
+    Long organizationId = 1L;
     String apiKey = "apiKey";
     GetGenerationRequestStatusResourceDTO expectedResult = new GetGenerationRequestStatusResourceDTO();
     String folderId = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
 
-    Mockito.when(brokerServiceMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNoticeGenerationRequestApisApiMap(apiKey))
       .thenReturn(noticeGenerationRequestApisApiMock);
@@ -109,7 +109,7 @@ class PrintPaymentNoticeClientTest {
       .thenReturn(expectedResult);
 
     // When
-    GetGenerationRequestStatusResourceDTO result = printPaymentNoticeClient.getFolderStatus(brokerId, folderId, VALID_ACCESS_TOKEN);
+    GetGenerationRequestStatusResourceDTO result = printPaymentNoticeClient.getFolderStatus(organizationId, folderId, VALID_ACCESS_TOKEN);
 
     // Then
     assertSame(expectedResult, result);
@@ -118,12 +118,12 @@ class PrintPaymentNoticeClientTest {
   @Test
   void givenValidRequestWhenGetFolderSignedUrlResourceThenVerifyResponse() {
     // Given
-    Long brokerId = 1L;
+    Long organizationId = 1L;
     String apiKey = "apiKey";
     GetSignedUrlResourceDTO expectedResult = new GetSignedUrlResourceDTO();
     String folderId = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
 
-    Mockito.when(brokerServiceMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNoticeGenerationRequestApisApiMap(apiKey))
       .thenReturn(noticeGenerationRequestApisApiMock);
@@ -131,7 +131,7 @@ class PrintPaymentNoticeClientTest {
       .thenReturn(expectedResult);
 
     // When
-    GetSignedUrlResourceDTO result = printPaymentNoticeClient.getFolderSignedUrlResource(brokerId, folderId, VALID_ACCESS_TOKEN);
+    GetSignedUrlResourceDTO result = printPaymentNoticeClient.getFolderSignedUrlResource(organizationId, folderId, VALID_ACCESS_TOKEN);
 
     // Then
     assertSame(expectedResult, result);
@@ -140,13 +140,13 @@ class PrintPaymentNoticeClientTest {
   @Test
   void givenNoApiKeyWhenGetFolderSignedUrlResourceThenThrowInvalidStateException() {
     // Given
-    Long brokerId = 1L;
+    Long organizationId = 1L;
     String folderId = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
 
-    Mockito.when(brokerServiceMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(null);
 
     // When, Then
-    Assertions.assertThrows(IllegalStateException.class, () -> printPaymentNoticeClient.getFolderSignedUrlResource(brokerId, folderId, VALID_ACCESS_TOKEN));
+    Assertions.assertThrows(IllegalStateException.class, () -> printPaymentNoticeClient.getFolderSignedUrlResource(organizationId, folderId, VALID_ACCESS_TOKEN));
   }
 }

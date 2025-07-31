@@ -13,22 +13,22 @@ public class PrintPaymentNoticeServiceImpl implements PrintPaymentNoticeService 
   }
 
   @Override
-  public byte[] generateNotice(Long brokerId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
-    return printPaymentNoticeClient.generateNotice(brokerId, noticeGenerationRequestItemDTO, accessToken);
+  public byte[] generateNotice(Long organizationId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
+    return printPaymentNoticeClient.generateNotice(organizationId, noticeGenerationRequestItemDTO, accessToken);
   }
 
   @Override
-  public NoticeGenerationMassiveResourceDTO generateNoticeMassive(Long brokerId, String idempotencyKey, NoticeGenerationMassiveRequestDTO noticeMassive, String accessToken) {
-    return printPaymentNoticeClient.generateNoticeMassive(brokerId, idempotencyKey, noticeMassive, accessToken);
+  public NoticeGenerationMassiveResourceDTO generateNoticeMassive(Long organizationId, String idempotencyKey, NoticeGenerationMassiveRequestDTO noticeMassive, String accessToken) {
+    return printPaymentNoticeClient.generateNoticeMassive(organizationId, idempotencyKey, noticeMassive, accessToken);
   }
 
   @Override
-  public GetGenerationRequestStatusResourceDTO getFolderStatus(Long brokerId, String folderId, String accessToken) {
-    return printPaymentNoticeClient.getFolderStatus(brokerId, folderId, accessToken);
+  public GetGenerationRequestStatusResourceDTO getFolderStatus(Long organizationId, String folderId, String accessToken) {
+    return printPaymentNoticeClient.getFolderStatus(organizationId, folderId, accessToken);
   }
 
   @Override
-  public GetSignedUrlResourceDTO getFolderSignedUrlResource(Long brokerId, String folderId, String accessToken) {
-    return printPaymentNoticeClient.getFolderSignedUrlResource(brokerId, folderId, accessToken);
+  public GetSignedUrlResourceDTO getFolderSignedUrlResource(Long organizationId, String folderId, String accessToken) {
+    return printPaymentNoticeClient.getFolderSignedUrlResource(organizationId, folderId, accessToken);
   }
 }

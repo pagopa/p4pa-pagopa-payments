@@ -60,6 +60,6 @@ public class ConversionUtils {
     if(localDate == null){
       return null;
     }
-    return LocalDateTime.of(localDate, LocalTime.MAX);
+    return LocalDateTime.of(localDate, LocalTime.of(23, 59, 59));
   }
 }

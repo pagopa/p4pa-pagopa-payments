@@ -171,10 +171,6 @@ class DebtPositionClientTest {
   void whenUpdateInstallmentNotificationFeeWithErrorThenException(String exceptionType, String errorMessage){
     //Given
     String accessToken = "ACCESSTOKEN";
-    Long organizationId = 1L;
-    String nav = "NAV";
-    Long newFeeCents = 100L;
-
     ActualizeAmountRequestDTO request = ActualizeAmountRequestDTO.builder()
       .organizationId(1L)
       .nav("NAV")

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.UpdateInstallmentNotificationFeeRequest;
+import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,9 +58,16 @@ class DebtPositionsApisHolderTest extends BaseApiHolderTest {
 
   @Test
   void whenGetDebtPositionApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    ActualizeAmountRequestDTO request = ActualizeAmountRequestDTO.builder()
+      .organizationId(1L)
+      .nav("NAV")
+      .newFeeCents(100L)
+      .actualizedFromPuSil(false)
+      .build();
+
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> apisHolder.getDebtPositionApi(accessToken)
-        .updateInstallmentNotificationFee(new UpdateInstallmentNotificationFeeRequest(1L, "NAV", 100L)),
+        .updateInstallmentNotificationFee(request),
       new ParameterizedTypeReference<>() {},
       apisHolder::unload);
   }

@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.UpdateInstallmentNotificationFeeRequest;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
@@ -42,19 +42,18 @@ public class DebtPositionClient {
       .getInstallmentsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList);
   }
 
-  public InstallmentDTO updateInstallmentNotificationFee(Long organizationId, String nav, Long newFeeCents, String accessToken) {
-    UpdateInstallmentNotificationFeeRequest request = new UpdateInstallmentNotificationFeeRequest(organizationId, nav, newFeeCents);
+  public InstallmentDTO updateInstallmentNotificationFee(ActualizeAmountRequestDTO request, String accessToken) {
     try {
       return debtPositionsApisHolder.getDebtPositionApi(accessToken).updateInstallmentNotificationFee(request);
     } catch (HttpClientErrorException.NotFound e) {
-      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO, nav);
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCONOSCIUTO, request.getNav());
     } catch (HttpClientErrorException.Conflict e) {
-      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO, nav);
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO, request.getNav());
     } catch (HttpClientErrorException ex) {
       if(ex.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
-        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO, nav);
+        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO, request.getNav());
       }
-      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, nav);
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getNav());
     }
   }
 

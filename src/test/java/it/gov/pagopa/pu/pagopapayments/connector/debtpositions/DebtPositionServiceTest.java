@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -79,17 +80,21 @@ class DebtPositionServiceTest {
   void whenUpdateInstallmentNotificationFeeThenInvokeClient(){
     // Given
     String accessToken = "ACCESSTOKEN";
-    Long organizationId = 1L;
-    String nav = "NAV";
-    Long newFeeCents = 100L;
+
+    ActualizeAmountRequestDTO request = ActualizeAmountRequestDTO.builder()
+      .organizationId(1L)
+      .nav("NAV")
+      .newFeeCents(100L)
+      .actualizedFromPuSil(false)
+      .build();
 
     InstallmentDTO expectedResult = new InstallmentDTO();
 
-    Mockito.when(clientMock.updateInstallmentNotificationFee(Mockito.same(organizationId),Mockito.same(nav),
-        Mockito.same(newFeeCents), Mockito.same(accessToken))).thenReturn(expectedResult);
+    Mockito.when(clientMock.updateInstallmentNotificationFee(Mockito.same(request),
+      Mockito.same(accessToken))).thenReturn(expectedResult);
 
     // When
-    InstallmentDTO result = service.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken);
+    InstallmentDTO result = service.updateInstallmentNotificationFee(request, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

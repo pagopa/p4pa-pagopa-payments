@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
@@ -108,6 +109,13 @@ class SynchronousPaymentServiceTest {
     notificationPriceResponse.setTotalPrice(notificationFeeCents);
     String apiKey = "API_KEY";
 
+    ActualizeAmountRequestDTO request = ActualizeAmountRequestDTO.builder()
+      .organizationId(1L)
+      .nav("NAV")
+      .newFeeCents((long) notificationFeeCents)
+      .actualizedFromPuSil(false)
+      .build();
+
     Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
       .thenReturn(organization);
@@ -115,9 +123,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(organization.getOrganizationId(),
       retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN)).thenReturn(notificationPriceResponse);
     Mockito.when(debtPositionServiceMock.updateInstallmentNotificationFee(
-        organization.getOrganizationId(),
-        retrievePaymentDTO.getNoticeNumber(),
-        (long) notificationFeeCents,
+       request,
         VALID_ACCEESS_TOKEN))
       .thenReturn(installmentDTO);
 
@@ -132,8 +138,7 @@ class SynchronousPaymentServiceTest {
     Mockito.verify(sendNotificationServiceMock, Mockito.times(1))
       .retrieveNotificationPrice(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN);
     Mockito.verify(debtPositionServiceMock, Mockito.times(1))
-      .updateInstallmentNotificationFee(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(),
-        (long) notificationFeeCents, VALID_ACCEESS_TOKEN);
+      .updateInstallmentNotificationFee(request, VALID_ACCEESS_TOKEN);
     Mockito.verify(debtPositionServiceMock, Mockito.never())
       .getInstallmentsByOrganizationIdAndNav(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }

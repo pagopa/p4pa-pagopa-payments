@@ -110,8 +110,8 @@ class SynchronousPaymentServiceTest {
     String apiKey = "API_KEY";
 
     ActualizeAmountRequestDTO request = ActualizeAmountRequestDTO.builder()
-      .organizationId(1L)
-      .nav("NAV")
+      .organizationId(organization.getOrganizationId())
+      .nav(retrievePaymentDTO.getNoticeNumber())
       .newFeeCents((long) notificationFeeCents)
       .actualizedFromPuSil(false)
       .build();
@@ -122,8 +122,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(organization.getOrganizationId(),
       retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN)).thenReturn(notificationPriceResponse);
-    Mockito.when(debtPositionServiceMock.updateInstallmentNotificationFee(
-       request,
+    Mockito.when(debtPositionServiceMock.updateInstallmentNotificationFee(request,
         VALID_ACCEESS_TOKEN))
       .thenReturn(installmentDTO);
 

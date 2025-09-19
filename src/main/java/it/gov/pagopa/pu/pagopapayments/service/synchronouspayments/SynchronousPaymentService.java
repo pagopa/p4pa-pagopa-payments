@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service.synchronouspayments;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -68,8 +69,16 @@ public class SynchronousPaymentService {
     Organization organization = paForNodeRequestValidatorService.paForNodeRequestValidate(request, accessToken);
     InstallmentDTO installment;
     long notificationFeeCents = retrieveNotificationFeeCents(organization, nav, accessToken);
+    // TODO P4ADEV-3331
+    ActualizeAmountRequestDTO actualizeAmountRequestDTO = ActualizeAmountRequestDTO.builder()
+      .organizationId(organization.getOrganizationId())
+      .nav(nav)
+      .newFeeCents(notificationFeeCents)
+      .actualizedFromPuSil(false)
+      .build();
+
     if(notificationFeeCents>0)
-       installment = debtPositionService.updateInstallmentNotificationFee(organization.getOrganizationId(), nav, notificationFeeCents, accessToken);
+       installment = debtPositionService.updateInstallmentNotificationFee(actualizeAmountRequestDTO, accessToken);
     else
       installment = getPayableDebtPositionByOrganizationAndNav(organization, nav, request.getPostalTransfer(), accessToken);
     return Pair.of(installment, organization);

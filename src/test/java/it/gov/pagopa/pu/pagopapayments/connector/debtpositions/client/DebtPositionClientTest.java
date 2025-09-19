@@ -4,10 +4,10 @@ import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionApi;
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgEntityControllerApi;
 import it.gov.pagopa.pu.debtpositions.controller.generated.DebtPositionTypeOrgSearchControllerApi;
 import it.gov.pagopa.pu.debtpositions.controller.generated.InstallmentApi;
+import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.UpdateInstallmentNotificationFeeRequest;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import org.junit.jupiter.api.AfterEach;
@@ -125,10 +125,13 @@ class DebtPositionClientTest {
   void whenUpdateInstallmentNotificationFeeThenInvokeApi(){
     //Given
     String accessToken = "ACCESSTOKEN";
-    Long organizationId = 1L;
-    String nav = "NAV";
-    Long newFeeCents = 100L;
-    UpdateInstallmentNotificationFeeRequest request = new UpdateInstallmentNotificationFeeRequest(organizationId, nav, newFeeCents);
+    ActualizeAmountRequestDTO request = ActualizeAmountRequestDTO.builder()
+      .organizationId(1L)
+      .nav("NAV")
+      .newFeeCents(100L)
+      .actualizedFromPuSil(false)
+      .build();
+
     InstallmentDTO expectedResult = new InstallmentDTO();
 
     Mockito.when(apisHolderMock.getDebtPositionApi(accessToken))
@@ -137,7 +140,7 @@ class DebtPositionClientTest {
       .thenReturn(expectedResult);
 
     // When
-    InstallmentDTO result = client.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken);
+    InstallmentDTO result = client.updateInstallmentNotificationFee(request, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);
@@ -168,10 +171,12 @@ class DebtPositionClientTest {
   void whenUpdateInstallmentNotificationFeeWithErrorThenException(String exceptionType, String errorMessage){
     //Given
     String accessToken = "ACCESSTOKEN";
-    Long organizationId = 1L;
-    String nav = "NAV";
-    Long newFeeCents = 100L;
-    UpdateInstallmentNotificationFeeRequest request = new UpdateInstallmentNotificationFeeRequest(organizationId, nav, newFeeCents);
+    ActualizeAmountRequestDTO request = ActualizeAmountRequestDTO.builder()
+      .organizationId(1L)
+      .nav("NAV")
+      .newFeeCents(100L)
+      .actualizedFromPuSil(false)
+      .build();
 
     Mockito.when(apisHolderMock.getDebtPositionApi(accessToken))
       .thenReturn(debtPositionApiMock);
@@ -181,7 +186,7 @@ class DebtPositionClientTest {
 
     // When
     PagoPaNodeFaultException exception = Assertions.assertThrows(PagoPaNodeFaultException.class,
-      () -> client.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken));
+      () -> client.updateInstallmentNotificationFee(request, accessToken));
 
     // Then
     Assertions.assertEquals(errorMessage, exception.getErrorCode().code());

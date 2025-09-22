@@ -14,7 +14,6 @@ import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.NotPayableSilActualizedAmountException;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
-import it.gov.pagopa.pu.pagopapayments.mapper.BalanceMapper;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentStatusVerifierService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -52,8 +51,6 @@ class SynchronousPaymentServiceTest {
   private SendNotificationService sendNotificationServiceMock;
   @Mock
   private PuSilService puSilServiceMock;
-  @Mock
-  private BalanceMapper balanceMapperMock;
 
   @InjectMocks
   private SynchronousPaymentService synchronousPaymentService;
@@ -243,13 +240,13 @@ class SynchronousPaymentServiceTest {
 
       ActualizationResultDTO amountUpdates = podamFactory.manufacturePojo(ActualizationResultDTO.class);
       amountUpdates.setNotificationFeeCents(150L);
-      amountUpdates.setBalance(null);
 
       ActualizeAmountRequestDTO expectedResult = ActualizeAmountRequestDTO.builder()
         .nav(nav)
         .organizationId(orgId)
         .newFeeCents(150L)
         .actualizedFromPuSil(true)
+        .balance(amountUpdates.getBalance())
         .notificationDate(amountUpdates.getDisplayDate())
         .iun(amountUpdates.getIun())
         .build();

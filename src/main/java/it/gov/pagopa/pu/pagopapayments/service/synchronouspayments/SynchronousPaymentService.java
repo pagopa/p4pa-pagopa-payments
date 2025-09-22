@@ -15,7 +15,6 @@ import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.NotPayableSilActualizedAmountException;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
-import it.gov.pagopa.pu.pagopapayments.mapper.BalanceMapper;
 import it.gov.pagopa.pu.pagopapayments.service.PaForNodeRequestValidatorService;
 import it.gov.pagopa.pu.pusil.dto.generated.ActualizationResultDTO;
 import it.gov.pagopa.pu.sendnotification.dto.generated.NotificationPriceResponseV23DTO;
@@ -42,15 +41,13 @@ public class SynchronousPaymentService {
   private final OrganizationService organizationService;
   private final SendNotificationService sendNotificationService;
   private final PuSilService puSilService;
-  private final BalanceMapper balanceMapper;
 
   public SynchronousPaymentService(DebtPositionService debtPositionService,
                                    PaForNodeRequestValidatorService paForNodeRequestValidatorService,
                                    SynchronousPaymentStatusVerifierService synchronousPaymentStatusVerifierService,
                                    AuthnService authnService,
     OrganizationService organizationService,
-    SendNotificationService sendNotificationService, PuSilService puSilService,
-    BalanceMapper balanceMapper) {
+    SendNotificationService sendNotificationService, PuSilService puSilService) {
     this.debtPositionService = debtPositionService;
     this.paForNodeRequestValidatorService = paForNodeRequestValidatorService;
     this.synchronousPaymentStatusVerifierService = synchronousPaymentStatusVerifierService;
@@ -58,7 +55,6 @@ public class SynchronousPaymentService {
     this.organizationService = organizationService;
     this.sendNotificationService = sendNotificationService;
     this.puSilService = puSilService;
-    this.balanceMapper = balanceMapper;
   }
 
   public Pair<InstallmentDTO, Organization> retrievePayment(RetrievePaymentDTO request) {
@@ -107,7 +103,7 @@ public class SynchronousPaymentService {
       {
         log.info("Retrieve notification fee from pu-sil by OrgSilServiceId {} and nav {}", debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav);
         ActualizationResultDTO amountUpdatesDTO = puSilService.actualize(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav, accessToken);
-        amountRequest.setBalance(balanceMapper.mapBalanceFromPuSil(amountUpdatesDTO.getBalance()));
+        amountRequest.setBalance(amountUpdatesDTO.getBalance());
         amountRequest.setIun(amountUpdatesDTO.getIun());
         amountRequest.setNotificationDate(amountUpdatesDTO.getDisplayDate());
         if (amountUpdatesDTO.getNotificationFeeCents()!=null && amountUpdatesDTO.getNotificationFeeCents()>0)

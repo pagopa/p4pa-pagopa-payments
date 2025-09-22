@@ -15,6 +15,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.NotPayableSilActualizedAmountException;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
+import it.gov.pagopa.pu.pagopapayments.mapper.BalanceMapper;
 import it.gov.pagopa.pu.pagopapayments.service.PaForNodeRequestValidatorService;
 import it.gov.pagopa.pu.pusil.dto.generated.ActualizationResultDTO;
 import it.gov.pagopa.pu.sendnotification.dto.generated.NotificationPriceResponseV23DTO;
@@ -41,13 +42,15 @@ public class SynchronousPaymentService {
   private final OrganizationService organizationService;
   private final SendNotificationService sendNotificationService;
   private final PuSilService puSilService;
+  private final BalanceMapper balanceMapper;
 
   public SynchronousPaymentService(DebtPositionService debtPositionService,
                                    PaForNodeRequestValidatorService paForNodeRequestValidatorService,
                                    SynchronousPaymentStatusVerifierService synchronousPaymentStatusVerifierService,
                                    AuthnService authnService,
     OrganizationService organizationService,
-    SendNotificationService sendNotificationService, PuSilService puSilService) {
+    SendNotificationService sendNotificationService, PuSilService puSilService,
+    BalanceMapper balanceMapper) {
     this.debtPositionService = debtPositionService;
     this.paForNodeRequestValidatorService = paForNodeRequestValidatorService;
     this.synchronousPaymentStatusVerifierService = synchronousPaymentStatusVerifierService;
@@ -55,6 +58,7 @@ public class SynchronousPaymentService {
     this.organizationService = organizationService;
     this.sendNotificationService = sendNotificationService;
     this.puSilService = puSilService;
+    this.balanceMapper = balanceMapper;
   }
 
   public Pair<InstallmentDTO, Organization> retrievePayment(RetrievePaymentDTO request) {
@@ -67,20 +71,12 @@ public class SynchronousPaymentService {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getFiscalCode());
     }
     Organization organization = paForNodeRequestValidatorService.paForNodeRequestValidate(request, accessToken);
-    InstallmentDTO installment;
-    long notificationFeeCents = retrieveNotificationFeeCents(organization, nav, accessToken);
-    // TODO P4ADEV-3331
-    ActualizeAmountRequestDTO actualizeAmountRequestDTO = ActualizeAmountRequestDTO.builder()
-      .organizationId(organization.getOrganizationId())
-      .nav(nav)
-      .newFeeCents(notificationFeeCents)
-      .actualizedFromPuSil(false)
-      .build();
+    ActualizeAmountRequestDTO actualizeAmountRequest = retrieveNotificationFeeCents(organization, nav, accessToken);
 
-    if(notificationFeeCents>0)
-       installment = debtPositionService.updateInstallmentNotificationFee(actualizeAmountRequestDTO, accessToken);
-    else
-      installment = getPayableDebtPositionByOrganizationAndNav(organization, nav, request.getPostalTransfer(), accessToken);
+    InstallmentDTO installment = (actualizeAmountRequest.getNewFeeCents() > 0)
+      ? debtPositionService.updateInstallmentNotificationFee(actualizeAmountRequest, accessToken)
+      : getPayableDebtPositionByOrganizationAndNav(organization, nav, request.getPostalTransfer(), accessToken);
+
     return Pair.of(installment, organization);
   }
 
@@ -89,24 +85,33 @@ public class SynchronousPaymentService {
     return synchronousPaymentStatusVerifierService.verifyPaymentStatus(organization, installmentDTOList, noticeNumber, postalTransfer);
   }
 
-  public long retrieveNotificationFeeCents(Organization organization, String nav, String accessToken){
+  public ActualizeAmountRequestDTO retrieveNotificationFeeCents(Organization organization, String nav, String accessToken){
     DebtPositionTypeOrg debtPositionTypeOrg = debtPositionService.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
     if(debtPositionTypeOrg!=null && Boolean.TRUE.equals(debtPositionTypeOrg.getFlagAmountActualization())) {
         String orgAccessToken = authnService.getAccessToken(organization.getIpaCode());
-        return retrieveNotificationFeeCentsFromPuSil(debtPositionTypeOrg, nav, orgAccessToken);
+        return retrieveNotificationFeeCentsFromPuSil(debtPositionTypeOrg, organization.getOrganizationId(), nav, orgAccessToken);
     } else {
         return retrieveNotificationFeeCentsFromSend(organization.getOrganizationId(), nav, accessToken);
     }
   }
 
-  private long retrieveNotificationFeeCentsFromPuSil(DebtPositionTypeOrg debtPositionTypeOrg, String nav, String accessToken) {
+  private ActualizeAmountRequestDTO retrieveNotificationFeeCentsFromPuSil(DebtPositionTypeOrg debtPositionTypeOrg,
+    Long organizationId, String nav, String accessToken) {
+    ActualizeAmountRequestDTO amountRequest = new ActualizeAmountRequestDTO();
+    amountRequest.setOrganizationId(organizationId);
+    amountRequest.setNav(nav);
+    amountRequest.setActualizedFromPuSil(true);
+    amountRequest.setNewFeeCents(0L);
     try{
       if(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId()!=null)
       {
         log.info("Retrieve notification fee from pu-sil by OrgSilServiceId {} and nav {}", debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav);
         ActualizationResultDTO amountUpdatesDTO = puSilService.actualize(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav, accessToken);
+        amountRequest.setBalance(balanceMapper.mapBalanceFromPuSil(amountUpdatesDTO.getBalance()));
+        amountRequest.setIun(amountUpdatesDTO.getIun());
+        amountRequest.setNotificationDate(amountUpdatesDTO.getDisplayDate());
         if (amountUpdatesDTO.getNotificationFeeCents()!=null && amountUpdatesDTO.getNotificationFeeCents()>0)
-          return amountUpdatesDTO.getNotificationFeeCents();
+          amountRequest.setNewFeeCents(amountUpdatesDTO.getNotificationFeeCents());
       }else {
         log.error("Failed to retrieve notification fee from pu-sil because amountActualizationOrgSilServiceId is null"
                 + " on debtPositionTypeOrgId {}", debtPositionTypeOrg.getDebtPositionTypeOrgId());
@@ -115,23 +120,27 @@ public class SynchronousPaymentService {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_DOVUTO_NON_PAGABILE, nav);
     }catch (Exception e){
       log.warn("Failed to retrieve notification fee from pu-sil: {}", e.getMessage());
-      return 0;
+      amountRequest.setNewFeeCents(0L);
     }
-    return 0;
+    return amountRequest;
   }
 
-  private long retrieveNotificationFeeCentsFromSend(Long organizationId, String nav, String accessToken) {
+  private ActualizeAmountRequestDTO retrieveNotificationFeeCentsFromSend(Long organizationId, String nav, String accessToken) {
     String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
+    ActualizeAmountRequestDTO amountRequest = new ActualizeAmountRequestDTO();
+    amountRequest.setOrganizationId(organizationId);
+    amountRequest.setNav(nav);
+    amountRequest.setActualizedFromPuSil(false);
+    amountRequest.setNewFeeCents(0L);
     if(sendAPIKey!=null && !sendAPIKey.isEmpty()){
       try{
         NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);
         log.info("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);
-        return Objects.requireNonNullElse(notificationPrice.getTotalPrice(), 0);
+        amountRequest.setNewFeeCents(Long.valueOf(Objects.requireNonNullElse(notificationPrice.getTotalPrice(), 0)));
       } catch (Exception e) {
         log.warn("Failed to retrieve notification price for organizationId {} and nav {}: {}", organizationId, nav, e.getMessage());
-        return 0;
       }
     }
-    return 0;
+    return amountRequest;
   }
 }

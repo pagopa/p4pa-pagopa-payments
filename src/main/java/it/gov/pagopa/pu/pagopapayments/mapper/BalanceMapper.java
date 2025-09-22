@@ -16,21 +16,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class BalanceMapper {
 
+  private final static String CAPITOLO = "capitolo";
+  private final static String IMPORTO = "importo";
+
   public String mapBalanceFromPuSil(String balance) {
     try{
       ObjectMapper mapper = new ObjectMapper();
       List<Map<String, Object>> balanceList = mapper.readValue(balance, new TypeReference<>() {});
       if (balanceList != null && !balanceList.isEmpty()) {
-        if (StringUtils.isNotBlank((String) balanceList.get(0).get("capitolo")) &&
-          balanceList.get(0).containsKey("importo")) {
+        if (StringUtils.isNotBlank((String) balanceList.get(0).get(CAPITOLO)) &&
+          balanceList.get(0).containsKey(IMPORTO)) {
 
           StringBuilder sb = new StringBuilder("<bilancio>");
           BigDecimal importFromBalance = BigDecimal.ZERO;
 
           for (Map<String, Object> bb : balanceList) {
-            if (StringUtils.isNotBlank((String) bb.get("capitolo"))) {
+            if (StringUtils.isNotBlank((String) bb.get(CAPITOLO))) {
               sb.append("<capitolo>");
-              sb.append("<codCapitolo>").append(bb.get("capitolo")).append("</codCapitolo>");
+              sb.append("<codCapitolo>").append(bb.get(CAPITOLO)).append("</codCapitolo>");
 
               if (StringUtils.isNotBlank((String) bb.get("ufficio"))) {
                 sb.append("<codUfficio>").append(bb.get("ufficio")).append("</codUfficio>");
@@ -41,8 +44,8 @@ public class BalanceMapper {
                 sb.append("<codAccertamento>").append(bb.get("accertamento")).append("</codAccertamento>");
               }
 
-              sb.append("<importo>").append(bb.get("importo")).append("</importo>");
-              importFromBalance = importFromBalance.add(new BigDecimal(bb.get("importo").toString()));
+              sb.append("<importo>").append(bb.get(IMPORTO)).append("</importo>");
+              importFromBalance = importFromBalance.add(new BigDecimal(bb.get(IMPORTO).toString()));
               sb.append("</accertamento></capitolo>");
             }
           }

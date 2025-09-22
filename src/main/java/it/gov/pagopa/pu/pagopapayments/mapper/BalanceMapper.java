@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class BalanceMapper {
 
-  private final static String CAPITOLO = "capitolo";
-  private final static String IMPORTO = "importo";
+  private static final String CAPITOLO = "capitolo";
+  private static final String IMPORTO = "importo";
 
   public String mapBalanceFromPuSil(String balance) {
     try{

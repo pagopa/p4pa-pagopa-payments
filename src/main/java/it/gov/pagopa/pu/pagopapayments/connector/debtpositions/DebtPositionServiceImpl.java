@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
@@ -34,10 +35,8 @@ public class DebtPositionServiceImpl implements DebtPositionService {
   }
 
   @Override
-  public InstallmentDTO updateInstallmentNotificationFee(Long organizationId,
-    String nav,
-    Long newFeeCents, String accessToken) {
-    return client.updateInstallmentNotificationFee(organizationId, nav, newFeeCents, accessToken);
+  public InstallmentDTO updateInstallmentNotificationFee(ActualizeAmountRequestDTO request, String accessToken) {
+    return client.updateInstallmentNotificationFee(request, accessToken);
   }
 
   @Override

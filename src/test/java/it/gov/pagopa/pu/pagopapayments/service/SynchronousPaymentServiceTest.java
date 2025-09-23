@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
@@ -108,16 +109,20 @@ class SynchronousPaymentServiceTest {
     notificationPriceResponse.setTotalPrice(notificationFeeCents);
     String apiKey = "API_KEY";
 
+    ActualizeAmountRequestDTO request = ActualizeAmountRequestDTO.builder()
+      .organizationId(organization.getOrganizationId())
+      .nav(retrievePaymentDTO.getNoticeNumber())
+      .newFeeCents((long) notificationFeeCents)
+      .actualizedFromPuSil(false)
+      .build();
+
     Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
       .thenReturn(organization);
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(organization.getOrganizationId(),
       retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN)).thenReturn(notificationPriceResponse);
-    Mockito.when(debtPositionServiceMock.updateInstallmentNotificationFee(
-        organization.getOrganizationId(),
-        retrievePaymentDTO.getNoticeNumber(),
-        (long) notificationFeeCents,
+    Mockito.when(debtPositionServiceMock.updateInstallmentNotificationFee(request,
         VALID_ACCEESS_TOKEN))
       .thenReturn(installmentDTO);
 
@@ -132,8 +137,7 @@ class SynchronousPaymentServiceTest {
     Mockito.verify(sendNotificationServiceMock, Mockito.times(1))
       .retrieveNotificationPrice(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN);
     Mockito.verify(debtPositionServiceMock, Mockito.times(1))
-      .updateInstallmentNotificationFee(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(),
-        (long) notificationFeeCents, VALID_ACCEESS_TOKEN);
+      .updateInstallmentNotificationFee(request, VALID_ACCEESS_TOKEN);
     Mockito.verify(debtPositionServiceMock, Mockito.never())
       .getInstallmentsByOrganizationIdAndNav(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
@@ -162,17 +166,25 @@ class SynchronousPaymentServiceTest {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
     String apiKey = "API-KEY";
-    int expectedPrice = 100;
+    Long orgId = organization.getOrganizationId();
+
+    ActualizeAmountRequestDTO expectedRequest = ActualizeAmountRequestDTO.builder()
+      .nav(nav)
+      .organizationId(orgId)
+      .newFeeCents(100L)
+      .actualizedFromPuSil(false)
+      .build();
 
     NotificationPriceResponseV23DTO mockResponse = Mockito.mock(NotificationPriceResponseV23DTO.class);
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
-    Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN)).thenReturn(mockResponse);
-    Mockito.when(mockResponse.getTotalPrice()).thenReturn(expectedPrice);
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
+    Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(orgId, nav, VALID_ACCEESS_TOKEN)).thenReturn(mockResponse);
+    Mockito.when(mockResponse.getTotalPrice()).thenReturn(Math.toIntExact(expectedRequest.getNewFeeCents()));
 
-    long result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
 
-    Assertions.assertEquals(expectedPrice, result);
+    ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
+
+    Assertions.assertEquals(expectedRequest, result);
   }
 
   @Test
@@ -180,12 +192,20 @@ class SynchronousPaymentServiceTest {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
     String emptyApiKey = "";
+    Long orgId = organization.getOrganizationId();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(emptyApiKey);
+    ActualizeAmountRequestDTO expectedResult = ActualizeAmountRequestDTO.builder()
+      .nav(nav)
+      .organizationId(orgId)
+      .newFeeCents(0L)
+      .actualizedFromPuSil(false)
+      .build();
 
-    long result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(emptyApiKey);
 
-    Assertions.assertEquals(0, result);
+    ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
+
+    Assertions.assertEquals(expectedResult, result);
   }
 
   @Test
@@ -193,14 +213,22 @@ class SynchronousPaymentServiceTest {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
     String apiKey = "API-KEY";
+    Long orgId = organization.getOrganizationId();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
-    Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(organization.getOrganizationId(), nav, VALID_ACCEESS_TOKEN))
+    ActualizeAmountRequestDTO expectedResult= ActualizeAmountRequestDTO.builder()
+      .nav(nav)
+      .organizationId(orgId)
+      .newFeeCents(0L)
+      .actualizedFromPuSil(false)
+      .build();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
+    Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(orgId, nav, VALID_ACCEESS_TOKEN))
       .thenThrow(new RuntimeException("Not Found"));
 
-    long result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
+    ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
 
-    Assertions.assertEquals(0, result);
+    Assertions.assertEquals(expectedResult, result);
   }
 
     //pu-sil region
@@ -208,6 +236,20 @@ class SynchronousPaymentServiceTest {
     void givenFlagAmountActualizationTrueAndFeeGreaterThanZeroWhenRetrieveNotificationFeeThenReturnSilFee() {
       Organization organization = podamFactory.manufacturePojo(Organization.class);
       String nav = "NAV";
+      Long orgId = organization.getOrganizationId();
+
+      ActualizationResultDTO amountUpdates = podamFactory.manufacturePojo(ActualizationResultDTO.class);
+      amountUpdates.setNotificationFeeCents(150L);
+
+      ActualizeAmountRequestDTO expectedResult = ActualizeAmountRequestDTO.builder()
+        .nav(nav)
+        .organizationId(orgId)
+        .newFeeCents(150L)
+        .actualizedFromPuSil(true)
+        .balance(amountUpdates.getBalance())
+        .notificationDate(amountUpdates.getDisplayDate())
+        .iun(amountUpdates.getIun())
+        .build();
 
       DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
       debtPositionTypeOrg.setFlagAmountActualization(true);
@@ -217,24 +259,28 @@ class SynchronousPaymentServiceTest {
       Mockito.when(authnServiceMock.getAccessToken(organization.getIpaCode()))
         .thenReturn(orgAccessToken);
 
-      ActualizationResultDTO amountUpdates = podamFactory.manufacturePojo(ActualizationResultDTO.class);
-      amountUpdates.setNotificationFeeCents(150L);
-
-      Mockito.when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(
-          organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
+      Mockito.when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(orgId, nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
         .thenReturn(debtPositionTypeOrg);
       Mockito.when(puSilServiceMock.actualize(999L, nav, orgAccessToken))
         .thenReturn(amountUpdates);
 
-      long result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
+      ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
 
-      Assertions.assertEquals(150L, result);
+      Assertions.assertEquals(expectedResult, result);
     }
 
   @Test
   void givenFlagAmountActualizationTrueAndFeeIsZeroWhenRetrieveNotificationFeeThenReturnZero() {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
+    Long orgId = organization.getOrganizationId();
+
+    ActualizeAmountRequestDTO expectedResult = ActualizeAmountRequestDTO.builder()
+      .nav(nav)
+      .organizationId(orgId)
+      .newFeeCents(0L)
+      .actualizedFromPuSil(true)
+      .build();
 
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
     debtPositionTypeOrg.setFlagAmountActualization(true);
@@ -243,21 +289,28 @@ class SynchronousPaymentServiceTest {
     ActualizationResultDTO amountUpdates = podamFactory.manufacturePojo(ActualizationResultDTO.class);
     amountUpdates.setNotificationFeeCents(0L);
 
-    Mockito.when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(
-        organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
+    Mockito.when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(orgId, nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
       .thenReturn(debtPositionTypeOrg);
     Mockito.when(puSilServiceMock.actualize(999L, nav, VALID_ACCEESS_TOKEN))
       .thenReturn(amountUpdates);
 
-    long result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
+    ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
 
-    Assertions.assertEquals(0, result);
+    Assertions.assertEquals(expectedResult, result);
   }
 
   @Test
   void givenFlagAmountActualizationTrueAndFeeIsNullWhenRetrieveNotificationFeeThenReturnZero() {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
+    Long orgId = organization.getOrganizationId();
+
+    ActualizeAmountRequestDTO expectedResult = ActualizeAmountRequestDTO.builder()
+      .nav(nav)
+      .organizationId(orgId)
+      .newFeeCents(0L)
+      .actualizedFromPuSil(true)
+      .build();
 
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
     debtPositionTypeOrg.setFlagAmountActualization(true);
@@ -267,52 +320,68 @@ class SynchronousPaymentServiceTest {
     amountUpdates.setNotificationFeeCents(null);
 
     Mockito.when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(
-        organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
+        orgId, nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
       .thenReturn(debtPositionTypeOrg);
     Mockito.when(puSilServiceMock.actualize(999L, nav, VALID_ACCEESS_TOKEN))
       .thenReturn(amountUpdates);
 
-    long result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
+    ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
 
-    Assertions.assertEquals(0, result);
+    Assertions.assertEquals(expectedResult, result);
   }
 
   @Test
   void givenFlagAmountActualizationTrueAndServiceIdIsNullWhenRetrieveNotificationFeeThenReturnZero() {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
+    Long orgId = organization.getOrganizationId();
+
+    ActualizeAmountRequestDTO expectedResult = ActualizeAmountRequestDTO.builder()
+      .nav(nav)
+      .organizationId(orgId)
+      .newFeeCents(0L)
+      .actualizedFromPuSil(true)
+      .build();
 
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
     debtPositionTypeOrg.setFlagAmountActualization(true);
     debtPositionTypeOrg.setAmountActualizationOrgSilServiceId(null);
 
     Mockito.when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(
-        organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
+        orgId, nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
       .thenReturn(debtPositionTypeOrg);
 
-    long result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
+    ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
 
-    Assertions.assertEquals(0, result);
+    Assertions.assertEquals(expectedResult, result);
   }
 
   @Test
   void givenFlagAmountActualizationTrueAndExceptionInTryBlockWhenRetrieveNotificationFeeThenReturnZero() {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
+    Long orgId = organization.getOrganizationId();
+
+    ActualizeAmountRequestDTO expectedResult = ActualizeAmountRequestDTO.builder()
+      .nav(nav)
+      .organizationId(orgId)
+      .newFeeCents(0L)
+      .actualizedFromPuSil(true)
+      .build();
 
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
     debtPositionTypeOrg.setFlagAmountActualization(true);
     debtPositionTypeOrg.setAmountActualizationOrgSilServiceId(999L);
 
     Mockito.when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(
-        organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
+        orgId, nav, ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
       .thenReturn(debtPositionTypeOrg);
     Mockito.when(puSilServiceMock.actualize(999L, nav, VALID_ACCEESS_TOKEN))
       .thenThrow(new RuntimeException("Exception"));
 
-    long result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
+    ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
 
-    Assertions.assertEquals(0, result);
+    Assertions.assertEquals(expectedResult, result);
   }
 
   @Test

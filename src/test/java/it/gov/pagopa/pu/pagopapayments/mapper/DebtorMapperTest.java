@@ -37,52 +37,27 @@ class DebtorMapperTest {
   }
 
   @Test
-  void givenInvalidAddressWhenToDebtorDTOThenError() {
+  void givenValidPersonWithNullAddressFieldsWhenToDebtorDTOThenOk() {
     //given
     PersonDTO personRequest = podamFactory.manufacturePojo(PersonDTO.class);
     personRequest.setAddress(null);
-
-    //when & verify
-    Assertions.assertThrows(IllegalArgumentException.class, () -> DebtorMapper.toDebtorDTO(personRequest));
-  }
-
-  @Test
-  void givenInvalidCivicWhenToDebtorDTOThenError() {
-    //given
-    PersonDTO personRequest = podamFactory.manufacturePojo(PersonDTO.class);
-    personRequest.setCivic(null);
-
-    //when & verify
-    Assertions.assertThrows(IllegalArgumentException.class, () -> DebtorMapper.toDebtorDTO(personRequest));
-  }
-
-  @Test
-  void givenInvalidLocationWhenToDebtorDTOThenError() {
-    //given
-    PersonDTO personRequest = podamFactory.manufacturePojo(PersonDTO.class);
     personRequest.setLocation(null);
-
-    //when & verify
-    Assertions.assertThrows(IllegalArgumentException.class, () -> DebtorMapper.toDebtorDTO(personRequest));
-  }
-
-  @Test
-  void givenInvalidPostalCodeWhenToDebtorDTOThenError() {
-    //given
-    PersonDTO personRequest = podamFactory.manufacturePojo(PersonDTO.class);
+    personRequest.setCivic(null);
+    personRequest.setProvince(null);
     personRequest.setPostalCode(null);
 
-    //when & verify
-    Assertions.assertThrows(IllegalArgumentException.class, () -> DebtorMapper.toDebtorDTO(personRequest));
+    //when
+    DebtorDTO response = DebtorMapper.toDebtorDTO(personRequest);
+
+    //verify
+    assertNotNull(response);
+    Assertions.assertEquals(" ", response.getAddress());
+    Assertions.assertEquals(" ", response.getBuildingNumber());
+    Assertions.assertEquals(" ", response.getCity());
+    Assertions.assertEquals(personRequest.getFullName(), response.getFullName());
+    Assertions.assertEquals(" ", response.getPostalCode());
+    Assertions.assertEquals(" ", response.getProvince());
+    TestUtils.checkNotNullFields(response, "taxCode");
   }
 
-  @Test
-  void givenInvalidProvinceWhenToDebtorDTOThenError() {
-    //given
-    PersonDTO personRequest = podamFactory.manufacturePojo(PersonDTO.class);
-    personRequest.setProvince(null);
-
-    //when & verify
-    Assertions.assertThrows(IllegalArgumentException.class, () -> DebtorMapper.toDebtorDTO(personRequest));
-  }
 }

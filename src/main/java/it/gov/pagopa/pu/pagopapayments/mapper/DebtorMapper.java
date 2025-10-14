@@ -11,29 +11,13 @@ public class DebtorMapper {
   }
 
   public static DebtorDTO toDebtorDTO(PersonDTO person) {
-    if (StringUtils.isBlank(person.getAddress())) {
-      throw new IllegalArgumentException("Debtor address cannot be null or empty");
-    }
-    if (StringUtils.isBlank(person.getCivic())) {
-      throw new IllegalArgumentException("Debtor building Number cannot be null or empty");
-    }
-    if (StringUtils.isBlank(person.getLocation())) {
-      throw new IllegalArgumentException("Debtor city cannot be null or empty");
-    }
-    if (StringUtils.isBlank(person.getPostalCode())) {
-      throw new IllegalArgumentException("Debtor postal Code cannot be null or empty");
-    }
-    if (StringUtils.isBlank(person.getProvince())) {
-      throw new IllegalArgumentException("Debtor province cannot be null or empty");
-    }
-
     DebtorDTO debtor = new DebtorDTO();
-    debtor.setAddress(person.getAddress());
-    debtor.setBuildingNumber(person.getCivic());
-    debtor.setCity(person.getLocation());
+    debtor.setAddress(StringUtils.isBlank(person.getAddress()) ? " " : person.getAddress());
+    debtor.setBuildingNumber(StringUtils.isBlank(person.getCivic()) ? " " : person.getCivic());
+    debtor.setCity(StringUtils.isBlank(person.getLocation()) ? " " : person.getLocation());
     debtor.setFullName(person.getFullName());
-    debtor.setPostalCode(person.getPostalCode());
-    debtor.setProvince(person.getProvince());
+    debtor.setPostalCode(StringUtils.isBlank(person.getPostalCode()) ? " " : person.getPostalCode());
+    debtor.setProvince(StringUtils.isBlank(person.getProvince()) ? " " : person.getProvince());
 
     return debtor;
   }

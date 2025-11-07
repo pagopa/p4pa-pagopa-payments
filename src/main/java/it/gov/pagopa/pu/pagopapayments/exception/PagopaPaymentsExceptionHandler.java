@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.exception;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PagoPaPaymentsErrorDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PagoPaPaymentsErrorDTO.CodeEnum;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -73,7 +74,7 @@ public class PagopaPaymentsExceptionHandler {
     return ResponseEntity
       .status(httpStatus)
       .contentType(MediaType.APPLICATION_JSON)
-      .body(new PagoPaPaymentsErrorDTO(errorEnum, message));
+      .body(new PagoPaPaymentsErrorDTO(errorEnum, message, Utilities.getTraceId()));
   }
 
   private static void logException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus) {

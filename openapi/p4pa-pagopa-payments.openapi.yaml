@@ -250,6 +250,8 @@ components:
             - PAGOPA_PAYMENTS_NOT_PAYABLE
         message:
           type: string
+        traceId:
+          type: string
     TaxonomyDTO:
       properties:
         organizationType:

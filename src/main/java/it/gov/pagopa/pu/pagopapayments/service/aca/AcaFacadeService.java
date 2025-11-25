@@ -33,11 +33,11 @@ public class AcaFacadeService {
   }
 
   private void invokePaCreatePositionImpl(String iud, DebtPositionDTO debtPosition, String accessToken) {
-    Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> debtPostionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(iud, debtPosition);
+    Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> debtPositionToSendACA = acaDebtPositionMapper.mapToNewDebtPositionRequest(iud, debtPosition);
     Pair<BrokerApiKeys, String> brokerData = brokerRetrieverService.getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), accessToken);
 
-    NewDebtPositionRequest newDebtPositionRequest = debtPostionToSendACA.getRight();
-    AcaDebtPositionMapper.OPERATION operation = debtPostionToSendACA.getLeft();
+    NewDebtPositionRequest newDebtPositionRequest = debtPositionToSendACA.getRight();
+    AcaDebtPositionMapper.OPERATION operation = debtPositionToSendACA.getLeft();
     if (operation == AcaDebtPositionMapper.OPERATION.DELETE) {
       //delete is defined calling the same paCreatePosition api, but having set amount=0
       newDebtPositionRequest.amount(0);

@@ -9,6 +9,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -36,7 +37,7 @@ public class PaGetPaymentMapper {
     payment.setDueDate(ConversionUtils.toXMLGregorianCalendar(ConversionUtils.localDate2RomeMaxTime(installmentDTO.getDueDate())));
     payment.setRetentionDate(ConversionUtils.toXMLGregorianCalendar(OffsetDateTime.now().plusMinutes(15))); //the data validity of this response: set to 15 minutes
     payment.setLastPayment(true);
-    payment.setDescription(installmentDTO.getRemittanceInformation());
+    payment.setDescription(Utilities.truncateRemittanceInformation(installmentDTO.getRemittanceInformation()));
     payment.setCompanyName(organization.getOrgName());
     payment.setOfficeName(null);
     payment.setPaymentAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()));
@@ -45,7 +46,7 @@ public class PaGetPaymentMapper {
     debtorId.setEntityUniqueIdentifierType(StEntityUniqueIdentifierType.valueOf(installmentDTO.getDebtor().getEntityType().name()));
     debtorId.setEntityUniqueIdentifierValue(installmentDTO.getDebtor().getFiscalCode());
     debtor.setUniqueIdentifier(debtorId);
-    debtor.setFullName(installmentDTO.getDebtor().getFullName());
+    debtor.setFullName(Utilities.truncateFullName(installmentDTO.getDebtor().getFullName()));
     debtor.setCountry(installmentDTO.getDebtor().getNation());
     debtor.setStateProvinceRegion(installmentDTO.getDebtor().getProvince());
     debtor.setCity(installmentDTO.getDebtor().getLocation());
@@ -57,7 +58,7 @@ public class PaGetPaymentMapper {
     CtTransferListPAV2 transferList = new CtTransferListPAV2();
     installmentDTO.getTransfers().forEach(transferDTO -> {
       CtTransferPAV2 transfer = new CtTransferPAV2();
-      transfer.setIdTransfer(transferDTO.getTransferIndex() != null ? transferDTO.getTransferIndex() : 0);
+      transfer.setIdTransfer(transferDTO.getTransferIndex());
       transfer.setFiscalCodePA(transferDTO.getOrgFiscalCode());
       transfer.setCompanyName(transferDTO.getOrgName());
       transfer.setTransferAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(transferDTO.getAmountCents()));

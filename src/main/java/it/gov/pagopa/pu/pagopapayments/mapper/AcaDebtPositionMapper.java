@@ -4,6 +4,7 @@ import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
@@ -53,8 +54,8 @@ public class AcaDebtPositionMapper {
           .postalIban(transfer.getPostalIban())
           .entityType(NewDebtPositionRequest.EntityTypeEnum.valueOf(debtor.getEntityType().getValue()))
           .entityFiscalCode(debtor.getFiscalCode())
-          .entityFullName(debtor.getFullName())
-          .description(installment.getRemittanceInformation())
+          .entityFullName(Utilities.truncateFullName(debtor.getFullName()))
+          .description(Utilities.truncateRemittanceInformation(installment.getRemittanceInformation()))
           .amount(installment.getAmountCents().intValue())
           .expirationDate(ConversionUtils.localDate2RomeMaxTime(installment.getDueDate()))
           .switchToExpired(Optional.ofNullable(installment.getSwitchToExpired()).orElse(false))

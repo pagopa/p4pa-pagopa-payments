@@ -40,4 +40,21 @@ public class Utilities {
       return nav.substring(1);
     }
   }
+
+  public static String truncateFullName(String fullName) {
+    // maxLenght value is found @ resources/soap/wsdl/xsd/paForNode.xsd:174
+    return safeTruncate(fullName, 70);
+  }
+
+  public static String truncateRemittanceInformation(String fullName) {
+    // maxLenght value is found @ resources/soap/wsdl/xsd/paForNode.xsd:416
+    return safeTruncate(fullName, 140);
+  }
+
+  private static String safeTruncate(String str, int maxLength) {
+    if (str == null) {
+      return null;
+    }
+    return str.length() <= maxLength ? str : str.substring(0, maxLength);
+  }
 }

@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.StringUtils;
 
 public class PaVerifyPaymentNoticeMapper {
@@ -30,7 +31,7 @@ public class PaVerifyPaymentNoticeMapper {
     response.setCompanyName(organization.getOrgName());
     response.setOfficeName(null);
     CtPaymentOptionDescriptionPA paymentOption = new CtPaymentOptionDescriptionPA();
-    response.setPaymentDescription(installment.getRemittanceInformation());
+    response.setPaymentDescription(Utilities.truncateRemittanceInformation(installment.getRemittanceInformation()));
     paymentOption.setOptions(StAmountOption.EQ);
     paymentOption.setAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(installment.getAmountCents()));
     paymentOption.setDueDate(ConversionUtils.toXMLGregorianCalendar(

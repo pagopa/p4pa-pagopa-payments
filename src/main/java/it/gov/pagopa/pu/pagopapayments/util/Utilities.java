@@ -46,9 +46,9 @@ public class Utilities {
     return safeTruncate(fullName, 70);
   }
 
-  public static String truncateRemittanceInformation(String fullName) {
+  public static String truncateRemittanceInformation(String remittanceInformation) {
     // maxLenght value is found @ resources/soap/wsdl/xsd/paForNode.xsd:416
-    return safeTruncate(fullName, 140);
+    return safeTruncate(remittanceInformation, 140);
   }
 
   private static String safeTruncate(String str, int maxLength) {

@@ -63,7 +63,7 @@ public class PaGetPaymentMapper {
       transfer.setCompanyName(transferDTO.getOrgName());
       transfer.setTransferAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(transferDTO.getAmountCents()));
       transfer.setTransferCategory(transferDTO.getCategory());
-      transfer.setRemittanceInformation(transferDTO.getRemittanceInformation());
+      transfer.setRemittanceInformation(Utilities.truncateRemittanceInformation(transferDTO.getRemittanceInformation()));
       transfer.setIBAN(transferType.equals(StTransferType.POSTAL) ? transferDTO.getPostalIban() : transferDTO.getIban());
       if(transferDTO.getStampHashDocument() != null) {
         CtRichiestaMarcaDaBollo richiestaMarcaDaBollo = new CtRichiestaMarcaDaBollo();

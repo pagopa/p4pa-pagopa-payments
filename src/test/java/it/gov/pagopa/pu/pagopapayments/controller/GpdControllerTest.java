@@ -36,7 +36,7 @@ class GpdControllerTest {
     .paymentOptions(List.of(PaymentOptionDTO.builder()
       .paymentOptionId(3L)
       .totalAmountCents(21_00L)
-      .paymentOptionType(PaymentOptionTypeEnum.INSTALLMENTS)
+      .paymentOptionType(PaymentOptionType.INSTALLMENTS)
       .installments(List.of(InstallmentDTO.builder()
           .installmentId(4L)
           .iuv("444444")

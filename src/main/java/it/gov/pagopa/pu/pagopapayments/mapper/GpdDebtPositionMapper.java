@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
@@ -40,7 +41,7 @@ public class GpdDebtPositionMapper {
           .iupd(installment.getIupdPagopa())
           .type(PaymentPositionModel.TypeEnum.valueOf(debtor.getEntityType().getValue()))
           .fiscalCode(debtor.getFiscalCode())
-          .fullName(debtor.getFullName())
+          .fullName(Utilities.truncateFullName(debtor.getFullName()))
           .streetName(debtor.getAddress())
           .civicNumber(debtor.getCivic())
           .postalCode(debtor.getPostalCode())
@@ -85,7 +86,7 @@ public class GpdDebtPositionMapper {
       .nav(installment.getNav())
       .iuv(installment.getIuv())
       .amount(installment.getAmountCents())
-      .description(installment.getRemittanceInformation())
+      .description(Utilities.truncateRemittanceInformation(installment.getRemittanceInformation()))
       .isPartialPayment(false)
       .dueDate(installment.getDueDate() != null ? ConversionUtils.atEndOfDay(installment.getDueDate()).toString() : ConversionUtils.MAX_EXPIRATION_DATE.toString())
       .fee(0L)
@@ -116,7 +117,7 @@ public class GpdDebtPositionMapper {
       .idTransfer(TransferModel.IdTransferEnum.fromValue(transfer.getTransferIndex().toString()))
       .amount(transfer.getAmountCents())
       .organizationFiscalCode(transfer.getOrgFiscalCode())
-      .remittanceInformation(transfer.getRemittanceInformation())
+      .remittanceInformation(Utilities.truncateRemittanceInformation(transfer.getRemittanceInformation()))
       .category(transfer.getCategory())
       .iban(transfer.getIban())
       .postalIban(transfer.getPostalIban())

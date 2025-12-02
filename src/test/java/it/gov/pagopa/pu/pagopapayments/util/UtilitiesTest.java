@@ -70,4 +70,30 @@ public class UtilitiesTest {
   public static void clearTraceIdContext(){
     MDC.clear();
   }
+
+  @Test
+  void testTruncateFullName() {
+    String under70Name = "fullName";
+    String over70Name = "Alexandrius WetherfordSilvermanValencourtMontgomeryEllingsworthBrade70hireRavenbrookThornfieldTalren";
+    String expectedTruncatedOver70Name = "Alexandrius WetherfordSilvermanValencourtMontgomeryEllingsworthBrade70";
+
+    Assertions.assertNull(Utilities.truncateFullName(null));
+    Assertions.assertEquals(under70Name,
+      Utilities.truncateFullName(under70Name));
+    Assertions.assertEquals(expectedTruncatedOver70Name,
+      Utilities.truncateFullName(over70Name));
+  }
+
+  @Test
+  void testTruncateRemittanceInformation() {
+    String under140Description = "remittanceInformation";
+    String over140Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad mi140 veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+    String expectedTruncatedOver140Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad mi140";
+
+    Assertions.assertNull(Utilities.truncateRemittanceInformation(null));
+    Assertions.assertEquals(under140Description,
+      Utilities.truncateRemittanceInformation(under140Description));
+    Assertions.assertEquals(expectedTruncatedOver140Description,
+      Utilities.truncateRemittanceInformation(over140Description));
+  }
 }

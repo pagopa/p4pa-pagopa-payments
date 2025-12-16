@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.mapper.AcaDebtPositionMapper;
@@ -41,6 +42,7 @@ class AcaFacadeServiceTest {
   void givenValidDebtPositionWhenSyncThenOk() {
     //given
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    debtPosition.setDebtPositionOrigin(DebtPositionOrigin.ORDINARY);
     Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> newDebtPositionRequestAndOperation = Pair.of(AcaDebtPositionMapper.OPERATION.DELETE, podamFactory.manufacturePojo(NewDebtPositionRequest.class));
 
     Mockito.when(acaDebtPositionMapperMock.mapToNewDebtPositionRequest("IUD", debtPosition)).thenReturn(newDebtPositionRequestAndOperation);
@@ -51,5 +53,20 @@ class AcaFacadeServiceTest {
     Mockito.verify(acaDebtPositionMapperMock, Mockito.times(1)).mapToNewDebtPositionRequest("IUD", debtPosition);
     Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerApiKeyAndSegregationCodesByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken());
     Mockito.verify(acaServiceMock, Mockito.times(1)).paCreatePosition(newDebtPositionRequestAndOperation.getRight(), VALID_ACA_KEY, VALID_SEGREGATION_CODE);
+  }
+
+  @Test
+  void givenSpontaneousOriginWhenSyncThenSkipAcaInvocation() {
+    // given
+    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    debtPosition.setDebtPositionOrigin(DebtPositionOrigin.SPONTANEOUS);
+
+    // when
+    acaFacadeService.sync("IUD", debtPosition, TestUtils.getFakeAccessToken());
+
+    // then
+    Mockito.verifyNoInteractions(acaDebtPositionMapperMock);
+    Mockito.verifyNoInteractions(brokerRetrieverServiceMock);
+    Mockito.verifyNoInteractions(acaServiceMock);
   }
 }

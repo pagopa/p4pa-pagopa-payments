@@ -87,7 +87,7 @@ class GpdClientTest {
   private PaymentPositionModel configureMocks(RegistryEventType registryEventType, Object request) {
     PaymentPositionModel paymentPositionModel = podamFactory.manufacturePojo(PaymentPositionModel.class);
 
-    when(gpdApisHolderMock.getGpdApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
+    when(gpdApisHolderMock.getApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
 
     RegistryContextData contextData = RegistryContextData.builder()
       .orgFiscalCode(ORGANIZATION_FISCAL_CODE)

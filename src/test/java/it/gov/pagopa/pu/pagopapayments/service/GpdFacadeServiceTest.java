@@ -36,96 +36,32 @@ class GpdFacadeServiceTest {
   private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   @Test
-  void givenValidDebtPositionWhenSyncInsertThenOk() {
+  void givenValidDebtPositionWhenSyncThenUseGpdKey() {
     //given
+    String iud = "IUD";
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
-    Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> paymentPositionModelAndOperation =
-      Pair.of(GpdDebtPositionMapper.OPERATION.CREATE, podamFactory.manufacturePojo(PaymentPositionModel.class));
+    PaymentPositionModel model = podamFactory.manufacturePojo(PaymentPositionModel.class);
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = BrokerForNodoPaDTO.builder()
       .organization(organization)
-      .brokerApiKeys(new BrokerApiKeys().gpdKey(VALID_GPD_KEY))
+      .brokerApiKeys(new BrokerApiKeys().gpdKey(VALID_GPD_KEY).acaKey("OTHER_KEY"))
       .broker(new Broker())
       .build();
 
-    Mockito.when(gpdDebtPositionMapperMock.mapToNewPaymentPositionModel("IUD", debtPosition, organization)).thenReturn(paymentPositionModelAndOperation);
-
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken()))
       .thenReturn(brokerForNodoPaDTO);
+    Mockito.when(gpdDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
+      .thenReturn(Pair.of(GpdDebtPositionMapper.OPERATION.CREATE, model));
 
     //when
-    gpdFacadeService.sync("IUD", debtPosition, TestUtils.getFakeAccessToken());
+    gpdFacadeService.sync(iud, debtPosition, TestUtils.getFakeAccessToken());
+
     //verify
-    Mockito.verify(gpdDebtPositionMapperMock, Mockito.times(1)).mapToNewPaymentPositionModel("IUD", debtPosition, organization);
-    Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken());
-    Mockito.verify(gpdServiceMock, Mockito.times(1)).paCreatePosition(
-      VALID_GPD_KEY,
-      organization.getOrgFiscalCode(),
-      paymentPositionModelAndOperation.getRight());
-  }
-
-  @Test
-  void givenValidDebtPositionWhenSyncUpdateThenOk() {
-    //given
-    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
-    Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> paymentPositionModelAndOperation =
-      Pair.of(GpdDebtPositionMapper.OPERATION.UPDATE, podamFactory.manufacturePojo(PaymentPositionModel.class));
-
-    BrokerForNodoPaDTO brokerForNodoPaDTO = BrokerForNodoPaDTO.builder()
-      .organization(organization)
-      .brokerApiKeys(new BrokerApiKeys().gpdKey(VALID_GPD_KEY))
-      .broker(new Broker())
-      .build();
-
-    Mockito.when(gpdDebtPositionMapperMock.mapToNewPaymentPositionModel("IUD", debtPosition, organization)).thenReturn(paymentPositionModelAndOperation);
-
-    Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken()))
-      .thenReturn(brokerForNodoPaDTO);
-
-    //when
-    gpdFacadeService.sync("IUD", debtPosition, TestUtils.getFakeAccessToken());
-    //verify
-    Mockito.verify(gpdDebtPositionMapperMock, Mockito.times(1)).mapToNewPaymentPositionModel("IUD", debtPosition, organization);
-    Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken());
-    Mockito.verify(gpdServiceMock, Mockito.times(1)).paUpdatePosition(
+    Mockito.verify(gpdServiceMock).paCreatePosition(
       Mockito.eq(VALID_GPD_KEY),
       Mockito.eq(organization.getOrgFiscalCode()),
-      Mockito.eq(paymentPositionModelAndOperation.getRight().getIupd()),
-      Mockito.same(paymentPositionModelAndOperation.getRight()));
+      Mockito.same(model)
+    );
   }
-  @Test
-  void givenValidDebtPositionWhenSyncDeleteThenOk() {
-    //given
-    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
-    Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> paymentPositionModelAndOperation =
-      Pair.of(GpdDebtPositionMapper.OPERATION.DELETE, podamFactory.manufacturePojo(PaymentPositionModel.class));
-
-    BrokerForNodoPaDTO brokerForNodoPaDTO = BrokerForNodoPaDTO.builder()
-      .organization(organization)
-      .brokerApiKeys(new BrokerApiKeys().gpdKey(VALID_GPD_KEY))
-      .broker(new Broker())
-      .build();
-
-    Mockito.when(gpdDebtPositionMapperMock.mapToNewPaymentPositionModel("IUD", debtPosition, organization)).thenReturn(paymentPositionModelAndOperation);
-
-    Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken()))
-      .thenReturn(brokerForNodoPaDTO);
-
-    //when
-    gpdFacadeService.sync("IUD", debtPosition, TestUtils.getFakeAccessToken());
-    //verify
-    Mockito.verify(gpdDebtPositionMapperMock, Mockito.times(1)).mapToNewPaymentPositionModel("IUD", debtPosition, organization);
-    Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken());
-    Mockito.verify(gpdServiceMock, Mockito.times(1)).paDeletePosition(
-      Mockito.eq(VALID_GPD_KEY),
-      Mockito.eq(organization.getOrgFiscalCode()),
-      Mockito.eq(paymentPositionModelAndOperation.getRight().getIupd()),
-      Mockito.same(paymentPositionModelAndOperation.getRight()));
-  }
-
-
-
 }

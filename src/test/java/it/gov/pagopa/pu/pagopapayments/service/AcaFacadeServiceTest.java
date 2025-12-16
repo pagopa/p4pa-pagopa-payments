@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
@@ -40,6 +41,8 @@ class AcaFacadeServiceTest {
     //given
     String iud = "IUD";
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    debtPosition.setDebtPositionOrigin(DebtPositionOrigin.ORDINARY);
+
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     PaymentPositionModel model = podamFactory.manufacturePojo(PaymentPositionModel.class);
 
@@ -63,5 +66,19 @@ class AcaFacadeServiceTest {
       Mockito.eq(organization.getOrgFiscalCode()),
       Mockito.same(model)
     );
+  }
+
+  @Test
+  void givenExcludedOriginWhenSyncThenSkipExecution() {
+    //given
+    String iud = "IUD";
+    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    debtPosition.setDebtPositionOrigin(DebtPositionOrigin.SPONTANEOUS);
+
+    //when
+    acaFacadeService.sync(iud, debtPosition, TestUtils.getFakeAccessToken());
+
+    //verify
+    Mockito.verifyNoInteractions(brokerRetrieverServiceMock, gpdDebtPositionMapperMock, acaServiceWrapperMock);
   }
 }

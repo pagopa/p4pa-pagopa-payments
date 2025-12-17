@@ -20,7 +20,7 @@ public class GpdController implements GpdApi {
 
   @Override
   public ResponseEntity<Void> syncGpd(String iud, DebtPositionDTO debtPositionDTO) {
-    log.info("invoking syncAca, iud[{}] debtPositionDTO[{}]", iud, debtPositionDTO.getDebtPositionId());
+    log.info("invoking syncGpd, iud[{}] debtPositionDTO[{}]", iud, debtPositionDTO.getDebtPositionId());
     gpdFacadeService.sync(iud, debtPositionDTO, SecurityUtils.getAccessToken());
     return ResponseEntity.ok().build();
   }

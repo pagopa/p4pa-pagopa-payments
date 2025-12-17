@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.client;
 
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentOptionModel;
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
-import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config.GpdApisHolder;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca_gpd.ApiClientProvider;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
@@ -10,67 +10,65 @@ import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
 
-@Service
 @Slf4j
 public class GpdClient {
 
-  private final GpdApisHolder gpdApisHolder;
+  private final ApiClientProvider apisHolder;
   private final RegistryLogger registryLogger;
 
-  public GpdClient(GpdApisHolder gpdApisHolder, RegistryLogger registryLogger) {
-    this.gpdApisHolder = gpdApisHolder;
+  public GpdClient(ApiClientProvider apisHolder, RegistryLogger registryLogger) {
+    this.apisHolder = apisHolder;
     this.registryLogger = registryLogger;
   }
 
-  public void createPosition(String apiKey, String organizationfiscalcode, PaymentPositionModel paymentPositionModel) {
+  public void createPosition(String apiKey, String orgFiscalCode, PaymentPositionModel paymentPositionModel) {
     registryLogger.execute(
       getRegistryContextDataFromPaymentPositionModel(
-        organizationfiscalcode,
+        orgFiscalCode,
         RegistryEventType.GPD_createPosition,
         paymentPositionModel
       ),
       paymentPositionModel,
       () -> {
-        PaymentPositionModel response = gpdApisHolder.getGpdApiClientByApiKey(apiKey)
-          .createPosition(organizationfiscalcode, paymentPositionModel, null, true);
+        PaymentPositionModel response = apisHolder.getApiClientByApiKey(apiKey)
+          .createPosition(orgFiscalCode, paymentPositionModel, null, true);
         return Triple.of(response, null, RegistryOutcome.OK);
       },
       null
     );
   }
 
-  public void updatePosition(String apiKey, String organizationfiscalcode, String iupd, PaymentPositionModel paymentPositionModel){
+  public void updatePosition(String apiKey, String orgFiscalCode, String iupd, PaymentPositionModel paymentPositionModel){
     registryLogger.execute(
       getRegistryContextDataFromPaymentPositionModel(
-        organizationfiscalcode,
+        orgFiscalCode,
         RegistryEventType.GPD_updatePosition,
         paymentPositionModel
       ),
       paymentPositionModel,
       () -> {
-        PaymentPositionModel response = gpdApisHolder.getGpdApiClientByApiKey(apiKey)
-          .updatePosition(organizationfiscalcode, iupd, paymentPositionModel, null,true);
+        PaymentPositionModel response = apisHolder.getApiClientByApiKey(apiKey)
+          .updatePosition(orgFiscalCode, iupd, paymentPositionModel, null,true);
         return Triple.of(response, null, RegistryOutcome.OK);
       },
       null
     );
   }
 
-  public void deletePosition(String apiKey, String organizationfiscalcode, String iupd, PaymentPositionModel paymentPositionModel) {
+  public void deletePosition(String apiKey, String orgFiscalCode, String iupd, PaymentPositionModel paymentPositionModel) {
     registryLogger.execute(
       getRegistryContextDataFromPaymentPositionModel(
-        organizationfiscalcode,
+        orgFiscalCode,
         RegistryEventType.GPD_deletePosition,
         paymentPositionModel
       ),
       iupd,
       () -> {
-        String response = gpdApisHolder.getGpdApiClientByApiKey(apiKey)
-          .deletePosition(organizationfiscalcode, iupd, null);
+        String response = apisHolder.getApiClientByApiKey(apiKey)
+          .deletePosition(orgFiscalCode, iupd, null);
         return Triple.of(response, null, RegistryOutcome.OK);
       },
       null
@@ -78,7 +76,7 @@ public class GpdClient {
   }
 
   private RegistryContextData getRegistryContextDataFromPaymentPositionModel(
-    String organizationFiscalCode,
+    String orgFiscalCode,
     RegistryEventType eventType,
     PaymentPositionModel paymentPositionModel
   ) {
@@ -91,7 +89,7 @@ public class GpdClient {
     }
 
     return RegistryContextData.builder()
-      .orgFiscalCode(organizationFiscalCode)
+      .orgFiscalCode(orgFiscalCode)
       .eventType(eventType)
       .iuv(iuvConcat)
       .build();

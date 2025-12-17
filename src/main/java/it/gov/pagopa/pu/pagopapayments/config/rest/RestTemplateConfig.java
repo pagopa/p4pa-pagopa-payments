@@ -8,16 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateBuilderConfigurer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.restclient.RestTemplateBuilder;
+import org.springframework.boot.restclient.autoconfigure.RestTemplateBuilderConfigurer;
 import org.springframework.boot.ssl.SslBundles;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -48,7 +47,7 @@ public class RestTemplateConfig {
         return new DefaultResponseErrorHandler() {
             @Override
             protected void handleError(@Nonnull ClientHttpResponse response, @Nonnull HttpStatusCode statusCode,
-                                       @Nullable URI url, @Nullable HttpMethod method) throws IOException {
+                                       URI url, HttpMethod method) throws IOException {
                 try {
                     super.handleError(response, statusCode, url, method);
                 } catch (HttpStatusCodeException ex) {

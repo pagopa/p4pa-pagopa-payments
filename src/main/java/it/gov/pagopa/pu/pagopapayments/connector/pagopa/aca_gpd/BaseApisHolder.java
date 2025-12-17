@@ -4,7 +4,7 @@ import it.gov.pagopa.nodo.gpd.controller.ApiClient;
 import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiApi;
 import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;

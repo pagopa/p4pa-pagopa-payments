@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
@@ -11,11 +10,12 @@ import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,7 +31,7 @@ class PrintPaymentNoticeControllerTest {
   private MockMvc mockMvc;
 
   @Autowired
-  private ObjectMapper objectMapper;
+  private JsonMapper jsonMapper;
 
   @MockitoBean
   private GenerateNoticeService generateNoticeService;
@@ -67,7 +67,7 @@ class PrintPaymentNoticeControllerTest {
     mockMvc.perform(post("/printpaymentnotice/generate")
         .param("iuv", IUV)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(debtPosition)))
+        .content(jsonMapper.writeValueAsString(debtPosition)))
       .andExpect(status().isOk())
       .andExpect(content().bytes(expectedResult));
 
@@ -94,7 +94,7 @@ class PrintPaymentNoticeControllerTest {
     // When & Then
     mockMvc.perform(post("/printpaymentnotice/generateMassive")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
+        .content(jsonMapper.writeValueAsString(request)))
       .andExpect(status().isOk())
       .andReturn();
 

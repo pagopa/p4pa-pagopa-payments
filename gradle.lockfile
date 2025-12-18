@@ -137,6 +137,7 @@ org.springframework.cloud:spring-cloud-starter-stream-kafka:5.0.0=compileClasspa
 org.springframework.cloud:spring-cloud-stream-binder-kafka-core:5.0.0=compileClasspath
 org.springframework.cloud:spring-cloud-stream-binder-kafka:5.0.0=compileClasspath
 org.springframework.cloud:spring-cloud-stream:5.0.0=compileClasspath
+org.springframework.data:spring-data-commons:4.0.0=compileClasspath
 org.springframework.integration:spring-integration-core:7.0.0=compileClasspath
 org.springframework.integration:spring-integration-jmx:7.0.0=compileClasspath
 org.springframework.integration:spring-integration-kafka:7.0.0=compileClasspath

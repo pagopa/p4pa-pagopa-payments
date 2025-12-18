@@ -13,6 +13,7 @@ import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.LocalDateTimeToOffse
 import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.OffsetDateTimeToLocalDateTimeJackson3Deserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -21,6 +22,7 @@ import java.time.OffsetDateTime;
 import java.util.TimeZone;
 
 @Configuration
+@EnableSpringDataWebSupport
 public class JsonConfig {
 
   @Bean

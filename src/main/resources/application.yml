@@ -65,8 +65,8 @@ management:
     build.enabled: true
     java.enabled: true
     git.enabled: true
+  otlp.metrics.export.enabled: "\${TRACING_EXPORT:false}"
   tracing:
-    export.otlp.enabled: "\${TRACING_EXPORT:false}"
     sampling.probability: "\${TRACING_SAMPLING_PROBABILITY:1.0}"
     baggage.remote-fields:
       - X-user-id

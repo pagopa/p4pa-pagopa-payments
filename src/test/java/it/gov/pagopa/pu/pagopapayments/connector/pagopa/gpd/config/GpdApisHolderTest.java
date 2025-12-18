@@ -14,7 +14,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
-class GpdApisHolderTest extends BaseApiHolderTest{
+class GpdApisHolderTest extends BaseApiHolderTest {
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
@@ -42,12 +42,11 @@ class GpdApisHolderTest extends BaseApiHolderTest{
   @Test
   void whenGetOrganizationEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      apiKey -> gpdApisHolder.getGpdApiClientByApiKey(apiKey)
-        .createPosition(ORG_FISCAL_CODE,new PaymentPositionModel(), null, true),
+      apiKey -> gpdApisHolder.getApiClientByApiKey(apiKey)
+        .createPosition(ORG_FISCAL_CODE, new PaymentPositionModel(), null, true),
       new ParameterizedTypeReference<>() {},
       () -> {},
       BaseApiHolderTest.AUTH_TYPE.API_KEY,
       "Ocp-Apim-Subscription-Key");
   }
-
 }

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.ws.config.annotation.EnableWs;
-import org.springframework.ws.config.annotation.WsConfigurerAdapter;
+import org.springframework.ws.config.annotation.WsConfigurer;
 import org.springframework.ws.support.WebUtils;
 import org.springframework.ws.transport.http.MessageDispatcherServlet;
 import org.springframework.ws.transport.http.WsdlDefinitionHandlerAdapter;
@@ -20,7 +20,6 @@ import org.springframework.ws.wsdl.wsdl11.SimpleWsdl11Definition;
 import org.springframework.ws.wsdl.wsdl11.Wsdl11Definition;
 import org.springframework.xml.xsd.SimpleXsdSchema;
 import org.springframework.xml.xsd.XsdSchema;
-import org.springframework.xml.xsd.XsdSchemaCollection;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -29,7 +28,7 @@ import java.util.Set;
 @EnableWs
 @Slf4j
 @Configuration(proxyBeanMethods = false)
-public class SoapWebServiceConfig extends WsConfigurerAdapter {
+public class SoapWebServiceConfig implements WsConfigurer {
 
   public static final String WS_PATH_NODE = WebSecurityConfig.SOAP_WS_BASE_PATH+"/node/";
   private static final String SOAP_RESOURCES_FOLDER = "soap";
@@ -128,13 +127,8 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
     return urlPath.substring(0, begin);
   }
 
-  @Bean
-  public XsdSchemaCollection getXsdSchemaCollection() {
-    return null;
-  }
-
   @Bean(name = PaForNodeEndpoint.NAME)
-  public Wsdl11Definition paForNodeEndpoint(XsdSchemaCollection xsdSchemaCollection) {
+  public Wsdl11Definition paForNodeEndpoint() {
     registerWsdlDefinition(WS_PATH_NODE + "wsdl/" + PaForNodeEndpoint.NAME);
     return new SimpleWsdl11Definition(resourceLoader.getResource("classpath:soap/wsdl/paForNode.wsdl"));
   }

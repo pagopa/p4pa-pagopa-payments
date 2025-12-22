@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.sendnotification.controller.BaseApi;
 import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
 import it.gov.pagopa.pu.sendnotification.controller.generated.SendApi;
 import jakarta.annotation.PreDestroy;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 

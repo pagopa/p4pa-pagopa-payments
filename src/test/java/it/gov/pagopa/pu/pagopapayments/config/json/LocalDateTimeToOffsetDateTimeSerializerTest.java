@@ -27,7 +27,7 @@ class LocalDateTimeToOffsetDateTimeSerializerTest {
   private LocalDateTimeToOffsetDateTimeSerializer dateTimeSerializer;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     dateTimeSerializer = new LocalDateTimeToOffsetDateTimeSerializer();
   }
 

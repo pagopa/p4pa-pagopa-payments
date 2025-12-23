@@ -1,10 +1,12 @@
 package it.gov.pagopa.pu.pagopapayments.config.json;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Assertions;
@@ -24,16 +26,24 @@ class JsonConfigTest {
   private final JsonMapper j3JsonMapper = jsonConfig.objectMapperJackson3();
 
   @Data
-  @NoArgsConstructor
-  @JsonPropertyOrder({"name", "nullField", "nonNullableNullField", "value", "dateTime", "offsetDateTime"})
+  @NoArgsConstructor(onConstructor_ = @JsonCreator)
+  @AllArgsConstructor
+  @JsonPropertyOrder({"name", "nullField", "nonNullableNullField", "value", "dateTime", "offsetDateTime", "implicitField"})
   public static class SampleDTO {
-    public String name;
+    private String name;
     private String nullField;
     @JsonInclude(JsonInclude.Include.ALWAYS)
     private String nonNullableNullField;
-    public Integer value;
-    public LocalDateTime dateTime;
-    public OffsetDateTime offsetDateTime;
+    private Integer value;
+    private LocalDateTime dateTime;
+    private OffsetDateTime offsetDateTime;
+    private String implicitField;
+
+    public void setName(String name) {
+      this.implicitField = name;
+      this.name = name;
+    }
+
   }
 
   @BeforeEach
@@ -66,7 +76,7 @@ class JsonConfigTest {
   }
 
   @Test
-  void testDateConversions() throws JsonProcessingException {
+  void testDateConversionsAndImplicitSet() throws JsonProcessingException {
     // Given
     String json = """
       {
@@ -83,6 +93,7 @@ class JsonConfigTest {
     expectedResult.setValue(42);
     expectedResult.setDateTime(LocalDateTime.of(2025, 12, 22, 18, 17, 39, 940891000));
     expectedResult.setOffsetDateTime(OffsetDateTime.of(2025, 12, 22, 18, 17, 39, 941234000, ZoneOffset.of("+01:00")));
+    expectedResult.setImplicitField(expectedResult.getName());
 
     // When
     SampleDTO j2Deserialized = j2ObjectMapper.readValue(json, SampleDTO.class);

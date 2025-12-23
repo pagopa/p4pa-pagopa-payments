@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class AcaApisHolderTest extends BaseApiHolderTest {
   void whenGetOrganizationEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> acaApisHolder.getApiClientByApiKey(apiKey)
-        .createPosition("12345678901", new PaymentPositionModel(), null, true),
+        .createPosition("12345678901", true, null, new PaymentPositionModelV3()),
       new ParameterizedTypeReference<>() {},
       () -> {},
       AUTH_TYPE.API_KEY,

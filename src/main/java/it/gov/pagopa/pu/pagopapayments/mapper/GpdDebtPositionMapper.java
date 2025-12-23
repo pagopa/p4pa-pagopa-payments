@@ -4,6 +4,7 @@ import it.gov.pagopa.nodo.gpd.dto.generated.*;
 import it.gov.pagopa.nodo.gpd.dto.generated.Stamp;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
@@ -18,47 +19,42 @@ import java.util.Set;
 @Component
 @Slf4j
 public class GpdDebtPositionMapper {
-
   public static final Set<InstallmentStatus> STATUS_TO_SEND_GPD = Set.of(InstallmentStatus.TO_SYNC);
-  private static final Set<InstallmentStatus> SYNC_STATUS_TO_DELETE = Set.of(InstallmentStatus.CANCELLED, InstallmentStatus.INVALID, InstallmentStatus.EXPIRED);
-  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED);
-  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_INSERT = Set.of(InstallmentStatus.DRAFT, InstallmentStatus.UNPAYABLE);
+  private static final Set<InstallmentStatus> SYNC_STATUS_TO_DELETE =
+    Set.of(InstallmentStatus.CANCELLED, InstallmentStatus.INVALID, InstallmentStatus.EXPIRED);
+  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_UPDATE_OR_DELETE =
+    Set.of(InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED);
+  private static final Set<InstallmentStatus> SYNC_STATUS_FROM_INSERT =
+    Set.of(InstallmentStatus.DRAFT, InstallmentStatus.UNPAYABLE);
 
-  private boolean installment2sendGpd(InstallmentDTO installment) {
-    //skip installment whose status is not in the filterInstallmentStatus
-    return STATUS_TO_SEND_GPD.contains(installment.getStatus());
-  }
 
-  public Pair<OPERATION, PaymentPositionModel> mapToNewPaymentPositionModel(String iud, DebtPositionDTO debtPosition, Organization org) {
+  public Pair<Operation, PaymentPositionModelV3> mapToNewPaymentPositionModel(String iud, DebtPositionDTO debtPosition, Organization org) {
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
       .filter(installment -> iud.equals(installment.getIud()))
       .filter(this::installment2sendGpd)
       .map(installment -> {
-        OPERATION operation = getOperation(installment);
-        PersonDTO debtor = installment.getDebtor();
-        return Pair.of(operation, new PaymentPositionModel()
+        Operation operation = getOperation(installment);
+
+        PaymentPositionModelV3 model = new PaymentPositionModelV3()
           .iupd(installment.getIupdPagopa())
-          .type(PaymentPositionModel.TypeEnum.valueOf(debtor.getEntityType().getValue()))
-          .fiscalCode(debtor.getFiscalCode())
-          .fullName(Utilities.truncateFullName(debtor.getFullName()))
-          .streetName(debtor.getAddress())
-          .civicNumber(debtor.getCivic())
-          .postalCode(debtor.getPostalCode())
-          .city(debtor.getLocation())
-          .province(debtor.getProvince())
-          .country(debtor.getNation())
-          .email(debtor.getEmail())
-          .switchToExpired(Optional.ofNullable(installment.getSwitchToExpired()).orElse(false))
           .companyName(org.getOrgName())
-          .paymentOption(List.of(getPaymentOption(installment)))
-          .validityDate(debtPosition.getValidityDate() != null ? debtPosition.getValidityDate().atStartOfDay().toString() : null)
-        );
-      }).findAny().orElseThrow(() -> new InvalidValueException("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));
+          .paymentOption(List.of(getPaymentOption(installment, debtPosition)));
+
+        return Pair.of(operation, model);
+      })
+      .findAny()
+      .orElseThrow(() -> new InvalidValueException(
+        "Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state"
+          .formatted(iud, debtPosition.getDebtPositionId())
+      ));
   }
 
-  private OPERATION getOperation(InstallmentDTO installment) {
-    OPERATION operation;
+  private boolean installment2sendGpd(InstallmentDTO installment) {
+    return STATUS_TO_SEND_GPD.contains(installment.getStatus());
+  }
+
+  private Operation getOperation(InstallmentDTO installment) {
     InstallmentSyncStatus syncStatus = installment.getSyncStatus();
 
     if (syncStatus == null) {
@@ -67,42 +63,93 @@ public class GpdDebtPositionMapper {
 
     if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
       SYNC_STATUS_TO_DELETE.contains(syncStatus.getSyncStatusTo())) {
-      operation = OPERATION.DELETE;
+      return Operation.DELETE;
+
     } else if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
       syncStatus.getSyncStatusTo().equals(InstallmentStatus.UNPAID)) {
-      operation = OPERATION.UPDATE;
+      return Operation.UPDATE;
+
     } else if (SYNC_STATUS_FROM_INSERT.contains(syncStatus.getSyncStatusFrom()) &&
       syncStatus.getSyncStatusTo().equals(InstallmentStatus.UNPAID)) {
-      operation = OPERATION.CREATE;
-    } else {
-      throw new InvalidValueException("Invalid sync status [%s->%s] for installment [%s]".formatted(
-        syncStatus.getSyncStatusFrom(), syncStatus.getSyncStatusTo(), installment.getIud()));
+      return Operation.CREATE;
     }
-    return operation;
+
+    throw new InvalidValueException("Invalid sync status [%s->%s] for installment [%s]"
+      .formatted(syncStatus.getSyncStatusFrom(), syncStatus.getSyncStatusTo(), installment.getIud()));
   }
 
-  private PaymentOptionModel getPaymentOption(InstallmentDTO installment) {
-    return PaymentOptionModel.builder()
+  private PaymentOptionModelV3 getPaymentOption(InstallmentDTO installment, DebtPositionDTO debtPosition) {
+    return PaymentOptionModelV3.builder()
+      .debtor(mapDebtor(installment.getDebtor()))
+      .switchToExpired(Optional.ofNullable(installment.getSwitchToExpired()).orElse(false))
+      .installments(List.of(mapInstallment(installment)))
+      .description(Utilities.truncateRemittanceInformation(installment.getRemittanceInformation()))
+      .validityDate(
+        debtPosition.getValidityDate() != null
+          ? debtPosition.getValidityDate().atStartOfDay().toString()
+          : null
+      )
+      .retentionDate(null)
+      .build();
+  }
+
+  private InstallmentModel mapInstallment(InstallmentDTO installment) {
+    InstallmentModel model = new InstallmentModel()
       .nav(installment.getNav())
       .iuv(installment.getIuv())
       .amount(installment.getAmountCents())
       .description(Utilities.truncateRemittanceInformation(installment.getRemittanceInformation()))
-      .isPartialPayment(false)
-      .dueDate(installment.getDueDate() != null ? ConversionUtils.atEndOfDay(installment.getDueDate()).toString() : ConversionUtils.MAX_EXPIRATION_DATE.toString())
-      .fee(0L)
-      .notificationFee(0L)
-      .paymentOptionMetadata(installment.getLegacyPaymentMetadata() != null ?
-        List.of(PaymentOptionMetadataModel.builder()
-          .key("datiSpecificiRiscossione")
-          .value(installment.getLegacyPaymentMetadata())
-          .build()) : null)
-      .transfer(installment.getTransfers().stream()
-        .map(this::getTransfer).toList())
-      .build();
+      .dueDate(
+        installment.getDueDate() != null
+          ? ConversionUtils.atEndOfDay(installment.getDueDate()).toString()
+          : ConversionUtils.MAX_EXPIRATION_DATE.toString()
+      )
+      .transfer(
+        installment.getTransfers().stream()
+          .map(this::getTransfer)
+          .toList()
+      );
+
+    if (installment.getLegacyPaymentMetadata() != null) {
+      model.installmentMetadata(
+        List.of(
+          new InstallmentMetadataModel()
+            .key("datiSpecificiRiscossione")
+            .value(installment.getLegacyPaymentMetadata())
+        )
+      );
+    }
+
+    return model;
+  }
+
+  private DebtorModel mapDebtor(PersonDTO debtor) {
+
+    DebtorModel model = new DebtorModel();
+
+    model.setFiscalCode(debtor.getFiscalCode());
+    model.setFullName(Utilities.truncateFullName(debtor.getFullName()));
+    model.setStreetName(debtor.getAddress());
+    model.setCivicNumber(debtor.getCivic());
+    model.setPostalCode(debtor.getPostalCode());
+    model.setCity(debtor.getLocation());
+    model.setProvince(debtor.getProvince());
+    model.setCountry(debtor.getNation());
+    model.setEmail(debtor.getEmail());
+
+    String type = debtor.getEntityType().getValue();
+    if ("F".equals(type)) {
+      model.setType(DebtorModel.TypeEnum.F);
+    } else if ("G".equals(type)) {
+      model.setType(DebtorModel.TypeEnum.G);
+    } else {
+      throw new InvalidValueException("Unsupported debtor entity type [%s]".formatted(type));
+    }
+
+    return model;
   }
 
   private TransferModel getTransfer(TransferDTO transfer) {
-
     boolean isStamp = transfer.getStampHashDocument() != null;
     Stamp stamp = null;
     if (isStamp) {
@@ -124,9 +171,5 @@ public class GpdDebtPositionMapper {
       .companyName(transfer.getOrgName())
       .stamp(stamp)
       .build();
-
   }
-
-
-  public enum OPERATION {CREATE, UPDATE, DELETE}
 }

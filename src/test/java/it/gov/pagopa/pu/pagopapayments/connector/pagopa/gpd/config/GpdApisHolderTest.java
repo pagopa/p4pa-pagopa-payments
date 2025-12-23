@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ class GpdApisHolderTest extends BaseApiHolderTest {
   void whenGetOrganizationEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> gpdApisHolder.getApiClientByApiKey(apiKey)
-        .createPosition(ORG_FISCAL_CODE, new PaymentPositionModel(), null, true),
+        .createPosition(ORG_FISCAL_CODE, true, null, new PaymentPositionModelV3()),
       new ParameterizedTypeReference<>() {},
       () -> {},
       BaseApiHolderTest.AUTH_TYPE.API_KEY,

@@ -1,8 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.client;
 
-import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiApi;
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentOptionModel;
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi;
+import it.gov.pagopa.nodo.gpd.dto.generated.InstallmentModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config.GpdApisHolder;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
@@ -30,7 +30,7 @@ class GpdClientTest {
   @Mock
   private GpdApisHolder gpdApisHolderMock;
   @Mock
-  private DebtPositionsApiApi debtPositionsApiMock;
+  private DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi debtPositionsApiMock;
   @Mock
   private RegistryLogger registryLoggerMock;
 
@@ -59,40 +59,44 @@ class GpdClientTest {
 
   @Test
   void createPosition_ShouldCallGpdApiClient() {
-    PaymentPositionModel paymentPositionModel = configureMocks(RegistryEventType.GPD_createPosition, null);
+    PaymentPositionModelV3 paymentPositionModel = configureMocks(RegistryEventType.GPD_createPosition, null);
 
     gpdClient.createPosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, paymentPositionModel);
 
-    verify(debtPositionsApiMock, times(1)).createPosition(ORGANIZATION_FISCAL_CODE, paymentPositionModel, null, TO_PUBLISH);
+    verify(debtPositionsApiMock, times(1)).createPosition(ORGANIZATION_FISCAL_CODE, TO_PUBLISH, null,  paymentPositionModel);
   }
 
   @Test
   void updatePosition_ShouldCallGpdApiClient() {
-    PaymentPositionModel paymentPositionModel = configureMocks(RegistryEventType.GPD_updatePosition, null);
+    PaymentPositionModelV3 paymentPositionModel = configureMocks(RegistryEventType.GPD_updatePosition, null);
 
     gpdClient.updatePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 
-    verify(debtPositionsApiMock, times(1)).updatePosition(ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel, null, TO_PUBLISH);
+    verify(debtPositionsApiMock, times(1)).updatePosition(ORGANIZATION_FISCAL_CODE, IUPD, TO_PUBLISH, null, paymentPositionModel);
   }
 
   @Test
   void deletePosition_ShouldCallGpdApiClient() {
-    PaymentPositionModel paymentPositionModel = configureMocks(RegistryEventType.GPD_deletePosition, IUPD);
+    PaymentPositionModelV3 paymentPositionModel = configureMocks(RegistryEventType.GPD_deletePosition, IUPD);
 
     gpdClient.deletePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 
     verify(debtPositionsApiMock, times(1)).deletePosition(ORGANIZATION_FISCAL_CODE, IUPD, null);
   }
 
-  private PaymentPositionModel configureMocks(RegistryEventType registryEventType, Object request) {
-    PaymentPositionModel paymentPositionModel = podamFactory.manufacturePojo(PaymentPositionModel.class);
+  private PaymentPositionModelV3 configureMocks(RegistryEventType registryEventType, Object request) {
+    PaymentPositionModelV3 paymentPositionModel = podamFactory.manufacturePojo(PaymentPositionModelV3.class);
 
     when(gpdApisHolderMock.getApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
 
     RegistryContextData contextData = RegistryContextData.builder()
       .orgFiscalCode(ORGANIZATION_FISCAL_CODE)
       .eventType(registryEventType)
-      .iuv(paymentPositionModel.getPaymentOption().stream().map(PaymentOptionModel::getIuv).collect(Collectors.joining(Utilities.IUV_SEPARATOR)))
+      .iuv(
+        paymentPositionModel.getPaymentOption().stream()
+          .flatMap(po -> po.getInstallments().stream())
+          .map(InstallmentModel::getIuv)
+          .collect(Collectors.joining(Utilities.IUV_SEPARATOR)))
       .build();
     RegistryLoggerTest.configureRegistryLoggerMock(registryLoggerMock, contextData, Objects.requireNonNullElse(request, paymentPositionModel), false, false);
 

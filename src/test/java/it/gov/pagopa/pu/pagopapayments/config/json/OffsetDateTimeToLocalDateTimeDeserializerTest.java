@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.config.json;
 
 import com.fasterxml.jackson.core.JsonParser;
+import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,7 +27,7 @@ class OffsetDateTimeToLocalDateTimeDeserializerTest {
     LocalDateTime result = deserializer.deserialize(parser, null);
 
     // Then
-    Assertions.assertEquals(offsetDateTime.toLocalDateTime(), result);
+    Assertions.assertEquals(offsetDateTime.atZoneSameInstant(Constants.ZONEID).toLocalDateTime(), result);
   }
 
   @Test
@@ -41,7 +42,7 @@ class OffsetDateTimeToLocalDateTimeDeserializerTest {
     LocalDateTime result = deserializer.deserialize(parser, null);
 
     // Then
-    Assertions.assertEquals(offsetDateTime.toLocalDateTime(), result);
+    Assertions.assertEquals(offsetDateTime.atZoneSameInstant(Constants.ZONEID).toLocalDateTime(), result);
   }
 
   @Test

@@ -27,13 +27,21 @@ import java.util.*;
 @Slf4j
 public class TestUtils {
 
+  static {
+    clearDefaultTimezone();
+  }
+
+  public static void clearDefaultTimezone() {
+    TimeZone.setDefault(Constants.DEFAULT_TIMEZONE);
+  }
+
   private static final String ACCESS_TOKEN = "TOKENHEADER.TOKENPAYLOAD.TOKENDIGEST";
 
   public static String getFakeAccessToken() {
     return ACCESS_TOKEN;
   }
 
-  public static void setFakeAccessTokenInContext(){
+  public static void setFakeAccessTokenInContext() {
     SecurityContextHolder.setContext(new SecurityContextImpl(new JwtAuthenticationToken(Jwt
       .withTokenValue(ACCESS_TOKEN)
       .header("", "")
@@ -45,7 +53,7 @@ public class TestUtils {
     PodamFactory externalFactory = new AbstractExternalFactory() {
       @Override
       public <T> T manufacturePojo(Class<T> pojoClass, Type... genericTypeArgs) {
-        if(pojoClass.isAssignableFrom(XMLGregorianCalendar.class)) {
+        if (pojoClass.isAssignableFrom(XMLGregorianCalendar.class)) {
           return (T) ConversionUtils.toXMLGregorianCalendar(OffsetDateTime.now());
         }
         return null;
@@ -57,7 +65,7 @@ public class TestUtils {
       }
     };
     PodamFactoryImpl podamFactory = new PodamFactoryImpl(externalFactory);
-    podamFactory.getStrategy().addOrReplaceTypeManufacturer(SortedSet.class, new AbstractTypeManufacturer<>(){
+    podamFactory.getStrategy().addOrReplaceTypeManufacturer(SortedSet.class, new AbstractTypeManufacturer<>() {
       @Override
       public SortedSet<?> getType(DataProviderStrategy strategy, AttributeMetadata attributeMetadata, ManufacturingContext manufacturingCtx) {
         return new TreeSet<>();
@@ -74,7 +82,7 @@ public class TestUtils {
     org.springframework.util.ReflectionUtils.doWithFields(o.getClass(),
       f -> {
         f.setAccessible(true);
-        Assertions.assertNotNull(f.get(o), "The field "+f.getName()+" of the input object of type "+o.getClass()+" is null!");
+        Assertions.assertNotNull(f.get(o), "The field " + f.getName() + " of the input object of type " + o.getClass() + " is null!");
       },
       f -> !excludedFieldsSet.contains(f.getName()));
   }
@@ -84,9 +92,9 @@ public class TestUtils {
     org.springframework.util.ReflectionUtils.doWithFields(o.getClass(),
       f -> {
         f.setAccessible(true);
-        Assertions.assertNotNull(f.get(o), "The field "+f.getName()+" of the input object of type "+o.getClass()+" is null!");
+        Assertions.assertNotNull(f.get(o), "The field " + f.getName() + " of the input object of type " + o.getClass() + " is null!");
       },
-      f -> !excludedFieldsSet.contains(f.getName()) && f.getAnnotation(Nullable.class)==null);
+      f -> !excludedFieldsSet.contains(f.getName()) && f.getAnnotation(Nullable.class) == null);
   }
 
 
@@ -181,15 +189,16 @@ public class TestUtils {
   }
 
   private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.nnnnnnnnn");
+
   private static <T> boolean compareEquals(Comparable<T> v1, T v2) {
     try {
       //specific equality tests for TemporalAccessor classes
-      if(v1 instanceof TemporalAccessor v1Time && v2 instanceof TemporalAccessor v2Time){
+      if (v1 instanceof TemporalAccessor v1Time && v2 instanceof TemporalAccessor v2Time) {
         //ignore timezone (for localDate/Time objects)
         return StringUtils.equals(formatter.format(v1Time), formatter.format(v2Time));
       } else {
         //generic fallback
-        return v1.compareTo(v2)==0;
+        return v1.compareTo(v2) == 0;
       }
     } catch (ClassCastException cce) {
       log.warn("cannot compare {} with {}", ClassUtils.getName(v1), ClassUtils.getName(v2));

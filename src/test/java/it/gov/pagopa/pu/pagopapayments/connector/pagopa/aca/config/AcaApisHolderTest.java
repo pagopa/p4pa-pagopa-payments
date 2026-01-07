@@ -20,6 +20,9 @@ class AcaApisHolderTest extends BaseApiHolderTest {
 
   private AcaApisHolder acaApisHolder;
 
+  private static final String ORG_FISCAL_CODE = "12345678901";
+  private static final String API_KEY_HEADER = "Ocp-Apim-Subscription-Key";
+
   @BeforeEach
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
@@ -40,11 +43,17 @@ class AcaApisHolderTest extends BaseApiHolderTest {
   @Test
   void whenGetOrganizationEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      apiKey -> acaApisHolder.getApiClientByApiKey(apiKey)
-        .createPosition("12345678901", true, null, new PaymentPositionModelV3()),
-      new ParameterizedTypeReference<>() {},
-      () -> {},
+      apiKey -> {
+        var api = acaApisHolder.getApiClientByApiKey(apiKey);
+        api.getApiClient().addDefaultHeader(API_KEY_HEADER, apiKey);
+
+        return api.createPosition(ORG_FISCAL_CODE, true, null, new PaymentPositionModelV3());
+      },
+      new ParameterizedTypeReference<>() {
+      },
+      () -> {
+      },
       AUTH_TYPE.API_KEY,
-      "Ocp-Apim-Subscription-Key");
+      API_KEY_HEADER);
   }
 }

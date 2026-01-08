@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca_gpd;
 
 import it.gov.pagopa.nodo.gpd.controller.ApiClient;
-import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiApi;
+import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi;
 import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
@@ -18,7 +18,7 @@ public abstract class BaseApisHolder implements ApiClientProvider {
   private final int maxAttempts;
   private final long waitTimeMillis;
 
-  private final Map<String, DebtPositionsApiApi> apiMap = new ConcurrentHashMap<>();
+  private final Map<String, DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi> apiMap = new ConcurrentHashMap<>();
 
   protected BaseApisHolder(
       RestTemplateBuilder restTemplateBuilder,
@@ -39,14 +39,14 @@ public abstract class BaseApisHolder implements ApiClientProvider {
   }
 
   @Override
-  public DebtPositionsApiApi getApiClientByApiKey(String apiKey) {
+  public DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi getApiClientByApiKey(String apiKey) {
     return apiMap.computeIfAbsent(apiKey, key -> {
       ApiClient apiClient = new ApiClient(restTemplate);
       apiClient.setBasePath(baseUrl);
       apiClient.setApiKey(key);
       apiClient.setMaxAttemptsForRetry(Math.max(1, maxAttempts));
       apiClient.setWaitTimeMillis(waitTimeMillis);
-      return new DebtPositionsApiApi(apiClient);
+      return new DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(apiClient);
     });
   }
 }

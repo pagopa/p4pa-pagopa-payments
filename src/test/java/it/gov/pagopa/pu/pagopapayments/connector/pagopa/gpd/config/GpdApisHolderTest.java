@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +21,7 @@ class GpdApisHolderTest extends BaseApiHolderTest {
   private GpdApisHolder gpdApisHolder;
 
   private static final String ORG_FISCAL_CODE = "1234567890";
+  private static final String API_KEY_HEADER = "Ocp-Apim-Subscription-Key";
 
   @BeforeEach
   void setUp() {
@@ -42,11 +43,17 @@ class GpdApisHolderTest extends BaseApiHolderTest {
   @Test
   void whenGetOrganizationEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      apiKey -> gpdApisHolder.getApiClientByApiKey(apiKey)
-        .createPosition(ORG_FISCAL_CODE, new PaymentPositionModel(), null, true),
-      new ParameterizedTypeReference<>() {},
-      () -> {},
+      apiKey -> {
+        var api = gpdApisHolder.getApiClientByApiKey(apiKey);
+        api.getApiClient().addDefaultHeader(API_KEY_HEADER, apiKey);
+
+        return api.createPosition(ORG_FISCAL_CODE, true, null, new PaymentPositionModelV3());
+      },
+      new ParameterizedTypeReference<>() {
+      },
+      () -> {
+      },
       BaseApiHolderTest.AUTH_TYPE.API_KEY,
-      "Ocp-Apim-Subscription-Key");
+      API_KEY_HEADER);
   }
 }

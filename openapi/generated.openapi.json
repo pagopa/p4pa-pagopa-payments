@@ -1053,9 +1053,13 @@
           },
           "paymentsReportingFileName" : {
             "type" : "string"
+          },
+          "revision" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         },
-        "required" : [ "flowDateTime", "pagopaPaymentsReportingId", "paymentsReportingFileName" ]
+        "required" : [ "flowDateTime", "pagopaPaymentsReportingId", "paymentsReportingFileName", "revision" ]
       }
     },
     "securitySchemes" : {

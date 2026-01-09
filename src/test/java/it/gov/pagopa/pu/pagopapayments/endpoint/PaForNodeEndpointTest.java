@@ -119,6 +119,33 @@ class PaForNodeEndpointTest {
     Assertions.assertEquals(paDemandPaymentNoticeRequest.getIdBrokerPA(), response.getFault().getId());
   }
 
+  @Test
+  void givenPagoPaNodeFaultExceptionWhenPaDemandPaymentNoticeThenSpecificFault() {
+    PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+    PagoPaNodeFaults specificError = PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO;
+    String specificEmitter = "SPECIFIC_EMITTER";
+    PagoPaNodeFaultException exceptionToThrow = new PagoPaNodeFaultException(specificError, specificEmitter);
+
+    RegistryContextData expectedContextData = RegistryContextData.builder()
+      .eventType(RegistryEventType.PaForNode_paDemandPaymentNotice)
+      .orgFiscalCode(request.getIdPA())
+      .brokerStationId(request.getIdStation())
+      .build();
+    configureRegistryLoggerMock(expectedContextData, request);
+
+    Mockito.when(demandPaymentNoticeServiceMock.handleRequest(request))
+      .thenThrow(exceptionToThrow);
+
+    // WHEN
+    PaDemandPaymentNoticeResponse response = paForNodeEndpoint.paDemandPaymentNotice(request);
+
+    // THEN
+    Assertions.assertNotNull(response);
+    Assertions.assertNotNull(response.getFault());
+    Assertions.assertEquals(specificError.code(), response.getFault().getFaultCode());
+    Assertions.assertEquals(specificEmitter, response.getFault().getId());
+    Assertions.assertNotEquals(StOutcome.OK, response.getOutcome());
+  }
   //endregion
 
 

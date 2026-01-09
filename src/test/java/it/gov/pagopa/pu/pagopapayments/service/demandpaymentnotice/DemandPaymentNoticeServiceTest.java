@@ -38,10 +38,9 @@ class DemandPaymentNoticeServiceTest {
   @InjectMocks
   private DemandPaymentNoticeService demandPaymentNoticeService;
 
-  private PodamFactory podamFactory;
+  private final PodamFactory podamFactory;
 
   private static final String ACCESS_TOKEN = "access-token";
-  private static final Long ORGANIZATION_ID = 1L;
 
   public DemandPaymentNoticeServiceTest() {
     podamFactory = TestUtils.getPodamFactory();

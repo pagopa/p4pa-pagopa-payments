@@ -184,6 +184,11 @@ rest:
     max-attempts: "\${PAGOPA_PRINT_PAYMENT_NOTICE_MAX_ATTEMPTS:3}" # It's counting also the first attempt
     wait-time-millis: "\${PAGOPA_PRINT_PAYMENT_NOTICE_WAIT_TIME_MILLIS:500}"
     print-body-when-error: "\${PAGOPA_PRINT_PAYMENT_NOTICE_PRINT_BODY_WHEN_ERROR:true}"
+  workflow-hub:
+    base-url: "\${WORKFLOW_HUB_BASE_URL:}"
+    max-attempts: "\${WORKFLOW_HUB_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${WORKFLOW_HUB_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${WORKFLOW_HUB_PRINT_BODY_WHEN_ERROR:true}"
 
 springdoc:
   writer-with-default-pretty-printer: true

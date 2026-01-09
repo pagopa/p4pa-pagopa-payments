@@ -4,6 +4,7 @@ import it.gov.pagopa.pagopa_api.pa.pafornode.*;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtFaultBean;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtResponse;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
@@ -16,6 +17,7 @@ import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.service.demandpaymentnotice.DemandPaymentNoticeService;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
@@ -40,20 +42,50 @@ public class PaForNodeEndpoint {
   private final ReceiptService receiptService;
   private final PaSendRTMapper paSendRTMapper;
   private final RegistryLogger registryLogger;
+  private final DemandPaymentNoticeService demandPaymentNoticeService;
 
 
-  public PaForNodeEndpoint(SynchronousPaymentService synchronousPaymentService, ReceiptService receiptService, PaSendRTMapper paSendRTMapper, RegistryLogger registryLogger) {
+  public PaForNodeEndpoint(SynchronousPaymentService synchronousPaymentService, ReceiptService receiptService, PaSendRTMapper paSendRTMapper, RegistryLogger registryLogger, DemandPaymentNoticeService demandPaymentNoticeService) {
     this.synchronousPaymentService = synchronousPaymentService;
     this.receiptService = receiptService;
     this.paSendRTMapper = paSendRTMapper;
     this.registryLogger = registryLogger;
+    this.demandPaymentNoticeService = demandPaymentNoticeService;
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paDemandPaymentNoticeRequest")
   @ResponsePayload
   public PaDemandPaymentNoticeResponse paDemandPaymentNotice(@RequestPayload PaDemandPaymentNoticeRequest request) {
-    log.info("processing paDemandPaymentNotice idPA[{}] servizio[{}/{}]", request.getIdPA(), request.getIdSoggettoServizio(), request.getIdServizio());
-    return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdBrokerPA(), new PaDemandPaymentNoticeResponse());
+    RegistryContextData contextData = RegistryContextData.builder()
+      .orgFiscalCode(request.getIdPA())
+      .brokerStationId(request.getIdStation())
+      .eventType(RegistryEventType.PaForNode_paDemandPaymentNotice)
+      .build();
+
+    return registryLogger.execute(
+      contextData,
+      request,
+      () -> {
+        log.info("processing paDemandPaymentNotice idPA[{}] servizio[{}/{}]", request.getIdPA(), request.getIdSoggettoServizio(), request.getIdServizio());
+        DebtPositionDTO debtPositionDTO = demandPaymentNoticeService.handleRequest(request);
+        PaDemandPaymentNoticeResponse resp = new PaDemandPaymentNoticeResponse();
+        resp.setOutcome(StOutcome.OK);
+        resp.setPaymentDescription(debtPositionDTO.getDescription());
+        return Triple.of(resp, null, RegistryOutcome.OK);
+      },
+      e -> {
+        PaDemandPaymentNoticeResponse resp;
+        if (Objects.requireNonNull(e) instanceof PagoPaNodeFaultException spe) {
+          log.error("Error in paDemandPaymentNotice [{}/{}] {}", request.getIdBrokerPA(), request.getIdServizio(), request.getIdStation(), e);
+          resp = handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaDemandPaymentNoticeResponse());
+        } else {
+          log.error("Error in paDemandPaymentNotice [{}/{}] {}", request.getIdBrokerPA(), request.getIdServizio(), request.getIdStation(), e);
+          resp = handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdBrokerPA(), new PaDemandPaymentNoticeResponse());
+        }
+
+        return resp;
+      }
+    );
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paVerifyPaymentNoticeReq")

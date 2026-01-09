@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.endpoint;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.*;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
@@ -15,6 +16,7 @@ import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLoggerTest;
+import it.gov.pagopa.pu.pagopapayments.service.demandpaymentnotice.DemandPaymentNoticeService;
 import it.gov.pagopa.pu.pagopapayments.service.receipt.ReceiptService;
 import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -42,6 +44,8 @@ class PaForNodeEndpointTest {
   private PaSendRTMapper paSendRTMapperMock;
   @Mock
   private RegistryLogger registryLoggerMock;
+  @Mock
+  private DemandPaymentNoticeService demandPaymentNoticeServiceMock;
 
   @InjectMocks
   private PaForNodeEndpoint paForNodeEndpoint;
@@ -54,7 +58,8 @@ class PaForNodeEndpointTest {
       synchronousPaymentServiceMock,
       receiptServiceMock,
       paSendRTMapperMock,
-      registryLoggerMock);
+      registryLoggerMock,
+      demandPaymentNoticeServiceMock);
   }
 
   private void configureRegistryLoggerMock(RegistryContextData contextData, Object request) {
@@ -66,6 +71,16 @@ class PaForNodeEndpointTest {
   void givenAnyWhenPaDemandPaymentNoticeThenFault() {
     // given
     PaDemandPaymentNoticeRequest paDemandPaymentNoticeRequest = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+
+    RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
+      .eventType(RegistryEventType.PaForNode_paDemandPaymentNotice)
+      .orgFiscalCode(paDemandPaymentNoticeRequest.getIdPA())
+      .brokerStationId(paDemandPaymentNoticeRequest.getIdStation())
+      .build();
+    configureRegistryLoggerMock(expectedRegistryContextData, paDemandPaymentNoticeRequest);
+
+    Mockito.when(demandPaymentNoticeServiceMock.handleRequest(paDemandPaymentNoticeRequest))
+      .thenThrow(new RuntimeException("Simulated System Error"));
 
     // when
     PaDemandPaymentNoticeResponse response = paForNodeEndpoint.paDemandPaymentNotice(paDemandPaymentNoticeRequest);

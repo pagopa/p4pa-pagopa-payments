@@ -12,5 +12,7 @@ public class Constants {
 
   public static final String AUX_DIGIT = "3";
 
+  public static final String WORKFLOW_STATUS_COMPLETED_VALUE = "WORKFLOW_EXECUTION_STATUS_COMPLETED";
+
 }
 

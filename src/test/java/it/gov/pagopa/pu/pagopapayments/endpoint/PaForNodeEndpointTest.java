@@ -68,6 +68,33 @@ class PaForNodeEndpointTest {
 
   //region paDemandPaymentNotice
   @Test
+  void givenValidRequestWhenPaDemandPaymentNoticeThenSuccess() {
+    // given
+    PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+    DebtPositionDTO debtPositionDTO = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    debtPositionDTO.setDescription("Test Description");
+
+    RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
+      .eventType(RegistryEventType.PaForNode_paDemandPaymentNotice)
+      .orgFiscalCode(request.getIdPA())
+      .brokerStationId(request.getIdStation())
+      .build();
+    configureRegistryLoggerMock(expectedRegistryContextData, request);
+
+    Mockito.when(demandPaymentNoticeServiceMock.handleRequest(request))
+      .thenReturn(debtPositionDTO);
+
+    // when
+    PaDemandPaymentNoticeResponse response = paForNodeEndpoint.paDemandPaymentNotice(request);
+
+    // verify
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(StOutcome.OK, response.getOutcome());
+    Assertions.assertEquals("Test Description", response.getPaymentDescription());
+    Assertions.assertNull(response.getFault()); // Qui il fault DEVE essere null
+  }
+
+  @Test
   void givenAnyWhenPaDemandPaymentNoticeThenFault() {
     // given
     PaDemandPaymentNoticeRequest paDemandPaymentNoticeRequest = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);

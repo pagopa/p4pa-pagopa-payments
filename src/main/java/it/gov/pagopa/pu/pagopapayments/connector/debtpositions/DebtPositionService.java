@@ -18,4 +18,5 @@ public interface DebtPositionService {
    * @return a pair containing the created DebtPositionDTO and the workflow ID from the response headers
    */
   Pair<DebtPositionDTO, String> createDebtPosition(DebtPositionDTO debtPositionDTO, String accessToken);
+  DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndCode(Long organizationId, String code, String accessToken);
 }

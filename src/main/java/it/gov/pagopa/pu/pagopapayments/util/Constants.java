@@ -14,5 +14,6 @@ public class Constants {
 
   public static final String WORKFLOW_STATUS_COMPLETED_VALUE = "WORKFLOW_EXECUTION_STATUS_COMPLETED";
 
+  public static final String SPONTANEOUS_PSP_DP_TYPE_ORG_CODE = "SPONTANEOUS_PSP";
 }
 

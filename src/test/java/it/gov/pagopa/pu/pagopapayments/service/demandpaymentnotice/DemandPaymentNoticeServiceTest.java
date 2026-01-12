@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service.demandpaymentnotice;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaDemandPaymentNoticeRequest;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
@@ -52,11 +53,17 @@ class DemandPaymentNoticeServiceTest {
     PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
+    debtPositionTypeOrg.setCode(Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE);
     String workflowId = "wf-123";
 
     when(authnServiceMock.getAccessToken()).thenReturn(ACCESS_TOKEN);
     when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN))
       .thenReturn(organization);
+
+    when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndCode(organization.getOrganizationId(),
+      Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE, ACCESS_TOKEN))
+      .thenReturn(debtPositionTypeOrg);
 
     when(debtPositionServiceMock.createDebtPosition(any(DebtPositionDTO.class), eq(ACCESS_TOKEN)))
       .thenReturn(Pair.of(createdDebtPosition, workflowId));
@@ -94,17 +101,42 @@ class DemandPaymentNoticeServiceTest {
   }
 
   @Test
-  void givenWorkflowSyncErrorWhenHandleRequestThenThrowException() {
+  void givenNonExistentDebtPositionTypeOrgWhenHandleRequestThenThrowException() {
     // Given
     PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
-    DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    String workflowId = "wf-failed";
 
     when(authnServiceMock.getAccessToken()).thenReturn(ACCESS_TOKEN);
     when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN))
       .thenReturn(organization);
 
+    when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndCode(organization.getOrganizationId(),
+      Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE, ACCESS_TOKEN))
+      .thenReturn(null);
+
+    // When & Then
+    PagoPaNodeFaultException exception = assertThrows(PagoPaNodeFaultException.class,
+      () -> demandPaymentNoticeService.handleRequest(request));
+
+    assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR, exception.getErrorCode());
+  }
+
+  @Test
+  void givenWorkflowSyncErrorWhenHandleRequestThenThrowException() {
+    // Given
+    PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
+    debtPositionTypeOrg.setCode(Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE);
+    String workflowId = "wf-failed";
+
+    when(authnServiceMock.getAccessToken()).thenReturn(ACCESS_TOKEN);
+    when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN))
+      .thenReturn(organization);
+    when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndCode(organization.getOrganizationId(),
+      Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE, ACCESS_TOKEN))
+      .thenReturn(debtPositionTypeOrg);
     when(debtPositionServiceMock.createDebtPosition(any(DebtPositionDTO.class), eq(ACCESS_TOKEN)))
       .thenReturn(Pair.of(createdDebtPosition, workflowId));
 

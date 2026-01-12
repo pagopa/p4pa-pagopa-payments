@@ -37,17 +37,19 @@ public class DemandPaymentNoticeService {
     String accessToken = authnService.getAccessToken();
     Organization organization = organizationService.getOrganizationByFiscalCode(request.getIdPA(), accessToken);
     if(organization == null) {
-      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdBrokerPA());
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdPA());
     }
-    DebtPositionDTO debtPositionDTO = createDummyDebtPosition();
-    debtPositionDTO.setOrganizationId(organization.getOrganizationId());
+    Long orgId = organization.getOrganizationId();
+
+    DebtPositionDTO debtPositionDTO = createDummyDebtPosition(orgId, accessToken);
+    debtPositionDTO.setOrganizationId(orgId);
     debtPositionDTO.description("spontaneous psp for service "+request.getIdServizio());
 
     Pair<DebtPositionDTO, String> debtPositionWithWFId = debtPositionService.createDebtPosition(debtPositionDTO, accessToken);
     return syncDebtPosition(accessToken, debtPositionWithWFId);
   }
 
-  private DebtPositionDTO createDummyDebtPosition(){
+  private DebtPositionDTO createDummyDebtPosition(Long organizationId, String accessToken){
     DebtPositionDTO dp = new DebtPositionDTO();
     dp.status(DebtPositionStatus.UNPAID);
     dp.debtPositionOrigin(DebtPositionOrigin.SPONTANEOUS_PSP);
@@ -55,7 +57,11 @@ public class DemandPaymentNoticeService {
     dp.flagPuPagoPaPayment(true);
     dp.multiDebtor(false);
     dp.setCreationDate(OffsetDateTime.now());
-    dp.debtPositionTypeOrgId(4514L); // hardcoded sponstaneous psp
+    DebtPositionTypeOrg debtPositionTypeOrg = debtPositionService.findDebtPositionTypeOrgByOrgIdAndCode(organizationId, Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE, accessToken);
+    if(debtPositionTypeOrg == null) {
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "DebptPositionTypeOrg with code "+Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE+" not found");
+    }
+    dp.debtPositionTypeOrgId(debtPositionTypeOrg.getDebtPositionTypeOrgId()); // hardcoded sponstaneous psp
 
     PaymentOptionDTO paymentOption = new PaymentOptionDTO();
     paymentOption.paymentOptionType(PaymentOptionType.INSTALLMENTS);

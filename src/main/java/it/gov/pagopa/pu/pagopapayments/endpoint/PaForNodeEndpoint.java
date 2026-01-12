@@ -31,6 +31,7 @@ import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Endpoint
 @Slf4j
@@ -71,7 +72,12 @@ public class PaForNodeEndpoint {
         PaDemandPaymentNoticeResponse resp = new PaDemandPaymentNoticeResponse();
         resp.setOutcome(StOutcome.OK);
         resp.setPaymentDescription(debtPositionDTO.getDescription());
-        return Triple.of(resp, null, RegistryOutcome.OK);
+        return Triple.of(resp,
+          debtPositionDTO.getPaymentOptions().stream()
+            .flatMap(option -> option.getInstallments().stream())
+            .map(InstallmentDTO::getIuv)
+            .collect(Collectors.joining(",")),
+          RegistryOutcome.OK);
       },
       e -> {
         PaDemandPaymentNoticeResponse resp;

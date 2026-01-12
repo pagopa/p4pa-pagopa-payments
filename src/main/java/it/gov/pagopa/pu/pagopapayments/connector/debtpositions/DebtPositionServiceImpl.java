@@ -54,5 +54,10 @@ public class DebtPositionServiceImpl implements DebtPositionService {
     return Pair.of(responseEntity.getBody(), responseEntity.getHeaders().getFirst(HEADER_X_WORKFLOW_ID));
   }
 
+  @Override
+  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndCode(Long organizationId, String code, String accessToken) {
+    return client.findDebtPositionTypeOrgByOrgIdAndCode(organizationId, code, accessToken);
+  }
+
 
 }

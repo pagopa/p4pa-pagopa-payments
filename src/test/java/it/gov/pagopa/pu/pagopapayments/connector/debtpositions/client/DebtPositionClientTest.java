@@ -258,4 +258,46 @@ class DebtPositionClientTest {
     Assertions.assertEquals(expectedResponse, result);
   }
 
+  @Test
+  void whenFindDebtPositionTypeOrgByOrgIdAndCodeThenInvokeApi() {
+    //Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String code = "CODE";
+    DebtPositionTypeOrg expectedResult = new DebtPositionTypeOrg();
+    expectedResult.setCode(code);
+
+    Mockito.when(apisHolderMock.getDebtPositionTypeOrgSearchControllerApi(accessToken))
+      .thenReturn(debtPositionTypeOrgSearchControllerApiMock);
+    Mockito.when(debtPositionTypeOrgSearchControllerApiMock.crudDebtPositionTypeOrgsFindByOrganizationIdAndCode(organizationId, code))
+      .thenReturn(expectedResult);
+
+    // When
+    DebtPositionTypeOrg result = client.findDebtPositionTypeOrgByOrgIdAndCode(organizationId, code, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNotExistentDebtPositionTypeOrgWhenFindDebtPositionTypeOrgByOrgIdAndCodeThenNull() {
+    //Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String code = "CODE";
+
+    Mockito.when(apisHolderMock.getDebtPositionTypeOrgSearchControllerApi(accessToken))
+      .thenReturn(debtPositionTypeOrgSearchControllerApiMock);
+
+    Mockito.when(debtPositionTypeOrgSearchControllerApiMock
+      .crudDebtPositionTypeOrgsFindByOrganizationIdAndCode(organizationId, code))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    DebtPositionTypeOrg result = client.findDebtPositionTypeOrgByOrgIdAndCode(organizationId, code, accessToken);
+
+    // Then
+    Assertions.assertNull(result);
+  }
+
 }

@@ -20,7 +20,8 @@ public class AcaFacadeService extends AbstractPaymentPositionFacadeService {
   private static final Set<DebtPositionOrigin> ACA_EXCLUDED_ORIGINS = Set.of(
     DebtPositionOrigin.SPONTANEOUS,
     DebtPositionOrigin.SPONTANEOUS_SIL,
-    DebtPositionOrigin.SPONTANEOUS_MIXED
+    DebtPositionOrigin.SPONTANEOUS_MIXED,
+    DebtPositionOrigin.SPONTANEOUS_PSP
   );
 
   public AcaFacadeService(

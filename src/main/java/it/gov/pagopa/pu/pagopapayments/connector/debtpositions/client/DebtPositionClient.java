@@ -66,6 +66,17 @@ public class DebtPositionClient {
     }
   }
 
+  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndCode(Long organizationId, String code, String accessToken){
+    try{
+      return debtPositionsApisHolder.getDebtPositionTypeOrgSearchControllerApi(accessToken)
+        .crudDebtPositionTypeOrgsFindByOrganizationIdAndCode(organizationId, code);
+    } catch (HttpClientErrorException.NotFound e) {
+      log.info("Cannot find DeptPositionTypeOrg having orgId {} and code {}",
+        organizationId, code);
+      return null;
+    }
+  }
+
   public ResponseEntity<DebtPositionDTO> createDebtPosition(DebtPositionDTO debtPositionDTO, String accessToken) {
     return debtPositionsApisHolder.getDebtPositionApi(accessToken)
       .createDebtPositionWithHttpInfo(debtPositionDTO, false);

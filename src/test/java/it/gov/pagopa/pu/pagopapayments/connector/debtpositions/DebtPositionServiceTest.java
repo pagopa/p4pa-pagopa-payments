@@ -139,4 +139,21 @@ class DebtPositionServiceTest {
     Assertions.assertSame("workflow-id", result.getRight());
   }
 
+  @Test
+  void whenFindDebtPositionTypeOrgByOrgIdAndCodeThenInvokeClient(){
+    // Given
+    String accessToken = "ACCESSTOKEN";
+
+    DebtPositionTypeOrg expectedResult = new DebtPositionTypeOrg();
+
+    Mockito.when(clientMock.findDebtPositionTypeOrgByOrgIdAndCode(1L, "CODE",
+      accessToken)).thenReturn(expectedResult);
+
+    // When
+    DebtPositionTypeOrg result = service.findDebtPositionTypeOrgByOrgIdAndCode(1L, "CODE", accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
 }

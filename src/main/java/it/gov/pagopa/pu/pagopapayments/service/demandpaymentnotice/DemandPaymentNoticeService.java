@@ -55,7 +55,7 @@ public class DemandPaymentNoticeService {
     dp.flagPuPagoPaPayment(true);
     dp.multiDebtor(false);
     dp.setCreationDate(OffsetDateTime.now());
-    dp.debtPositionTypeOrgId(4514L); //sponstaneous psp hardcoded
+    dp.debtPositionTypeOrgId(4514L); // hardcoded sponstaneous psp
 
     PaymentOptionDTO paymentOption = new PaymentOptionDTO();
     paymentOption.paymentOptionType(PaymentOptionType.INSTALLMENTS);
@@ -87,7 +87,7 @@ public class DemandPaymentNoticeService {
     //wait for the debt positions to be synced
     String result = workflowService.waitWorkflowCompletion(workflowId, 10, 1000, accessToken);
 
-    //if any of the debt positions failed to sync, return a fault response
+    //if debt positions failed to sync, return a fault response
     if (!Constants.WORKFLOW_STATUS_COMPLETED_VALUE.equals(result)) {
       log.error("Error syncing debt position: DebtPositionId: {}, WorkflowId: {}, Result: {}",
         dp.getDebtPositionId(), workflowId, result);

@@ -79,6 +79,17 @@ paths:
           required: true
           schema:
             type: string
+        - name: revision
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: pspId
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: OK

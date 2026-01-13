@@ -49,7 +49,7 @@ class PaymentsReportingIdMapperTest {
   @Test
   void givenTipoIdRendicontazioneNullWhenMapThenReturnReportingIdDTOWithNullFields() {
     // given & when
-    PaymentsReportingIdDTO result = PaymentsReportingIdMapper.map(null);
+    PaymentsReportingIdDTO result = PaymentsReportingIdMapper.map((TipoIdRendicontazione)null);
 
     // then
     Assertions.assertNull(result);

@@ -30,9 +30,9 @@ public class PaymentsReportingController implements PaymentsReportingApi {
   }
 
   @Override
-  public ResponseEntity<Long> fetchPaymentReporting(Long organizationId, String flowId, String fileName){
-    log.info("invoking uploadPaymentsReporting, organizationId[{}], flowId[{}], fileName[{}]", organizationId, flowId, fileName);
-    Long result = paymentsReportingService.fetchPaymentReporting(organizationId, flowId, fileName, SecurityUtils.getAccessToken());
+  public ResponseEntity<Long> fetchPaymentReporting(Long organizationId, String flowId, String fileName, Long revision, String pspId){
+    log.info("invoking uploadPaymentsReporting, organizationId[{}], flowId[{}], revision[{}], pspId[{}], fileName[{}]", organizationId, flowId, revision, pspId, fileName);
+    Long result = paymentsReportingService.fetchPaymentReporting(organizationId, flowId, revision, pspId, fileName, SecurityUtils.getAccessToken());
     return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).body(result);
   }
 

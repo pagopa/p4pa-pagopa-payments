@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.service;
+package it.gov.pagopa.pu.pagopapayments.service.paymentsreporting;
 
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
@@ -11,7 +11,6 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
-import it.gov.pagopa.pu.pagopapayments.service.paymentsreporting.PaymentsReportingLegacySoapServiceImpl;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

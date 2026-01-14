@@ -74,7 +74,7 @@ public class PaymentsReportingMapper {
       .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())
       .idStation(brokerForNodoPaDTO.getBroker().getStationId())
       .fiscalCode(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
-      .paymentReportingBytes(new byte[0]) //TODO mapping from singleFlowResponse and paymentList to xml (byte array)
+      .paymentReportingBytes(new byte[0]) //TO DO mapping from singleFlowResponse and paymentList to xml (byte array)
       .build();
   }
 

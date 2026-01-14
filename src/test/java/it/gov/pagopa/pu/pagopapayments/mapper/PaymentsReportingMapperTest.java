@@ -223,8 +223,6 @@ class PaymentsReportingMapperTest {
     Organization organization = new Organization();
     organization.setOrgFiscalCode("orgFiscalCode");
     brokerForNodoPaDTO.setOrganization(organization);
-    SingleFlowResponse singleFlowResponse = new SingleFlowResponse();
-    List<Payment> paymentList = new ArrayList<>();
 
     // when
     PaPaymentReportingDTO actualResult = PaymentsReportingMapper.mapPaymentsReporting(

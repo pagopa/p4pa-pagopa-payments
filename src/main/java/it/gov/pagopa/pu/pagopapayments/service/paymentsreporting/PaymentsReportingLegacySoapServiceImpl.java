@@ -34,7 +34,7 @@ public class PaymentsReportingLegacySoapServiceImpl implements PaymentsReporting
   }
 
   @Override
-  public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, Long unused_revision, String unused_pspId, String fileName, String accessToken) {
+  public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, Long revision, String pspId, String fileName, String accessToken) {
     if (PaymentsReportingMapper.isFilenameInvalid(fileName, paymentsReportingId)) {
       throw new InvalidValueException("PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
     }

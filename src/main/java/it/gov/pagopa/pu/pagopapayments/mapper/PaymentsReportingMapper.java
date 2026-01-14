@@ -68,7 +68,7 @@ public class PaymentsReportingMapper {
     return !filename.startsWith(paymentsReportingId) || !filename.endsWith(PAYMENTS_REPORTING_FILE_EXTENSION);
   }
 
-  public static PaPaymentReportingDTO mapPaymentsReporting(BrokerForNodoPaDTO brokerForNodoPaDTO, SingleFlowResponse singleFlowResponse, List<Payment> paymentList) {
+  public static PaPaymentReportingDTO mapPaymentsReporting(BrokerForNodoPaDTO brokerForNodoPaDTO) {
     return PaPaymentReportingDTO.builder()
       .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
       .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())

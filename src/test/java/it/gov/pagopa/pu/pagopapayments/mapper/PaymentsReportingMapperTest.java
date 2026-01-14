@@ -2,8 +2,6 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import gov.telematici.pagamenti.ws.TipoIdRendicontazione;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.FlowByPSP;
-import it.gov.pagopa.nodo.fdrorganization.dto.generated.Payment;
-import it.gov.pagopa.nodo.fdrorganization.dto.generated.SingleFlowResponse;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;

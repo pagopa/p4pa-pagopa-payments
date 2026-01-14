@@ -22,16 +22,16 @@ public class PaymentsReportingMapper {
 
   private PaymentsReportingMapper() {}
 
-  public List<PaymentsReportingIdDTO> mapToIdDtoList(List<FlowByPSP> flowByPSPList) {
+  public static List<PaymentsReportingIdDTO> mapToIdDtoList(List<FlowByPSP> flowByPSPList) {
     if(flowByPSPList == null || flowByPSPList.isEmpty()) {
       return new ArrayList<>();
     }
     return flowByPSPList.stream()
-      .map(this::mapIdDto)
+      .map(PaymentsReportingMapper::mapIdDto)
       .toList();
   }
 
-  private PaymentsReportingIdDTO mapIdDto(FlowByPSP flowByPSP) {
+  private static PaymentsReportingIdDTO mapIdDto(FlowByPSP flowByPSP) {
     if(flowByPSP==null){
       return null;
     }
@@ -51,7 +51,7 @@ public class PaymentsReportingMapper {
   private static PaymentsReportingIdDTO mapIdDto(String flowId, Long revision, OffsetDateTime flowDate) {
     return PaymentsReportingIdDTO.builder()
       .pagopaPaymentsReportingId(flowId)
-      .revision(Optional.ofNullable(revision).orElse(0L).intValue()) //TODO check int type for revision
+      .revision(Optional.ofNullable(revision).map(Long::intValue).orElse(null))
       .flowDateTime(flowDate)
       .paymentsReportingFileName(getFileName(flowId, flowDate))
       .build();
@@ -68,7 +68,7 @@ public class PaymentsReportingMapper {
     return !filename.startsWith(paymentsReportingId) || !filename.endsWith(PAYMENTS_REPORTING_FILE_EXTENSION);
   }
 
-  public PaPaymentReportingDTO mapPaymentsReporting(BrokerForNodoPaDTO brokerForNodoPaDTO, SingleFlowResponse singleFlowResponse, List<Payment> paymentList) {
+  public static PaPaymentReportingDTO mapPaymentsReporting(BrokerForNodoPaDTO brokerForNodoPaDTO, SingleFlowResponse singleFlowResponse, List<Payment> paymentList) {
     return PaPaymentReportingDTO.builder()
       .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
       .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())

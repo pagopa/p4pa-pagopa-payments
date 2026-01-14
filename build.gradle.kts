@@ -193,6 +193,7 @@ tasks.register("dependenciesBuild") {
     "openApiGenerateREGISTRIES",
     "openApiGenerateWORKFLOWHUB",
     "openApiGeneratePUSIL",
+    "openApiGenerateCLASSIFICATION",
     "jaxbJavaGenPaForNode",
     "jaxbJavaGenNodeForPa"
   )
@@ -604,6 +605,42 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
       "WorkflowTypeOrg" to "String",
       "ScheduleEnum" to "String",
       "WorkflowExecutionStatus" to "String"
+    )
+  )
+  configOptions.set(
+    mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
+      "dateLibrary" to "java8",
+      "serializableModel" to "true",
+      "useSpringBoot3" to "true",
+      "useJakartaEe" to "true",
+      "useOneOfInterfaces" to "true",
+      "useBeanValidation" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "enumPropertyNaming" to "original",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    )
+  )
+  library.set("resttemplate")
+}
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateCLASSIFICATION") {
+  group = "openapi"
+  description = "openapi"
+
+  generatorName.set("java")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-classification/refs/heads/$targetEnv/openapi/generated.openapi.json")
+  outputDir.set("$projectDir/build/generated")
+  invokerPackage.set("it.gov.pagopa.pu.classification.generated")
+  apiPackage.set("it.gov.pagopa.pu.classification.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.classification.dto.generated")
+  typeMappings.set(
+    mapOf(
+      "LocalDateTime" to "java.time.LocalDateTime"
     )
   )
   configOptions.set(

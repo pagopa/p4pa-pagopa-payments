@@ -59,7 +59,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
     NodoChiediElencoFlussiRendicontazioneRisposta response = (NodoChiediElencoFlussiRendicontazioneRisposta)
       getWebServiceTemplate().marshalSendAndReceive(request, getMessageCallback(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey(), "nodoChiediElencoFlussiRendicontazione"));
 
-    if (response != null && response.getFault() != null) {
+    if (response.getFault() != null) {
       if(response.getFault().getFaultCode().equals("PPT_DOMINIO_SCONOSCIUTO")) {
         log.info("Retrieved fault code PPT_DOMINIO_SCONOSCIUTO for org {}. Returning empty list",brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
         return Collections.emptyList();
@@ -69,14 +69,8 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
     }
 
     List<PaymentsReportingIdDTO> reportingList = new ArrayList<>();
-    if(response == null || response.getElencoFlussiRendicontazione() == null) {
-      log.info("No PaymentsReportingId found for org {}. Returning empty list",brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
-      return Collections.emptyList();
-    }
-    response.getElencoFlussiRendicontazione().getIdRendicontaziones().forEach(
-      idRendicontazione -> reportingList.add(
-        PaymentsReportingMapper.mapIdDto(idRendicontazione)
-      )
+    response.getElencoFlussiRendicontazione().getIdRendicontaziones().forEach(idRendicontazione ->
+      reportingList.add(PaymentsReportingMapper.mapIdDto(idRendicontazione))
     );
 
     return reportingList;

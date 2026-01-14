@@ -9,7 +9,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
-import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingIdMapper;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
@@ -59,7 +59,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
     NodoChiediElencoFlussiRendicontazioneRisposta response = (NodoChiediElencoFlussiRendicontazioneRisposta)
       getWebServiceTemplate().marshalSendAndReceive(request, getMessageCallback(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey(), "nodoChiediElencoFlussiRendicontazione"));
 
-    if (response.getFault() != null) {
+    if (response != null && response.getFault() != null) {
       if(response.getFault().getFaultCode().equals("PPT_DOMINIO_SCONOSCIUTO")) {
         log.info("Retrieved fault code PPT_DOMINIO_SCONOSCIUTO for org {}. Returning empty list",brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
         return Collections.emptyList();
@@ -69,8 +69,14 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
     }
 
     List<PaymentsReportingIdDTO> reportingList = new ArrayList<>();
-    response.getElencoFlussiRendicontazione().getIdRendicontaziones().forEach(idRendicontazione ->
-      reportingList.add(PaymentsReportingIdMapper.map(idRendicontazione))
+    if(response == null || response.getElencoFlussiRendicontazione() == null) {
+      log.info("No PaymentsReportingId found for org {}. Returning empty list",brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
+      return Collections.emptyList();
+    }
+    response.getElencoFlussiRendicontazione().getIdRendicontaziones().forEach(
+      idRendicontazione -> reportingList.add(
+        PaymentsReportingMapper.mapIdDto(idRendicontazione)
+      )
     );
 
     return reportingList;

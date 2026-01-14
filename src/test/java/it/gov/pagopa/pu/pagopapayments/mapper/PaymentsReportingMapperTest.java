@@ -12,7 +12,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentsReportingIdMapperTest {
+class PaymentsReportingMapperTest {
 
   @Test
   void givenValidTipoIdRendicontazioneWhenMapThenReturnReportingIdDTO() throws DatatypeConfigurationException {
@@ -24,7 +24,7 @@ class PaymentsReportingIdMapperTest {
     tipoIdRendicontazione.setDataOraFlusso(xmlGregorianCalendar);
 
     // when
-    PaymentsReportingIdDTO result = PaymentsReportingIdMapper.map(tipoIdRendicontazione);
+    PaymentsReportingIdDTO result = PaymentsReportingMapper.mapIdDto(tipoIdRendicontazione);
 
     // then
     Assertions.assertNotNull(result);
@@ -38,7 +38,7 @@ class PaymentsReportingIdMapperTest {
     TipoIdRendicontazione tipoIdRendicontazione = new TipoIdRendicontazione();
 
     // when
-    PaymentsReportingIdDTO result = PaymentsReportingIdMapper.map(tipoIdRendicontazione);
+    PaymentsReportingIdDTO result = PaymentsReportingMapper.mapIdDto(tipoIdRendicontazione);
 
     // then
     Assertions.assertNotNull(result);
@@ -48,8 +48,10 @@ class PaymentsReportingIdMapperTest {
 
   @Test
   void givenTipoIdRendicontazioneNullWhenMapThenReturnReportingIdDTOWithNullFields() {
-    // given & when
-    PaymentsReportingIdDTO result = PaymentsReportingIdMapper.map((TipoIdRendicontazione)null);
+    // given
+    TipoIdRendicontazione tipoIdRendicontazione = null;
+    // when
+    PaymentsReportingIdDTO result = PaymentsReportingMapper.mapIdDto(tipoIdRendicontazione);
 
     // then
     Assertions.assertNull(result);

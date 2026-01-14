@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
-import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingIdMapper;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +33,7 @@ public class PaymentsReportingLegacySoapServiceImpl implements PaymentsReporting
 
   @Override
   public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, Long unused_revision, String unused_pspId, String fileName, String accessToken) {
-    if (PaymentsReportingIdMapper.isFilenameInvalid(fileName, paymentsReportingId)) {
+    if (PaymentsReportingMapper.isFilenameInvalid(fileName, paymentsReportingId)) {
       throw new InvalidValueException("PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
     }
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);

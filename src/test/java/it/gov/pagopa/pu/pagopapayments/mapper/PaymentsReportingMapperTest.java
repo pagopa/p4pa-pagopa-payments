@@ -228,9 +228,7 @@ class PaymentsReportingMapperTest {
 
     // when
     PaPaymentReportingDTO actualResult = PaymentsReportingMapper.mapPaymentsReporting(
-      brokerForNodoPaDTO,
-      singleFlowResponse,
-      paymentList
+      brokerForNodoPaDTO
     );
 
 

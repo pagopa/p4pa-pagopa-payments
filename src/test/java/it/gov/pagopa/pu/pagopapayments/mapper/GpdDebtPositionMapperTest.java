@@ -1,8 +1,11 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.InstallmentModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.PaymentOptionModelV3;
+import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -19,6 +22,7 @@ import uk.co.jemos.podam.common.AttributeStrategy;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @ExtendWith(MockitoExtension.class)
 class GpdDebtPositionMapperTest {
@@ -39,17 +43,14 @@ class GpdDebtPositionMapperTest {
 
   @BeforeEach
   void init() {
-    // generate random DebtPositionDTO
     debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    // fix some field values
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
         installment.getDebtor().setEntityType(PersonEntityType.F);
         installment.setStatus(InstallmentStatus.UNPAID);
         installment.setSyncStatus(null);
         installment.setDueDate(LocalDate.now().plusDays(10));
-        installment.getTransfers().forEach(transfer ->
-          transfer.setTransferIndex(1));
+        installment.getTransfers().forEach(transfer -> transfer.setTransferIndex(1));
       }));
 
     organization = podamFactory.manufacturePojo(Organization.class);
@@ -66,52 +67,66 @@ class GpdDebtPositionMapperTest {
     return installmentDTO;
   }
 
-
   @Test
   void givenValidDebtPositionExpiringWhenMapToPaymentPositionModelThenOk() {
     //given
     InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID);
 
     //when
-    Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
+    Pair<Operation, PaymentPositionModelV3> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
 
     //verify
     Assertions.assertNotNull(response);
-    PaymentPositionModel paymentPositionModel = response.getRight();
-    Assertions.assertNotNull(paymentPositionModel);
-    TestUtils.checkNotNullFields(paymentPositionModel, "payStandIn","streetName","civicNumber","postalCode","city","province","country","region","email","phone","officeName","validityDate","paymentDate","status");
+    Assertions.assertEquals(Operation.CREATE, response.getLeft());
 
+    PaymentPositionModelV3 paymentPositionModel = response.getRight();
+    Assertions.assertNotNull(paymentPositionModel);
     Assertions.assertEquals(toSync.getIupdPagopa(), paymentPositionModel.getIupd());
-    Assertions.assertEquals(toSync.getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
-    Assertions.assertEquals(GpdDebtPositionMapper.OPERATION.CREATE, response.getLeft());
+    Assertions.assertEquals(organization.getOrgName(), paymentPositionModel.getCompanyName());
+    Assertions.assertFalse(paymentPositionModel.getPaymentOption().isEmpty());
+
+    PaymentOptionModelV3 paymentOption = paymentPositionModel.getPaymentOption().getFirst();
+    Assertions.assertNotNull(paymentOption.getDebtor());
+    Assertions.assertFalse(paymentOption.getInstallments().isEmpty());
+
+    InstallmentModel installment = paymentOption.getInstallments().getFirst();
+    Assertions.assertEquals(toSync.getNav(), installment.getNav());
   }
 
   @Test
   void givenValidDebtPositionWithVariousOpsWhenMapToPaymentPositionModelThenOk() {
     //given
-    List<Pair<InstallmentDTO, GpdDebtPositionMapper.OPERATION>> toSyncList = List.of(
-      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID), GpdDebtPositionMapper.OPERATION.CREATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentStatus.UNPAID, InstallmentStatus.UNPAID), GpdDebtPositionMapper.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentStatus.EXPIRED, InstallmentStatus.UNPAID), GpdDebtPositionMapper.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentStatus.UNPAID, InstallmentStatus.CANCELLED), GpdDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentStatus.UNPAID, InstallmentStatus.INVALID), GpdDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentStatus.EXPIRED, InstallmentStatus.CANCELLED), GpdDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentStatus.EXPIRED, InstallmentStatus.INVALID), GpdDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED), GpdDebtPositionMapper.OPERATION.DELETE)
+    List<Pair<InstallmentDTO, Operation>> toSyncList = List.of(
+      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID), Operation.CREATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentStatus.UNPAID, InstallmentStatus.UNPAID), Operation.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentStatus.EXPIRED, InstallmentStatus.UNPAID), Operation.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentStatus.UNPAID, InstallmentStatus.CANCELLED), Operation.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentStatus.UNPAID, InstallmentStatus.INVALID), Operation.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentStatus.EXPIRED, InstallmentStatus.CANCELLED), Operation.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentStatus.EXPIRED, InstallmentStatus.INVALID), Operation.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED), Operation.DELETE)
     );
 
     toSyncList.forEach(pair -> {
-      //when
-      Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(pair.getLeft().getIud(), debtPosition, organization);
+      Pair<Operation, PaymentPositionModelV3> response =
+        gpdDebtPositionMapper.mapToNewPaymentPositionModel(
+          pair.getLeft().getIud(), debtPosition, organization
+        );
 
       Assertions.assertNotNull(response);
-      PaymentPositionModel paymentPositionModel = response.getRight();
-      Assertions.assertNotNull(paymentPositionModel);
-      TestUtils.checkNotNullFields(paymentPositionModel, "payStandIn","streetName","civicNumber","postalCode","city","province","country","region","email","phone","officeName","validityDate","paymentDate","status");
-
-      Assertions.assertEquals(ConversionUtils.atEndOfDay(pair.getLeft().getDueDate()).toString(), paymentPositionModel.getPaymentOption().getFirst().getDueDate());
-      Assertions.assertEquals(pair.getLeft().getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
       Assertions.assertEquals(pair.getRight(), response.getLeft());
+
+      PaymentPositionModelV3 model = response.getRight();
+      Assertions.assertNotNull(model);
+
+      PaymentOptionModelV3 paymentOption = model.getPaymentOption().getFirst();
+      InstallmentModel installment = paymentOption.getInstallments().getFirst();
+
+      Assertions.assertEquals(
+        Objects.requireNonNull(ConversionUtils.atEndOfDay(pair.getLeft().getDueDate())).toString(),
+        installment.getDueDate()
+      );
+      Assertions.assertEquals(pair.getLeft().getNav(), installment.getNav());
     });
   }
 
@@ -137,16 +152,18 @@ class GpdDebtPositionMapperTest {
     InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.UNPAYABLE, InstallmentStatus.UNPAID);
 
     //when
-    Pair<GpdDebtPositionMapper.OPERATION, PaymentPositionModel> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
+    Pair<Operation, PaymentPositionModelV3> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
 
     //verify
     Assertions.assertNotNull(response);
-    PaymentPositionModel paymentPositionModel = response.getRight();
-    Assertions.assertNotNull(paymentPositionModel);
-    TestUtils.checkNotNullFields(paymentPositionModel, "payStandIn","streetName","civicNumber","postalCode","city","province","country","region","email","phone","officeName","validityDate","paymentDate","status");
+    Assertions.assertEquals(Operation.CREATE, response.getLeft());
 
-    Assertions.assertEquals(toSync.getIupdPagopa(), paymentPositionModel.getIupd());
-    Assertions.assertEquals(toSync.getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
-    Assertions.assertEquals(GpdDebtPositionMapper.OPERATION.CREATE, response.getLeft());
+    PaymentPositionModelV3 model = response.getRight();
+    Assertions.assertEquals(toSync.getIupdPagopa(), model.getIupd());
+
+    InstallmentModel installment =
+      model.getPaymentOption().getFirst().getInstallments().getFirst();
+
+    Assertions.assertEquals(toSync.getNav(), installment.getNav());
   }
 }

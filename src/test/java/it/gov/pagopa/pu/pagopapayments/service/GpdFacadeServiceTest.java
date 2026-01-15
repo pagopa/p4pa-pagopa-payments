@@ -1,12 +1,13 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.GpdService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
+import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.mapper.GpdDebtPositionMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import it.gov.pagopa.pu.pagopapayments.service.gpd.GpdFacadeService;
@@ -41,7 +42,7 @@ class GpdFacadeServiceTest {
     String iud = "IUD";
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
-    PaymentPositionModel model = podamFactory.manufacturePojo(PaymentPositionModel.class);
+    PaymentPositionModelV3 model = podamFactory.manufacturePojo(PaymentPositionModelV3.class);
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = BrokerForNodoPaDTO.builder()
       .organization(organization)
@@ -52,7 +53,7 @@ class GpdFacadeServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), TestUtils.getFakeAccessToken()))
       .thenReturn(brokerForNodoPaDTO);
     Mockito.when(gpdDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
-      .thenReturn(Pair.of(GpdDebtPositionMapper.OPERATION.CREATE, model));
+      .thenReturn(Pair.of(Operation.CREATE, model));
 
     //when
     gpdFacadeService.sync(iud, debtPosition, TestUtils.getFakeAccessToken());

@@ -1,14 +1,12 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -66,5 +64,21 @@ public class DebtPositionClient {
         organizationId, nav, debtPositionOriginList);
       return null;
     }
+  }
+
+  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndCode(Long organizationId, String code, String accessToken){
+    try{
+      return debtPositionsApisHolder.getDebtPositionTypeOrgSearchControllerApi(accessToken)
+        .crudDebtPositionTypeOrgsFindByOrganizationIdAndCode(organizationId, code);
+    } catch (HttpClientErrorException.NotFound e) {
+      log.info("Cannot find DeptPositionTypeOrg having orgId {} and code {}",
+        organizationId, code);
+      return null;
+    }
+  }
+
+  public ResponseEntity<DebtPositionDTO> createDebtPosition(DebtPositionDTO debtPositionDTO, String accessToken) {
+    return debtPositionsApisHolder.getDebtPositionApi(accessToken)
+      .createDebtPositionWithHttpInfo(debtPositionDTO, false);
   }
 }

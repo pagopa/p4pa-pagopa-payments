@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.client.GpdClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ class GpdServiceTest {
 
   private static final String API_KEY = "testApiKey";
   private static final String ORGANIZATION_FISCAL_CODE = "testOrganizationFiscalCode";
-  private static final PaymentPositionModel PAYMENT_POSITION_MODEL = new PaymentPositionModel();
+  private static final PaymentPositionModelV3 PAYMENT_POSITION_MODEL_V_3 = new PaymentPositionModelV3();
   private static final String IUPD = "testIupd";
 
   @BeforeEach
@@ -29,19 +29,19 @@ class GpdServiceTest {
 
   @Test
   void testPaCreatePosition() {
-    gpdService.paCreatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, PAYMENT_POSITION_MODEL);
-    verify(gpdClientMock, times(1)).createPosition(API_KEY, ORGANIZATION_FISCAL_CODE, PAYMENT_POSITION_MODEL);
+    gpdService.paCreatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, PAYMENT_POSITION_MODEL_V_3);
+    verify(gpdClientMock, times(1)).createPosition(API_KEY, ORGANIZATION_FISCAL_CODE, PAYMENT_POSITION_MODEL_V_3);
   }
 
   @Test
   void testPaUpdatePosition() {
-    gpdService.paUpdatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL);
-    verify(gpdClientMock, times(1)).updatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL);
+    gpdService.paUpdatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL_V_3);
+    verify(gpdClientMock, times(1)).updatePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL_V_3);
   }
 
   @Test
   void testPaDeletePosition() {
-    gpdService.paDeletePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL);
-    verify(gpdClientMock, times(1)).deletePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL);
+    gpdService.paDeletePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL_V_3);
+    verify(gpdClientMock, times(1)).deletePosition(API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, PAYMENT_POSITION_MODEL_V_3);
   }
 }

@@ -1,6 +1,5 @@
-package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config;
+package it.gov.pagopa.pu.pagopapayments.connector.workflow.config;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,22 +13,20 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
-class GpdApisHolderTest extends BaseApiHolderTest {
+class WorkflowApisHolderTest extends BaseApiHolderTest {
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
-  private GpdApisHolder gpdApisHolder;
-
-  private static final String ORG_FISCAL_CODE = "1234567890";
-  private static final String API_KEY_HEADER = "Ocp-Apim-Subscription-Key";
+  private WorkflowApisHolder workflowApisHolder;
 
   @BeforeEach
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    GpdApiClientConfig apiClient = new GpdApiClientConfig();
-    apiClient.setBaseUrl("http://example.com");
-    gpdApisHolder = new GpdApisHolder(apiClient, restTemplateBuilderMock);
+    WorkflowApiClientConfig clientConfig = WorkflowApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .build();
+    workflowApisHolder = new WorkflowApisHolder(clientConfig, restTemplateBuilderMock);
   }
 
   @AfterEach
@@ -41,19 +38,13 @@ class GpdApisHolderTest extends BaseApiHolderTest {
   }
 
   @Test
-  void whenGetOrganizationEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+  void whenDebtPositionApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      apiKey -> {
-        var api = gpdApisHolder.getApiClientByApiKey(apiKey);
-        api.getApiClient().addDefaultHeader(API_KEY_HEADER, apiKey);
-
-        return api.createPosition(ORG_FISCAL_CODE, true, null, new PaymentPositionModelV3());
-      },
+      accessToken -> workflowApisHolder.getWorkflowApi(accessToken)
+        .waitWorkflowCompletion("1234", 1, 1000),
       new ParameterizedTypeReference<>() {
       },
-      () -> {
-      },
-      BaseApiHolderTest.AUTH_TYPE.API_KEY,
-      API_KEY_HEADER);
+      workflowApisHolder::unload);
   }
+
 }

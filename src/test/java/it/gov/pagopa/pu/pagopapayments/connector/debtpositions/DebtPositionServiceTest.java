@@ -1,10 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client.DebtPositionClient;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -117,6 +116,41 @@ class DebtPositionServiceTest {
 
     // When
     DebtPositionTypeOrg result = service.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenCreateDebtPositionThenReturnDebtPositionDTO() {
+    // Given
+    DebtPositionDTO debtPositionDTO = new DebtPositionDTO();
+    String accessToken = "ACCESSTOKEN";
+    ResponseEntity<DebtPositionDTO> expectedResult = ResponseEntity.ok().header("X-Workflow-Id", "workflow-id").body(debtPositionDTO);
+
+    Mockito.when(clientMock.createDebtPosition(debtPositionDTO, accessToken)).thenReturn(expectedResult);
+
+    // When
+    Pair<DebtPositionDTO, String> result = service.createDebtPosition(debtPositionDTO, accessToken);
+
+    // Then
+    Assertions.assertNotNull(result);
+    Assertions.assertSame(expectedResult.getBody(), result.getLeft());
+    Assertions.assertSame("workflow-id", result.getRight());
+  }
+
+  @Test
+  void whenFindDebtPositionTypeOrgByOrgIdAndCodeThenInvokeClient(){
+    // Given
+    String accessToken = "ACCESSTOKEN";
+
+    DebtPositionTypeOrg expectedResult = new DebtPositionTypeOrg();
+
+    Mockito.when(clientMock.findDebtPositionTypeOrgByOrgIdAndCode(1L, "CODE",
+      accessToken)).thenReturn(expectedResult);
+
+    // When
+    DebtPositionTypeOrg result = service.findDebtPositionTypeOrgByOrgIdAndCode(1L, "CODE", accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

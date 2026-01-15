@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
+import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +55,8 @@ class PaymentsReportingMapperTest {
     // then
     Assertions.assertNotNull(actualResult);
     Assertions.assertFalse(actualResult.isEmpty());
+    Assertions.assertEquals(1, actualResult.size());
+    TestUtils.checkNotNullFields(actualResult.getFirst());
     Assertions.assertEquals(FLOW_ID, actualResult.getFirst().getPagopaPaymentsReportingId());
     Assertions.assertEquals(FLOW_DATE, actualResult.getFirst().getFlowDateTime());
     Assertions.assertEquals(1L, actualResult.getFirst().getRevision().longValue());
@@ -69,12 +72,13 @@ class PaymentsReportingMapperTest {
     tipoIdRendicontazione.setDataOraFlusso(xmlGregorianCalendar);
 
     // when
-    PaymentsReportingIdDTO result = PaymentsReportingMapper.mapIdDto(tipoIdRendicontazione);
+    PaymentsReportingIdDTO actualResult = PaymentsReportingMapper.mapIdDto(tipoIdRendicontazione);
 
     // then
-    Assertions.assertNotNull(result);
-    Assertions.assertEquals(FLOW_ID, result.getPagopaPaymentsReportingId());
-    Assertions.assertNotNull(result.getFlowDateTime());
+    Assertions.assertNotNull(actualResult);
+    TestUtils.checkNotNullFields(actualResult, "revision");
+    Assertions.assertEquals(FLOW_ID, actualResult.getPagopaPaymentsReportingId());
+    Assertions.assertNotNull(actualResult.getFlowDateTime());
   }
 
   @ParameterizedTest
@@ -98,6 +102,7 @@ class PaymentsReportingMapperTest {
     // then
     Assertions.assertNotNull(actualResult);
     Assertions.assertFalse(actualResult.isEmpty());
+    Assertions.assertEquals(1, actualResult.size());
     Assertions.assertEquals(flowId, actualResult.getFirst().getPagopaPaymentsReportingId());
     Assertions.assertEquals(flowDate, actualResult.getFirst().getFlowDateTime());
     Assertions.assertEquals(
@@ -154,6 +159,7 @@ class PaymentsReportingMapperTest {
     // then
     Assertions.assertNotNull(actualResult);
     Assertions.assertFalse(actualResult.isEmpty());
+    Assertions.assertEquals(1, actualResult.size());
     Assertions.assertNull(actualResult.getFirst());
   }
 

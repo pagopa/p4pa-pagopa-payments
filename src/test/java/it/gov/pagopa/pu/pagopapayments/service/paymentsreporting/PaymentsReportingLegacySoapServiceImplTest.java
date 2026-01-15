@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,7 @@ class PaymentsReportingLegacySoapServiceImplTest {
   private PaymentsReportingLegacySoapServiceImpl paymentsReportingLegacySoapServiceImpl;
 
   private static final Long ORGANIZATION_ID = 1L;
+  private static final OffsetDateTime LATEST_FLOW_DATE = OffsetDateTime.now(); //don't use in PaymentsReportingLegacySoapServiceImpl
   private static final String REPORTING_ID = "2";
   private static final Broker BROKER = new Broker()
     .brokerFiscalCode("brokerCode")
@@ -63,7 +65,7 @@ class PaymentsReportingLegacySoapServiceImplTest {
 
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenThrow(new ApplicationException("Broker service error"));
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingLegacySoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingLegacySoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, LATEST_FLOW_DATE, accessToken));
     Assertions.assertEquals("Broker service error", exception.getMessage());
     verify(brokerRetrieverServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     verify(nodeForPaClientMock, never()).getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
@@ -78,7 +80,7 @@ class PaymentsReportingLegacySoapServiceImplTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenReturn(response);
 
-    List<PaymentsReportingIdDTO> result = paymentsReportingLegacySoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
+    List<PaymentsReportingIdDTO> result = paymentsReportingLegacySoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, LATEST_FLOW_DATE, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertTrue(result.isEmpty());
@@ -93,7 +95,7 @@ class PaymentsReportingLegacySoapServiceImplTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenThrow(new ApplicationException("Node client error"));
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingLegacySoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingLegacySoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, LATEST_FLOW_DATE, accessToken));
     Assertions.assertEquals("Node client error", exception.getMessage());
     verify(brokerRetrieverServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     verify(nodeForPaClientMock, times(1)).getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
@@ -111,7 +113,7 @@ class PaymentsReportingLegacySoapServiceImplTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenReturn(response);
 
-    List<PaymentsReportingIdDTO> result = paymentsReportingLegacySoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
+    List<PaymentsReportingIdDTO> result = paymentsReportingLegacySoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, LATEST_FLOW_DATE, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertFalse(result.isEmpty());

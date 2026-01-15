@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Slf4j
@@ -28,7 +29,7 @@ public class PaymentsReportingLegacySoapServiceImpl implements PaymentsReporting
   }
 
   @Override
-  public List<PaymentsReportingIdDTO> getPaymentsReportingList(Long organizationId, String accessToken) {
+  public List<PaymentsReportingIdDTO> getPaymentsReportingList(Long organizationId, OffsetDateTime latestFlowDate, String accessToken) {
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     return nodeForPaClient.getPaymentsReportingList(brokerForNodoPaDTO);
   }

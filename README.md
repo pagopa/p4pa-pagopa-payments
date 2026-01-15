@@ -159,10 +159,6 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | PU_SIL_MAX_ATTEMPTS                     | PuSil API max attempts                             | 3       |
 | PU_SIL_WAIT_TIME_MILLIS                 | PuSil retry waiting time (milliseconds)            | 500     |
 | PU_SIL_PRINT_BODY_WHEN_ERROR            | To print body when an error occurs                 | true    |
-| CLASSIFICATION_BASE_URL                 | Classification microservice URL                    |         |
-| CLASSIFICATION_MAX_ATTEMPTS             | Classification API max attempts                    | 3       |
-| CLASSIFICATION_WAIT_TIME_MILLIS         | Classification retry waiting time (milliseconds)   | 500     |
-| CLASSIFICATION_PRINT_BODY_WHEN_ERROR    | To print body when an error occurs                 | true    |
 
 ##### 🌍 External services
 | ENV                                                        | DESCRIPTION                                                     | DEFAULT |

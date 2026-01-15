@@ -420,6 +420,14 @@
             "type" : "integer",
             "format" : "int64"
           }
+        }, {
+          "name" : "latestFlowDate",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
         } ],
         "responses" : {
           "404" : {

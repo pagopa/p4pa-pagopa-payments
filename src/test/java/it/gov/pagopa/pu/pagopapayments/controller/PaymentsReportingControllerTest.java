@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,12 +36,13 @@ class PaymentsReportingControllerTest {
   @Test
   void getReportingList_whenValidRequest_thenReturnReportingList() {
     Long organizationId = 1L;
+    OffsetDateTime latestFlowDate = OffsetDateTime.now();
     List<PaymentsReportingIdDTO> expectedResponse = List.of(new PaymentsReportingIdDTO());
 
-    Mockito.when(paymentsReportingServiceMock.getPaymentsReportingList(organizationId, TestUtils.getFakeAccessToken())).thenReturn(expectedResponse);
+    Mockito.when(paymentsReportingServiceMock.getPaymentsReportingList(organizationId, latestFlowDate, TestUtils.getFakeAccessToken())).thenReturn(expectedResponse);
     TestUtils.setFakeAccessTokenInContext();
 
-    ResponseEntity<List<PaymentsReportingIdDTO>> response = paymentsReportingController.getPaymentsReportingList(organizationId);
+    ResponseEntity<List<PaymentsReportingIdDTO>> response = paymentsReportingController.getPaymentsReportingList(organizationId, latestFlowDate);
 
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedResponse, response.getBody());

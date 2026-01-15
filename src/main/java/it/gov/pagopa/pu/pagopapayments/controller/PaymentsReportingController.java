@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -23,16 +24,16 @@ public class PaymentsReportingController implements PaymentsReportingApi {
   }
 
   @Override
-  public ResponseEntity<List<PaymentsReportingIdDTO>> getPaymentsReportingList(Long organizationId) {
-    log.info("User requested getPaymentsReportingList, organizationId[{}]", organizationId);
-    List<PaymentsReportingIdDTO> reportingList = paymentsReportingService.getPaymentsReportingList(organizationId, SecurityUtils.getAccessToken());
+  public ResponseEntity<List<PaymentsReportingIdDTO>> getPaymentsReportingList(Long organizationId, OffsetDateTime latestFlowDate) {
+    log.info("User requested getPaymentsReportingList, organizationId[{}], latestFlowDate[{}]", organizationId, latestFlowDate);
+    List<PaymentsReportingIdDTO> reportingList = paymentsReportingService.getPaymentsReportingList(organizationId, latestFlowDate, SecurityUtils.getAccessToken());
     return ResponseEntity.ok(reportingList);
   }
 
   @Override
-  public ResponseEntity<Long> fetchPaymentReporting(Long organizationId, String flowId, String fileName){
-    log.info("invoking uploadPaymentsReporting, organizationId[{}], flowId[{}], fileName[{}]", organizationId, flowId, fileName);
-    Long result = paymentsReportingService.fetchPaymentReporting(organizationId, flowId, fileName, SecurityUtils.getAccessToken());
+  public ResponseEntity<Long> fetchPaymentReporting(Long organizationId, String flowId, String fileName, Long revision, String pspId){
+    log.info("invoking uploadPaymentsReporting, organizationId[{}], flowId[{}], revision[{}], pspId[{}], fileName[{}]", organizationId, flowId, revision, pspId, fileName);
+    Long result = paymentsReportingService.fetchPaymentReporting(organizationId, flowId, revision, pspId, fileName, SecurityUtils.getAccessToken());
     return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).body(result);
   }
 

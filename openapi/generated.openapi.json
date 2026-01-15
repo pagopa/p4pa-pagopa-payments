@@ -420,6 +420,14 @@
             "type" : "integer",
             "format" : "int64"
           }
+        }, {
+          "name" : "latestFlowDate",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
         } ],
         "responses" : {
           "404" : {
@@ -500,6 +508,21 @@
           "name" : "fileName",
           "in" : "query",
           "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "revision",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "pspId",
+          "in" : "query",
+          "required" : false,
           "schema" : {
             "type" : "string"
           }
@@ -1053,9 +1076,13 @@
           },
           "paymentsReportingFileName" : {
             "type" : "string"
+          },
+          "revision" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         },
-        "required" : [ "flowDateTime", "pagopaPaymentsReportingId", "paymentsReportingFileName" ]
+        "required" : [ "flowDateTime", "pagopaPaymentsReportingId", "paymentsReportingFileName", "revision" ]
       }
     },
     "securitySchemes" : {

@@ -9,7 +9,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
-import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingIdMapper;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
@@ -70,7 +70,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
 
     List<PaymentsReportingIdDTO> reportingList = new ArrayList<>();
     response.getElencoFlussiRendicontazione().getIdRendicontaziones().forEach(idRendicontazione ->
-      reportingList.add(PaymentsReportingIdMapper.map(idRendicontazione))
+      reportingList.add(PaymentsReportingMapper.mapIdDto(idRendicontazione))
     );
 
     return reportingList;

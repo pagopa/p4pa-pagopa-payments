@@ -71,14 +71,15 @@ class PaymentsReportingMapperTest {
     Assertions.assertNotNull(actualResult);
     Assertions.assertFalse(actualResult.isEmpty());
     Assertions.assertEquals(1, actualResult.size());
+    Assertions.assertNotNull(actualResult.getFirst());
     TestUtils.checkNotNullFields(actualResult.getFirst());
     Assertions.assertEquals(FLOW_ID, actualResult.getFirst().getPagopaPaymentsReportingId());
     Assertions.assertEquals(FLOW_DATE, actualResult.getFirst().getFlowDateTime());
-    Assertions.assertEquals(1L, actualResult.getFirst().getRevision().longValue());
+    Assertions.assertEquals(1L, Optional.ofNullable(actualResult.getFirst().getRevision()).map(Integer::longValue).orElse(0L));
   }
 
   @Test
-  void givenValidTipoIdRendicontazioneWhenMapThenReturnReportingIdDTO() throws DatatypeConfigurationException {
+  void givenValidPaymentsReportingIdTypeWhenMapThenReturnReportingIdDTO() throws DatatypeConfigurationException {
     // given
     TipoIdRendicontazione tipoIdRendicontazione = new TipoIdRendicontazione();
     tipoIdRendicontazione.setIdentificativoFlusso(FLOW_ID);
@@ -139,7 +140,7 @@ class PaymentsReportingMapperTest {
   }
 
   @Test
-  void givenTipoIdRendicontazioneWithNullFieldsWhenMapThenReturnReportingIdDTOWithNullFields() {
+  void givenPaymentsReportingIdTypeWithNullFieldsWhenMapThenReturnReportingIdDTOWithNullFields() {
     // given
     TipoIdRendicontazione tipoIdRendicontazione = new TipoIdRendicontazione();
 
@@ -153,11 +154,9 @@ class PaymentsReportingMapperTest {
   }
 
   @Test
-  void givenTipoIdRendicontazioneNullWhenMapThenReturnReportingIdDTOWithNullFields() {
-    // given
-    TipoIdRendicontazione tipoIdRendicontazione = null;
-    // when
-    PaymentsReportingIdDTO result = paymentsReportingMapper.mapIdDto(tipoIdRendicontazione);
+  void givenPaymentsReportingIdTypeNullWhenMapThenReturnReportingIdDTOWithNullFields() {
+    // given & when
+    PaymentsReportingIdDTO result = paymentsReportingMapper.mapIdDto(null);
 
     // then
     Assertions.assertNull(result);
@@ -232,7 +231,7 @@ class PaymentsReportingMapperTest {
   }
 
   @Test
-  void givenValidInputWhenMapCtFlussoRiversamentoReturnPaPaymentReportingDTO() {
+  void givenValidInputWhenMapPaymentsReportingReturnPaPaymentReportingDTO() {
     // given
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
     Broker broker = new Broker();
@@ -243,7 +242,7 @@ class PaymentsReportingMapperTest {
     organization.setOrgFiscalCode("orgFiscalCode");
     brokerForNodoPaDTO.setOrganization(organization);
 
-    CtFlussoRiversamento flussoRiversamento = new CtFlussoRiversamento();
+    CtFlussoRiversamento paymentReporting = new CtFlussoRiversamento();
 
     Mockito.when(
       jaxbTransformService.marshalling(
@@ -253,8 +252,8 @@ class PaymentsReportingMapperTest {
     ).thenReturn("xmlByteString");
 
     // when
-    PaPaymentReportingDTO actualResult = paymentsReportingMapper.mapPaymentsReporting(
-      brokerForNodoPaDTO, flussoRiversamento
+    PaPaymentReportingDTO actualResult = paymentsReportingMapper.mapPaPaymentsReportingDTO(
+      brokerForNodoPaDTO, paymentReporting
     );
 
     // then
@@ -268,7 +267,7 @@ class PaymentsReportingMapperTest {
 
   @ParameterizedTest
   @EnumSource(SenderTypeEnum.class)
-  void givenValidInputWhenMapSingleFlowResponseAndPaymentsReturnCtFlussoRiversamento(SenderTypeEnum senderTypeEnum) {
+  void givenValidInputWhenMapSingleFlowResponseAndPaymentsReturnPaymentsReporting(SenderTypeEnum senderTypeEnum) {
     // given
     SingleFlowResponse singleFlowResponse = new SingleFlowResponse();
     singleFlowResponse.setFdr("fdrId");
@@ -299,7 +298,7 @@ class PaymentsReportingMapperTest {
     paymentList.add(payment);
 
     // when
-    CtFlussoRiversamento actualResult = paymentsReportingMapper.mapFlussoRiversamento(
+    CtFlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
       singleFlowResponse, paymentList
     );
 
@@ -312,7 +311,30 @@ class PaymentsReportingMapperTest {
   }
 
   @Test
-  void givenValidInputWhenMapSingleFlowResponseAndPaymentsReturnCtFlussoRiversamento() {
+  void givenNullSingleFlowWhenMapSingleFlowResponseAndPaymentListReturnPaymentsReporting() {
+    // given
+    List<Payment> paymentList = new ArrayList<>();
+    Payment payment = new Payment();
+    payment.setIuv("iuv");
+    payment.setIur("iur");
+    payment.setIndex(1L);
+    payment.setPay(20.0);
+    payment.setPayDate(OffsetDateTime.now());
+    payment.setPayStatus(Payment.PayStatusEnum.EXECUTED);
+    paymentList.add(payment);
+
+    // when
+    CtFlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
+      null, paymentList
+    );
+
+    // then
+    Assertions.assertNull(actualResult);
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideInvalidPaymentList")
+  void givenInvalidPaymentListWhenMapSingleFlowResponseAndPaymentListReturnNull(List<Payment> paymentList) {
     // given
     SingleFlowResponse singleFlowResponse = new SingleFlowResponse();
     singleFlowResponse.setFdr("fdrId");
@@ -327,8 +349,8 @@ class PaymentsReportingMapperTest {
     singleFlowResponse.setSumPayments(0.0);
 
     // when
-    CtFlussoRiversamento actualResult = paymentsReportingMapper.mapFlussoRiversamento(
-      singleFlowResponse, new ArrayList<>()
+    CtFlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
+      singleFlowResponse, paymentList
     );
 
     // then
@@ -337,6 +359,13 @@ class PaymentsReportingMapperTest {
     Assertions.assertNull(actualResult.getIstitutoMittente());
     Assertions.assertNull(actualResult.getIstitutoRicevente());
     Assertions.assertEquals(0, actualResult.getDatiSingoliPagamenti().size());
+  }
+
+  private static Stream<List<Payment>> provideInvalidPaymentList() {
+    return Stream.of(
+      new ArrayList<>(),
+      null
+    );
   }
 
 }

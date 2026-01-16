@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -75,7 +76,7 @@ public class PaymentsReportingMapper {
     return !filename.startsWith(paymentsReportingId) || !filename.endsWith(PAYMENTS_REPORTING_FILE_EXTENSION);
   }
 
-  public PaPaymentReportingDTO mapPaymentsReporting(BrokerForNodoPaDTO brokerForNodoPaDTO, CtFlussoRiversamento ctFlussoRiversamento) {
+  public PaPaymentReportingDTO mapPaPaymentsReportingDTO(BrokerForNodoPaDTO brokerForNodoPaDTO, CtFlussoRiversamento ctFlussoRiversamento) {
     String paymentReportingMarshalling = jaxbTransformService.marshalling(ctFlussoRiversamento, CtFlussoRiversamento.class);
     return PaPaymentReportingDTO.builder()
       .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
@@ -86,33 +87,36 @@ public class PaymentsReportingMapper {
       .build();
   }
 
-  public CtFlussoRiversamento mapFlussoRiversamento(SingleFlowResponse singleFlowResponse, List<Payment> paymentList) {
+  public CtFlussoRiversamento mapPaymentsReporting(SingleFlowResponse singleFlowResponse, List<Payment> paymentList) {
+    if(singleFlowResponse == null) {
+      return null;
+    }
     CtFlussoRiversamento ctFlussoRiversamento = new CtFlussoRiversamento();
     ctFlussoRiversamento.setIdentificativoFlusso(singleFlowResponse.getFdr());
     ctFlussoRiversamento.setRevisioneFlusso(Optional.ofNullable(singleFlowResponse.getRevision()).orElse(0L).intValue());
     ctFlussoRiversamento.setDataOraFlusso(ConversionUtils.toXMLGregorianCalendar(singleFlowResponse.getFdrDate()));
     ctFlussoRiversamento.setIdentificativoUnivocoRegolamento(singleFlowResponse.getRegulation());
     ctFlussoRiversamento.setDataRegolamento(ConversionUtils.toXMLGregorianCalendar(ConversionUtils.localDate2RomeMinTime(singleFlowResponse.getRegulationDate())));
-    ctFlussoRiversamento.setIstitutoMittente(this.mapIstitutoMittente(singleFlowResponse.getSender()));
+    ctFlussoRiversamento.setIstitutoMittente(this.mapSender(singleFlowResponse.getSender()));
     ctFlussoRiversamento.setCodiceBicBancaDiRiversamento(singleFlowResponse.getBicCodePouringBank());
-    ctFlussoRiversamento.setIstitutoRicevente(this.mapIstitutoRicevente(singleFlowResponse.getReceiver()));
+    ctFlussoRiversamento.setIstitutoRicevente(this.mapReceiver(singleFlowResponse.getReceiver()));
     ctFlussoRiversamento.setNumeroTotalePagamenti(Optional.ofNullable(singleFlowResponse.getTotPayments()).map(BigDecimal::new).orElse(null));
     ctFlussoRiversamento.setImportoTotalePagamenti(Optional.ofNullable(singleFlowResponse.getSumPayments()).map(BigDecimal::new).orElse(null));
     ctFlussoRiversamento.getDatiSingoliPagamenti().addAll(this.mapPaymentList(paymentList));
     return ctFlussoRiversamento;
   }
 
-  private CtIstitutoMittente mapIstitutoMittente(Sender sender) {
+  private CtIstitutoMittente mapSender(Sender sender) {
     if(sender == null) {
       return null;
     }
     CtIstitutoMittente ctIstitutoMittente = new CtIstitutoMittente();
     ctIstitutoMittente.setDenominazioneMittente(sender.getPspName());
-    ctIstitutoMittente.setIdentificativoUnivocoMittente(mapCtIdentificativoUnivoco(sender));
+    ctIstitutoMittente.setIdentificativoUnivocoMittente(mapSenderId(sender));
     return ctIstitutoMittente;
   }
 
-  private CtIdentificativoUnivoco mapCtIdentificativoUnivoco(Sender sender) {
+  private CtIdentificativoUnivoco mapSenderId(Sender sender) {
     CtIdentificativoUnivoco ctIdentificativoUnivoco = new CtIdentificativoUnivoco();
     ctIdentificativoUnivoco.setCodiceIdentificativoUnivoco(sender.getId());
     ctIdentificativoUnivoco.setTipoIdentificativoUnivoco(mapSenderType(sender.getType()));
@@ -127,17 +131,17 @@ public class PaymentsReportingMapper {
     };
   }
 
-  private CtIstitutoRicevente mapIstitutoRicevente(Receiver receiver) {
+  private CtIstitutoRicevente mapReceiver(Receiver receiver) {
     if(receiver == null) {
       return null;
     }
     CtIstitutoRicevente ctIstitutoRicevente = new CtIstitutoRicevente();
     ctIstitutoRicevente.setDenominazioneRicevente(receiver.getOrganizationName());
-    ctIstitutoRicevente.setIdentificativoUnivocoRicevente(mapIdentificativoUnivocoRicevente(receiver));
+    ctIstitutoRicevente.setIdentificativoUnivocoRicevente(mapReceiverId(receiver));
     return ctIstitutoRicevente;
   }
 
-  private CtIdentificativoUnivocoPersonaG mapIdentificativoUnivocoRicevente(Receiver receiver) {
+  private CtIdentificativoUnivocoPersonaG mapReceiverId(Receiver receiver) {
     CtIdentificativoUnivocoPersonaG ctIdentificativoUnivocoPersonaG = new CtIdentificativoUnivocoPersonaG();
     ctIdentificativoUnivocoPersonaG.setCodiceIdentificativoUnivoco(receiver.getId());
     ctIdentificativoUnivocoPersonaG.setTipoIdentificativoUnivoco(StTipoIdentificativoUnivocoPersG.G);
@@ -145,11 +149,11 @@ public class PaymentsReportingMapper {
   }
 
   private List<CtDatiSingoliPagamenti> mapPaymentList(List<Payment> paymentList) {
-    if(paymentList == null) {
+    if(paymentList == null || paymentList.isEmpty()) {
       return new ArrayList<>();
     }
     ArrayList<CtDatiSingoliPagamenti> ctDatiSingoliPagamentiList = new ArrayList<>();
-    paymentList.forEach(payment -> {
+    paymentList.stream().filter(Objects::nonNull).forEach(payment -> {
       CtDatiSingoliPagamenti ctDatiSingoliPagamenti = new CtDatiSingoliPagamenti();
       ctDatiSingoliPagamenti.setIdentificativoUnivocoVersamento(payment.getIuv());
       ctDatiSingoliPagamenti.setIdentificativoUnivocoRiscossione(payment.getIur());

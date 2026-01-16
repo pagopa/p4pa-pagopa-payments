@@ -243,7 +243,6 @@ components:
         - pagopaPaymentsReportingId
         - flowDateTime
         - paymentsReportingFileName
-        - revision
       type: object
       properties:
         pagopaPaymentsReportingId:
@@ -255,6 +254,8 @@ components:
           type: string
         revision:
           type: integer
+        pspId:
+          type: string
     PagoPaPaymentsErrorDTO:
       type: object
       required:

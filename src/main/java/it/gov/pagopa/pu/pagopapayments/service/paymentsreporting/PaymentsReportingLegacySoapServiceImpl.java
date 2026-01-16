@@ -21,11 +21,13 @@ public class PaymentsReportingLegacySoapServiceImpl implements PaymentsReporting
   private final NodeForPaClient nodeForPaClient;
   private final BrokerRetrieverService brokerRetrieverService;
   private final FileShareService fileShareService;
+  private final PaymentsReportingMapper paymentsReportingMapper;
 
-  public PaymentsReportingLegacySoapServiceImpl(NodeForPaClient nodeForPaClient, BrokerRetrieverService brokerRetrieverService, FileShareService fileShareService) {
+  public PaymentsReportingLegacySoapServiceImpl(NodeForPaClient nodeForPaClient, BrokerRetrieverService brokerRetrieverService, FileShareService fileShareService, PaymentsReportingMapper paymentsReportingMapper) {
     this.nodeForPaClient = nodeForPaClient;
     this.brokerRetrieverService = brokerRetrieverService;
     this.fileShareService = fileShareService;
+    this.paymentsReportingMapper = paymentsReportingMapper;
   }
 
   @Override
@@ -36,7 +38,7 @@ public class PaymentsReportingLegacySoapServiceImpl implements PaymentsReporting
 
   @Override
   public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, Long revision, String pspId, String fileName, String accessToken) {
-    if (PaymentsReportingMapper.isFilenameInvalid(fileName, paymentsReportingId)) {
+    if (paymentsReportingMapper.isFilenameInvalid(fileName, paymentsReportingId)) {
       throw new InvalidValueException("PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
     }
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);

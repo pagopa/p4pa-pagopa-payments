@@ -38,15 +38,17 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
 
   private final RegistryLogger registryLogger;
   private final NodoChiediFlussoRendicontazioneMapper fetchPaymentsReportingRequestMapper;
+  private final PaymentsReportingMapper paymentsReportingMapper;
 
   public NodeForPaClientImpl(
     String defaultUri,
     Jaxb2Marshaller marshaller,
     NodoChiediFlussoRendicontazioneMapper fetchPaymentsReportingRequestMapper,
-    RegistryLogger registryLogger
+    RegistryLogger registryLogger, PaymentsReportingMapper paymentsReportingMapper
   ) {
     this.registryLogger = registryLogger;
     this.fetchPaymentsReportingRequestMapper = fetchPaymentsReportingRequestMapper;
+    this.paymentsReportingMapper = paymentsReportingMapper;
 
     setDefaultUri(defaultUri);
     setMarshaller(marshaller);
@@ -70,7 +72,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
 
     List<PaymentsReportingIdDTO> reportingList = new ArrayList<>();
     response.getElencoFlussiRendicontazione().getIdRendicontaziones().forEach(idRendicontazione ->
-      reportingList.add(PaymentsReportingMapper.mapIdDto(idRendicontazione))
+      reportingList.add(paymentsReportingMapper.mapIdDto(idRendicontazione))
     );
 
     return reportingList;

@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
@@ -49,12 +50,14 @@ class NodeForPaClientImplTest {
   private NodoChiediFlussoRendicontazioneMapper fetchPaymentsReportingRequestMapperMock;
   @Mock
   private RegistryLogger registryLoggerMock;
+  @Mock
+  private PaymentsReportingMapper paymentsReportingMapper;
 
   private NodeForPaClientImpl nodeForPaClient;
 
   @BeforeEach
   void init(){
-    this.nodeForPaClient = new NodeForPaClientImpl("http://localhost", new Jaxb2Marshaller(), fetchPaymentsReportingRequestMapperMock, registryLoggerMock);
+    this.nodeForPaClient = new NodeForPaClientImpl("http://localhost", new Jaxb2Marshaller(), fetchPaymentsReportingRequestMapperMock, registryLoggerMock, paymentsReportingMapper);
     nodeForPaClient.setWebServiceTemplate(webServiceTemplateMock);
   }
 

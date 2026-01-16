@@ -194,7 +194,8 @@ tasks.register("dependenciesBuild") {
     "openApiGenerateWORKFLOWHUB",
     "openApiGeneratePUSIL",
     "jaxbJavaGenPaForNode",
-    "jaxbJavaGenNodeForPa"
+    "jaxbJavaGenNodeForPa",
+    "jaxbJavaGenFlussoRiversamento"
   )
 }
 
@@ -643,6 +644,13 @@ jaxb {
       schema = file("$rootDir/src/main/resources/soap/wsdl/nodeForPa.wsdl")
       bindings =
         layout.files("$rootDir/src/main/resources/soap/wsdl/nodeForPa.xjb")
+    }
+    register("FlussoRiversamento") {
+      extension = true
+      args = listOf("-wsdl")
+      outputDir = file("$projectDir/build/generated/jaxb/java")
+      schema = file("src/main/resources/soap/xsd-pu/FlussoRiversamento.xsd")
+      bindings = layout.files("src/main/resources/soap/xsd-pu/FlussoRiversamento.xjb")
     }
   }
 }

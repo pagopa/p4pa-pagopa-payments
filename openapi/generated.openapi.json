@@ -1080,9 +1080,12 @@
           "revision" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "pspId" : {
+            "type" : "string"
           }
         },
-        "required" : [ "flowDateTime", "pagopaPaymentsReportingId", "paymentsReportingFileName", "revision" ]
+        "required" : [ "flowDateTime", "pagopaPaymentsReportingId", "paymentsReportingFileName" ]
       }
     },
     "securitySchemes" : {

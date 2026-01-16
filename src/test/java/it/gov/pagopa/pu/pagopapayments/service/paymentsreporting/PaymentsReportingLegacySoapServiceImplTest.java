@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
@@ -36,6 +37,8 @@ class PaymentsReportingLegacySoapServiceImplTest {
   private NodeForPaClient nodeForPaClientMock;
   @Mock
   private FileShareService fileShareServiceMock;
+  @Mock
+  private PaymentsReportingMapper paymentsReportingMapper;
 
   @InjectMocks
   private PaymentsReportingLegacySoapServiceImpl paymentsReportingLegacySoapServiceImpl;
@@ -131,6 +134,7 @@ class PaymentsReportingLegacySoapServiceImplTest {
     response.setFiscalCode("orgFiscalCode");
     Long ingestionFlowFileId = 1L;
 
+    Mockito.when(paymentsReportingMapper.isFilenameInvalid(fileName, REPORTING_ID)).thenReturn(false);
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID)).thenReturn(response);
     Mockito.when(fileShareServiceMock.uploadPaymentReporting(response, ORGANIZATION_ID, fileName, accessToken)).thenReturn(ingestionFlowFileId);
@@ -139,6 +143,7 @@ class PaymentsReportingLegacySoapServiceImplTest {
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(ingestionFlowFileId, result);
+    Mockito.verify(paymentsReportingMapper, Mockito.times(1)).isFilenameInvalid(fileName,REPORTING_ID);
     Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     Mockito.verify(nodeForPaClientMock, Mockito.times(1)).fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID);
     Mockito.verify(fileShareServiceMock, Mockito.times(1)).uploadPaymentReporting(response, ORGANIZATION_ID, fileName, accessToken);
@@ -149,8 +154,11 @@ class PaymentsReportingLegacySoapServiceImplTest {
     String accessToken = TestUtils.getFakeAccessToken();
     String fileName = "fileName.xml";
 
+    Mockito.when(paymentsReportingMapper.isFilenameInvalid(fileName, REPORTING_ID)).thenReturn(true);
+
     Assertions.assertThrows(InvalidValueException.class, () -> paymentsReportingLegacySoapServiceImpl
       .fetchPaymentReporting(ORGANIZATION_ID, REPORTING_ID, 1L, "pspId", fileName, accessToken));
+    Mockito.verify(paymentsReportingMapper, Mockito.times(1)).isFilenameInvalid(fileName,REPORTING_ID);
   }
 
 

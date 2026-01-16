@@ -96,7 +96,7 @@ public class PaymentsReportingMapper {
     ctFlussoRiversamento.setRevisioneFlusso(Optional.ofNullable(singleFlowResponse.getRevision()).orElse(0L).intValue());
     ctFlussoRiversamento.setDataOraFlusso(ConversionUtils.toXMLGregorianCalendar(singleFlowResponse.getFdrDate()));
     ctFlussoRiversamento.setIdentificativoUnivocoRegolamento(singleFlowResponse.getRegulation());
-    ctFlussoRiversamento.setDataRegolamento(ConversionUtils.toXMLGregorianCalendar(ConversionUtils.localDate2RomeMinTime(singleFlowResponse.getRegulationDate())));
+    ctFlussoRiversamento.setDataRegolamento(ConversionUtils.toXMLGregorianCalendar(ConversionUtils.toOffsetDateTimeStartOfTheDay(singleFlowResponse.getRegulationDate())));
     ctFlussoRiversamento.setIstitutoMittente(this.mapSender(singleFlowResponse.getSender()));
     ctFlussoRiversamento.setCodiceBicBancaDiRiversamento(singleFlowResponse.getBicCodePouringBank());
     ctFlussoRiversamento.setIstitutoRicevente(this.mapReceiver(singleFlowResponse.getReceiver()));

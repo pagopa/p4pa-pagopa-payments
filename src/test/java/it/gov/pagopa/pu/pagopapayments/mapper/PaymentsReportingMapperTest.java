@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import gov.telematici.pagamenti.ws.TipoIdRendicontazione;
-import it.gov.digitpa.schemas._2011.pagamenti.CtFlussoRiversamento;
+import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
@@ -26,7 +26,6 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -242,12 +241,12 @@ class PaymentsReportingMapperTest {
     organization.setOrgFiscalCode("orgFiscalCode");
     brokerForNodoPaDTO.setOrganization(organization);
 
-    CtFlussoRiversamento paymentReporting = new CtFlussoRiversamento();
+    FlussoRiversamento paymentReporting = new FlussoRiversamento();
 
     Mockito.when(
       jaxbTransformService.marshalling(
-        Mockito.any(CtFlussoRiversamento.class),
-        Mockito.eq(CtFlussoRiversamento.class)
+        Mockito.any(FlussoRiversamento.class),
+        Mockito.eq(FlussoRiversamento.class)
       )
     ).thenReturn("xmlByteString");
 
@@ -274,7 +273,7 @@ class PaymentsReportingMapperTest {
     singleFlowResponse.setRevision(1L);
     singleFlowResponse.setFdrDate(OffsetDateTime.now());
     singleFlowResponse.setRegulation("regulation");
-    singleFlowResponse.setRegulationDate(LocalDate.now());
+    singleFlowResponse.setRegulationDate(OffsetDateTime.now());
     Sender sender = new Sender();
     sender.setPspName("pspName");
     sender.setId("pspId");
@@ -298,7 +297,7 @@ class PaymentsReportingMapperTest {
     paymentList.add(payment);
 
     // when
-    CtFlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
+    FlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
       singleFlowResponse, paymentList
     );
 
@@ -307,7 +306,7 @@ class PaymentsReportingMapperTest {
     TestUtils.checkNotNullFields(actualResult, "versioneOggetto");
     TestUtils.checkNotNullFields(actualResult.getIstitutoMittente());
     TestUtils.checkNotNullFields(actualResult.getIstitutoRicevente());
-    actualResult.getDatiSingoliPagamenti().forEach(TestUtils::checkNotNullFields);
+    actualResult.getDatiSingoliPagamentis().forEach(TestUtils::checkNotNullFields);
   }
 
   @Test
@@ -324,7 +323,7 @@ class PaymentsReportingMapperTest {
     paymentList.add(payment);
 
     // when
-    CtFlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
+    FlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
       null, paymentList
     );
 
@@ -341,7 +340,7 @@ class PaymentsReportingMapperTest {
     singleFlowResponse.setRevision(1L);
     singleFlowResponse.setFdrDate(OffsetDateTime.now());
     singleFlowResponse.setRegulation("regulation");
-    singleFlowResponse.setRegulationDate(LocalDate.now());
+    singleFlowResponse.setRegulationDate(OffsetDateTime.now());
     singleFlowResponse.setSender(null);
     singleFlowResponse.setBicCodePouringBank("bicCodePouringBank");
     singleFlowResponse.setReceiver(null);
@@ -349,7 +348,7 @@ class PaymentsReportingMapperTest {
     singleFlowResponse.setSumPayments(0.0);
 
     // when
-    CtFlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
+    FlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
       singleFlowResponse, paymentList
     );
 
@@ -358,7 +357,7 @@ class PaymentsReportingMapperTest {
     TestUtils.checkNotNullFields(actualResult, "istitutoMittente", "istitutoRicevente", "versioneOggetto");
     Assertions.assertNull(actualResult.getIstitutoMittente());
     Assertions.assertNull(actualResult.getIstitutoRicevente());
-    Assertions.assertEquals(0, actualResult.getDatiSingoliPagamenti().size());
+    Assertions.assertEquals(0, actualResult.getDatiSingoliPagamentis().size());
   }
 
   private static Stream<List<Payment>> provideInvalidPaymentList() {

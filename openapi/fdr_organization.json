@@ -1385,7 +1385,9 @@
             ]
           },
           "regulationDate": {
-            "$ref": "#/components/schemas/LocalDate"
+            "description": "Modified because Node send a OffsetDateTime",
+            "type": "string",
+            "format": "date-time"
           },
           "bicCodePouringBank": {
             "type": "string",

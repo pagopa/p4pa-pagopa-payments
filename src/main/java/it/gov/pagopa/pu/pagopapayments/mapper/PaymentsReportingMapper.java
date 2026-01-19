@@ -22,6 +22,7 @@ import java.util.Optional;
 public class PaymentsReportingMapper {
 
   public static final String PAYMENTS_REPORTING_FILE_EXTENSION = ".xml";
+  public static final String XML_OBJECT_VERSION = "1.0";
 
   private final JAXBTransformService jaxbTransformService;
 
@@ -92,6 +93,7 @@ public class PaymentsReportingMapper {
       return null;
     }
     FlussoRiversamento flussoRiversamento = new FlussoRiversamento();
+    flussoRiversamento.setVersioneOggetto(XML_OBJECT_VERSION); //field unused for PaymentsReportingRestServiceImpl but needed for backward compatibility with PaymentsReportingLegacySoapServiceImpl
     flussoRiversamento.setIdentificativoFlusso(singleFlowResponse.getFdr());
     flussoRiversamento.setRevisioneFlusso(Optional.ofNullable(singleFlowResponse.getRevision()).orElse(0L).intValue());
     flussoRiversamento.setDataOraFlusso(ConversionUtils.toXMLGregorianCalendar(singleFlowResponse.getFdrDate()));

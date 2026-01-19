@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,7 +46,7 @@ class NodePaymentsReportingClientTest {
   @InjectMocks
   private NodePaymentsReportingClient paymentsReportingClient;
 
-  private final static PodamFactory podamFactory = TestUtils.getPodamFactory();
+  private static final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   public static final String SYNC_API_KEY = "SYNC_KEY";
   private static final String ORGANIZATION_FISCAL_CODE = "12345678901";

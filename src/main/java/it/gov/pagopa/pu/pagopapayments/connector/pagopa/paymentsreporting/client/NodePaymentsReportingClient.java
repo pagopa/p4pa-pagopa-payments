@@ -37,7 +37,7 @@ public class NodePaymentsReportingClient {
         page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey())
           .iOrganizationsControllerGetAllPublishedFlows(
             brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(), latestFlowDate,
-            page.longValue(), null, null, null
+            (long) page, null, null, null
           ),
         this::isPaginatedFlowsResponseEmpty,
         this::getTotalPageFromPaginatedFlowsResponse,
@@ -53,7 +53,6 @@ public class NodePaymentsReportingClient {
   }
 
   private Integer getTotalPageFromPaginatedFlowsResponse(PaginatedFlowsResponse paginatedFlowsResponse) {
-    assert paginatedFlowsResponse.getMetadata() != null;
     return paginatedFlowsResponse.getMetadata().getTotPage();
   }
 
@@ -94,7 +93,7 @@ public class NodePaymentsReportingClient {
       page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey())
         .iOrganizationsControllerGetPaymentsFromPublishedFlow(
                 reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
-                pspId, revision, page.longValue(), null
+                pspId, revision, (long) page, null
         ),
       this::isPaginatedPaymentsResponseEmpty,
       this::getTotalPageFromPaginatedPaymentsResponse,
@@ -126,7 +125,6 @@ public class NodePaymentsReportingClient {
   }
 
   private Integer getTotalPageFromPaginatedPaymentsResponse(PaginatedPaymentsResponse paginatedPaymentsResponse) {
-    assert paginatedPaymentsResponse.getMetadata() != null;
     return paginatedPaymentsResponse.getMetadata().getTotPage();
   }
 

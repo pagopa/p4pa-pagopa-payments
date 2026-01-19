@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper.PAYMENTS_REPORTING_FILE_EXTENSION;
 
@@ -41,13 +42,14 @@ public class PaymentsReportingRestServiceImpl implements PaymentsReportingServic
 
   @Override
   public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, Long revision, String pspId, String fileName, String accessToken) {
-    fileName = paymentsReportingId + "_payments_reporting" + PAYMENTS_REPORTING_FILE_EXTENSION; // in PaymentsReportingIdDTO paymentsReportingFileName is not set by getPaymentsReportingList in PaymentsReportingRestServiceImpl
-    if(paymentsReportingMapper.isFilenameInvalid(fileName, paymentsReportingId)){
-      throw new InvalidValueException("PaymentsReporting file name not valid '" + fileName + "' to fetch file with id " + paymentsReportingId);
+    String nonNullFileName = Optional.ofNullable(fileName)
+      .orElse(paymentsReportingId + "_payments_reporting" + PAYMENTS_REPORTING_FILE_EXTENSION); // paymentsReportingFileName in PaymentsReportingIdDTO may be not set by getPaymentsReportingList in PaymentsReportingRestServiceImpl
+    if(paymentsReportingMapper.isFilenameInvalid(nonNullFileName, paymentsReportingId)){
+      throw new InvalidValueException("PaymentsReporting file name not valid '" + nonNullFileName + "' to fetch file with id " + paymentsReportingId);
     }
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     PaPaymentReportingDTO paPaymentReportingDTO = nodePaymentsReportingService.fetchPaymentReporting(brokerForNodoPaDTO, paymentsReportingId, revision, pspId);
-    return fileShareService.uploadPaymentReporting(paPaymentReportingDTO, organizationId, fileName, accessToken);
+    return fileShareService.uploadPaymentReporting(paPaymentReportingDTO, organizationId, nonNullFileName, accessToken);
   }
 
 }

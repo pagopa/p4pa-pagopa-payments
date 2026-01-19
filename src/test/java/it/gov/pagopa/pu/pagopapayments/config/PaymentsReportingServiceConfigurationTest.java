@@ -32,7 +32,7 @@ class PaymentsReportingServiceConfigurationTest {
   private PaymentsReportingServiceConfiguration paymentsReportingServiceConfiguration;
 
   @Test
-  public void LegacyTest() {
+  void LegacyTest() {
     String isLeagcyString = Boolean.TRUE.toString();
     paymentsReportingServiceConfiguration =
       new PaymentsReportingServiceConfiguration(isLeagcyString);
@@ -52,7 +52,7 @@ class PaymentsReportingServiceConfigurationTest {
   }
 
   @Test
-  public void NonLegacyTest() {
+  void NonLegacyTest() {
     String isLegacyString = Boolean.FALSE.toString();
     paymentsReportingServiceConfiguration =
       new PaymentsReportingServiceConfiguration(isLegacyString);

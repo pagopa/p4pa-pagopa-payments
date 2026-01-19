@@ -42,7 +42,6 @@ public class NodePaymentsReportingApisHolder {
     ApiClient apiClient = new ApiClient(restTemplate);
     apiClient.setBasePath(clientConfig.getBaseUrl());
     ((ApiKeyAuth)apiClient.getAuthentication("apiKeyHeader")).setApiKey(apiKey);
-    //((ApiKeyAuth)apiClient.getAuthentication("apiKeyQuery")).setApiKey(null);
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
     return apiClient;

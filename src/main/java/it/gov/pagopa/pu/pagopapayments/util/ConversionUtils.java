@@ -50,12 +50,6 @@ public class ConversionUtils {
     return OffsetDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
   }
 
-  public static OffsetDateTime toOffsetDateTimeStartOfTheDay(LocalDate dueDate){
-    return Optional.ofNullable(dueDate)
-      .map(dt -> dt.atTime(LocalTime.MIN).atZone(Constants.ZONEID).toOffsetDateTime())
-      .orElse(null);
-  }
-
   public static OffsetDateTime localDate2RomeMaxTime(LocalDate dueDate){
     return Optional.ofNullable(dueDate)
       .map(dt -> dt.atTime(LocalTime.MAX).atZone(Constants.ZONEID).toOffsetDateTime())

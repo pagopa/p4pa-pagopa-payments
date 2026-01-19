@@ -1385,7 +1385,7 @@
             ]
           },
           "regulationDate": {
-            "description": "Modified because Node send a LocalDateTime",
+            "description": "Modified because Node send a OffsetDateTime",
             "type": "string",
             "format": "date-time"
           },

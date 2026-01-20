@@ -119,10 +119,6 @@ logging:
     PERFORMANCE_LOG.API_REQUEST: "\${LOG_LEVEL_PERFORMANCE_LOG_API_REQUEST:\${logging.level.PERFORMANCE_LOG}}"
     PERFORMANCE_LOG.REST_INVOKE: "\${LOG_LEVEL_PERFORMANCE_LOG_REST_INVOKE:\${logging.level.PERFORMANCE_LOG}}"
 
-feature-flags:
-  payments-reporting:
-    legacy: "\${PAYMENTS_REPORTING_LEGACY_FEATURE_FLAG:false}"
-
 soap:
   pagopa-payments:
     wsdl-base-url: "\${PAGOPA_PAYMENTS_WSDL_BASE_URL:http://localhost:8080}"

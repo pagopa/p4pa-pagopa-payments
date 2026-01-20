@@ -34,7 +34,7 @@ public class PaymentsReportingClient {
 
   public List<FlowByPSP> fetchIdList(BrokerForNodoPaDTO brokerForNodoPaDTO, OffsetDateTime latestFlowDate) {
     return PageUtils.fetchAllFromPaginatedApi(
-        page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey())
+        page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey())
           .iOrganizationsControllerGetAllPublishedFlows(
             brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(), latestFlowDate,
             (long) page, null, null, null
@@ -57,7 +57,7 @@ public class PaymentsReportingClient {
   }
 
   public SingleFlowResponse fetchPaymentReportingFlow(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId, Long revision, String pspId) {
-    return apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey())
+    return apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey())
       .iOrganizationsControllerGetSinglePublishedFlow(
               reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
               pspId, revision
@@ -90,7 +90,7 @@ public class PaymentsReportingClient {
 
   private Triple<List<Payment>, String, RegistryOutcome> fetchAllPaymentsRequestHandler(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId, Long revision, String pspId) {
     List<Payment> responseList = PageUtils.fetchAllFromPaginatedApi(
-      page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey())
+      page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey())
         .iOrganizationsControllerGetPaymentsFromPublishedFlow(
                 reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
                 pspId, revision, (long) page, null

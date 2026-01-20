@@ -48,7 +48,7 @@ class PaymentsReportingClientTest {
 
   private static final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
-  public static final String SYNC_API_KEY = "SYNC_KEY";
+  public static final String SYNC_PAYMENTS_REPORTING_API_KEY = "syncPaymentsReportingApiKey";
   private static final String ORGANIZATION_FISCAL_CODE = "12345678901";
   private static final String PSP_ID = "12345678901";
   private static final String PAYMENTS_REPORTING_ID = "paymentsReportingId";
@@ -69,7 +69,7 @@ class PaymentsReportingClientTest {
   void fetchIdList(PaginatedFlowsResponse paginatedFlowsResponse) {
     //given
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
-    brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncKey(SYNC_API_KEY).build());
+    brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncPaymentsReportingKey(SYNC_PAYMENTS_REPORTING_API_KEY).build());
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     organization.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
     brokerForNodoPaDTO.setOrganization(organization);
@@ -77,7 +77,7 @@ class PaymentsReportingClientTest {
 
     List<FlowByPSP> expectedResult = paginatedFlowsResponse == null ? new ArrayList<>() : paginatedFlowsResponse.getData();
 
-    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_API_KEY))
+    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_PAYMENTS_REPORTING_API_KEY))
       .thenReturn(organizationsApi);
     Mockito.when(
       organizationsApi.iOrganizationsControllerGetAllPublishedFlows(
@@ -131,14 +131,14 @@ class PaymentsReportingClientTest {
   void fetchPaymentReportingFlow() {
     //given
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
-    brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncKey(SYNC_API_KEY).build());
+    brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncPaymentsReportingKey(SYNC_PAYMENTS_REPORTING_API_KEY).build());
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     organization.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
     brokerForNodoPaDTO.setOrganization(organization);
 
     SingleFlowResponse expectedResponse = new SingleFlowResponse();
 
-    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_API_KEY))
+    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_PAYMENTS_REPORTING_API_KEY))
       .thenReturn(organizationsApi);
     Mockito.when(
       organizationsApi.iOrganizationsControllerGetSinglePublishedFlow(
@@ -160,7 +160,7 @@ class PaymentsReportingClientTest {
   @MethodSource("providePaginatedPaymentsResponseScenarios")
   void fetchAllPaymentsForPaymentReportingFlow(PaginatedPaymentsResponse paginatedPaymentsResponse) {
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
-    brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncKey(SYNC_API_KEY).build());
+    brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncPaymentsReportingKey(SYNC_PAYMENTS_REPORTING_API_KEY).build());
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     organization.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
     brokerForNodoPaDTO.setOrganization(organization);
@@ -169,7 +169,7 @@ class PaymentsReportingClientTest {
 
     List<Payment> expectedResult = paginatedPaymentsResponse == null ? new ArrayList<>() : paginatedPaymentsResponse.getData();
 
-    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_API_KEY))
+    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_PAYMENTS_REPORTING_API_KEY))
       .thenReturn(organizationsApi);
     Mockito.when(
       organizationsApi.iOrganizationsControllerGetPaymentsFromPublishedFlow(

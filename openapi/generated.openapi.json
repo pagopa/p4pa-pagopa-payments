@@ -926,6 +926,9 @@
           },
           "updateTraceId" : {
             "type" : "string"
+          },
+          "originalRemittanceInformation" : {
+            "type" : "string"
           }
         },
         "required" : [ "amountCents", "debtor", "remittanceInformation" ]

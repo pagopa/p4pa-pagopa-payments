@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.clien
 
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
-import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.NodePaymentsReportingApisHolder;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.PaymentsReportingApisHolder;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
@@ -21,19 +21,19 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class NodePaymentsReportingClient {
-  private final NodePaymentsReportingApisHolder apisHolder;
+public class PaymentsReportingClient {
+  private final PaymentsReportingApisHolder apisHolder;
   private final RegistryLogger registryLogger;
   private final PaymentsReportingMapper paymentsReportingMapper;
 
-  public NodePaymentsReportingClient(NodePaymentsReportingApisHolder apisHolder, RegistryLogger registryLogger, PaymentsReportingMapper paymentsReportingMapper) {
+  public PaymentsReportingClient(PaymentsReportingApisHolder apisHolder, RegistryLogger registryLogger, PaymentsReportingMapper paymentsReportingMapper) {
     this.apisHolder = apisHolder;
     this.registryLogger = registryLogger;
     this.paymentsReportingMapper = paymentsReportingMapper;
   }
 
   public List<FlowByPSP> fetchIdList(BrokerForNodoPaDTO brokerForNodoPaDTO, OffsetDateTime latestFlowDate) {
-    return PageUtils.fetchListFromPaginatedResponse(
+    return PageUtils.fetchAllFromPaginatedApi(
         page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey())
           .iOrganizationsControllerGetAllPublishedFlows(
             brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(), latestFlowDate,
@@ -89,7 +89,7 @@ public class NodePaymentsReportingClient {
   }
 
   private Triple<List<Payment>, String, RegistryOutcome> fetchAllPaymentsRequestHandler(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId, Long revision, String pspId) {
-    List<Payment> responseList = PageUtils.fetchListFromPaginatedResponse(
+    List<Payment> responseList = PageUtils.fetchAllFromPaginatedApi(
       page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncKey())
         .iOrganizationsControllerGetPaymentsFromPublishedFlow(
                 reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),

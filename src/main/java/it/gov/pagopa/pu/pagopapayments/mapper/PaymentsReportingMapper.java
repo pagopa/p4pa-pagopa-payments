@@ -93,7 +93,7 @@ public class PaymentsReportingMapper {
       return null;
     }
     FlussoRiversamento flussoRiversamento = new FlussoRiversamento();
-    flussoRiversamento.setVersioneOggetto(XML_OBJECT_VERSION); //field unused for PaymentsReportingRestServiceImpl but needed for backward compatibility with PaymentsReportingLegacySoapServiceImpl
+    flussoRiversamento.setVersioneOggetto(XML_OBJECT_VERSION); //field unused for PaymentsReportingRestServiceImpl but needed for backward compatibility with PaymentsReportingSoapServiceImpl
     flussoRiversamento.setIdentificativoFlusso(singleFlowResponse.getFdr());
     flussoRiversamento.setRevisioneFlusso(Optional.ofNullable(singleFlowResponse.getRevision()).orElse(0L).intValue());
     flussoRiversamento.setDataOraFlusso(ConversionUtils.toXMLGregorianCalendar(singleFlowResponse.getFdrDate()));

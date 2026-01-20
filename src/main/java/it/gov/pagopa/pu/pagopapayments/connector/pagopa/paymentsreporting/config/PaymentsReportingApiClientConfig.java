@@ -10,5 +10,5 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "rest.pagopa-node-services.sync-payments-reporting")
 @SuperBuilder
 @NoArgsConstructor
-public class NodePaymentsReportingApiClientConfig extends ApiClientConfig {
+public class PaymentsReportingApiClientConfig extends ApiClientConfig {
 }

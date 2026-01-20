@@ -5,7 +5,7 @@ import it.gov.pagopa.nodo.fdrorganization.controller.generated.OrganizationsApi;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.NodePaymentsReportingApisHolder;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.PaymentsReportingApisHolder;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
@@ -32,10 +32,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
-class NodePaymentsReportingClientTest {
+class PaymentsReportingClientTest {
 
   @Mock
-  private NodePaymentsReportingApisHolder nodePaymentsReportingApisHolder;
+  private PaymentsReportingApisHolder paymentsReportingApisHolder;
   @Mock
   private OrganizationsApi organizationsApi;
   @Mock
@@ -44,7 +44,7 @@ class NodePaymentsReportingClientTest {
   private PaymentsReportingMapper paymentsReportingMapper;
 
   @InjectMocks
-  private NodePaymentsReportingClient paymentsReportingClient;
+  private PaymentsReportingClient paymentsReportingClient;
 
   private static final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
@@ -57,7 +57,7 @@ class NodePaymentsReportingClientTest {
   @AfterEach
   void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(
-      nodePaymentsReportingApisHolder,
+      paymentsReportingApisHolder,
       organizationsApi,
       registryLogger,
       paymentsReportingMapper
@@ -77,7 +77,7 @@ class NodePaymentsReportingClientTest {
 
     List<FlowByPSP> expectedResult = paginatedFlowsResponse == null ? new ArrayList<>() : paginatedFlowsResponse.getData();
 
-    Mockito.when(nodePaymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_API_KEY))
+    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_API_KEY))
       .thenReturn(organizationsApi);
     Mockito.when(
       organizationsApi.iOrganizationsControllerGetAllPublishedFlows(
@@ -138,7 +138,7 @@ class NodePaymentsReportingClientTest {
 
     SingleFlowResponse expectedResponse = new SingleFlowResponse();
 
-    Mockito.when(nodePaymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_API_KEY))
+    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_API_KEY))
       .thenReturn(organizationsApi);
     Mockito.when(
       organizationsApi.iOrganizationsControllerGetSinglePublishedFlow(
@@ -169,7 +169,7 @@ class NodePaymentsReportingClientTest {
 
     List<Payment> expectedResult = paginatedPaymentsResponse == null ? new ArrayList<>() : paginatedPaymentsResponse.getData();
 
-    Mockito.when(nodePaymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_API_KEY))
+    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_API_KEY))
       .thenReturn(organizationsApi);
     Mockito.when(
       organizationsApi.iOrganizationsControllerGetPaymentsFromPublishedFlow(

@@ -9,19 +9,21 @@ import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Slf4j
-public class PaymentsReportingLegacySoapServiceImpl implements PaymentsReportingService {
+@Service
+public class PaymentsReportingSoapServiceImpl implements PaymentsReportingSoapService {
 
   private final NodeForPaClient nodeForPaClient;
   private final BrokerRetrieverService brokerRetrieverService;
   private final FileShareService fileShareService;
   private final PaymentsReportingMapper paymentsReportingMapper;
 
-  public PaymentsReportingLegacySoapServiceImpl(NodeForPaClient nodeForPaClient, BrokerRetrieverService brokerRetrieverService, FileShareService fileShareService, PaymentsReportingMapper paymentsReportingMapper) {
+  public PaymentsReportingSoapServiceImpl(NodeForPaClient nodeForPaClient, BrokerRetrieverService brokerRetrieverService, FileShareService fileShareService, PaymentsReportingMapper paymentsReportingMapper) {
     this.nodeForPaClient = nodeForPaClient;
     this.brokerRetrieverService = brokerRetrieverService;
     this.fileShareService = fileShareService;
@@ -29,13 +31,13 @@ public class PaymentsReportingLegacySoapServiceImpl implements PaymentsReporting
   }
 
   @Override
-  public List<PaymentsReportingIdDTO> getPaymentsReportingList(Long organizationId, OffsetDateTime latestFlowDate, String accessToken) {
+  public List<PaymentsReportingIdDTO> getPaymentsReportingList(Long organizationId, String accessToken) {
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     return nodeForPaClient.getPaymentsReportingList(brokerForNodoPaDTO);
   }
 
   @Override
-  public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, Long revision, String pspId, String fileName, String accessToken) {
+  public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, String fileName, String accessToken) {
     if (paymentsReportingMapper.isFilenameInvalid(fileName, paymentsReportingId)) {
       throw new InvalidValueException("PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
     }

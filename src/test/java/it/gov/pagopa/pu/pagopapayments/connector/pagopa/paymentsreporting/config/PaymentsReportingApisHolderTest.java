@@ -15,12 +15,12 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import java.time.OffsetDateTime;
 
 @ExtendWith(MockitoExtension.class)
-class NodePaymentsReportingApisHolderTest extends BaseApiHolderTest {
+class PaymentsReportingApisHolderTest extends BaseApiHolderTest {
 
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
-  private NodePaymentsReportingApisHolder nodePaymentsReportingApisHolder;
+  private PaymentsReportingApisHolder paymentsReportingApisHolder;
 
 
   private static final String ORG_FISCAL_CODE = "1234567890";
@@ -30,10 +30,10 @@ class NodePaymentsReportingApisHolderTest extends BaseApiHolderTest {
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    NodePaymentsReportingApiClientConfig clientConfig = NodePaymentsReportingApiClientConfig.builder()
+    PaymentsReportingApiClientConfig clientConfig = PaymentsReportingApiClientConfig.builder()
       .baseUrl("http://example.com")
       .build();
-    nodePaymentsReportingApisHolder = new NodePaymentsReportingApisHolder(restTemplateBuilderMock, clientConfig);
+    paymentsReportingApisHolder = new PaymentsReportingApisHolder(restTemplateBuilderMock, clientConfig);
   }
 
   @AfterEach
@@ -48,7 +48,7 @@ class NodePaymentsReportingApisHolderTest extends BaseApiHolderTest {
   void whenGetOrganizationApiByApiKeyThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> {
-        var api = nodePaymentsReportingApisHolder.getOrganizationApiByApiKey(apiKey);
+        var api = paymentsReportingApisHolder.getOrganizationApiByApiKey(apiKey);
         api.getApiClient().addDefaultHeader(API_KEY_HEADER, apiKey);
 
         return api.iOrganizationsControllerGetAllPublishedFlows(ORG_FISCAL_CODE,  OffsetDateTime.now(), 1L, null, null, null);

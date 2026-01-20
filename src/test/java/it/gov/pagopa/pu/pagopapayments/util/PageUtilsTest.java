@@ -9,9 +9,9 @@ import java.util.List;
 class PageUtilsTest {
 
   @Test
-  void fetchListFromPaginatedResponseTwoPages() {
+  void fetchAllFromPaginatedApiTwoPages() {
     List<String> stringList = List.of("string1", "string2", "string3", "string4", "string5", "string6", "string7", "string8");
-    List<String> resultList = PageUtils.fetchListFromPaginatedResponse(
+    List<String> resultList = PageUtils.fetchAllFromPaginatedApi(
       pageNum -> pageNum == 1 ? stringList.stream().limit(5).toList()
         : stringList.stream().skip(5).toList(),
       List::isEmpty,
@@ -24,9 +24,9 @@ class PageUtilsTest {
   }
 
   @Test
-  void fetchListFromPaginatedResponseOnePage() {
+  void fetchAllFromPaginatedApiOnePage() {
     List<String> stringList = List.of("string1", "string2", "string3", "string4", "string5");
-    List<String> resultList = PageUtils.fetchListFromPaginatedResponse(
+    List<String> resultList = PageUtils.fetchAllFromPaginatedApi(
       pageNum -> stringList,
       List::isEmpty,
       l -> 1, // 1 pages
@@ -38,8 +38,8 @@ class PageUtilsTest {
   }
 
   @Test
-  void fetchListFromPaginatedResponseZeroPages() {
-    List<String> resultList = PageUtils.fetchListFromPaginatedResponse(
+  void fetchAllFromPaginatedApiZeroPages() {
+    List<String> resultList = PageUtils.fetchAllFromPaginatedApi(
       pageNum -> new ArrayList<String>(),
       l -> true, //test for empty page
       l -> 0, // 0 pages

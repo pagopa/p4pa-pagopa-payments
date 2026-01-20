@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -11,7 +12,7 @@ public class PageUtils {
 
   private PageUtils() {}
 
-  public static <P,O> List<O> fetchListFromPaginatedResponse(
+  public static <P,O> List<O> fetchAllFromPaginatedApi(
     IntFunction<P> apiCall,
     Predicate<P> isPageEmpty,
     ToIntFunction<P> pageToTotalPageMapper,
@@ -19,7 +20,7 @@ public class PageUtils {
     int pageNum = 1;
     P firstPagedResult = apiCall.apply(pageNum);
     if(isPageEmpty.test(firstPagedResult)) {
-      return new ArrayList<>();
+      return Collections.emptyList();
     }
     int totPage = pageToTotalPageMapper.applyAsInt(firstPagedResult);
     List<O> resultList = new ArrayList<>(pageToListMapper.apply(firstPagedResult));

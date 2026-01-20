@@ -14,20 +14,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
-public class NodePaymentsReportingApisHolder {
+public class PaymentsReportingApisHolder {
   private final RestTemplate restTemplate;
-  private final NodePaymentsReportingApiClientConfig clientConfig;
+  private final PaymentsReportingApiClientConfig clientConfig;
 
   private final Map<String, OrganizationsApi> paymentsReportingApisApiMap = new ConcurrentHashMap<>();
 
-  public NodePaymentsReportingApisHolder(
+  public PaymentsReportingApisHolder(
     RestTemplateBuilder restTemplateBuilder,
-    NodePaymentsReportingApiClientConfig clientConfig) {
+    PaymentsReportingApiClientConfig clientConfig) {
     this.restTemplate = restTemplateBuilder.build();
     this.clientConfig = clientConfig;
 
     if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("NODE-SYNC-PAYMENTS-REPORTING"));
+      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("PAGOPA-PAYMENTS-REPORTING"));
     }
   }
 

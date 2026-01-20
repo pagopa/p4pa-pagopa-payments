@@ -161,27 +161,26 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | PU_SIL_PRINT_BODY_WHEN_ERROR            | To print body when an error occurs                 | true    |
 
 ##### 🌍 External services
-| ENV                                                       | DESCRIPTION                                                                                      | DEFAULT |
-|-----------------------------------------------------------|--------------------------------------------------------------------------------------------------|---------|
-| PAGOPA_NODE_ACA_BASE_URL                                  | PagoPA ACA service URL                                                                           |         |
-| PAGOPA_NODE_ACA_MAX_ATTEMPTS                              | PagoPA ACA API max attempts                                                                      | 3       |
-| PAGOPA_NODE_ACA_WAIT_TIME_MILLIS                          | PagoPA ACA retry waiting time (milliseconds)                                                     | 500     |
-| PAGOPA_NODE_ACA_PRINT_BODY_WHEN_ERROR                     | To print body when an error occurs                                                               | true    |
-| PAGOPA_NODE_GPD_BASE_URL                                  | PagoPA GPD service URL                                                                           |         |
-| PAGOPA_NODE_GPD_MAX_ATTEMPTS                              | PagoPA GPD API max attempts                                                                      | 3       |
-| PAGOPA_NODE_GPD_WAIT_TIME_MILLIS                          | PagoPA GPD retry waiting time (milliseconds)                                                     | 500     |
-| PAGOPA_NODE_GPD_PRINT_BODY_WHEN_ERROR                     | To print body when an error occurs                                                               | true    |
-| PAGOPA_TAXONOMIES_BASE_URL                                | PagoPA Taxonomy service URL                                                                      |         |
-| PAGOPA_TAXONOMIES_PRINT_BODY_WHEN_ERROR                   | To print body when an error occurs                                                               | true    |
-| PAGOPA_PRINT_PAYMENT_NOTICE_BASE_URL                      | PagoPA PrintPaymentNotice service URL                                                            |         |
-| PAGOPA_PRINT_PAYMENT_NOTICE_MAX_ATTEMPTS                  | PagoPA PrintPaymentNotice API max attempts                                                       | 3       |
-| PAGOPA_PRINT_PAYMENT_NOTICE_WAIT_TIME_MILLIS              | PagoPA PrintPaymentNotice retry waiting time (milliseconds)                                      | 500     |
-| PAGOPA_PRINT_PAYMENT_NOTICE_PRINT_BODY_WHEN_ERROR         | To print body when an error occurs                                                               | true    |
-| PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_BASE_URL              | PagoPA sync PaymentReporting service URL                                                         |         |
-| PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_MAX_ATTEMPTS          | PagoPA sync PaymentReporting API max attempts                                                    | 3       |
-| PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_WAIT_TIME_MILLIS      | PagoPA sync PaymentReporting retry waiting time (milliseconds)                                   | 500     |
-| PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_PRINT_BODY_WHEN_ERROR | To print body when an error occurs                                                               | true    |
-| PAYMENTS_REPORTING_LEGACY_FEATURE_FLAG                    | Select between legacy SOAP or new REST connector for fetching PaymentsReporting from PagoPA Node | false   |
+| ENV                                                       | DESCRIPTION                                                     | DEFAULT |
+|------------------------------------------------------------|-----------------------------------------------------------------|---------|
+| PAGOPA_NODE_ACA_BASE_URL                                  | PagoPA ACA service URL                                          |         |
+| PAGOPA_NODE_ACA_MAX_ATTEMPTS                              | PagoPA ACA API max attempts                                     | 3       |
+| PAGOPA_NODE_ACA_WAIT_TIME_MILLIS                          | PagoPA ACA retry waiting time (milliseconds)                    | 500     |
+| PAGOPA_NODE_ACA_PRINT_BODY_WHEN_ERROR                     | To print body when an error occurs                              | true    |
+| PAGOPA_NODE_GPD_BASE_URL                                  | PagoPA GPD service URL                                          |         |
+| PAGOPA_NODE_GPD_MAX_ATTEMPTS                              | PagoPA GPD API max attempts                                     | 3       |
+| PAGOPA_NODE_GPD_WAIT_TIME_MILLIS                          | PagoPA GPD retry waiting time (milliseconds)                    | 500     |
+| PAGOPA_NODE_GPD_PRINT_BODY_WHEN_ERROR                     | To print body when an error occurs                              | true    |
+| PAGOPA_TAXONOMIES_BASE_URL                                | PagoPA Taxonomy service URL                                     |         |
+| PAGOPA_TAXONOMIES_PRINT_BODY_WHEN_ERROR                   | To print body when an error occurs                              | true    |
+| PAGOPA_PRINT_PAYMENT_NOTICE_BASE_URL                      | PagoPA PrintPaymentNotice service URL                           |         |
+| PAGOPA_PRINT_PAYMENT_NOTICE_MAX_ATTEMPTS                  | PagoPA PrintPaymentNotice API max attempts                      | 3       |
+| PAGOPA_PRINT_PAYMENT_NOTICE_WAIT_TIME_MILLIS              | PagoPA PrintPaymentNotice retry waiting time (milliseconds)     | 500     |
+| PAGOPA_PRINT_PAYMENT_NOTICE_PRINT_BODY_WHEN_ERROR         | To print body when an error occurs                              | true    |
+| PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_BASE_URL              | PagoPA sync PaymentReporting service URL                        |         |
+| PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_MAX_ATTEMPTS          | PagoPA sync PaymentReporting API max attempts                   | 3       |
+| PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_WAIT_TIME_MILLIS      | PagoPA sync PaymentReporting retry waiting time (milliseconds)  | 500     |
+| PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_PRINT_BODY_WHEN_ERROR | To print body when an error occurs                              | true    |
 ##### 🌀 KAFKA
 | ENV                                              | DESCRIPTION                                                        | DEFAULT   |
 |--------------------------------------------------|--------------------------------------------------------------------|-----------|

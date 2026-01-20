@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.service.paymentsreporting;
 
 import it.gov.pagopa.pu.pagopapayments.connector.fileshare.FileShareService;
-import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.NodePaymentsReportingService;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.PaymentsReportingService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class PaymentsReportingRestServiceImplTest {
 
   @Mock
-  private NodePaymentsReportingService nodePaymentsReportingService;
+  private PaymentsReportingService paymentsReportingService;
   @Mock
   private BrokerRetrieverService brokerRetrieverService;
   @Mock
@@ -40,7 +40,7 @@ class PaymentsReportingRestServiceImplTest {
   @AfterEach
   void tearDown() {
     Mockito.verifyNoMoreInteractions(
-      nodePaymentsReportingService,
+      paymentsReportingService,
       brokerRetrieverService,
       fileShareService,
       paymentsReportingMapper
@@ -76,7 +76,7 @@ class PaymentsReportingRestServiceImplTest {
     ).thenReturn(brokerForNodoPaDTO);
 
     Mockito.when(
-      nodePaymentsReportingService.fetchPaymentReportingIdList(
+      paymentsReportingService.fetchPaymentReportingIdList(
         brokerForNodoPaDTO,
         latestFlowDate
       )
@@ -121,7 +121,7 @@ class PaymentsReportingRestServiceImplTest {
     ).thenReturn(brokerForNodoPaDTO);
 
     Mockito.when(
-      nodePaymentsReportingService.fetchPaymentReporting(
+      paymentsReportingService.fetchPaymentReporting(
         brokerForNodoPaDTO, paymentsReportingId, revision, pspId
       )
     ).thenReturn(paPaymentReportingDTO);

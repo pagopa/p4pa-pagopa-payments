@@ -8,7 +8,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
-import it.gov.pagopa.pu.pagopapayments.mapper.AcaGpdV1Mapper;
+import it.gov.pagopa.pu.pagopapayments.mapper.AcaDebtPositionMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,7 +21,7 @@ import java.util.Set;
 public class AcaFacadeService {
 
   private final AcaService acaService;
-  private final AcaGpdV1Mapper acaGpdV1Mapper;
+  private final AcaDebtPositionMapper acaDebtPositionMapper;
   private final BrokerRetrieverService brokerRetrieverService;
 
   private static final String SERVICE_NAME = "ACA";
@@ -33,9 +33,9 @@ public class AcaFacadeService {
     DebtPositionOrigin.SPONTANEOUS_PSP
   );
 
-  public AcaFacadeService(AcaService acaService, AcaGpdV1Mapper acaGpdV1Mapper, BrokerRetrieverService brokerRetrieverService) {
+  public AcaFacadeService(AcaService acaService, AcaDebtPositionMapper acaDebtPositionMapper, BrokerRetrieverService brokerRetrieverService) {
     this.acaService = acaService;
-    this.acaGpdV1Mapper = acaGpdV1Mapper;
+    this.acaDebtPositionMapper = acaDebtPositionMapper;
     this.brokerRetrieverService = brokerRetrieverService;
   }
 
@@ -56,7 +56,7 @@ public class AcaFacadeService {
     Organization organization = brokerForNodoPaDTO.getOrganization();
 
     Pair<Operation, PaymentPositionModel> debtPositionToSendGPD =
-      acaGpdV1Mapper.mapToNewPaymentPositionModel(iud, debtPositionDTO, organization);
+      acaDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPositionDTO, organization);
 
     PaymentPositionModel newPaymentPositionModel = debtPositionToSendGPD.getRight();
     Operation operation = debtPositionToSendGPD.getLeft();

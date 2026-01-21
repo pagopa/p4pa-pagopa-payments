@@ -9,7 +9,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
-import it.gov.pagopa.pu.pagopapayments.mapper.AcaGpdV1Mapper;
+import it.gov.pagopa.pu.pagopapayments.mapper.AcaDebtPositionMapper;
 import it.gov.pagopa.pu.pagopapayments.service.aca.AcaFacadeService;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
@@ -29,7 +29,7 @@ class AcaFacadeServiceTest {
   private AcaService acaServiceMock;
 
   @Mock
-  private AcaGpdV1Mapper acaGpdV1MapperMock;
+  private AcaDebtPositionMapper acaDebtPositionMapperMock;
 
   @Mock
   private BrokerRetrieverService brokerRetrieverServiceMock;
@@ -61,7 +61,7 @@ class AcaFacadeServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
       .thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(acaGpdV1MapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
       .thenReturn(Pair.of(Operation.CREATE, model));
 
     // when
@@ -97,7 +97,7 @@ class AcaFacadeServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
       .thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(acaGpdV1MapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
       .thenReturn(Pair.of(Operation.UPDATE, model));
 
     // when
@@ -134,7 +134,7 @@ class AcaFacadeServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
       .thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(acaGpdV1MapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
       .thenReturn(Pair.of(Operation.DELETE, model));
 
     // when
@@ -161,6 +161,6 @@ class AcaFacadeServiceTest {
     acaFacadeService.sync(iud, debtPosition, TestUtils.getFakeAccessToken());
 
     // then
-    Mockito.verifyNoInteractions(brokerRetrieverServiceMock, acaGpdV1MapperMock, acaServiceMock);
+    Mockito.verifyNoInteractions(brokerRetrieverServiceMock, acaDebtPositionMapperMock, acaServiceMock);
   }
 }

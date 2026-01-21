@@ -162,10 +162,19 @@ public class PaymentsReportingMapper {
       ctDatiSingoliPagamenti.setIndiceDatiSingoloPagamento(payment.getIndex().intValue());
       ctDatiSingoliPagamenti.setSingoloImportoPagato(BigDecimal.valueOf(payment.getPay()));
       ctDatiSingoliPagamenti.setDataEsitoSingoloPagamento(ConversionUtils.toXMLGregorianCalendar(payment.getPayDate()));
-      ctDatiSingoliPagamenti.setCodiceEsitoSingoloPagamento(payment.getPayStatus().getValue());
+      ctDatiSingoliPagamenti.setCodiceEsitoSingoloPagamento(this.mapPaymentStatusToPaymentCode(payment.getPayStatus()));
       ctDatiSingoliPagamentiList.add(ctDatiSingoliPagamenti);
     });
     return ctDatiSingoliPagamentiList;
+  }
+
+  private String mapPaymentStatusToPaymentCode(Payment.PayStatusEnum payStatus) {
+    return switch (payStatus) {
+      case EXECUTED, STAND_IN -> "0";
+      case REVOKED -> "3";
+      case STAND_IN_NO_RPT -> "8";
+      case NO_RPT -> "9";
+    };
   }
 
 }

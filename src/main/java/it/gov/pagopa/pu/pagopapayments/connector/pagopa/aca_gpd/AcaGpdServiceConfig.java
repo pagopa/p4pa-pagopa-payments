@@ -1,5 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca_gpd;
 
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaServiceImpl;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.client.AcaClient;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config.AcaApisHolder;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.GpdService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.GpdServiceImpl;
@@ -18,18 +21,18 @@ public class AcaGpdServiceConfig {
     return new GpdClient(gpdApisHolder, registryLogger);
   }
 
-  @Bean("acaClient")
-  public GpdClient acaClient(AcaApisHolder acaApisHolder, RegistryLogger registryLogger) {
-    return new GpdClient(acaApisHolder, registryLogger);
+  @Bean
+  public AcaClient acaClient(AcaApisHolder acaApisHolder, RegistryLogger registryLogger) {
+    return new AcaClient(acaApisHolder, registryLogger);
   }
 
   @Bean("gpdService")
-  public GpdService gpdService(@Qualifier("gpdClient") GpdClient client) {
-    return new GpdServiceImpl(client);
+  public GpdService gpdService(@Qualifier("gpdClient") GpdClient gpdClient) {
+    return new GpdServiceImpl(gpdClient);
   }
 
-  @Bean("acaServiceWrapper")
-  public GpdService acaServiceWrapper(@Qualifier("acaClient") GpdClient client) {
-    return new GpdServiceImpl(client);
+  @Bean("acaService")
+  public AcaService acaService(@Qualifier("acaClient") AcaClient acaClient) {
+    return new AcaServiceImpl(acaClient);
   }
 }

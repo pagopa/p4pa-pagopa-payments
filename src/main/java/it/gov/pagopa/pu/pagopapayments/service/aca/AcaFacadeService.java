@@ -1,21 +1,30 @@
 package it.gov.pagopa.pu.pagopapayments.service.aca;
 
+import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.GpdService;
-import it.gov.pagopa.pu.pagopapayments.mapper.GpdDebtPositionMapper;
-import it.gov.pagopa.pu.pagopapayments.service.aca_gpd.AbstractPaymentPositionFacadeService;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;
+import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
+import it.gov.pagopa.pu.pagopapayments.enums.Operation;
+import it.gov.pagopa.pu.pagopapayments.mapper.AcaGpdV1Mapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
 @Service
 @Slf4j
-public class AcaFacadeService extends AbstractPaymentPositionFacadeService {
+public class AcaFacadeService {
+
+  private final AcaService acaService;
+  private final AcaGpdV1Mapper acaGpdV1Mapper;
+  private final BrokerRetrieverService brokerRetrieverService;
+
+  private static final String SERVICE_NAME = "ACA";
 
   private static final Set<DebtPositionOrigin> ACA_EXCLUDED_ORIGINS = Set.of(
     DebtPositionOrigin.SPONTANEOUS,
@@ -24,20 +33,12 @@ public class AcaFacadeService extends AbstractPaymentPositionFacadeService {
     DebtPositionOrigin.SPONTANEOUS_PSP
   );
 
-  public AcaFacadeService(
-    @Qualifier("acaServiceWrapper") GpdService acaServiceWrapper,
-    GpdDebtPositionMapper gpdDebtPositionMapper,
-    BrokerRetrieverService brokerRetrieverService
-  ) {
-    super(acaServiceWrapper, gpdDebtPositionMapper, brokerRetrieverService, "ACA");
+  public AcaFacadeService(AcaService acaService, AcaGpdV1Mapper acaGpdV1Mapper, BrokerRetrieverService brokerRetrieverService) {
+    this.acaService = acaService;
+    this.acaGpdV1Mapper = acaGpdV1Mapper;
+    this.brokerRetrieverService = brokerRetrieverService;
   }
 
-  @Override
-  protected String getApiKey(BrokerApiKeys keys) {
-    return keys.getAcaKey();
-  }
-
-  @Override
   public void sync(String iud, DebtPositionDTO debtPosition, String accessToken) {
     if (ACA_EXCLUDED_ORIGINS.contains(debtPosition.getDebtPositionOrigin())) {
       log.info("Skipping ACA sync for debtPosition [{}] having origin [{}]",
@@ -45,6 +46,45 @@ public class AcaFacadeService extends AbstractPaymentPositionFacadeService {
         debtPosition.getDebtPositionOrigin());
       return;
     }
-    super.sync(iud, debtPosition, accessToken);
+    invokeCreatePositionImpl(iud, debtPosition, accessToken);
+  }
+
+  private void invokeCreatePositionImpl(String iud, DebtPositionDTO debtPositionDTO, String accessToken) {
+    BrokerForNodoPaDTO brokerForNodoPaDTO =
+      brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(debtPositionDTO.getOrganizationId(), accessToken);
+
+    Organization organization = brokerForNodoPaDTO.getOrganization();
+
+    Pair<Operation, PaymentPositionModel> debtPositionToSendGPD =
+      acaGpdV1Mapper.mapToNewPaymentPositionModel(iud, debtPositionDTO, organization);
+
+    PaymentPositionModel newPaymentPositionModel = debtPositionToSendGPD.getRight();
+    Operation operation = debtPositionToSendGPD.getLeft();
+
+    log.info("invoking {} with operation [{}] for installment[{}/{}]",
+      SERVICE_NAME,
+      operation.name(),
+      newPaymentPositionModel.getPaymentOption().getFirst().getIuv(),
+      iud
+    );
+
+    String apiKey = getApiKey(brokerForNodoPaDTO.getBrokerApiKeys());
+    String orgFiscalCode = organization.getOrgFiscalCode();
+
+    switch (operation) {
+      case DELETE:
+        acaService.paDeletePosition(apiKey, orgFiscalCode, newPaymentPositionModel.getIupd(), newPaymentPositionModel);
+        break;
+      case UPDATE:
+        acaService.paUpdatePosition(apiKey, orgFiscalCode, newPaymentPositionModel.getIupd(), newPaymentPositionModel);
+        break;
+      case CREATE:
+        acaService.paCreatePosition(apiKey, orgFiscalCode, newPaymentPositionModel);
+        break;
+    }
+  }
+
+  private String getApiKey(BrokerApiKeys keys) {
+    return keys.getAcaKey();
   }
 }

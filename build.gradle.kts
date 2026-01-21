@@ -187,6 +187,7 @@ tasks.register("dependenciesBuild") {
     "openApiGenerateFILESHARE",
     "openApiGeneratePaCreatePosition",
     "openApiGenerateGPD",
+    "openApiGenerateACA",
     "openApiGenerateNodeFdrOrganization",
     "openApiGeneratePrintPaymentNoticeClient",
     "openApiGenerateSENDNOTIFICATION",
@@ -439,6 +440,43 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
       "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
     )
   )
+  library.set("resttemplate")
+}
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateACA") {
+  group = "openapi"
+  description = "Generate ACA client from GPD v1 spec"
+
+  generatorName.set("java")
+  inputSpec.set("$rootDir/openapi/aca-gpd-v1.json")
+  outputDir.set("$projectDir/build/generated")
+  apiPackage.set("it.gov.pagopa.pu.aca.gpd.v1.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.aca.gpd.v1.dto.generated")
+  invokerPackage.set("it.gov.pagopa.pu.aca.gpd.v1.generated")
+  typeMappings.set(
+    mapOf(
+      "DateTime" to "String"
+    )
+  )
+
+  configOptions.set(
+    mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
+      "dateLibrary" to "java8",
+      "serializableModel" to "true",
+      "useSpringBoot3" to "true",
+      "useJakartaEe" to "true",
+      "useOneOfInterfaces" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "enumPropertyNaming" to "original",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    )
+  )
+
   library.set("resttemplate")
 }
 

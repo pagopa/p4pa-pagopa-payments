@@ -81,10 +81,11 @@
 
 	<xsd:simpleType name="stCodiceEsitoPagamento">
 		<xsd:restriction base="xsd:string">
-			<xsd:pattern value="[0-9]{1,1}"/>
-			<xsd:enumeration value="0"/><!-- Pagamento eseguito -->
-			<xsd:enumeration value="3"/><!-- Pagamento revocato -->
-			<xsd:enumeration value="9"/><!-- Pagamento eseguito in assenza di RPT -->
+      <xsd:pattern value="[0-9]{1,1}"/>
+      <xsd:enumeration value="0"/><!-- Pagamento eseguito o pagamento STAND_IN eseguito -->
+      <xsd:enumeration value="3"/><!-- Pagamento revocato -->
+      <xsd:enumeration value="8"/><!-- Pagamento STAND_IN eseguito in assenza di RPT -->
+      <xsd:enumeration value="9"/><!-- Pagamento eseguito in assenza di RPT -->
 		</xsd:restriction>
 	</xsd:simpleType>
 
@@ -204,9 +205,11 @@
 			</xsd:element>
 			<xsd:element name="codiceEsitoSingoloPagamento" type="pay_i:stCodiceEsitoPagamento" minOccurs="1">
 				<xsd:annotation>
-					<xsd:documentation>Campo numerico indicante l’esito del pagamento. Può assumere i seguenti valori:</xsd:documentation>
-					<xsd:documentation>0=Pagamento eseguito</xsd:documentation>
-					<xsd:documentation>3=Pagamento revocato</xsd:documentation>
+          <xsd:documentation>Campo numerico indicante l’esito del pagamento. Può assumere i seguenti valori:</xsd:documentation>
+          <xsd:documentation>0=Pagamento eseguito o pagamento STAND_IN eseguito</xsd:documentation>
+          <xsd:documentation>3=Pagamento revocato</xsd:documentation>
+          <xsd:documentation>8=Pagamento STAND_IN eseguito in assenza di RPT</xsd:documentation>
+          <xsd:documentation>9=Pagamento eseguito in assenza di RPT</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
 			<xsd:element name="dataEsitoSingoloPagamento" type="pay_i:stISODate" minOccurs="1">

@@ -265,36 +265,35 @@ class PaymentsReportingMapperTest {
   }
 
   @ParameterizedTest
-  @EnumSource(SenderTypeEnum.class)
-  void givenValidInputWhenMapSingleFlowResponseAndPaymentsReturnPaymentsReporting(SenderTypeEnum senderTypeEnum) {
+  @EnumSource(Payment.PayStatusEnum.class)
+  void givenValidInputWhenMapSingleFlowResponseAndPaymentListReturnPaymentsReporting(Payment.PayStatusEnum payStatusEnum) {
     // given
-    SingleFlowResponse singleFlowResponse = new SingleFlowResponse();
-    singleFlowResponse.setFdr("fdrId");
-    singleFlowResponse.setRevision(1L);
-    singleFlowResponse.setFdrDate(OffsetDateTime.now());
-    singleFlowResponse.setRegulation("regulation");
-    singleFlowResponse.setRegulationDate(OffsetDateTime.now());
-    Sender sender = new Sender();
-    sender.setPspName("pspName");
-    sender.setId("pspId");
-    sender.setType(senderTypeEnum);
-    singleFlowResponse.setSender(sender);
-    singleFlowResponse.setBicCodePouringBank("bicCodePouringBank");
-    Receiver receiver = new Receiver();
-    receiver.setOrganizationName("orgName");
-    receiver.setId("orgId");
-    singleFlowResponse.setReceiver(receiver);
-    singleFlowResponse.setTotPayments(1L);
-    singleFlowResponse.setSumPayments(20.0);
-    List<Payment> paymentList = new ArrayList<>();
-    Payment payment = new Payment();
-    payment.setIuv("iuv");
-    payment.setIur("iur");
-    payment.setIndex(1L);
-    payment.setPay(20.0);
-    payment.setPayDate(OffsetDateTime.now());
-    payment.setPayStatus(Payment.PayStatusEnum.EXECUTED);
-    paymentList.add(payment);
+    Sender sender = getSender(SenderTypeEnum.ABI_CODE);
+    Receiver receiver = getReceiver();
+    SingleFlowResponse singleFlowResponse = getSingleFlowResponse(sender, receiver);
+    List<Payment> paymentList = List.of(getPayment(payStatusEnum));
+
+    // when
+    FlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
+      singleFlowResponse, paymentList
+    );
+
+    // then
+    Assertions.assertNotNull(actualResult);
+    TestUtils.checkNotNullFields(actualResult, "versioneOggetto");
+    TestUtils.checkNotNullFields(actualResult.getIstitutoMittente());
+    TestUtils.checkNotNullFields(actualResult.getIstitutoRicevente());
+    actualResult.getDatiSingoliPagamentis().forEach(TestUtils::checkNotNullFields);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SenderTypeEnum.class)
+  void givenValidInputWhenMapSingleFlowResponseAndPaymentListReturnPaymentsReporting(SenderTypeEnum senderTypeEnum) {
+    // given
+    Sender sender = getSender(senderTypeEnum);
+    Receiver receiver = getReceiver();
+    SingleFlowResponse singleFlowResponse = getSingleFlowResponse(sender, receiver);
+    List<Payment> paymentList = List.of(getPayment(Payment.PayStatusEnum.EXECUTED));
 
     // when
     FlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
@@ -310,17 +309,9 @@ class PaymentsReportingMapperTest {
   }
 
   @Test
-  void givenNullSingleFlowWhenMapSingleFlowResponseAndPaymentListReturnPaymentsReporting() {
+  void givenNullSingleFlowWhenMapSingleFlowResponseAndPaymentListReturnNullPaymentsReporting() {
     // given
-    List<Payment> paymentList = new ArrayList<>();
-    Payment payment = new Payment();
-    payment.setIuv("iuv");
-    payment.setIur("iur");
-    payment.setIndex(1L);
-    payment.setPay(20.0);
-    payment.setPayDate(OffsetDateTime.now());
-    payment.setPayStatus(Payment.PayStatusEnum.EXECUTED);
-    paymentList.add(payment);
+    List<Payment> paymentList = List.of(getPayment(Payment.PayStatusEnum.EXECUTED));
 
     // when
     FlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
@@ -333,19 +324,9 @@ class PaymentsReportingMapperTest {
 
   @ParameterizedTest
   @MethodSource("provideInvalidPaymentList")
-  void givenInvalidPaymentListWhenMapSingleFlowResponseAndPaymentListReturnNull(List<Payment> paymentList) {
+  void givenInvalidPaymentListWhenMapSingleFlowResponseAndPaymentListReturnPaymentsReporting(List<Payment> paymentList) {
     // given
-    SingleFlowResponse singleFlowResponse = new SingleFlowResponse();
-    singleFlowResponse.setFdr("fdrId");
-    singleFlowResponse.setRevision(1L);
-    singleFlowResponse.setFdrDate(OffsetDateTime.now());
-    singleFlowResponse.setRegulation("regulation");
-    singleFlowResponse.setRegulationDate(OffsetDateTime.now());
-    singleFlowResponse.setSender(null);
-    singleFlowResponse.setBicCodePouringBank("bicCodePouringBank");
-    singleFlowResponse.setReceiver(null);
-    singleFlowResponse.setTotPayments(0L);
-    singleFlowResponse.setSumPayments(0.0);
+    SingleFlowResponse singleFlowResponse = getSingleFlowResponse(null, null);
 
     // when
     FlussoRiversamento actualResult = paymentsReportingMapper.mapPaymentsReporting(
@@ -365,6 +346,47 @@ class PaymentsReportingMapperTest {
       new ArrayList<>(),
       null
     );
+  }
+
+  private static SingleFlowResponse getSingleFlowResponse(Sender sender, Receiver receiver) {
+    SingleFlowResponse singleFlowResponse = new SingleFlowResponse();
+    singleFlowResponse.setFdr("fdrId");
+    singleFlowResponse.setRevision(1L);
+    singleFlowResponse.setFdrDate(OffsetDateTime.now());
+    singleFlowResponse.setRegulation("regulation");
+    singleFlowResponse.setRegulationDate(OffsetDateTime.now());
+    singleFlowResponse.setSender(sender);
+    singleFlowResponse.setBicCodePouringBank("bicCodePouringBank");
+    singleFlowResponse.setReceiver(receiver);
+    singleFlowResponse.setTotPayments(1L);
+    singleFlowResponse.setSumPayments(20.0);
+    return singleFlowResponse;
+  }
+
+  private static Payment getPayment(Payment.PayStatusEnum payStatusEnum) {
+    Payment payment = new Payment();
+    payment.setIuv("iuv");
+    payment.setIur("iur");
+    payment.setIndex(1L);
+    payment.setPay(20.0);
+    payment.setPayDate(OffsetDateTime.now());
+    payment.setPayStatus(payStatusEnum);
+    return payment;
+  }
+
+  private static Receiver getReceiver() {
+    Receiver receiver = new Receiver();
+    receiver.setOrganizationName("orgName");
+    receiver.setId("orgId");
+    return receiver;
+  }
+
+  private static Sender getSender(SenderTypeEnum senderTypeEnum) {
+    Sender sender = new Sender();
+    sender.setPspName("pspName");
+    sender.setId("pspId");
+    sender.setType(senderTypeEnum);
+    return sender;
   }
 
 }

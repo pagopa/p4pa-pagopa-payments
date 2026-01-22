@@ -11,6 +11,9 @@ public enum RegistryEventType {
   PaForNode_paDemandPaymentNotice(true),
 
   ACA_newDebtPosition(false),
+  ACA_createPosition(false),
+  ACA_updatePosition(false),
+  ACA_deletePosition(false),
 
   ACA_createPosition(false),
   ACA_updatePosition(false),

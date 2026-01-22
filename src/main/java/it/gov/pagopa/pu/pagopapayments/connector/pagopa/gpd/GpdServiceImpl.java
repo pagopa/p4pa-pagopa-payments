@@ -2,9 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd;
 
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.client.GpdClient;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class GpdServiceImpl implements GpdService {
 
   private final GpdClient client;

@@ -99,8 +99,9 @@ class PaymentsReportingServiceImplTest {
     Assertions.assertEquals(expectedResult, actualResult);
   }
 
-  @Test
-  void givenPaymentsReportingClientThrowsBadRequestWhenFetchPaymentReportingIdListThenReturnEmptyList() {
+  @ParameterizedTest
+  @MethodSource("provideCaughtErrorResponseScenarios")
+  void givenPaymentsReportingClientThrowsBadRequestWhenFetchPaymentReportingIdListThenReturnEmptyList(ErrorResponse errorResponse) {
     //given
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
     Organization organization = podamFactory.manufacturePojo(Organization.class);
@@ -108,15 +109,6 @@ class PaymentsReportingServiceImplTest {
     brokerForNodoPaDTO.setOrganization(organization);
     OffsetDateTime latestFlowDate = OffsetDateTime.now();
 
-    ErrorResponse errorResponse = ErrorResponse.builder()
-      .appErrorCode("FDR-2008")
-      .errors(
-        List.of(
-          ErrorMessage.builder()
-            .message("Creditor institution with ID [%s] is invalid or unknown.".formatted(ORG_FISCAL_CODE))
-            .build()
-        )
-      ).build();
     HttpClientErrorException badRequest =
       HttpClientErrorException.BadRequest.create(
         HttpStatusCode.valueOf(400),
@@ -133,8 +125,25 @@ class PaymentsReportingServiceImplTest {
     Assertions.assertEquals(Collections.emptyList(), actualResult);
   }
 
+  private static Stream<ErrorResponse> provideCaughtErrorResponseScenarios() {
+    return Stream.of(
+      ErrorResponse.builder()
+        .appErrorCode("FDR-2008")
+        .build(),
+      ErrorResponse.builder()
+        .appErrorCode("FDR-2008")
+        .errors(
+          List.of(
+            ErrorMessage.builder()
+              .message("Creditor institution with ID [%s] is invalid or unknown.".formatted(ORG_FISCAL_CODE))
+              .build()
+          )
+        ).build()
+    );
+  }
+
   @ParameterizedTest
-  @MethodSource("provideErrorResponseScenarios")
+  @MethodSource("provideNonCaughtErrorResponseScenarios")
   void givenPaymentsReportingClientThrowsBadRequestWhenFetchPaymentReportingIdListThenThrowException(ErrorResponse errorResponse) {
     //given
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
@@ -159,7 +168,7 @@ class PaymentsReportingServiceImplTest {
     );
   }
 
-  private static  Stream<ErrorResponse> provideErrorResponseScenarios() {
+  private static  Stream<ErrorResponse> provideNonCaughtErrorResponseScenarios() {
     return Stream.of(
       null,
       ErrorResponse.builder().appErrorCode("COD-0000").build()

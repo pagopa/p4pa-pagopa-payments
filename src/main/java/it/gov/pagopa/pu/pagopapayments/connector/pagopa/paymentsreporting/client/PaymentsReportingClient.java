@@ -113,7 +113,7 @@ public class PaymentsReportingClient {
     );
     return Map.of(
       RegistryLogger.SKIP_PAYLOAD_KEY, true,
-      "xml", paPaymentReportingDTO.getPaymentReportingBytes()
+      "xml", new String(paPaymentReportingDTO.getPaymentReportingBytes())
     );
   }
 

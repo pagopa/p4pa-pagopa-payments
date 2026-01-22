@@ -170,8 +170,9 @@ public class PaymentsReportingMapper {
 
   private String mapPaymentStatusToPaymentCode(Payment.PayStatusEnum payStatus) {
     return switch (payStatus) {
-      case EXECUTED, STAND_IN -> "0";
+      case EXECUTED-> "0";
       case REVOKED -> "3";
+      case STAND_IN -> "4";
       case STAND_IN_NO_RPT -> "8";
       case NO_RPT -> "9";
     };

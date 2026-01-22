@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.clien
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.PaymentsReportingApisHolder;
+import it.gov.pagopa.pu.pagopapayments.connector.soap.mapper.NodoChiediFlussoRendicontazioneMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
@@ -25,11 +26,13 @@ public class PaymentsReportingClient {
   private final PaymentsReportingApisHolder apisHolder;
   private final RegistryLogger registryLogger;
   private final PaymentsReportingMapper paymentsReportingMapper;
+  private final NodoChiediFlussoRendicontazioneMapper nodoChiediFlussoRendicontazioneMapper;
 
-  public PaymentsReportingClient(PaymentsReportingApisHolder apisHolder, RegistryLogger registryLogger, PaymentsReportingMapper paymentsReportingMapper) {
+  public PaymentsReportingClient(PaymentsReportingApisHolder apisHolder, RegistryLogger registryLogger, PaymentsReportingMapper paymentsReportingMapper, NodoChiediFlussoRendicontazioneMapper nodoChiediFlussoRendicontazioneMapper) {
     this.apisHolder = apisHolder;
     this.registryLogger = registryLogger;
     this.paymentsReportingMapper = paymentsReportingMapper;
+    this.nodoChiediFlussoRendicontazioneMapper = nodoChiediFlussoRendicontazioneMapper;
   }
 
   public List<FlowByPSP> fetchIdList(BrokerForNodoPaDTO brokerForNodoPaDTO, OffsetDateTime latestFlowDate) {
@@ -68,7 +71,10 @@ public class PaymentsReportingClient {
     RegistryContextData contextData = buildRegistryContextData(brokerForNodoPaDTO, pspId);
     return registryLogger.execute(
       contextData,
-      brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
+      nodoChiediFlussoRendicontazioneMapper.createFlussoRendicontazioneRequest(
+        brokerForNodoPaDTO,
+        reportingId
+      ),
       () -> fetchAllPaymentsRequestHandler(brokerForNodoPaDTO, reportingId, revision, pspId),
       null,
       null,

@@ -1,11 +1,13 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.client;
 
+import gov.telematici.pagamenti.ws.NodoChiediFlussoRendicontazione;
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.nodo.fdrorganization.controller.generated.OrganizationsApi;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.PaymentsReportingApisHolder;
+import it.gov.pagopa.pu.pagopapayments.connector.soap.mapper.NodoChiediFlussoRendicontazioneMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
@@ -34,6 +36,7 @@ import java.util.stream.Stream;
 @ExtendWith(MockitoExtension.class)
 class PaymentsReportingClientTest {
 
+  public static final NodoChiediFlussoRendicontazione NODO_CHIEDI_FLUSSO_RENDICONTAZIONE = new NodoChiediFlussoRendicontazione();
   @Mock
   private PaymentsReportingApisHolder paymentsReportingApisHolder;
   @Mock
@@ -42,6 +45,8 @@ class PaymentsReportingClientTest {
   private RegistryLogger registryLogger;
   @Mock
   private PaymentsReportingMapper paymentsReportingMapper;
+  @Mock
+  private NodoChiediFlussoRendicontazioneMapper nodoChiediFlussoRendicontazioneMapper;
 
   @InjectMocks
   private PaymentsReportingClient paymentsReportingClient;
@@ -60,7 +65,8 @@ class PaymentsReportingClientTest {
       paymentsReportingApisHolder,
       organizationsApi,
       registryLogger,
-      paymentsReportingMapper
+      paymentsReportingMapper,
+      nodoChiediFlussoRendicontazioneMapper
     );
   }
 
@@ -181,6 +187,12 @@ class PaymentsReportingClientTest {
         Mockito.isNull()
       )
     ).thenReturn(paginatedPaymentsResponse);
+    Mockito.when(
+      nodoChiediFlussoRendicontazioneMapper.createFlussoRendicontazioneRequest(
+        brokerForNodoPaDTO,
+        PAYMENTS_REPORTING_ID
+      )
+    ).thenReturn(NODO_CHIEDI_FLUSSO_RENDICONTAZIONE);
 
     this.mockRegistryLogger();
 
@@ -235,7 +247,7 @@ class PaymentsReportingClientTest {
       .pspId(PSP_ID)
       .eventType(RegistryEventType.NodeForPa_fetchPaymentReporting)
       .build();
-    RegistryLoggerTest.configureRegistryLoggerMock(registryLogger, contextData, ORGANIZATION_FISCAL_CODE, false, true);
+    RegistryLoggerTest.configureRegistryLoggerMock(registryLogger, contextData, NODO_CHIEDI_FLUSSO_RENDICONTAZIONE, false, true);
   }
 
 }

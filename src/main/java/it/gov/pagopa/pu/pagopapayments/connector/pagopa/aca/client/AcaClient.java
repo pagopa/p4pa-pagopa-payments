@@ -26,7 +26,7 @@ public class AcaClient {
     registryLogger.execute(
       getRegistryContextDataFromPaymentPositionModel(
         orgFiscalCode,
-        RegistryEventType.GPD_createPosition,
+        RegistryEventType.ACA_createPosition,
         paymentPositionModel
       ),
       paymentPositionModel,
@@ -43,7 +43,7 @@ public class AcaClient {
     registryLogger.execute(
       getRegistryContextDataFromPaymentPositionModel(
         orgFiscalCode,
-        RegistryEventType.GPD_updatePosition,
+        RegistryEventType.ACA_updatePosition,
         paymentPositionModel
       ),
       paymentPositionModel,
@@ -60,7 +60,7 @@ public class AcaClient {
     registryLogger.execute(
       getRegistryContextDataFromPaymentPositionModel(
         orgFiscalCode,
-        RegistryEventType.GPD_deletePosition,
+        RegistryEventType.ACA_deletePosition,
         paymentPositionModel
       ),
       iupd,

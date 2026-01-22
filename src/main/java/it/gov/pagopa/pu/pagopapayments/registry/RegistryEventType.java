@@ -12,6 +12,10 @@ public enum RegistryEventType {
 
   ACA_newDebtPosition(false),
 
+  ACA_createPosition(false),
+  ACA_updatePosition(false),
+  ACA_deletePosition(false),
+
   GPD_createPosition(false),
   GPD_updatePosition(false),
   GPD_deletePosition(false),

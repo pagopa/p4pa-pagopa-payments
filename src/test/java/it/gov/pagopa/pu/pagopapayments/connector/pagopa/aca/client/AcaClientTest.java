@@ -61,7 +61,7 @@ class AcaClientTest {
   @Test
   void createPosition_ShouldCallAcaApiClient() {
     PaymentPositionModel paymentPositionModel =
-      configureMocks(RegistryEventType.GPD_createPosition, null);
+      configureMocks(RegistryEventType.ACA_createPosition, null);
 
     acaClient.createPosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, paymentPositionModel);
 
@@ -72,7 +72,7 @@ class AcaClientTest {
   @Test
   void updatePosition_ShouldCallAcaApiClient() {
     PaymentPositionModel paymentPositionModel =
-      configureMocks(RegistryEventType.GPD_updatePosition, null);
+      configureMocks(RegistryEventType.ACA_updatePosition, null);
 
     acaClient.updatePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 
@@ -83,7 +83,7 @@ class AcaClientTest {
   @Test
   void deletePosition_ShouldCallAcaApiClient() {
     PaymentPositionModel paymentPositionModel =
-      configureMocks(RegistryEventType.GPD_deletePosition, IUPD);
+      configureMocks(RegistryEventType.ACA_deletePosition, IUPD);
 
     acaClient.deletePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 

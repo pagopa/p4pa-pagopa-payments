@@ -25,16 +25,11 @@ public class AcaDebtPositionMapper {
   private static final Set<InstallmentStatus> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED);
   private static final Set<InstallmentStatus> SYNC_STATUS_FROM_INSERT = Set.of(InstallmentStatus.DRAFT, InstallmentStatus.UNPAYABLE);
 
-  private boolean installment2sendGpd(InstallmentDTO installment) {
-    //skip installment whose status is not in the filterInstallmentStatus
-    return STATUS_TO_SEND_ACA.contains(installment.getStatus());
-  }
-
   public Pair<Operation, PaymentPositionModel> mapToNewPaymentPositionModel(String iud, DebtPositionDTO debtPosition, Organization org) {
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
       .filter(installment -> iud.equals(installment.getIud()))
-      .filter(this::installment2sendGpd)
+      .filter(this::installment2sendAca)
       .map(installment -> {
         Operation operation = getOperation(installment);
         PersonDTO debtor = installment.getDebtor();
@@ -56,6 +51,11 @@ public class AcaDebtPositionMapper {
           .validityDate(debtPosition.getValidityDate() != null ? debtPosition.getValidityDate().atStartOfDay().toString() : null)
         );
       }).findAny().orElseThrow(() -> new InvalidValueException("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));
+  }
+
+  private boolean installment2sendAca(InstallmentDTO installment) {
+    //skip installment whose status is not in the filterInstallmentStatus
+    return STATUS_TO_SEND_ACA.contains(installment.getStatus());
   }
 
   private Operation getOperation(InstallmentDTO installment) {

@@ -1,9 +1,10 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.nodo.pacreateposition.dto.generated.NewDebtPositionRequest;
+import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
-import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -17,17 +18,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.common.AttributeStrategy;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 @ExtendWith(MockitoExtension.class)
 class AcaDebtPositionMapperTest {
+
   @InjectMocks
   private AcaDebtPositionMapper acaDebtPositionMapper;
 
   private final PodamFactory podamFactory;
 
   private DebtPositionDTO debtPosition;
+  private Organization organization;
 
   AcaDebtPositionMapperTest() {
     podamFactory = TestUtils.getPodamFactory();
@@ -38,14 +41,18 @@ class AcaDebtPositionMapperTest {
 
   @BeforeEach
   void init() {
-    // generate random DebtPositionDTO
     debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    // fix some field values
+
     debtPosition.getPaymentOptions().forEach(paymentOption ->
       paymentOption.getInstallments().forEach(installment -> {
         installment.getDebtor().setEntityType(PersonEntityType.F);
         installment.setStatus(InstallmentStatus.UNPAID);
         installment.setSyncStatus(null);
+        installment.setDueDate(LocalDate.now().plusDays(10));
+        installment.getTransfers().forEach(transfer ->
+          transfer.setTransferIndex(1));
+
+        organization = podamFactory.manufacturePojo(Organization.class);
       }));
   }
 
@@ -56,112 +63,72 @@ class AcaDebtPositionMapperTest {
       .syncStatusFrom(syncStatusFrom)
       .syncStatusTo(syncStatusTo)
       .build());
-    installmentDTO.setTransfers(List.of(Objects.requireNonNull(installmentDTO.getTransfers()).getFirst()));
+    installmentDTO.setTransfers(List.of(installmentDTO.getTransfers().getFirst()));
     return installmentDTO;
   }
 
-  //region mapToNewDebtPositionRequest
-
   @Test
-  void givenValidDebtPositionExpiringWhenMapToNewDebtPositionRequestThenOk() {
+  void givenValidDebtPositionExpiringWhenMapToPaymentPositionModelThenOk() {
     //given
     InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID);
 
     //when
-    Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(toSync.getIud(), debtPosition);
+    Pair<Operation, PaymentPositionModel> response = acaDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
 
     //verify
     Assertions.assertNotNull(response);
-    NewDebtPositionRequest newDebtPositionRequest = response.getRight();
-    Assertions.assertNotNull(newDebtPositionRequest);
-    TestUtils.checkNotNullFields(newDebtPositionRequest);
+    PaymentPositionModel paymentPositionModel = response.getRight();
+    Assertions.assertNotNull(paymentPositionModel);
+    TestUtils.checkNotNullFields(paymentPositionModel, "payStandIn", "streetName", "civicNumber", "postalCode", "city", "province", "country", "region", "email", "phone", "officeName", "validityDate", "paymentDate", "status");
 
-    Assertions.assertEquals(ConversionUtils.localDate2RomeMaxTime(toSync.getDueDate()), newDebtPositionRequest.getExpirationDate());
-    Assertions.assertEquals(toSync.getNav(), newDebtPositionRequest.getNav());
-    Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
+    Assertions.assertEquals(toSync.getIupdPagopa(), paymentPositionModel.getIupd());
+    Assertions.assertEquals(toSync.getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
+    Assertions.assertEquals(Operation.CREATE, response.getLeft());
   }
 
   @Test
-  void givenValidDebtPositionNonExpiringWhenMapToNewDebtPositionRequestThenOk() {
+  void givenValidDebtPositionWithVariousOpsWhenMapToPaymentPositionModelThenOk() {
     //given
-    InstallmentDTO toSync = setSyncStatus(debtPosition, 1, 1, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID);
-    toSync.setDueDate(null);
-
-    //when
-    Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(toSync.getIud(), debtPosition);
-
-    //verify
-    Assertions.assertNotNull(response);
-    NewDebtPositionRequest newDebtPositionRequest = response.getRight();
-    Assertions.assertNotNull(newDebtPositionRequest);
-    TestUtils.checkNotNullFields(newDebtPositionRequest);
-
-    Assertions.assertEquals(ConversionUtils.MAX_EXPIRATION_DATE.atZone(Constants.ZONEID).toOffsetDateTime(), newDebtPositionRequest.getExpirationDate());
-    Assertions.assertEquals(toSync.getNav(), newDebtPositionRequest.getNav());
-    Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
-  }
-
-  @Test
-  void givenValidDebtPositionWithVariousOpsWhenMapToNewDebtPositionRequestThenOk() {
-    //given
-    List<Pair<InstallmentDTO, AcaDebtPositionMapper.OPERATION>> toSyncList = List.of(
-      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID), AcaDebtPositionMapper.OPERATION.CREATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentStatus.UNPAID, InstallmentStatus.UNPAID), AcaDebtPositionMapper.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentStatus.EXPIRED, InstallmentStatus.UNPAID), AcaDebtPositionMapper.OPERATION.UPDATE),
-      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentStatus.UNPAID, InstallmentStatus.CANCELLED), AcaDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentStatus.UNPAID, InstallmentStatus.INVALID), AcaDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentStatus.EXPIRED, InstallmentStatus.CANCELLED), AcaDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentStatus.EXPIRED, InstallmentStatus.INVALID), AcaDebtPositionMapper.OPERATION.DELETE),
-      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED), AcaDebtPositionMapper.OPERATION.DELETE)
+    List<Pair<InstallmentDTO, Operation>> toSyncList = List.of(
+      Pair.of(setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID), Operation.CREATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 1, InstallmentStatus.UNPAID, InstallmentStatus.UNPAID), Operation.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 0, 2, InstallmentStatus.EXPIRED, InstallmentStatus.UNPAID), Operation.UPDATE),
+      Pair.of(setSyncStatus(debtPosition, 1, 0, InstallmentStatus.UNPAID, InstallmentStatus.CANCELLED), Operation.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 1, 1, InstallmentStatus.UNPAID, InstallmentStatus.INVALID), Operation.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 0, InstallmentStatus.EXPIRED, InstallmentStatus.CANCELLED), Operation.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 1, InstallmentStatus.EXPIRED, InstallmentStatus.INVALID), Operation.DELETE),
+      Pair.of(setSyncStatus(debtPosition, 2, 2, InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED), Operation.DELETE)
     );
-    //others installments will be ignored
 
     toSyncList.forEach(pair -> {
       //when
-      Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(pair.getLeft().getIud(), debtPosition);
+      Pair<Operation, PaymentPositionModel> response = acaDebtPositionMapper.mapToNewPaymentPositionModel(pair.getLeft().getIud(), debtPosition, organization);
 
       Assertions.assertNotNull(response);
-      NewDebtPositionRequest newDebtPositionRequest = response.getRight();
-      Assertions.assertNotNull(newDebtPositionRequest);
-      TestUtils.checkNotNullFields(newDebtPositionRequest);
+      PaymentPositionModel paymentPositionModel = response.getRight();
+      Assertions.assertNotNull(paymentPositionModel);
+      TestUtils.checkNotNullFields(paymentPositionModel, "payStandIn", "streetName", "civicNumber", "postalCode", "city", "province", "country", "region", "email", "phone", "officeName", "validityDate", "paymentDate", "status");
 
-      Assertions.assertEquals(ConversionUtils.localDate2RomeMaxTime(pair.getLeft().getDueDate()), newDebtPositionRequest.getExpirationDate());
-      Assertions.assertEquals(pair.getLeft().getNav(), newDebtPositionRequest.getNav());
+      Assertions.assertEquals(ConversionUtils.atEndOfDay(pair.getLeft().getDueDate()).toString(), paymentPositionModel.getPaymentOption().getFirst().getDueDate());
+      Assertions.assertEquals(pair.getLeft().getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
       Assertions.assertEquals(pair.getRight(), response.getLeft());
     });
   }
 
   @Test
-  void givenValidDebtPositionWithInvalidStatusWhenMapToNewDebtPositionRequestThenException() {
+  void givenValidDebtPositionWithInvalidStatusWhenMapToPaymentPositionModelThenException() {
     //given
     InstallmentDTO installment = setSyncStatus(debtPosition, 1, 2, InstallmentStatus.PAID, InstallmentStatus.UNPAID);
     //others installments will be ignored
 
     //when
     String iud = installment.getIud();
-    InvalidValueException response = Assertions.assertThrows(InvalidValueException.class, () -> acaDebtPositionMapper.mapToNewDebtPositionRequest(iud, debtPosition));
+    InvalidValueException response = Assertions.assertThrows(InvalidValueException.class, () -> acaDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, organization));
 
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals("Invalid sync status [%s->%s] for installment [%s]".formatted(
-      Objects.requireNonNull(installment.getSyncStatus()).getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
-  }
-
-  @Test
-  void givenValidDebtPositionWithMultipleTransferWhenMapToNewDebtPositionRequestThenException() {
-    //given
-    InstallmentDTO installment = setSyncStatus(debtPosition, 1, 2, InstallmentStatus.PAID, InstallmentStatus.UNPAID);
-    installment.setTransfers(podamFactory.manufacturePojo(List.class, TransferDTO.class));
-    //others installments will be ignored
-
-    //when
-    String iud = installment.getIud();
-    InvalidValueException response = Assertions.assertThrows(InvalidValueException.class, () -> acaDebtPositionMapper.mapToNewDebtPositionRequest(iud, debtPosition));
-
-    //verify
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals("Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(
-      installment.getIud(), debtPosition.getDebtPositionId()), response.getMessage());
+      installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
   }
 
   @Test
@@ -170,12 +137,17 @@ class AcaDebtPositionMapperTest {
     InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.UNPAYABLE, InstallmentStatus.UNPAID);
 
     //when
-    Pair<AcaDebtPositionMapper.OPERATION, NewDebtPositionRequest> response = acaDebtPositionMapper.mapToNewDebtPositionRequest(toSync.getIud(), debtPosition);
+    Pair<Operation, PaymentPositionModel> response = acaDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
 
     //verify
     Assertions.assertNotNull(response);
-    Assertions.assertEquals(AcaDebtPositionMapper.OPERATION.CREATE, response.getLeft());
-  }
-  //endregion
+    PaymentPositionModel paymentPositionModel = response.getRight();
+    Assertions.assertNotNull(paymentPositionModel);
+    TestUtils.checkNotNullFields(paymentPositionModel, "payStandIn", "streetName", "civicNumber", "postalCode", "city", "province", "country", "region", "email", "phone", "officeName", "validityDate", "paymentDate", "status");
 
+    Assertions.assertEquals(toSync.getIupdPagopa(), paymentPositionModel.getIupd());
+    Assertions.assertEquals(toSync.getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
+    Assertions.assertEquals(Operation.CREATE, response.getLeft());
+  }
 }
+

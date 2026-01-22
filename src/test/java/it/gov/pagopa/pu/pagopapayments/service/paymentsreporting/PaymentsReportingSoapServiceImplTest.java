@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.service;
+package it.gov.pagopa.pu.pagopapayments.service.paymentsreporting;
 
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
@@ -10,8 +10,8 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
-import it.gov.pagopa.pu.pagopapayments.service.paymentsreporting.PaymentsReportingService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentsReportingServiceTest {
+class PaymentsReportingSoapServiceImplTest {
 
   @Mock
   private BrokerRetrieverService brokerRetrieverServiceMock;
@@ -36,9 +36,11 @@ class PaymentsReportingServiceTest {
   private NodeForPaClient nodeForPaClientMock;
   @Mock
   private FileShareService fileShareServiceMock;
+  @Mock
+  private PaymentsReportingMapper paymentsReportingMapper;
 
   @InjectMocks
-  private PaymentsReportingService paymentsReportingService;
+  private PaymentsReportingSoapServiceImpl paymentsReportingSoapServiceImpl;
 
   private static final Long ORGANIZATION_ID = 1L;
   private static final String REPORTING_ID = "2";
@@ -64,7 +66,7 @@ class PaymentsReportingServiceTest {
 
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenThrow(new ApplicationException("Broker service error"));
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingSoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
     Assertions.assertEquals("Broker service error", exception.getMessage());
     verify(brokerRetrieverServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     verify(nodeForPaClientMock, never()).getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
@@ -79,7 +81,7 @@ class PaymentsReportingServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenReturn(response);
 
-    List<PaymentsReportingIdDTO> result = paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
+    List<PaymentsReportingIdDTO> result = paymentsReportingSoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertTrue(result.isEmpty());
@@ -94,7 +96,7 @@ class PaymentsReportingServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenThrow(new ApplicationException("Node client error"));
 
-    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
+    ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingSoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
     Assertions.assertEquals("Node client error", exception.getMessage());
     verify(brokerRetrieverServiceMock, times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     verify(nodeForPaClientMock, times(1)).getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO);
@@ -112,7 +114,7 @@ class PaymentsReportingServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenReturn(response);
 
-    List<PaymentsReportingIdDTO> result = paymentsReportingService.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
+    List<PaymentsReportingIdDTO> result = paymentsReportingSoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertFalse(result.isEmpty());
@@ -130,14 +132,16 @@ class PaymentsReportingServiceTest {
     response.setFiscalCode("orgFiscalCode");
     Long ingestionFlowFileId = 1L;
 
+    Mockito.when(paymentsReportingMapper.isFilenameInvalid(fileName, REPORTING_ID)).thenReturn(false);
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
     Mockito.when(nodeForPaClientMock.fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID)).thenReturn(response);
     Mockito.when(fileShareServiceMock.uploadPaymentReporting(response, ORGANIZATION_ID, fileName, accessToken)).thenReturn(ingestionFlowFileId);
 
-    Long result = paymentsReportingService.fetchPaymentReporting(ORGANIZATION_ID, REPORTING_ID, fileName, accessToken);
+    Long result = paymentsReportingSoapServiceImpl.fetchPaymentReporting(ORGANIZATION_ID, REPORTING_ID, fileName, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(ingestionFlowFileId, result);
+    Mockito.verify(paymentsReportingMapper, Mockito.times(1)).isFilenameInvalid(fileName,REPORTING_ID);
     Mockito.verify(brokerRetrieverServiceMock, Mockito.times(1)).getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken);
     Mockito.verify(nodeForPaClientMock, Mockito.times(1)).fetchPaymentReporting(BROKER_FOR_NODO_PA_DTO, REPORTING_ID);
     Mockito.verify(fileShareServiceMock, Mockito.times(1)).uploadPaymentReporting(response, ORGANIZATION_ID, fileName, accessToken);
@@ -148,8 +152,11 @@ class PaymentsReportingServiceTest {
     String accessToken = TestUtils.getFakeAccessToken();
     String fileName = "fileName.xml";
 
-    Assertions.assertThrows(InvalidValueException.class, () -> paymentsReportingService
+    Mockito.when(paymentsReportingMapper.isFilenameInvalid(fileName, REPORTING_ID)).thenReturn(true);
+
+    Assertions.assertThrows(InvalidValueException.class, () -> paymentsReportingSoapServiceImpl
       .fetchPaymentReporting(ORGANIZATION_ID, REPORTING_ID, fileName, accessToken));
+    Mockito.verify(paymentsReportingMapper, Mockito.times(1)).isFilenameInvalid(fileName,REPORTING_ID);
   }
 
 

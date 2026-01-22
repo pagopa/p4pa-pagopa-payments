@@ -176,6 +176,11 @@ rest:
       max-attempts: "\${PAGOPA_NODE_GPD_MAX_ATTEMPTS:3}" # It's counting also the first attempt
       wait-time-millis: "\${PAGOPA_NODE_GPD_WAIT_TIME_MILLIS:500}"
       print-body-when-error: "\${PAGOPA_NODE_GPD_PRINT_BODY_WHEN_ERROR:true}"
+    sync-payments-reporting:
+      base-url: "\${PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_BASE_URL:}"
+      max-attempts: "\${PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+      wait-time-millis: "\${PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_WAIT_TIME_MILLIS:500}"
+      print-body-when-error: "\${PAGOPA_NODE_SYNC_PAYMENTS_REPORTING_PRINT_BODY_WHEN_ERROR:true}"
   pagopa-taxonomies:
     base-url: "\${PAGOPA_TAXONOMIES_BASE_URL:}"
     print-body-when-error: "\${PAGOPA_TAXONOMIES_PRINT_BODY_WHEN_ERROR:true}"

@@ -408,10 +408,10 @@
         } ]
       }
     },
-    "/paymentsReporting/{organizationId}" : {
+    "/paymentsReporting/soap/{organizationId}" : {
       "get" : {
         "tags" : [ "payments-reporting" ],
-        "operationId" : "getPaymentsReportingList",
+        "operationId" : "soapGetPaymentsReportingList",
         "parameters" : [ {
           "name" : "organizationId",
           "in" : "path",
@@ -477,10 +477,10 @@
         } ]
       }
     },
-    "/paymentsReporting/{organizationId}/fetch" : {
+    "/paymentsReporting/soap/{organizationId}/fetch" : {
       "get" : {
         "tags" : [ "payments-reporting" ],
-        "operationId" : "fetchPaymentReporting",
+        "operationId" : "soapFetchPaymentReporting",
         "parameters" : [ {
           "name" : "organizationId",
           "in" : "path",
@@ -500,6 +500,175 @@
           "name" : "fileName",
           "in" : "query",
           "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int64"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int64"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int64"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/paymentsReporting/rest/{organizationId}" : {
+      "get" : {
+        "tags" : [ "payments-reporting" ],
+        "operationId" : "restGetPaymentsReportingList",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "latestFlowDate",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagoPaPaymentsErrorDTO"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "List of payments reporting",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PaymentsReportingIdDTO"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PaymentsReportingIdDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PaymentsReportingIdDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/paymentsReporting/rest/{organizationId}/fetch" : {
+      "get" : {
+        "tags" : [ "payments-reporting" ],
+        "operationId" : "restFetchPaymentReporting",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "flowId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "fileName",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "revision",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "pspId",
+          "in" : "query",
+          "required" : false,
           "schema" : {
             "type" : "string"
           }
@@ -756,6 +925,9 @@
             "type" : "string"
           },
           "updateTraceId" : {
+            "type" : "string"
+          },
+          "originalRemittanceInformation" : {
             "type" : "string"
           }
         },
@@ -1052,6 +1224,13 @@
             "format" : "date-time"
           },
           "paymentsReportingFileName" : {
+            "type" : "string"
+          },
+          "revision" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pspId" : {
             "type" : "string"
           }
         },

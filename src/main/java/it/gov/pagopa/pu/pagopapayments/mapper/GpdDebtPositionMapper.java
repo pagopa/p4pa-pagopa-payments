@@ -45,7 +45,7 @@ public class GpdDebtPositionMapper {
       })
       .findAny()
       .orElseThrow(() -> new InvalidValueException(
-        "Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state"
+        "[INVALID_INSTALLMENT] Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state"
           .formatted(iud, debtPosition.getDebtPositionId())
       ));
   }
@@ -58,7 +58,7 @@ public class GpdDebtPositionMapper {
     InstallmentSyncStatus syncStatus = installment.getSyncStatus();
 
     if (syncStatus == null) {
-      throw new InvalidValueException("Sync status is null for installment [%s]".formatted(installment.getIud()));
+      throw new InvalidValueException("[INVALID_SYNC_STATUS] Sync status is null for installment [%s]".formatted(installment.getIud()));
     }
 
     if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
@@ -74,7 +74,7 @@ public class GpdDebtPositionMapper {
       return Operation.CREATE;
     }
 
-    throw new InvalidValueException("Invalid sync status [%s->%s] for installment [%s]"
+    throw new InvalidValueException("[INVALID_SYNC_STATUS] Invalid sync status [%s->%s] for installment [%s]"
       .formatted(syncStatus.getSyncStatusFrom(), syncStatus.getSyncStatusTo(), installment.getIud()));
   }
 
@@ -143,7 +143,7 @@ public class GpdDebtPositionMapper {
     } else if ("G".equals(type)) {
       model.setType(DebtorModel.TypeEnum.G);
     } else {
-      throw new InvalidValueException("Unsupported debtor entity type [%s]".formatted(type));
+      throw new InvalidValueException("[INVALID_DEBTOR] Unsupported debtor entity type [%s]".formatted(type));
     }
 
     return model;

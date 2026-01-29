@@ -29,7 +29,7 @@ public class BrokerRetrieverService {
   public Pair<BrokerApiKeys, String> getBrokerApiKeyAndSegregationCodesByOrganizationId(Long organizationId, String accessToken){
     Organization organization = organizationService.getOrganizationById(organizationId, accessToken);
     if(organization==null){
-      throw new NotFoundException("organization [%s]".formatted(organizationId));
+      throw new NotFoundException("[ORGANIZATION_NOT_FOUND] organization [%s]".formatted(organizationId));
     }
     BrokerApiKeys apiKeys = brokerService.getApiKeyByBrokerId(organization.getBrokerId(), accessToken);
     String segregationCodes = organization.getSegregationCode();
@@ -40,7 +40,7 @@ public class BrokerRetrieverService {
   public BrokerForNodoPaDTO getBrokerForNodoPaDTOByOrganizationId(Long organizationId, String accessToken){
     Organization organization = organizationService.getOrganizationById(organizationId, accessToken);
     if(organization==null){
-      throw new NotFoundException("organization [%s]".formatted(organizationId));
+      throw new NotFoundException("[ORGANIZATION_NOT_FOUND] organization [%s]".formatted(organizationId));
     }
     BrokerApiKeys apiKeys = brokerService.getApiKeyByBrokerId(organization.getBrokerId(), accessToken);
     Broker broker = brokerService.getBrokerById(organization.getBrokerId(), accessToken);

@@ -166,4 +166,24 @@ class GpdDebtPositionMapperTest {
 
     Assertions.assertEquals(toSync.getNav(), installment.getNav());
   }
+
+  @Test
+  void givenInstallmentToSyncWithNullSyncStatusWhenMapToPaymentPositionModelThenException() {
+    //given
+    InstallmentDTO installment = debtPosition.getPaymentOptions().get(0).getInstallments().get(0);
+    installment.setStatus(InstallmentStatus.TO_SYNC);
+    installment.setSyncStatus(null);
+    String iud = installment.getIud();
+
+    //when
+    InvalidValueException ex = Assertions.assertThrows(
+      InvalidValueException.class,
+      () -> gpdDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, organization)
+    );
+
+    //verify
+    Assertions.assertNotNull(ex);
+    Assertions.assertEquals("[INVALID_SYNC_STATUS] Sync status is null for installment [%s]".formatted(iud), ex.getMessage()
+    );
+  }
 }

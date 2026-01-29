@@ -21,7 +21,7 @@ public class PuSilClient {
     try {
       return apisHolder.getActualizationApi(accessToken).actualize(orgSilServiceId, nav);
     } catch (HttpClientErrorException.Conflict e) {
-      throw new NotPayableSilActualizedAmountException("Error when invoke actualize", e);
+      throw new NotPayableSilActualizedAmountException("[ACTUALIZATION_ERROR] Error when invoke actualize", e);
     }
   }
 }

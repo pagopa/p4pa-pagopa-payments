@@ -127,7 +127,7 @@ class AcaDebtPositionMapperTest {
 
     //verify
     Assertions.assertNotNull(response);
-    Assertions.assertEquals("Invalid sync status [%s->%s] for installment [%s]".formatted(
+    Assertions.assertEquals("[INVALID_SYNC_STATUS] Invalid sync status [%s->%s] for installment [%s]".formatted(
       installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
   }
 

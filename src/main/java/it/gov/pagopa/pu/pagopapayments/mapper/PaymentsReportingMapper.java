@@ -103,7 +103,7 @@ public class PaymentsReportingMapper {
     flussoRiversamento.setIstitutoMittente(this.mapSender(singleFlowResponse.getSender()));
     flussoRiversamento.setCodiceBicBancaDiRiversamento(singleFlowResponse.getBicCodePouringBank());
     flussoRiversamento.setIstitutoRicevente(this.mapReceiver(singleFlowResponse.getReceiver()));
-    flussoRiversamento.setNumeroTotalePagamenti(Optional.ofNullable(singleFlowResponse.getTotPayments()).map(BigDecimal::new).orElse(null));
+    flussoRiversamento.setNumeroTotalePagamenti(Optional.ofNullable(singleFlowResponse.getTotPayments()).map(BigDecimal::valueOf).orElse(null));
     flussoRiversamento.setImportoTotalePagamenti(Optional.ofNullable(singleFlowResponse.getSumPayments()).map(p -> BigDecimal.valueOf(p).setScale(2, RoundingMode.HALF_EVEN)).orElse(null));
     flussoRiversamento.getDatiSingoliPagamentis().addAll(this.mapPaymentList(paymentList));
     return flussoRiversamento;

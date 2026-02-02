@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -102,8 +103,8 @@ public class PaymentsReportingMapper {
     flussoRiversamento.setIstitutoMittente(this.mapSender(singleFlowResponse.getSender()));
     flussoRiversamento.setCodiceBicBancaDiRiversamento(singleFlowResponse.getBicCodePouringBank());
     flussoRiversamento.setIstitutoRicevente(this.mapReceiver(singleFlowResponse.getReceiver()));
-    flussoRiversamento.setNumeroTotalePagamenti(Optional.ofNullable(singleFlowResponse.getTotPayments()).map(BigDecimal::new).orElse(null));
-    flussoRiversamento.setImportoTotalePagamenti(Optional.ofNullable(singleFlowResponse.getSumPayments()).map(BigDecimal::new).orElse(null));
+    flussoRiversamento.setNumeroTotalePagamenti(Optional.ofNullable(singleFlowResponse.getTotPayments()).map(BigDecimal::valueOf).orElse(null));
+    flussoRiversamento.setImportoTotalePagamenti(Optional.ofNullable(singleFlowResponse.getSumPayments()).map(p -> BigDecimal.valueOf(p).setScale(2, RoundingMode.HALF_EVEN)).orElse(null));
     flussoRiversamento.getDatiSingoliPagamentis().addAll(this.mapPaymentList(paymentList));
     return flussoRiversamento;
   }
@@ -160,7 +161,7 @@ public class PaymentsReportingMapper {
       ctDatiSingoliPagamenti.setIdentificativoUnivocoVersamento(payment.getIuv());
       ctDatiSingoliPagamenti.setIdentificativoUnivocoRiscossione(payment.getIur());
       ctDatiSingoliPagamenti.setIndiceDatiSingoloPagamento(payment.getIndex().intValue());
-      ctDatiSingoliPagamenti.setSingoloImportoPagato(BigDecimal.valueOf(payment.getPay()));
+      ctDatiSingoliPagamenti.setSingoloImportoPagato(BigDecimal.valueOf(payment.getPay()).setScale(2, RoundingMode.HALF_EVEN));
       ctDatiSingoliPagamenti.setDataEsitoSingoloPagamento(ConversionUtils.toXMLGregorianCalendar(payment.getPayDate()));
       ctDatiSingoliPagamenti.setCodiceEsitoSingoloPagamento(this.mapPaymentStatusToPaymentCode(payment.getPayStatus()));
       ctDatiSingoliPagamentiList.add(ctDatiSingoliPagamenti);

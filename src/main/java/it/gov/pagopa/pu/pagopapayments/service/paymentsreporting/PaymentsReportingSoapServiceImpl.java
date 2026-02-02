@@ -38,7 +38,7 @@ public class PaymentsReportingSoapServiceImpl implements PaymentsReportingSoapSe
   @Override
   public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, String fileName, String accessToken) {
     if (paymentsReportingMapper.isFilenameInvalid(fileName, paymentsReportingId)) {
-      throw new InvalidValueException("PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
+      throw new InvalidValueException("[INVALID_FILE_NAME] PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
     }
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     PaPaymentReportingDTO response = nodeForPaClient.fetchPaymentReporting(brokerForNodoPaDTO, paymentsReportingId);

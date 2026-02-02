@@ -281,9 +281,11 @@ class PaymentsReportingMapperTest {
     // then
     Assertions.assertNotNull(actualResult);
     TestUtils.checkNotNullFields(actualResult, "versioneOggetto");
+    Assertions.assertTrue(TestUtils.checkDecimalPlaces(actualResult.getImportoTotalePagamenti(),2));
     TestUtils.checkNotNullFields(actualResult.getIstitutoMittente());
     TestUtils.checkNotNullFields(actualResult.getIstitutoRicevente());
     actualResult.getDatiSingoliPagamentis().forEach(TestUtils::checkNotNullFields);
+    actualResult.getDatiSingoliPagamentis().forEach(p -> Assertions.assertTrue(TestUtils.checkDecimalPlaces(p.getSingoloImportoPagato(),2)));
   }
 
   @ParameterizedTest
@@ -303,9 +305,11 @@ class PaymentsReportingMapperTest {
     // then
     Assertions.assertNotNull(actualResult);
     TestUtils.checkNotNullFields(actualResult, "versioneOggetto");
+    Assertions.assertTrue(TestUtils.checkDecimalPlaces(actualResult.getImportoTotalePagamenti(),2));
     TestUtils.checkNotNullFields(actualResult.getIstitutoMittente());
     TestUtils.checkNotNullFields(actualResult.getIstitutoRicevente());
     actualResult.getDatiSingoliPagamentis().forEach(TestUtils::checkNotNullFields);
+    actualResult.getDatiSingoliPagamentis().forEach(p -> Assertions.assertTrue(TestUtils.checkDecimalPlaces(p.getSingoloImportoPagato(),2)));
   }
 
   @Test

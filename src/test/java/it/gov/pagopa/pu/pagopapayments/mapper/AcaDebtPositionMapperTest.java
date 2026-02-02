@@ -127,7 +127,7 @@ class AcaDebtPositionMapperTest {
 
     //verify
     Assertions.assertNotNull(response);
-    Assertions.assertEquals("Invalid sync status [%s->%s] for installment [%s]".formatted(
+    Assertions.assertEquals("[INVALID_SYNC_STATUS] Invalid sync status [%s->%s] for installment [%s]".formatted(
       installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
   }
 
@@ -148,6 +148,27 @@ class AcaDebtPositionMapperTest {
     Assertions.assertEquals(toSync.getIupdPagopa(), paymentPositionModel.getIupd());
     Assertions.assertEquals(toSync.getNav(), paymentPositionModel.getPaymentOption().getFirst().getNav());
     Assertions.assertEquals(Operation.CREATE, response.getLeft());
+  }
+
+  @Test
+  void givenInstallmentToSyncWithNullSyncStatusWhenMapToPaymentPositionModelThenException() {
+    //given
+    InstallmentDTO installment = debtPosition.getPaymentOptions().get(0).getInstallments().get(0);
+    installment.setStatus(InstallmentStatus.TO_SYNC);
+    installment.setSyncStatus(null);
+
+    String iud = installment.getIud();
+
+    //when
+    InvalidValueException ex = Assertions.assertThrows(
+      InvalidValueException.class,
+      () -> acaDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, organization)
+    );
+
+    //verify
+    Assertions.assertNotNull(ex);
+    Assertions.assertEquals("[INVALID_SYNC_STATUS] Sync status is null for installment [%s]".formatted(iud), ex.getMessage()
+    );
   }
 }
 

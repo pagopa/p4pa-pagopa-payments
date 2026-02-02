@@ -17,6 +17,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.time.chrono.ChronoZonedDateTime;
@@ -213,6 +214,15 @@ public class TestUtils {
       // This exception cannot be thrown
       e.printStackTrace();
       throw new RuntimeException(e);
+    }
+  }
+
+  public static boolean checkDecimalPlaces(BigDecimal number, int decimalPlaces) {
+    try {
+      BigDecimal scaledBigDecimal = number.movePointRight(decimalPlaces); //this scaled BigDecimal should have zero decimal places
+      return scaledBigDecimal.toBigInteger().equals(scaledBigDecimal.toBigIntegerExact());
+    } catch (ArithmeticException e) {
+      return false;
     }
   }
 }

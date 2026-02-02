@@ -40,11 +40,19 @@ public class PaForNodeRequestValidatorService {
 
   public Organization paSendRtRequestValidate(PaSendRtDTO request, String accessToken) {
     Organization organization = organizationService.getOrganizationByFiscalCode(request.getIdPA(), accessToken);
-    if(organization == null) {
-      // Look for organization in secondary transfers
-      // TODO
 
-      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdBrokerPA());
+    if(organization == null) {
+      // Check if there is at least one organization managed in PU within the transfer list
+      boolean hasValidTransferOrg = request.getTransferList().stream()
+        .map(transfer -> organizationService.getOrganizationByFiscalCode(transfer.getFiscalCodePA(), accessToken))
+        .anyMatch(Objects::nonNull);
+
+      if(!hasValidTransferOrg) {
+        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdBrokerPA());
+      } else {
+        // If at least one transfer is managed, use the technical organization
+        organization = organizationService.getOrganizationById(-1L, accessToken);
+      }
     }
 
     validateOrganizationBrokerAndStation(organization, request, accessToken);

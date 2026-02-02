@@ -8,6 +8,11 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.MDC;
 
+import java.math.BigDecimal;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 public class UtilitiesTest {
 
   @Test
@@ -95,5 +100,21 @@ public class UtilitiesTest {
       Utilities.truncateRemittanceInformation(under140Description));
     Assertions.assertEquals(expectedTruncatedOver140Description,
       Utilities.truncateRemittanceInformation(over140Description));
+  }
+
+  @Test
+  void givenBigDecimalEuroAmountWhenBigDecimalEuroToLongCentsAmountThenReturnCorrectCents() {
+    BigDecimal amount = BigDecimal.valueOf(123.45);
+
+    long result = Utilities.bigDecimalEuroToLongCentsAmount(amount);
+
+    assertEquals(12345, result);
+  }
+
+  @Test
+  void givenNullAmountWhenBigDecimalEuroToLongCentsAmountThenReturnNull() {
+    Long result = Utilities.bigDecimalEuroToLongCentsAmount(null);
+
+    assertNull(result);
   }
 }

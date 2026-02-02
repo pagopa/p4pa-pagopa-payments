@@ -65,6 +65,12 @@ public class PaForNodeRequestValidatorService {
       log.warn("paymentRequestValidate [{}/{}]: organization is not active", request.getFiscalCode(), request.getNoticeNumber());
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, organization.getOrgFiscalCode());
     }
+
+    // If is a technical organization skip broker and station validation
+    if (organization.getOrganizationId() == -1L) {
+      return;
+    }
+
     // Broker cannot be null if organization is found
     Broker broker = brokerService.getBrokerById(organization.getBrokerId(), accessToken);
     if (!Objects.equals(request.getIdBrokerPA(), broker.getBrokerFiscalCode())) {
@@ -73,6 +79,7 @@ public class PaForNodeRequestValidatorService {
         request.getIdBrokerPA(), broker.getBrokerFiscalCode());
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO, broker.getBrokerFiscalCode());
     }
+
     // Sync brokers expects to receive RT on stationId, async brokers expects to receive RT on broadcastStationId. accepting both
     List<String> expectedStations = List.of(
       Objects.requireNonNullElse(broker.getStationId(), "NOTCONFIGUREDSTATIONID"),

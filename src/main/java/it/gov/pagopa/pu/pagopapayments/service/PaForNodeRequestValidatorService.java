@@ -61,14 +61,14 @@ public class PaForNodeRequestValidatorService {
   }
 
   private void validateOrganizationBrokerAndStation(Organization organization, PaForNodeDTO request, String accessToken) {
-    // If is a technical organization skip validation
-    if (organization.getOrganizationId() == -1L) {
-      return;
-    }
-
     if (!Objects.equals(organization.getStatus(), OrganizationStatus.ACTIVE)) {
       log.warn("paymentRequestValidate [{}/{}]: organization is not active", request.getFiscalCode(), request.getNoticeNumber());
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, organization.getOrgFiscalCode());
+    }
+
+    // If is a technical organization skip validation
+    if (organization.getOrganizationId() == -1L) {
+      return;
     }
 
     // Broker cannot be null if organization is found

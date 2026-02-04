@@ -52,7 +52,6 @@ public class PaForNodeRequestValidatorService {
       } else {
         // If at least one transfer is managed, use the technical organization
         organization = organizationService.getOrganizationById(-1L, accessToken);
-        request.setFiscalCode(organization.getOrgFiscalCode() + "_" + request.getFiscalCode());
       }
     }
 

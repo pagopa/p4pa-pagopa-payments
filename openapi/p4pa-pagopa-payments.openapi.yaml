@@ -318,10 +318,10 @@ components:
     PagoPaPaymentsErrorDTO:
       type: object
       required:
-        - code
+        - category
         - message
       properties:
-        code:
+        category:
           type: string
           enum:
             - PAGOPA_PAYMENTS_NOT_FOUND

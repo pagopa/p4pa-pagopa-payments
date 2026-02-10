@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
+import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,5 +81,15 @@ public class DebtPositionClient {
   public ResponseEntity<DebtPositionDTO> createDebtPosition(DebtPositionDTO debtPositionDTO, String accessToken) {
     return debtPositionsApisHolder.getDebtPositionApi(accessToken)
       .createDebtPositionWithHttpInfo(debtPositionDTO, false);
+  }
+
+  public List<DebtPositionDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOrigins, String accessToken) {
+    try {
+      return debtPositionsApisHolder.getDebtPositionApi(accessToken)
+        .getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOrigins);
+    } catch (HttpClientErrorException.NotFound e) {
+      log.info("Couldn't find any Debt Position having organizationId {} and nav {}", organizationId, nav);
+      return Collections.emptyList();
+    }
   }
 }

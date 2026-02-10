@@ -666,6 +666,33 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   library.set("resttemplate")
 }
 
+openApiGenerate {
+  generatorName.set("spring")
+  inputSpec.set("$rootDir/openapi/openapiForOrgs.json")
+  outputDir.set("$projectDir/build/generated")
+  apiPackage.set("it.gov.pagopa.pu.pagopapayments.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.pagopapayments.dto.generated")
+  typeMappings.set(
+    mapOf(
+      "DateTime" to "String"
+    )
+  )
+  configOptions.set(
+    mapOf(
+      "dateLibrary" to "java8",
+      "requestMappingMode" to "api_interface",
+      "useSpringBoot3" to "true",
+      "interfaceOnly" to "true",
+      "useTags" to "true",
+      "useBeanValidation" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "enumPropertyNaming" to "original",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    )
+  )
+}
+
 jaxb {
   javaGen {
     register("paForNode") {

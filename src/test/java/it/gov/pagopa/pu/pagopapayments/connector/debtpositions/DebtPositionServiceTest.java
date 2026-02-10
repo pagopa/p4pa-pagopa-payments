@@ -16,7 +16,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.ORDINARY_DEBT_POSITION_ORIGINS;
 
 @ExtendWith(MockitoExtension.class)
 class DebtPositionServiceTest {
@@ -156,4 +159,22 @@ class DebtPositionServiceTest {
     Assertions.assertSame(expectedResult, result);
   }
 
+  @Test
+  void whenGetDebtPositionsByOrganizationIdAndNavThenInvokeClient(){
+    // Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String nav = "301000000026066731";
+
+    List<DebtPositionDTO> expectedResult = new ArrayList<>();
+
+    Mockito.when(clientMock.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken))
+      .thenReturn(expectedResult);
+
+    // When
+    List<DebtPositionDTO> result = service.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
 }

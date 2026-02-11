@@ -340,6 +340,6 @@ class DebtPositionClientTest {
     List<DebtPositionDTO> result = client.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
 
     // Then
-    Assertions.assertNull(result);
+    Assertions.assertTrue(result.isEmpty());
   }
 }

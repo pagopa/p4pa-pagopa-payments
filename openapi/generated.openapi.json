@@ -27,6 +27,9 @@
   }, {
     "name" : "taxonomies",
     "description" : "the taxonomies API"
+  }, {
+    "name" : "Payment Options Resource",
+    "description" : "the Payment Options Resource API"
   } ],
   "paths" : {
     "/printpaymentnotice/generate" : {
@@ -171,6 +174,131 @@
         "security" : [ {
           "BearerAuth" : [ ]
         } ]
+      }
+    },
+    "/payment-options/organizations/{organization-fiscal-code}/notices/{notice-number}" : {
+      "post" : {
+        "tags" : [ "Payment Options Resource" ],
+        "summary" : "Get payment options by noticeNumber",
+        "description" : "Returns payment options for a given notice and organization",
+        "operationId" : "getPaymentOptionsByNoticeNumber",
+        "parameters" : [ {
+          "name" : "notice-number",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "organization-fiscal-code",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Default app exception for status 404",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "httpStatusCode" : 404,
+                  "httpStatusDescription" : "Not Found",
+                  "appErrorCode" : "ODP-107",
+                  "timestamp" : 1724425035,
+                  "dateTime" : "2024-08-23T14:57:15.635528",
+                  "errorMessage" : "PAA_PAGAMENTO_SCONOSCIUTO Errore per pagamento sconosciuto"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "httpStatusCode" : 500,
+                  "httpStatusDescription" : "Internal Server Error",
+                  "appErrorCode" : "ODP-103",
+                  "timestamp" : 1724425035,
+                  "dateTime" : "2024-08-23T14:57:15.635528",
+                  "errorMessage" : "PAA_SYSTEM_ERROR Errore generico"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Default app exception for status 400",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "httpStatusCode" : 400,
+                  "httpStatusDescription" : "Bad Request",
+                  "appErrorCode" : "ODP-101",
+                  "timestamp" : 1724425035,
+                  "dateTime" : "2024-08-23T14:57:15.635528",
+                  "errorMessage" : "PAA_SINTASSI Errore di sintassi del modello nella richiesta"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Default app exception for status 409",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "httpStatusCode" : 409,
+                  "httpStatusDescription" : "Conflict",
+                  "appErrorCode" : "ODP-108",
+                  "timestamp" : 1724425035,
+                  "dateTime" : "2024-08-23T14:57:15.635528",
+                  "errorMessage" : "PAA_PAGAMENTO_DUPLICATO Errore per pagamento duplicato"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "Default app exception for status 422",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "httpStatusCode" : 422,
+                  "httpStatusDescription" : "Unprocessable Entity",
+                  "appErrorCode" : "ODP-110",
+                  "timestamp" : 1724425035,
+                  "dateTime" : "2024-08-23T14:57:15.635528",
+                  "errorMessage" : "PAA_PAGAMENTO_SCADUTO Errore per pagamento scaduto"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaymentOptionsResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/gpd/sync" : {
@@ -1146,6 +1274,135 @@
           }
         },
         "required" : [ "debtPositions", "requestId" ]
+      },
+      "ErrorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "httpStatusCode" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 500
+          },
+          "httpStatusDescription" : {
+            "type" : "string",
+            "example" : "Internal Server Error  (HTTP Status Code reference according to https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status)"
+          },
+          "errorMessage" : {
+            "type" : "string",
+            "example" : "An unexpected error has occurred. Please contact support."
+          },
+          "appErrorCode" : {
+            "type" : "string",
+            "example" : "ODP-<ERR_ID>"
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 1724425035
+          },
+          "dateTime" : {
+            "type" : "string",
+            "example" : "2024-08-23T14:57:15.635528"
+          }
+        }
+      },
+      "EnumInstallment" : {
+        "type" : "string",
+        "enum" : [ "POI_UNPAID", "POI_PAID", "POI_EXPIRED_NOT_PAYABLE", "POI_EXPIRED_UNPAID", "POI_INVALID" ]
+      },
+      "EnumPo" : {
+        "type" : "string",
+        "enum" : [ "PO_UNPAID", "PO_PAID", "PO_PARTIALLY_PAID", "PO_EXPIRED_NOT_PAYABLE", "PO_EXPIRED_UNPAID", "PO_INVALID" ]
+      },
+      "Installment" : {
+        "type" : "object",
+        "properties" : {
+          "nav" : {
+            "type" : "string"
+          },
+          "iuv" : {
+            "type" : "string"
+          },
+          "amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "dueDate" : {
+            "type" : "string"
+          },
+          "validFrom" : {
+            "type" : "string"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/EnumInstallment"
+          },
+          "statusReason" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PaymentOption" : {
+        "type" : "object",
+        "properties" : {
+          "description" : {
+            "type" : "string"
+          },
+          "numberOfInstallments" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "dueDate" : {
+            "type" : "string"
+          },
+          "validFrom" : {
+            "type" : "string"
+          },
+          "amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/EnumPo"
+          },
+          "statusReason" : {
+            "type" : "string"
+          },
+          "allCCP" : {
+            "type" : "boolean"
+          },
+          "installments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Installment"
+            }
+          }
+        }
+      },
+      "PaymentOptionsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "organizationFiscalCode" : {
+            "type" : "string"
+          },
+          "companyName" : {
+            "type" : "string"
+          },
+          "officeName" : {
+            "type" : "string"
+          },
+          "standin" : {
+            "type" : "boolean"
+          },
+          "paymentOptions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PaymentOption"
+            }
+          }
+        }
       },
       "TaxonomyDTO" : {
         "type" : "object",

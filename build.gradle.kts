@@ -180,8 +180,8 @@ tasks.register("dependenciesBuild") {
   description = "grouping all together automatically generate code tasks"
 
   dependsOn(
-    "openApiGenerateP4PAAUTH",
     "openApiGenerate",
+    "openApiGenerateP4PAAUTH",
     "openApiGenerateDEBTPOSITIONS",
     "openApiGenerateORGANIZATION",
     "openApiGenerateFILESHARE",
@@ -196,7 +196,8 @@ tasks.register("dependenciesBuild") {
     "openApiGeneratePUSIL",
     "jaxbJavaGenPaForNode",
     "jaxbJavaGenNodeForPa",
-    "jaxbJavaGenFlussoRiversamento"
+    "jaxbJavaGenFlussoRiversamento",
+    "openApiGenerateForOrgs"
   )
 }
 
@@ -212,7 +213,7 @@ springBoot {
 }
 
 openApiGenerate {
-  generatorName.set("spring")
+generatorName.set("spring")
   inputSpec.set("$rootDir/openapi/p4pa-pagopa-payments.openapi.yaml")
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.pu.pagopapayments.controller.generated")
@@ -666,15 +667,15 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   library.set("resttemplate")
 }
 
-tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGeneratePaymentOptionsForPSP") {
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateForOrgs") {
   group = "openapi"
   description = "description"
 
-  generatorName.set("java")
+  generatorName.set("spring")
   inputSpec.set("$rootDir/openapi/openapiForOrgs.json")
   outputDir.set("$projectDir/build/generated")
-  apiPackage.set("it.gov.pagopa.nodo.openapiForOrgs.controller.generated")
-  modelPackage.set("it.gov.pagopa.nodo.openapiForOrgs.dto.generated")
+  apiPackage.set("it.gov.pagopa.pu.fororgs.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.fororgs.dto.generated")
   typeMappings.set(
     mapOf(
       "DateTime" to "String"
@@ -684,6 +685,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     mapOf(
       "swaggerAnnotations" to "false",
       "openApiNullable" to "false",
+      "interfaceOnly" to "true",
       "dateLibrary" to "java8",
       "serializableModel" to "true",
       "useSpringBoot3" to "true",
@@ -697,7 +699,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
       "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
     )
   )
-  library.set("resttemplate")
+  library.set("spring-boot")
 }
 
 jaxb {

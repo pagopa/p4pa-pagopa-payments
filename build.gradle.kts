@@ -666,12 +666,15 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   library.set("resttemplate")
 }
 
-openApiGenerate {
-  generatorName.set("spring")
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGeneratePaymentOptionsForPSP") {
+  group = "openapi"
+  description = "description"
+
+  generatorName.set("java")
   inputSpec.set("$rootDir/openapi/openapiForOrgs.json")
   outputDir.set("$projectDir/build/generated")
-  apiPackage.set("it.gov.pagopa.pu.pagopapayments.controller.generated")
-  modelPackage.set("it.gov.pagopa.pu.pagopapayments.dto.generated")
+  apiPackage.set("it.gov.pagopa.nodo.openapiForOrgs.controller.generated")
+  modelPackage.set("it.gov.pagopa.nodo.openapiForOrgs.dto.generated")
   typeMappings.set(
     mapOf(
       "DateTime" to "String"
@@ -679,18 +682,22 @@ openApiGenerate {
   )
   configOptions.set(
     mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
       "dateLibrary" to "java8",
-      "requestMappingMode" to "api_interface",
+      "serializableModel" to "true",
       "useSpringBoot3" to "true",
-      "interfaceOnly" to "true",
-      "useTags" to "true",
-      "useBeanValidation" to "true",
+      "useJakartaEe" to "true",
+      "useOneOfInterfaces" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
       "generateConstructorWithAllArgs" to "true",
       "generatedConstructorWithRequiredArgs" to "true",
       "enumPropertyNaming" to "original",
       "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
     )
   )
+  library.set("resttemplate")
 }
 
 jaxb {

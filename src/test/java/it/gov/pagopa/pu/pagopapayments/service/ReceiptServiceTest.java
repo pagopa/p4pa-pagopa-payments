@@ -45,7 +45,7 @@ class ReceiptServiceTest {
 
     Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCESS_TOKEN);
     Mockito.when(authnServiceMock.getAccessToken(Mockito.anyString())).thenReturn(VALID_ACCESS_TOKEN);
-    Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN)).thenReturn(organization);
+    Mockito.when(paForNodeRequestValidatorServiceMock.paSendRtRequestValidate(request, VALID_ACCESS_TOKEN)).thenReturn(organization);
     Mockito.when(fileShareServiceMock.uploadRt(request, organization, VALID_ACCESS_TOKEN)).thenReturn(validIngestionFlowId);
 
     // when
@@ -55,7 +55,7 @@ class ReceiptServiceTest {
     Assertions.assertEquals(validIngestionFlowId, response);
     Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
     Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken(Mockito.anyString());
-    Mockito.verify(paForNodeRequestValidatorServiceMock, Mockito.times(1)).paForNodeRequestValidate(request, VALID_ACCESS_TOKEN);
+    Mockito.verify(paForNodeRequestValidatorServiceMock, Mockito.times(1)).paSendRtRequestValidate(request, VALID_ACCESS_TOKEN);
     Mockito.verify(fileShareServiceMock, Mockito.times(1)).uploadRt(request, organization, VALID_ACCESS_TOKEN);
   }
 }

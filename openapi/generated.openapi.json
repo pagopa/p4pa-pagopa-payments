@@ -726,15 +726,15 @@
   },
   "components" : {
     "schemas" : {
-      "CodeEnum" : {
+      "CategoryEnum" : {
         "type" : "string",
         "enum" : [ "PAGOPA_PAYMENTS_NOT_FOUND", "PAGOPA_PAYMENTS_BAD_REQUEST", "PAGOPA_PAYMENTS_GENERIC_ERROR", "PAGOPA_PAYMENTS_NOT_PAYABLE" ]
       },
       "PagoPaPaymentsErrorDTO" : {
         "type" : "object",
         "properties" : {
-          "code" : {
-            "$ref" : "#/components/schemas/CodeEnum"
+          "category" : {
+            "$ref" : "#/components/schemas/CategoryEnum"
           },
           "message" : {
             "type" : "string"
@@ -743,7 +743,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "code", "message" ]
+        "required" : [ "category", "message" ]
       },
       "Action" : {
         "type" : "string",

@@ -48,8 +48,37 @@ class PaSendRtMapperTest {
     Assertions.assertEquals(receiptBytes, response.getReceiptBytes());
     Assertions.assertEquals(request.getReceipt().getFiscalCode(), response.getFiscalCode());
     Assertions.assertEquals(request.getReceipt().getNoticeNumber(), response.getNoticeNumber());
+    Assertions.assertEquals(request.getReceipt().getTransferList().getTransfers().size(), response.getTransferList().size());
     TestUtils.checkNotNullFields(request);
   }
 
+  @Test
+  void givenRequestWithNullMetadataAndNullMbdWhenMappingThenEmptyValues() {
+    PaSendRTV2Request request = podamFactory.manufacturePojo(PaSendRTV2Request.class);
+    byte[] receiptBytes = podamFactory.manufacturePojo(byte[].class);
+
+    request.getReceipt().getTransferList().getTransfers().forEach(t -> {
+      t.setMetadata(null);
+      t.setMBDAttachment(null);
+    });
+
+    Mockito.when(jaxbTransformService.marshallingAsBytes(request, PaSendRTV2Request.class)).thenReturn(receiptBytes);
+
+    PaSendRtDTO response = paSendRTMapper.paSendRtV2Request2PaSendRtDTO(request);
+
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(request.getIdPA(), response.getIdPA());
+    Assertions.assertEquals(request.getIdBrokerPA(), response.getIdBrokerPA());
+    Assertions.assertEquals(request.getIdStation(), response.getIdStation());
+    Assertions.assertEquals(receiptBytes, response.getReceiptBytes());
+    Assertions.assertEquals(request.getReceipt().getFiscalCode(), response.getFiscalCode());
+    Assertions.assertEquals(request.getReceipt().getNoticeNumber(), response.getNoticeNumber());
+    Assertions.assertEquals(request.getReceipt().getTransferList().getTransfers().size(), response.getTransferList().size());
+    response.getTransferList().forEach(t -> {
+      Assertions.assertNull(t.getMetadata());
+      Assertions.assertNull(t.getMbdAttachment());
+    });
+    TestUtils.checkNotNullFields(request);
+  }
   //endregion
 }

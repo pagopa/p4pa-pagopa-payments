@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.exception;
 
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PagoPaPaymentsErrorDTO;
-import it.gov.pagopa.pu.pagopapayments.dto.generated.PagoPaPaymentsErrorDTO.CodeEnum;
+import it.gov.pagopa.pu.pagopapayments.dto.generated.PagoPaPaymentsErrorDTO.CategoryEnum;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,24 +34,24 @@ public class PagopaPaymentsExceptionHandler {
   @ExceptionHandler(NotFoundException.class)
   @ResponseStatus(value = HttpStatus.NOT_FOUND)
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleResourceNotFoundException(NotFoundException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.NOT_FOUND, PagoPaPaymentsErrorDTO.CodeEnum.PAGOPA_PAYMENTS_NOT_FOUND);
+    return handleException(ex, request, HttpStatus.NOT_FOUND, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_NOT_FOUND);
   }
 
   @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleViolationException(Exception ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.BAD_REQUEST, PagoPaPaymentsErrorDTO.CodeEnum.PAGOPA_PAYMENTS_BAD_REQUEST);
+    return handleException(ex, request, HttpStatus.BAD_REQUEST, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST);
   }
 
   @ExceptionHandler({ServletException.class, ErrorResponseException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleServletException(Exception ex, HttpServletRequest request) {
     HttpStatusCode httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-    PagoPaPaymentsErrorDTO.CodeEnum errorCode = PagoPaPaymentsErrorDTO.CodeEnum.PAGOPA_PAYMENTS_GENERIC_ERROR;
+    PagoPaPaymentsErrorDTO.CategoryEnum errorCode = PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_GENERIC_ERROR;
     if (ex instanceof ErrorResponse errorResponse) {
       httpStatus = errorResponse.getStatusCode();
       if (httpStatus.isSameCodeAs(HttpStatus.NOT_FOUND)) {
-        errorCode = PagoPaPaymentsErrorDTO.CodeEnum.PAGOPA_PAYMENTS_NOT_FOUND;
+        errorCode = PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_NOT_FOUND;
       } else if (httpStatus.is4xxClientError()) {
-        errorCode = PagoPaPaymentsErrorDTO.CodeEnum.PAGOPA_PAYMENTS_BAD_REQUEST;
+        errorCode = PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST;
       }
     }
     return handleException(ex, request, httpStatus, errorCode);
@@ -59,15 +59,15 @@ public class PagopaPaymentsExceptionHandler {
 
   @ExceptionHandler({RuntimeException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, PagoPaPaymentsErrorDTO.CodeEnum.PAGOPA_PAYMENTS_GENERIC_ERROR);
+    return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_GENERIC_ERROR);
   }
 
   @ExceptionHandler({NotPayableSilActualizedAmountException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleNotPayableSilActualizedAmountException(RuntimeException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.CONFLICT, CodeEnum.PAGOPA_PAYMENTS_NOT_PAYABLE);
+    return handleException(ex, request, HttpStatus.CONFLICT, CategoryEnum.PAGOPA_PAYMENTS_NOT_PAYABLE);
   }
 
-  static ResponseEntity<PagoPaPaymentsErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, PagoPaPaymentsErrorDTO.CodeEnum errorEnum) {
+  static ResponseEntity<PagoPaPaymentsErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, PagoPaPaymentsErrorDTO.CategoryEnum errorEnum) {
     logException(ex, request, httpStatus);
 
     String message = buildReturnedMessage(ex);

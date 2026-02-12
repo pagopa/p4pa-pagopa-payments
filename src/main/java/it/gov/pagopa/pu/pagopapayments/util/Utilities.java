@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.util;
 
 import org.slf4j.MDC;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ public class Utilities {
   }
 
   public static final String IUV_SEPARATOR = ",";
+  public static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
   public static String getTraceId() {
     return MDC.get("traceId");
@@ -56,5 +58,9 @@ public class Utilities {
       return null;
     }
     return str.length() <= maxLength ? str : str.substring(0, maxLength);
+  }
+
+  public static Long bigDecimalEuroToLongCentsAmount(BigDecimal euroAmount) {
+    return euroAmount != null ? euroAmount.multiply(HUNDRED).longValue() : null;
   }
 }

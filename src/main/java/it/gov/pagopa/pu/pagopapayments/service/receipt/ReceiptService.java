@@ -24,7 +24,7 @@ public class ReceiptService {
 
   public Long processReceivedReceipt(PaSendRtDTO request) {
     String accessToken = authnService.getAccessToken();
-    Organization organization = paForNodeRequestValidatorService.paForNodeRequestValidate(request, accessToken);
+    Organization organization = paForNodeRequestValidatorService.paSendRtRequestValidate(request, accessToken);
     //for file share we need an organization-specific access token
     String accessTokenOrg = authnService.getAccessToken(organization.getIpaCode());
     return fileShareService.uploadRt(request, organization, accessTokenOrg);

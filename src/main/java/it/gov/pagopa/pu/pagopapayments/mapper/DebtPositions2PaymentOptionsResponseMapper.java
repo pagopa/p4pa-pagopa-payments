@@ -1,15 +1,13 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
-import it.gov.pagopa.pu.fororgs.dto.generated.*;
 import it.gov.pagopa.pu.fororgs.dto.generated.PaymentOption;
+import it.gov.pagopa.pu.fororgs.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,8 +27,8 @@ public class DebtPositions2PaymentOptionsResponseMapper {
     response.setStandin(false);
 
     List<PaymentOption> paymentOptions = debtPositions.stream()
-      .flatMap(dp -> dp.getPaymentOptions().stream())
-      .map(this::mapPO)
+      .flatMap(dp -> dp.getPaymentOptions().stream()
+        .map(poDTO -> mapPO(poDTO, dp)))
       .toList();
 
     response.setPaymentOptions(paymentOptions);
@@ -38,21 +36,25 @@ public class DebtPositions2PaymentOptionsResponseMapper {
     return response;
   }
 
-  private PaymentOption mapPO(PaymentOptionDTO dto) {
+  private PaymentOption mapPO(PaymentOptionDTO poDTO, DebtPositionDTO dpDTO) {
     PaymentOption po = new PaymentOption();
 
-    po.setDescription(dto.getDescription());
-    po.setNumberOfInstallments(dto.getInstallments().size());
-    po.setDueDate(calculateMaxDueDate(dto.getInstallments()));
-    po.setValidFrom(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-    po.setAmount(dto.getTotalAmountCents());
-    po.setStatus(mapPOStatus(dto.getStatus()));
+    po.setDescription(poDTO.getDescription());
+    po.setNumberOfInstallments(poDTO.getInstallments().size());
+    po.setDueDate(calculateMaxDueDate(poDTO.getInstallments()));
+    po.setValidFrom(
+      dpDTO.getValidityDate() != null
+        ? dpDTO.getValidityDate().atStartOfDay().toString()
+        : null
+    );
+    po.setAmount(poDTO.getTotalAmountCents());
+    po.setStatus(mapPOStatus(poDTO.getStatus()));
     po.setStatusReason(null);
     po.setAllCCP(false);
 
-    List<Installment> installments = dto.getInstallments()
+    List<Installment> installments = poDTO.getInstallments()
       .stream()
-      .map(this::mapInstallment)
+      .map(inst -> mapInstallment(inst, dpDTO))
       .toList();
 
     po.setInstallments(installments);
@@ -69,20 +71,24 @@ public class DebtPositions2PaymentOptionsResponseMapper {
       .orElse(null);
   }
 
-  private Installment mapInstallment(InstallmentDTO dto) {
+  private Installment mapInstallment(InstallmentDTO installmentDTO, DebtPositionDTO dpDTO) {
     Installment installment = new Installment();
 
-    installment.setNav(dto.getNav());
-    installment.setIuv(dto.getIuv());
-    installment.setAmount(dto.getAmountCents());
-    installment.setDescription(dto.getRemittanceInformation());
+    installment.setNav(installmentDTO.getNav());
+    installment.setIuv(installmentDTO.getIuv());
+    installment.setAmount(installmentDTO.getAmountCents());
+    installment.setDescription(installmentDTO.getRemittanceInformation());
     installment.setDueDate(
-      dto.getDueDate() != null
-        ? ConversionUtils.atEndOfDay(dto.getDueDate()).toString()
+      installmentDTO.getDueDate() != null
+        ? ConversionUtils.atEndOfDay(installmentDTO.getDueDate()).toString()
         : null
     );
-    installment.setValidFrom(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-    installment.setStatus(mapInstallmentStatus(dto.getStatus()));
+    installment.setValidFrom(
+      dpDTO.getValidityDate() != null
+        ? dpDTO.getValidityDate().atStartOfDay().toString()
+        : null
+    );
+    installment.setStatus(mapInstallmentStatus(installmentDTO.getStatus()));
     installment.setStatusReason(null);
 
     return installment;
@@ -107,7 +113,8 @@ public class DebtPositions2PaymentOptionsResponseMapper {
       case UNPAID -> EnumInstallment.POI_UNPAID;
       case REPORTED, PAID -> EnumInstallment.POI_PAID;
       case EXPIRED -> EnumInstallment.POI_EXPIRED_NOT_PAYABLE;
-      case INVALID, CANCELLED, TO_SYNC, UNPAYABLE, DRAFT -> EnumInstallment.POI_INVALID;
+      case INVALID, CANCELLED, TO_SYNC, UNPAYABLE, DRAFT ->
+        EnumInstallment.POI_INVALID;
     };
   }
 }

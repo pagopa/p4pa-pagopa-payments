@@ -213,7 +213,7 @@ springBoot {
 }
 
 openApiGenerate {
-generatorName.set("spring")
+  generatorName.set("spring")
   inputSpec.set("$rootDir/openapi/p4pa-pagopa-payments.openapi.yaml")
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.pu.pagopapayments.controller.generated")
@@ -674,8 +674,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   generatorName.set("spring")
   inputSpec.set("$rootDir/openapi/openapiForOrgs.json")
   outputDir.set("$projectDir/build/generated")
-  apiPackage.set("it.gov.pagopa.pu.fororgs.controller.generated")
-  modelPackage.set("it.gov.pagopa.pu.fororgs.dto.generated")
+  apiPackage.set("it.gov.pagopa.pu.orgfornode.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.orgfornode.dto.generated")
   typeMappings.set(
     mapOf(
       "DateTime" to "String"

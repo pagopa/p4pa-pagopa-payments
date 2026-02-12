@@ -322,24 +322,4 @@ class DebtPositionClientTest {
     // Then
     Assertions.assertSame(expectedResult, result);
   }
-
-  @Test
-  void givenNonExistingDebtPositionWhenGetDebtPositionsByOrganizationIdAndNavThenEmptyList() {
-    //Given
-    String accessToken = "ACCESSTOKEN";
-    Long organizationId = 1L;
-    String nav = "301000000026066731";
-
-    Mockito.when(apisHolderMock.getDebtPositionApi(accessToken))
-      .thenReturn(debtPositionApiMock);
-
-    Mockito.when(debtPositionApiMock.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
-
-    // When
-    List<DebtPositionDTO> result = client.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
-
-    // Then
-    Assertions.assertTrue(result.isEmpty());
-  }
 }

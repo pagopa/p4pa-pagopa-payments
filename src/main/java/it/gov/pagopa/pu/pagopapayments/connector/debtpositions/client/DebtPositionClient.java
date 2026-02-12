@@ -4,7 +4,6 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
-import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +23,11 @@ public class DebtPositionClient {
   }
 
   public DebtPositionTypeOrg getDebtPositionTypeOrgById(Long debtPositionTypeOrgId, String accessToken) {
-    try{
+    try {
       return debtPositionsApisHolder
         .getDebtPositionTypeOrgEntityControllerApi(accessToken)
         .crudGetDebtpositiontypeorg(String.valueOf(debtPositionTypeOrgId));
-    } catch (HttpClientErrorException.NotFound e){
+    } catch (HttpClientErrorException.NotFound e) {
       log.info("Cannot find DeptPositionTypeOrg having id {}", debtPositionTypeOrgId);
       return null;
     }
@@ -49,7 +48,7 @@ public class DebtPositionClient {
     } catch (HttpClientErrorException.Conflict e) {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO, request.getNav());
     } catch (HttpClientErrorException ex) {
-      if(ex.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
+      if (ex.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
         throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO, request.getNav());
       }
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getNav());
@@ -67,8 +66,8 @@ public class DebtPositionClient {
     }
   }
 
-  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndCode(Long organizationId, String code, String accessToken){
-    try{
+  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndCode(Long organizationId, String code, String accessToken) {
+    try {
       return debtPositionsApisHolder.getDebtPositionTypeOrgSearchControllerApi(accessToken)
         .crudDebtPositionTypeOrgsFindByOrganizationIdAndCode(organizationId, code);
     } catch (HttpClientErrorException.NotFound e) {
@@ -84,12 +83,7 @@ public class DebtPositionClient {
   }
 
   public List<DebtPositionDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOrigins, String accessToken) {
-    try {
-      return debtPositionsApisHolder.getDebtPositionApi(accessToken)
-        .getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOrigins);
-    } catch (HttpClientErrorException.NotFound e) {
-      log.info("Couldn't find any Debt Position having organizationId {} and nav {}", organizationId, nav);
-      return Collections.emptyList();
-    }
+    return debtPositionsApisHolder.getDebtPositionApi(accessToken)
+      .getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOrigins);
   }
 }

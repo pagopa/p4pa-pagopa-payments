@@ -60,9 +60,10 @@ class DebtPositions2PaymentOptionsResponseMapperTest {
 
     // verify
     Assertions.assertNotNull(response);
+    TestUtils.checkNotNullFields(response, "organizationFiscalCode", "companyName", "officeName", "standin");
+
     Assertions.assertNull(response.getOrganizationFiscalCode());
     Assertions.assertNull(response.getCompanyName());
-
     Assertions.assertNotNull(response.getPaymentOptions());
     Assertions.assertTrue(response.getPaymentOptions().isEmpty());
   }
@@ -74,9 +75,10 @@ class DebtPositions2PaymentOptionsResponseMapperTest {
 
     // verify
     Assertions.assertNotNull(response);
+    TestUtils.checkNotNullFields(response, "organizationFiscalCode", "companyName", "officeName", "standin");
+
     Assertions.assertNull(response.getOrganizationFiscalCode());
     Assertions.assertNull(response.getCompanyName());
-
     Assertions.assertNotNull(response.getPaymentOptions());
     Assertions.assertTrue(response.getPaymentOptions().isEmpty());
   }
@@ -130,9 +132,11 @@ class DebtPositions2PaymentOptionsResponseMapperTest {
     // verify flatten
     Assertions.assertNotNull(response.getPaymentOptions());
     Assertions.assertEquals(expectedPaymentOptions, response.getPaymentOptions().size());
+    TestUtils.checkNotNullFields(response, "officeName");
 
-    // verify mapping su un PaymentOption qualsiasi
+    // verify mapping
     PaymentOption mappedPo = response.getPaymentOptions().getFirst();
+    TestUtils.checkNotNullFields(mappedPo, "statusReason", "dueDate");
     Assertions.assertNotNull(mappedPo);
 
     Assertions.assertEquals("PO_DESC", mappedPo.getDescription());
@@ -150,6 +154,7 @@ class DebtPositions2PaymentOptionsResponseMapperTest {
 
     Installment mappedInstallment = mappedPo.getInstallments().getFirst();
     Assertions.assertNotNull(mappedInstallment);
+    TestUtils.checkNotNullFields(mappedInstallment, "statusReason");
     Assertions.assertEquals(EnumInstallment.POI_UNPAID, mappedInstallment.getStatus());
     Assertions.assertNull(mappedInstallment.getStatusReason());
     Assertions.assertNotNull(mappedInstallment.getValidFrom());
@@ -200,6 +205,7 @@ class DebtPositions2PaymentOptionsResponseMapperTest {
 
     // verify
     PaymentOption mapped = response.getPaymentOptions().getFirst();
+    TestUtils.checkNotNullFields(mapped, "statusReason");
     Assertions.assertEquals(EnumPo.PO_PAID, mapped.getStatus());
 
     String expectedMaxDueDate = Objects.requireNonNull(ConversionUtils.atEndOfDay(d2)).toString();
@@ -207,9 +213,11 @@ class DebtPositions2PaymentOptionsResponseMapperTest {
 
     Installment mappedI1 = mapped.getInstallments().get(0);
     Assertions.assertNull(mappedI1.getDueDate());
+    TestUtils.checkNotNullFields(mappedI1, "dueDate", "statusReason");
     Assertions.assertEquals(EnumInstallment.POI_PAID, mappedI1.getStatus());
 
     Installment mappedI3 = mapped.getInstallments().get(2);
+    TestUtils.checkNotNullFields(mappedI3, "statusReason");
     Assertions.assertEquals(
       Objects.requireNonNull(ConversionUtils.atEndOfDay(d2)).toString(),
       mappedI3.getDueDate()
@@ -242,9 +250,11 @@ class DebtPositions2PaymentOptionsResponseMapperTest {
 
     // verify
     PaymentOption mappedPo = response.getPaymentOptions().getFirst();
+    TestUtils.checkNotNullFields(mappedPo, "statusReason", "dueDate");
     Assertions.assertEquals(EnumPo.PO_INVALID, mappedPo.getStatus());
 
     Installment mappedInst = mappedPo.getInstallments().getFirst();
+    TestUtils.checkNotNullFields(mappedInst, "statusReason");
     Assertions.assertEquals(EnumInstallment.POI_INVALID, mappedInst.getStatus());
   }
 }

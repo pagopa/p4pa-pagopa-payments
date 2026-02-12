@@ -2,18 +2,18 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.fororgs.controller.generated.PaymentOptionsApi;
 import it.gov.pagopa.pu.fororgs.dto.generated.PaymentOptionsResponse;
-import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsforpsp.PaymentOptionsForPSPService;
+import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsforpsp.PaymentOptionsForNodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
-public class PaymentOptionsForPSPController implements PaymentOptionsApi {
+public class PaymentOptionsForNodeController implements PaymentOptionsApi {
 
-  private final PaymentOptionsForPSPService service;
+  private final PaymentOptionsForNodeService service;
 
-  public PaymentOptionsForPSPController(PaymentOptionsForPSPService service) {
+  public PaymentOptionsForNodeController(PaymentOptionsForNodeService service) {
     this.service = service;
   }
 

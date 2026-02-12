@@ -7,7 +7,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.mapper.DebtPositions2PaymentOptionsResponseMapper;
-import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsforpsp.PaymentOptionsForPSPService;
+import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsforpsp.PaymentOptionsForNodeService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +21,7 @@ import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.ORDINARY_DE
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentOptionsForPSPServiceTest {
+class PaymentOptionsForNodeServiceTest {
 
   @Mock
   private AuthnService authnServiceMock;
@@ -36,7 +36,7 @@ class PaymentOptionsForPSPServiceTest {
   private DebtPositions2PaymentOptionsResponseMapper mapperMock;
 
   @InjectMocks
-  private PaymentOptionsForPSPService service;
+  private PaymentOptionsForNodeService service;
 
   @Test
   void givenValidInputsWhenGetPaymentOptionsThenOk() {

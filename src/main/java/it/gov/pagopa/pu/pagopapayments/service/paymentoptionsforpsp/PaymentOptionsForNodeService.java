@@ -14,14 +14,14 @@ import java.util.List;
 import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.ORDINARY_DEBT_POSITION_ORIGINS;
 
 @Service
-public class PaymentOptionsForPSPService {
+public class PaymentOptionsForNodeService {
 
   private final AuthnService authnService;
   private final OrganizationService organizationService;
   private final DebtPositionService debtPositionService;
   private final DebtPositions2PaymentOptionsResponseMapper mapper;
 
-  public PaymentOptionsForPSPService(AuthnService authnService, OrganizationService organizationService, DebtPositionService debtPositionService, DebtPositions2PaymentOptionsResponseMapper mapper) {
+  public PaymentOptionsForNodeService(AuthnService authnService, OrganizationService organizationService, DebtPositionService debtPositionService, DebtPositions2PaymentOptionsResponseMapper mapper) {
     this.authnService = authnService;
     this.organizationService = organizationService;
     this.debtPositionService = debtPositionService;

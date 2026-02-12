@@ -1,7 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.fororgs.dto.generated.PaymentOptionsResponse;
-import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsforpsp.PaymentOptionsForPSPService;
+import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsforpsp.PaymentOptionsForNodeService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,13 +15,18 @@ import org.springframework.http.ResponseEntity;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentOptionsForPSPControllerTest {
+class PaymentOptionsForNodeControllerTest {
 
   @Mock
-  private PaymentOptionsForPSPService serviceMock;
+  private PaymentOptionsForNodeService serviceMock;
 
   @InjectMocks
-  private PaymentOptionsForPSPController controller;
+  private PaymentOptionsForNodeController controller;
+
+  @AfterEach
+  void verifyNoMore() {
+    verifyNoMoreInteractions(serviceMock);
+  }
 
   @Test
   void givenServiceReturnsResponseWhenGetPaymentOptionsByNoticeNumberThenOk() {
@@ -40,8 +46,7 @@ class PaymentOptionsForPSPControllerTest {
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertSame(expected, response.getBody());
 
-    verify(serviceMock, times(1)).getPaymentOptions(noticeNumber, organizationFiscalCode);
-    verifyNoMoreInteractions(serviceMock);
+    verify(serviceMock).getPaymentOptions(noticeNumber, organizationFiscalCode);
   }
 
   @Test
@@ -61,7 +66,6 @@ class PaymentOptionsForPSPControllerTest {
     Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     Assertions.assertNull(response.getBody());
 
-    verify(serviceMock, times(1)).getPaymentOptions(noticeNumber, organizationFiscalCode);
-    verifyNoMoreInteractions(serviceMock);
+    verify(serviceMock).getPaymentOptions(noticeNumber, organizationFiscalCode);
   }
 }

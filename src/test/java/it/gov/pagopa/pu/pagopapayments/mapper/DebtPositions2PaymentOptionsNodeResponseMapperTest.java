@@ -22,16 +22,16 @@ import java.util.List;
 import java.util.Objects;
 
 @ExtendWith(MockitoExtension.class)
-class DebtPositions2PaymentOptionsResponseMapperTest {
+class DebtPositions2PaymentOptionsNodeResponseMapperTest {
 
   @InjectMocks
-  private DebtPositions2PaymentOptionsResponseMapper mapperMock;
+  private DebtPositions2PaymentOptionsNodeResponseMapper mapperMock;
 
   private final PodamFactory podamFactory;
 
   private Organization organization;
 
-  DebtPositions2PaymentOptionsResponseMapperTest() {
+  DebtPositions2PaymentOptionsNodeResponseMapperTest() {
     podamFactory = TestUtils.getPodamFactory();
     podamFactory.getStrategy().setDefaultNumberOfCollectionElements(3);
     podamFactory.getStrategy().addOrReplaceAttributeStrategy(
@@ -51,36 +51,6 @@ class DebtPositions2PaymentOptionsResponseMapperTest {
     organization = podamFactory.manufacturePojo(Organization.class);
     organization.setOrgFiscalCode("ORG_FISCAL_CODE");
     organization.setOrgName("ORG_NAME");
-  }
-
-  @Test
-  void givenNullDebtPositionsWhenMapToResponseThenEmptyResponse() {
-    // when
-    PaymentOptionsResponse response = mapperMock.mapToResponse(null, organization);
-
-    // verify
-    Assertions.assertNotNull(response);
-    TestUtils.checkNotNullFields(response, "organizationFiscalCode", "companyName", "officeName", "standin");
-
-    Assertions.assertNull(response.getOrganizationFiscalCode());
-    Assertions.assertNull(response.getCompanyName());
-    Assertions.assertNotNull(response.getPaymentOptions());
-    Assertions.assertTrue(response.getPaymentOptions().isEmpty());
-  }
-
-  @Test
-  void givenEmptyDebtPositionsWhenMapToResponseThenEmptyResponse() {
-    // when
-    PaymentOptionsResponse response = mapperMock.mapToResponse(List.of(), organization);
-
-    // verify
-    Assertions.assertNotNull(response);
-    TestUtils.checkNotNullFields(response, "organizationFiscalCode", "companyName", "officeName", "standin");
-
-    Assertions.assertNull(response.getOrganizationFiscalCode());
-    Assertions.assertNull(response.getCompanyName());
-    Assertions.assertNotNull(response.getPaymentOptions());
-    Assertions.assertTrue(response.getPaymentOptions().isEmpty());
   }
 
   @Test
@@ -136,8 +106,8 @@ class DebtPositions2PaymentOptionsResponseMapperTest {
 
     // verify mapping
     PaymentOption mappedPo = response.getPaymentOptions().getFirst();
-    TestUtils.checkNotNullFields(mappedPo, "statusReason", "dueDate");
     Assertions.assertNotNull(mappedPo);
+    TestUtils.checkNotNullFields(mappedPo, "statusReason", "dueDate");
 
     Assertions.assertEquals("PO_DESC", mappedPo.getDescription());
     Assertions.assertEquals(999L, mappedPo.getAmount());

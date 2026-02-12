@@ -12,14 +12,10 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class DebtPositions2PaymentOptionsResponseMapper {
+public class DebtPositions2PaymentOptionsNodeResponseMapper {
 
   public PaymentOptionsResponse mapToResponse(List<DebtPositionDTO> debtPositions, Organization organization) {
     PaymentOptionsResponse response = new PaymentOptionsResponse();
-
-    if (debtPositions == null || debtPositions.isEmpty()) {
-      return response;
-    }
 
     response.setOrganizationFiscalCode(organization.getOrgFiscalCode());
     response.setCompanyName(organization.getOrgName());

@@ -856,7 +856,7 @@
     "schemas" : {
       "CategoryEnum" : {
         "type" : "string",
-        "enum" : [ "PAGOPA_PAYMENTS_NOT_FOUND", "PAGOPA_PAYMENTS_BAD_REQUEST", "PAGOPA_PAYMENTS_GENERIC_ERROR", "PAGOPA_PAYMENTS_NOT_PAYABLE" ]
+        "enum" : [ "PAGOPA_PAYMENTS_NOT_FOUND", "PAGOPA_PAYMENTS_BAD_REQUEST", "PAGOPA_PAYMENTS_GENERIC_ERROR", "PAGOPA_PAYMENTS_NOT_PAYABLE", "PAGOPA_PAYMENTS_CONFLICT" ]
       },
       "PagoPaPaymentsErrorDTO" : {
         "type" : "object",

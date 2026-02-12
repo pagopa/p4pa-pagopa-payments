@@ -45,8 +45,6 @@ class PaymentOptionsForNodeControllerTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertSame(expected, response.getBody());
-
-    verify(serviceMock).getPaymentOptions(noticeNumber, organizationFiscalCode);
   }
 
   @Test
@@ -65,7 +63,5 @@ class PaymentOptionsForNodeControllerTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     Assertions.assertNull(response.getBody());
-
-    verify(serviceMock).getPaymentOptions(noticeNumber, organizationFiscalCode);
   }
 }

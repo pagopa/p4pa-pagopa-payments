@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
-import it.gov.pagopa.pu.fororgs.controller.generated.PaymentOptionsApi;
-import it.gov.pagopa.pu.fororgs.dto.generated.PaymentOptionsResponse;
+import it.gov.pagopa.pu.orgfornode.controller.generated.PaymentOptionsApi;
+import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOptionsResponse;
 import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsforpsp.PaymentOptionsForNodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

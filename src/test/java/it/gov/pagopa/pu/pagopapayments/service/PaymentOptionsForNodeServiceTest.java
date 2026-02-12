@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.fororgs.dto.generated.PaymentOptionsResponse;
+import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOptionsResponse;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;

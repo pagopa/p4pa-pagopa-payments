@@ -28,8 +28,8 @@
     "name" : "taxonomies",
     "description" : "the taxonomies API"
   }, {
-    "name" : "Payment Options Resource",
-    "description" : "the Payment Options Resource API"
+    "name" : "Payment Options For Node Resource",
+    "description" : "the Payment Options For Node Resource API"
   } ],
   "paths" : {
     "/printpaymentnotice/generate" : {
@@ -178,7 +178,7 @@
     },
     "/payment-options/organizations/{organization-fiscal-code}/notices/{notice-number}" : {
       "post" : {
-        "tags" : [ "Payment Options Resource" ],
+        "tags" : [ "Payment Options For Node Resource" ],
         "summary" : "Get payment options by noticeNumber",
         "description" : "Returns payment options for a given notice and organization",
         "operationId" : "getPaymentOptionsByNoticeNumber",

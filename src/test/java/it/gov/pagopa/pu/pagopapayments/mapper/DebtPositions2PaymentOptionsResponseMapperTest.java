@@ -1,8 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
-import it.gov.pagopa.pu.fororgs.dto.generated.*;
-import it.gov.pagopa.pu.fororgs.dto.generated.PaymentOption;
+import it.gov.pagopa.pu.orgfornode.dto.generated.*;
+import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOption;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;

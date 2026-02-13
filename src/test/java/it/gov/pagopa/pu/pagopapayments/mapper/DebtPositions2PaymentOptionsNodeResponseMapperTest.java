@@ -54,6 +54,21 @@ class DebtPositions2PaymentOptionsNodeResponseMapperTest {
   }
 
   @Test
+  void givenNullDebtPositionsWhenMapToResponseThenHeaderIsFilledAndNoPaymentOptions() {
+    // when
+    PaymentOptionsResponse response = mapperMock.mapToResponse(null, organization);
+
+    // verify
+    Assertions.assertNotNull(response);
+    TestUtils.checkNotNullFields(response, "organizationFiscalCode", "companyName", "officeName", "standin");
+
+    Assertions.assertEquals("ORG_FISCAL_CODE", response.getOrganizationFiscalCode());
+    Assertions.assertEquals("ORG_NAME", response.getCompanyName());
+    Assertions.assertNotNull(response.getPaymentOptions());
+    Assertions.assertTrue(response.getPaymentOptions().isEmpty());
+  }
+
+  @Test
   void givenValidDebtPositionsWhenMapToResponseThenOkAndFlattenPaymentOptions() {
     // given
     List<DebtPositionDTO> debtPositions = List.of(

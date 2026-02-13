@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOptionsResponse;
-import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsforpsp.PaymentOptionsForNodeService;
+import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsfornode.PaymentOptionsForNodeService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

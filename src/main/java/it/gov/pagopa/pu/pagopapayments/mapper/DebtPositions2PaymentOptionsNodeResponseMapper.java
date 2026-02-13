@@ -22,9 +22,13 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
     response.setOfficeName(null);
     response.setStandin(false);
 
-    List<PaymentOption> paymentOptions = debtPositions.stream()
-      .flatMap(dp -> dp.getPaymentOptions().stream()
-        .map(poDTO -> mapPO(poDTO, dp)))
+    List<PaymentOption> paymentOptions = (debtPositions == null ? List.<DebtPositionDTO>of() : debtPositions).stream()
+      .filter(Objects::nonNull)
+      .flatMap(dp -> {
+        List<PaymentOptionDTO> po = dp.getPaymentOptions();
+        return po.stream()
+          .map(poDTO -> mapPO(poDTO, dp));
+      })
       .toList();
 
     response.setPaymentOptions(paymentOptions);

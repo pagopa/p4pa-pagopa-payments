@@ -40,7 +40,7 @@ public class PaymentOptionsForNodeService {
     }
 
     List<DebtPositionDTO> debtPositions = debtPositionService.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), noticeNumber, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
-    if (debtPositions == null) {
+    if (debtPositions == null || debtPositions.isEmpty()) {
       return null;
     }
 

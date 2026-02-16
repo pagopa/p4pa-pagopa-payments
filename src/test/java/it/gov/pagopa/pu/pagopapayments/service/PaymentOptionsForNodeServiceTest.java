@@ -119,6 +119,28 @@ class PaymentOptionsForNodeServiceTest {
   }
 
   @Test
+  void givenDebtPositionsEmptyWhenGetPaymentOptionsThenReturnNull() {
+    String noticeNumber = "NAV123";
+    String organizationFiscalCode = "ORG_FISCAL_CODE";
+    String accessToken = "ACCESS_TOKEN";
+    Long organizationId = 1L;
+
+    Organization organization = new Organization();
+    organization.setOrganizationId(organizationId);
+
+    when(authnServiceMock.getAccessToken()).thenReturn(accessToken);
+    when(organizationServiceMock.getOrganizationByFiscalCode(organizationFiscalCode, accessToken))
+      .thenReturn(organization);
+    when(debtPositionServiceMock.getDebtPositionsByOrganizationIdAndNav(
+      organizationId, noticeNumber, ORDINARY_DEBT_POSITION_ORIGINS, accessToken
+    )).thenReturn(List.of());
+
+    PaymentOptionsResponseForNode response = service.getPaymentOptions(noticeNumber, organizationFiscalCode);
+
+    Assertions.assertNull(response);
+  }
+
+  @Test
   void givenMoreThanOneDebtPositionWhenGetPaymentOptionsThenThrowConflict() {
     String noticeNumber = "NAV123";
     String organizationFiscalCode = "ORG_FISCAL_CODE";

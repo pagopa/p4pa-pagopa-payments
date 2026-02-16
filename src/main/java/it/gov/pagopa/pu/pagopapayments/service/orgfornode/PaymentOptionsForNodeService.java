@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.pagopapayments.exception.ConflictException;
 import it.gov.pagopa.pu.pagopapayments.exception.NotFoundException;
 import it.gov.pagopa.pu.pagopapayments.mapper.DebtPositions2PaymentOptionsNodeResponseMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class PaymentOptionsForNodeService {
     }
 
     List<DebtPositionDTO> debtPositions = debtPositionService.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), noticeNumber, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
-    if (debtPositions == null) {
+    if (CollectionUtils.isEmpty(debtPositions)) {
       return null;
     }
 

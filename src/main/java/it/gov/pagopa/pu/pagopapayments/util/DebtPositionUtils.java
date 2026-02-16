@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.util;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.debtpositions.dto.generated.PaymentOptionStatus;
 
@@ -30,4 +31,16 @@ public class DebtPositionUtils {
     PaymentOptionStatus.TO_SYNC,
     PaymentOptionStatus.UNPAID,
     PaymentOptionStatus.PARTIALLY_PAID);
+
+  public static boolean isPayableInstallment(InstallmentDTO installment) {
+    if (installment == null || installment.getStatus() == null) {
+      return false;
+    }
+
+    InstallmentStatus status = InstallmentStatus.TO_SYNC.equals(installment.getStatus())
+      ? (installment.getSyncStatus() != null ? installment.getSyncStatus().getSyncStatusTo() : null)
+      : installment.getStatus();
+
+    return status != null && PAYABLE_INSTALLMENT_STATUSES.contains(status);
+  }
 }

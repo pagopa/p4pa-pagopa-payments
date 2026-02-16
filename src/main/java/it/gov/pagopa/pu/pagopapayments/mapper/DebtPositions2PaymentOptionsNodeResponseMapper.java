@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.orgfornode.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -39,10 +40,8 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
   }
 
   private PaymentOptionForNode mapPO(PaymentOptionDTO poDTO, DebtPositionDTO dpDTO) {
-    List<InstallmentDTO> src = poDTO.getInstallments();
-
-    List<InstallmentDTO> payable = src.stream()
-      .filter(this::isPayableInstallment)
+    List<InstallmentDTO> payable = poDTO.getInstallments().stream()
+      .filter(DebtPositionUtils::isPayableInstallment)
       .toList();
 
     if (payable.isEmpty()) {
@@ -98,23 +97,6 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
     installment.setStatusReason(null);
 
     return installment;
-  }
-
-  private boolean isPayableInstallment(InstallmentDTO inst) {
-    if (inst == null || inst.getStatus() == null) {
-      return false;
-    }
-
-    if (PAYABLE_INSTALLMENT_STATUSES.contains(inst.getStatus())) {
-      return true;
-    }
-
-    if (inst.getStatus() == InstallmentStatus.TO_SYNC) {
-      InstallmentSyncStatus sync = inst.getSyncStatus();
-      return sync != null && sync.getSyncStatusTo() == InstallmentStatus.UNPAID;
-    }
-
-    return false;
   }
 
   private EnumPoForNode mapPOStatus(PaymentOptionStatus status) {

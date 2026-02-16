@@ -23,8 +23,11 @@ public class DebtPositionUtils {
     InstallmentStatus.PAID,
     InstallmentStatus.REPORTED);
 
+  public static final Set<InstallmentStatus> PAYABLE_INSTALLMENT_STATUSES = Set.of(
+    InstallmentStatus.UNPAID);
+
   public static final Set<PaymentOptionStatus> PAYABLE_PAYMENT_OPTION_STATUSES = Set.of(
+    PaymentOptionStatus.TO_SYNC,
     PaymentOptionStatus.UNPAID,
-    PaymentOptionStatus.PARTIALLY_PAID
-  );
+    PaymentOptionStatus.PARTIALLY_PAID);
 }

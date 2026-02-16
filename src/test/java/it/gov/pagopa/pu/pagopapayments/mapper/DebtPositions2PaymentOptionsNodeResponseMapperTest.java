@@ -82,6 +82,7 @@ class DebtPositions2PaymentOptionsNodeResponseMapperTest {
     TestUtils.checkNotNullFields(response, "officeName");
 
     Assertions.assertEquals(2, response.getPaymentOptions().size());
+    Assertions.assertFalse(response.getPaymentOptions().contains(null));
 
     PaymentOptionForNode first = response.getPaymentOptions().getFirst();
     Assertions.assertNotNull(first);
@@ -156,7 +157,7 @@ class DebtPositions2PaymentOptionsNodeResponseMapperTest {
   }
 
   @Test
-  void givenInstallmentCancelledWhenMapToResponseThenMappedToInvalid() {
+  void givenInstallmentCancelledWhenMapToResponseThenPoIsDiscarded() {
     DebtPositionDTO dp = podamFactory.manufacturePojo(DebtPositionDTO.class);
 
     PaymentOptionDTO po = podamFactory.manufacturePojo(PaymentOptionDTO.class);
@@ -165,6 +166,7 @@ class DebtPositions2PaymentOptionsNodeResponseMapperTest {
     po.setTotalAmountCents(1L);
 
     InstallmentDTO inst = newInstallment("NAV", InstallmentStatus.CANCELLED, LocalDate.now().plusDays(2));
+
     po.setInstallments(List.of(inst));
     dp.setPaymentOptions(List.of(po));
 
@@ -173,15 +175,62 @@ class DebtPositions2PaymentOptionsNodeResponseMapperTest {
     Assertions.assertNotNull(response);
     TestUtils.checkNotNullFields(response, "officeName");
 
+    Assertions.assertNotNull(response.getPaymentOptions());
+    Assertions.assertTrue(response.getPaymentOptions().isEmpty());
+  }
+
+  @Test
+  void givenInstallmentToSyncWithSyncStatusToUnpaidWhenMapToResponseThenInstallmentIsIncluded() {
+    DebtPositionDTO dp = podamFactory.manufacturePojo(DebtPositionDTO.class);
+
+    InstallmentDTO toSync = newInstallment("NAV_TS", InstallmentStatus.TO_SYNC, LocalDate.now().plusDays(1));
+    InstallmentSyncStatus sync = new InstallmentSyncStatus();
+    sync.setSyncStatusFrom(InstallmentStatus.DRAFT);
+    sync.setSyncStatusTo(InstallmentStatus.UNPAID);
+    toSync.setSyncStatus(sync);
+
+    PaymentOptionDTO po = podamFactory.manufacturePojo(PaymentOptionDTO.class);
+    po.setStatus(PaymentOptionStatus.UNPAID);
+    po.setInstallments(List.of(toSync));
+    dp.setPaymentOptions(List.of(po));
+
+    PaymentOptionsResponseForNode response = mapper.mapToResponse(dp, organization);
+
+    Assertions.assertNotNull(response);
+    TestUtils.checkNotNullFields(response, "officeName");
+
+    Assertions.assertEquals(1, response.getPaymentOptions().size());
+    Assertions.assertNotNull(response.getPaymentOptions().getFirst());
+
     PaymentOptionForNode mappedPo = response.getPaymentOptions().getFirst();
-    Assertions.assertNotNull(mappedPo);
-    TestUtils.checkNotNullFields(mappedPo, "statusReason", "validFrom");
+    Assertions.assertEquals(1, mappedPo.getInstallments().size());
 
     InstallmentForNode mappedInst = mappedPo.getInstallments().getFirst();
-    Assertions.assertNotNull(mappedInst);
-    TestUtils.checkNotNullFields(mappedInst, "statusReason", "validFrom");
+    Assertions.assertEquals("NAV_TS", mappedInst.getNav());
+  }
 
-    Assertions.assertEquals(EnumInstallmentForNode.POI_INVALID, mappedInst.getStatus());
+  @Test
+  void givenInstallmentToSyncWithSyncStatusToPaidWhenMapToResponseThenPoIsDiscarded() {
+    DebtPositionDTO dp = podamFactory.manufacturePojo(DebtPositionDTO.class);
+
+    InstallmentDTO toSync = newInstallment("NAV_TS", InstallmentStatus.TO_SYNC, LocalDate.now().plusDays(1));
+    InstallmentSyncStatus sync = new InstallmentSyncStatus();
+    sync.setSyncStatusFrom(InstallmentStatus.UNPAID);
+    sync.setSyncStatusTo(InstallmentStatus.PAID);
+    toSync.setSyncStatus(sync);
+
+    PaymentOptionDTO po = podamFactory.manufacturePojo(PaymentOptionDTO.class);
+    po.setStatus(PaymentOptionStatus.UNPAID);
+    po.setInstallments(List.of(toSync));
+    dp.setPaymentOptions(List.of(po));
+
+    PaymentOptionsResponseForNode response = mapper.mapToResponse(dp, organization);
+
+    Assertions.assertNotNull(response);
+    TestUtils.checkNotNullFields(response, "officeName");
+
+    Assertions.assertNotNull(response.getPaymentOptions());
+    Assertions.assertTrue(response.getPaymentOptions().isEmpty());
   }
 
   private InstallmentDTO newInstallment(String nav, InstallmentStatus status, LocalDate dueDate) {

@@ -10,8 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.PAID_INSTALLMENT_STATUSES;
-import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.PAYABLE_PAYMENT_OPTION_STATUSES;
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.*;
 
 @Component
 public class DebtPositions2PaymentOptionsNodeResponseMapper {
@@ -31,6 +30,7 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
     List<PaymentOptionForNode> paymentOptions = dp.getPaymentOptions().stream()
       .filter(poDTO -> PAYABLE_PAYMENT_OPTION_STATUSES.contains(poDTO.getStatus()))
       .map(poDTO -> mapPO(poDTO, dp))
+      .filter(Objects::nonNull)
       .toList();
 
     response.setPaymentOptions(paymentOptions);
@@ -41,11 +41,11 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
   private PaymentOptionForNode mapPO(PaymentOptionDTO poDTO, DebtPositionDTO dpDTO) {
     List<InstallmentDTO> src = poDTO.getInstallments();
 
-    List<InstallmentDTO> notPaid = src.stream()
-      .filter(inst -> inst.getStatus() == null || !PAID_INSTALLMENT_STATUSES.contains(inst.getStatus()))
+    List<InstallmentDTO> payable = src.stream()
+      .filter(this::isPayableInstallment)
       .toList();
 
-    if (notPaid.isEmpty()) {
+    if (payable.isEmpty()) {
       return null;
     }
 
@@ -63,7 +63,7 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
     po.setStatusReason(null);
     po.setAllCCP(false);
 
-    po.setInstallments(notPaid.stream().map(inst -> mapInstallment(inst, dpDTO)).toList());
+    po.setInstallments(payable.stream().map(inst -> mapInstallment(inst, dpDTO)).toList());
 
     return po;
   }
@@ -98,6 +98,23 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
     installment.setStatusReason(null);
 
     return installment;
+  }
+
+  private boolean isPayableInstallment(InstallmentDTO inst) {
+    if (inst == null || inst.getStatus() == null) {
+      return false;
+    }
+
+    if (PAYABLE_INSTALLMENT_STATUSES.contains(inst.getStatus())) {
+      return true;
+    }
+
+    if (inst.getStatus() == InstallmentStatus.TO_SYNC) {
+      InstallmentSyncStatus sync = inst.getSyncStatus();
+      return sync != null && sync.getSyncStatusTo() == InstallmentStatus.UNPAID;
+    }
+
+    return false;
   }
 
   private EnumPoForNode mapPOStatus(PaymentOptionStatus status) {

@@ -1241,6 +1241,9 @@
           },
           "mbdAttachment" : {
             "type" : "string"
+          },
+          "flagOwner" : {
+            "type" : "boolean"
           }
         },
         "required" : [ "amountCents", "category", "orgFiscalCode", "orgName", "remittanceInformation", "transferIndex" ]

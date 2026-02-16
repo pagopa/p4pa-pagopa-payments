@@ -23,7 +23,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.ORDINARY_DEBT_POSITION_ORIGINS;
 
 @ExtendWith(MockitoExtension.class)
 class DebtPositionClientTest {
@@ -300,4 +303,23 @@ class DebtPositionClientTest {
     Assertions.assertNull(result);
   }
 
+  @Test
+  void whenGetDebtPositionsByOrganizationIdAndNavThenInvokeApi() {
+    //Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String nav = "301000000026066731";
+    List<DebtPositionDTO> expectedResult = new ArrayList<>();
+
+    Mockito.when(apisHolderMock.getDebtPositionApi(accessToken))
+      .thenReturn(debtPositionApiMock);
+    Mockito.when(debtPositionApiMock.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS))
+      .thenReturn(expectedResult);
+
+    // When
+    List<DebtPositionDTO> result = client.getDebtPositionsByOrganizationIdAndNav(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
 }

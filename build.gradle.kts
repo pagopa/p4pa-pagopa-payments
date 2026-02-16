@@ -180,8 +180,8 @@ tasks.register("dependenciesBuild") {
   description = "grouping all together automatically generate code tasks"
 
   dependsOn(
-    "openApiGenerateP4PAAUTH",
     "openApiGenerate",
+    "openApiGenerateP4PAAUTH",
     "openApiGenerateDEBTPOSITIONS",
     "openApiGenerateORGANIZATION",
     "openApiGenerateFILESHARE",
@@ -196,7 +196,8 @@ tasks.register("dependenciesBuild") {
     "openApiGeneratePUSIL",
     "jaxbJavaGenPaForNode",
     "jaxbJavaGenNodeForPa",
-    "jaxbJavaGenFlussoRiversamento"
+    "jaxbJavaGenFlussoRiversamento",
+    "openApiGenerateOrgForNode"
   )
 }
 
@@ -664,6 +665,42 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+}
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateOrgForNode") {
+  group = "openapi"
+  description = "description"
+
+  generatorName.set("spring")
+  inputSpec.set("$rootDir/openapi/openapiForOrgs.json")
+  outputDir.set("$projectDir/build/generated")
+  apiPackage.set("it.gov.pagopa.pu.orgfornode.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.orgfornode.dto.generated")
+  modelNameSuffix.set("ForNode")
+  typeMappings.set(
+    mapOf(
+      "DateTime" to "String"
+    )
+  )
+  configOptions.set(
+    mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
+      "interfaceOnly" to "true",
+      "dateLibrary" to "java8",
+      "serializableModel" to "true",
+      "useSpringBoot3" to "true",
+      "useJakartaEe" to "true",
+      "useOneOfInterfaces" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "enumPropertyNaming" to "original",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    )
+  )
+  library.set("spring-boot")
 }
 
 jaxb {

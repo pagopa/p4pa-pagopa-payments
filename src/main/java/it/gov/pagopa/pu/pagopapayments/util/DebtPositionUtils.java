@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.util;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
+import it.gov.pagopa.pu.debtpositions.dto.generated.PaymentOptionStatus;
 
 import java.util.List;
 import java.util.Set;
@@ -21,4 +22,9 @@ public class DebtPositionUtils {
   public static final Set<InstallmentStatus> PAID_INSTALLMENT_STATUSES = Set.of(
     InstallmentStatus.PAID,
     InstallmentStatus.REPORTED);
+
+  public static final Set<PaymentOptionStatus> PAYABLE_PAYMENT_OPTION_STATUSES = Set.of(
+    PaymentOptionStatus.UNPAID,
+    PaymentOptionStatus.PARTIALLY_PAID
+  );
 }

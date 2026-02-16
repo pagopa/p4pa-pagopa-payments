@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.PAID_INSTALLMENT_STATUSES;
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.PAYABLE_PAYMENT_OPTION_STATUSES;
 
 @Component
 public class DebtPositions2PaymentOptionsNodeResponseMapper {
@@ -28,8 +29,7 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
     }
 
     List<PaymentOptionForNode> paymentOptions = dp.getPaymentOptions().stream()
-      .filter(poDTO -> poDTO.getStatus() == PaymentOptionStatus.UNPAID
-        || poDTO.getStatus() == PaymentOptionStatus.PARTIALLY_PAID)
+      .filter(poDTO -> PAYABLE_PAYMENT_OPTION_STATUSES.contains(poDTO.getStatus()))
       .map(poDTO -> mapPO(poDTO, dp))
       .toList();
 

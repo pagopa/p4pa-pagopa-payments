@@ -1,11 +1,8 @@
-package it.gov.pagopa.pu.pagopapayments.service.paymentoptionsfornode;
+package it.gov.pagopa.pu.pagopapayments.service.orgfornode;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
-import it.gov.pagopa.pu.debtpositions.dto.generated.PaymentOptionStatus;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOptionsResponse;
+import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOptionsResponseForNode;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
@@ -17,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.ORDINARY_DEBT_POSITION_ORIGINS;
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.PAID_INSTALLMENT_STATUSES;
 
 @Service
 public class PaymentOptionsForNodeService {
@@ -33,12 +31,12 @@ public class PaymentOptionsForNodeService {
     this.mapper = mapper;
   }
 
-  public PaymentOptionsResponse getPaymentOptions(String noticeNumber, String organizationFiscalCode) {
+  public PaymentOptionsResponseForNode getPaymentOptions(String noticeNumber, String organizationFiscalCode) {
     String accessToken = authnService.getAccessToken();
 
     Organization organization = organizationService.getOrganizationByFiscalCode(organizationFiscalCode, accessToken);
     if (organization == null) {
-      throw new NotFoundException("[ORGANIZATION_NOT_FOUND] Organization not found");
+      throw new NotFoundException("[ORGANIZATION_NOT_FOUND] Organization having fiscal code " + organizationFiscalCode + " not found");
     }
 
     List<DebtPositionDTO> debtPositions = debtPositionService.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), noticeNumber, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
@@ -46,35 +44,21 @@ public class PaymentOptionsForNodeService {
       return null;
     }
 
-    List<DebtPositionDTO> validDebtPositions = debtPositions.stream()
-      .filter(dp -> dp.getDebtPositionOrigin() != DebtPositionOrigin.SECONDARY_ORG)
-      .toList();
-
-    if (validDebtPositions.isEmpty()) {
-      return null;
+    if (debtPositions.size() > 1) {
+      throw new ConflictException("[MULTIPLE_DEBT_POSITIONS_FOUND] More than one Debt Position having notice number " + noticeNumber + " and organization fiscal code " + organizationFiscalCode + " found");
     }
 
-    if (validDebtPositions.size() > 1) {
-      throw new ConflictException("[MULTIPLE_DEBT_POSITIONS_FOUND] More than one valid Debt Position found");
-    }
-
-    DebtPositionDTO dp = validDebtPositions.get(0);
+    DebtPositionDTO dp = debtPositions.getFirst();
 
     boolean navPaidOrReported = dp.getPaymentOptions().stream()
       .flatMap(po -> po.getInstallments().stream())
       .filter(inst -> noticeNumber.equals(inst.getNav()))
-      .anyMatch(inst -> inst.getStatus() == InstallmentStatus.PAID || inst.getStatus() == InstallmentStatus.REPORTED);
+      .anyMatch(inst -> PAID_INSTALLMENT_STATUSES.contains(inst.getStatus()));
 
     if (navPaidOrReported) {
-      throw new ConflictException("[INSTALLMENT_ALREADY_PAID] Installment already paid");
+      throw new ConflictException("[INSTALLMENT_ALREADY_PAID] Installment having notice number " + noticeNumber + " already paid");
     }
 
-    List<DebtPositionDTO> dpForResponse = List.of(
-      dp.paymentOptions(dp.getPaymentOptions().stream()
-        .filter(po -> po.getStatus() == PaymentOptionStatus.UNPAID || po.getStatus() == PaymentOptionStatus.PARTIALLY_PAID)
-        .toList()
-      ));
-
-    return mapper.mapToResponse(dpForResponse, organization);
+    return mapper.mapToResponse(dp, organization);
   }
 }

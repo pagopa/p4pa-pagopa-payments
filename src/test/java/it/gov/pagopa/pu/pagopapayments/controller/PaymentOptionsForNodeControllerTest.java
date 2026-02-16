@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
-import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOptionsResponse;
-import it.gov.pagopa.pu.pagopapayments.service.paymentoptionsfornode.PaymentOptionsForNodeService;
+import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOptionsResponseForNode;
+import it.gov.pagopa.pu.pagopapayments.service.orgfornode.PaymentOptionsForNodeService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,11 +34,11 @@ class PaymentOptionsForNodeControllerTest {
     String noticeNumber = "NAV123";
     String organizationFiscalCode = "ORG_FISCAL_CODE";
 
-    PaymentOptionsResponse expected = new PaymentOptionsResponse();
+    PaymentOptionsResponseForNode expected = new PaymentOptionsResponseForNode();
     when(serviceMock.getPaymentOptions(noticeNumber, organizationFiscalCode)).thenReturn(expected);
 
     // when
-    ResponseEntity<PaymentOptionsResponse> response =
+    ResponseEntity<PaymentOptionsResponseForNode> response =
       controller.getPaymentOptionsByNoticeNumber(noticeNumber, organizationFiscalCode);
 
     // then
@@ -56,7 +56,7 @@ class PaymentOptionsForNodeControllerTest {
     when(serviceMock.getPaymentOptions(noticeNumber, organizationFiscalCode)).thenReturn(null);
 
     // when
-    ResponseEntity<PaymentOptionsResponse> response =
+    ResponseEntity<PaymentOptionsResponseForNode> response =
       controller.getPaymentOptionsByNoticeNumber(noticeNumber, organizationFiscalCode);
 
     // then

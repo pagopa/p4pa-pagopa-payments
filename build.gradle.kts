@@ -197,7 +197,7 @@ tasks.register("dependenciesBuild") {
     "jaxbJavaGenPaForNode",
     "jaxbJavaGenNodeForPa",
     "jaxbJavaGenFlussoRiversamento",
-    "openApiGenerateForOrgs"
+    "openApiGenerateOrgForNode"
   )
 }
 
@@ -667,7 +667,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   library.set("resttemplate")
 }
 
-tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateForOrgs") {
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateOrgForNode") {
   group = "openapi"
   description = "description"
 
@@ -676,6 +676,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.pu.orgfornode.controller.generated")
   modelPackage.set("it.gov.pagopa.pu.orgfornode.dto.generated")
+  modelNameSuffix.set("ForNode")
   typeMappings.set(
     mapOf(
       "DateTime" to "String"

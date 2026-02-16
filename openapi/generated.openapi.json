@@ -203,7 +203,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
+                  "$ref" : "#/components/schemas/ErrorResponseForNode"
                 },
                 "example" : {
                   "httpStatusCode" : 404,
@@ -221,7 +221,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
+                  "$ref" : "#/components/schemas/ErrorResponseForNode"
                 },
                 "example" : {
                   "httpStatusCode" : 500,
@@ -239,7 +239,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
+                  "$ref" : "#/components/schemas/ErrorResponseForNode"
                 },
                 "example" : {
                   "httpStatusCode" : 400,
@@ -257,7 +257,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
+                  "$ref" : "#/components/schemas/ErrorResponseForNode"
                 },
                 "example" : {
                   "httpStatusCode" : 409,
@@ -275,7 +275,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
+                  "$ref" : "#/components/schemas/ErrorResponseForNode"
                 },
                 "example" : {
                   "httpStatusCode" : 422,
@@ -293,7 +293,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PaymentOptionsResponse"
+                  "$ref" : "#/components/schemas/PaymentOptionsResponseForNode"
                 }
               }
             }
@@ -1275,7 +1275,7 @@
         },
         "required" : [ "debtPositions", "requestId" ]
       },
-      "ErrorResponse" : {
+      "ErrorResponseForNode" : {
         "type" : "object",
         "properties" : {
           "httpStatusCode" : {
@@ -1306,15 +1306,15 @@
           }
         }
       },
-      "EnumInstallment" : {
+      "EnumInstallmentForNode" : {
         "type" : "string",
         "enum" : [ "POI_UNPAID", "POI_PAID", "POI_EXPIRED_NOT_PAYABLE", "POI_EXPIRED_UNPAID", "POI_INVALID" ]
       },
-      "EnumPo" : {
+      "EnumPoForNode" : {
         "type" : "string",
         "enum" : [ "PO_UNPAID", "PO_PAID", "PO_PARTIALLY_PAID", "PO_EXPIRED_NOT_PAYABLE", "PO_EXPIRED_UNPAID", "PO_INVALID" ]
       },
-      "Installment" : {
+      "InstallmentForNode" : {
         "type" : "object",
         "properties" : {
           "nav" : {
@@ -1337,14 +1337,14 @@
             "type" : "string"
           },
           "status" : {
-            "$ref" : "#/components/schemas/EnumInstallment"
+            "$ref" : "#/components/schemas/EnumInstallmentForNode"
           },
           "statusReason" : {
             "type" : "string"
           }
         }
       },
-      "PaymentOption" : {
+      "PaymentOptionForNode" : {
         "type" : "object",
         "properties" : {
           "description" : {
@@ -1365,7 +1365,7 @@
             "format" : "int64"
           },
           "status" : {
-            "$ref" : "#/components/schemas/EnumPo"
+            "$ref" : "#/components/schemas/EnumPoForNode"
           },
           "statusReason" : {
             "type" : "string"
@@ -1376,12 +1376,12 @@
           "installments" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/Installment"
+              "$ref" : "#/components/schemas/InstallmentForNode"
             }
           }
         }
       },
-      "PaymentOptionsResponse" : {
+      "PaymentOptionsResponseForNode" : {
         "type" : "object",
         "properties" : {
           "organizationFiscalCode" : {
@@ -1399,7 +1399,7 @@
           "paymentOptions" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/PaymentOption"
+              "$ref" : "#/components/schemas/PaymentOptionForNode"
             }
           }
         }

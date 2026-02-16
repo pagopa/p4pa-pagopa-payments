@@ -1,9 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
-import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOption;
-import it.gov.pagopa.pu.orgfornode.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.orgfornode.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import org.springframework.stereotype.Component;
 
@@ -11,24 +10,27 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.PAID_INSTALLMENT_STATUSES;
+
 @Component
 public class DebtPositions2PaymentOptionsNodeResponseMapper {
 
-  public PaymentOptionsResponse mapToResponse(List<DebtPositionDTO> debtPositions, Organization organization) {
-    PaymentOptionsResponse response = new PaymentOptionsResponse();
-
+  public PaymentOptionsResponseForNode mapToResponse(DebtPositionDTO dp, Organization organization) {
+    PaymentOptionsResponseForNode response = new PaymentOptionsResponseForNode();
     response.setOrganizationFiscalCode(organization.getOrgFiscalCode());
     response.setCompanyName(organization.getOrgName());
     response.setOfficeName(null);
     response.setStandin(false);
 
-    List<PaymentOption> paymentOptions = (debtPositions == null ? List.<DebtPositionDTO>of() : debtPositions).stream()
-      .filter(Objects::nonNull)
-      .flatMap(dp -> {
-        List<PaymentOptionDTO> po = dp.getPaymentOptions();
-        return po.stream()
-          .map(poDTO -> mapPO(poDTO, dp));
-      })
+    if (dp == null) {
+      response.setPaymentOptions(List.of());
+      return response;
+    }
+
+    List<PaymentOptionForNode> paymentOptions = dp.getPaymentOptions().stream()
+      .filter(poDTO -> poDTO.getStatus() == PaymentOptionStatus.UNPAID
+        || poDTO.getStatus() == PaymentOptionStatus.PARTIALLY_PAID)
+      .map(poDTO -> mapPO(poDTO, dp))
       .toList();
 
     response.setPaymentOptions(paymentOptions);
@@ -36,9 +38,18 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
     return response;
   }
 
-  private PaymentOption mapPO(PaymentOptionDTO poDTO, DebtPositionDTO dpDTO) {
-    PaymentOption po = new PaymentOption();
+  private PaymentOptionForNode mapPO(PaymentOptionDTO poDTO, DebtPositionDTO dpDTO) {
+    List<InstallmentDTO> src = poDTO.getInstallments();
 
+    List<InstallmentDTO> notPaid = src.stream()
+      .filter(inst -> inst.getStatus() == null || !PAID_INSTALLMENT_STATUSES.contains(inst.getStatus()))
+      .toList();
+
+    if (notPaid.isEmpty()) {
+      return null;
+    }
+
+    PaymentOptionForNode po = new PaymentOptionForNode();
     po.setDescription(poDTO.getDescription());
     po.setNumberOfInstallments(poDTO.getInstallments().size());
     po.setDueDate(calculateMaxDueDate(poDTO.getInstallments()));
@@ -52,12 +63,7 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
     po.setStatusReason(null);
     po.setAllCCP(false);
 
-    List<Installment> installments = poDTO.getInstallments()
-      .stream()
-      .map(inst -> mapInstallment(inst, dpDTO))
-      .toList();
-
-    po.setInstallments(installments);
+    po.setInstallments(notPaid.stream().map(inst -> mapInstallment(inst, dpDTO)).toList());
 
     return po;
   }
@@ -71,8 +77,8 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
       .orElse(null);
   }
 
-  private Installment mapInstallment(InstallmentDTO installmentDTO, DebtPositionDTO dpDTO) {
-    Installment installment = new Installment();
+  private InstallmentForNode mapInstallment(InstallmentDTO installmentDTO, DebtPositionDTO dpDTO) {
+    InstallmentForNode installment = new InstallmentForNode();
 
     installment.setNav(installmentDTO.getNav());
     installment.setIuv(installmentDTO.getIuv());
@@ -94,27 +100,26 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
     return installment;
   }
 
-  private EnumPo mapPOStatus(PaymentOptionStatus status) {
+  private EnumPoForNode mapPOStatus(PaymentOptionStatus status) {
     if (status == null) return null;
 
     return switch (status) {
-      case UNPAID -> EnumPo.PO_UNPAID;
-      case REPORTED, PAID -> EnumPo.PO_PAID;
-      case PARTIALLY_PAID -> EnumPo.PO_PARTIALLY_PAID;
-      case EXPIRED -> EnumPo.PO_EXPIRED_NOT_PAYABLE;
-      case INVALID, CANCELLED, TO_SYNC, UNPAYABLE, DRAFT -> EnumPo.PO_INVALID;
+      case UNPAID -> EnumPoForNode.PO_UNPAID;
+      case REPORTED, PAID -> EnumPoForNode.PO_PAID;
+      case PARTIALLY_PAID -> EnumPoForNode.PO_PARTIALLY_PAID;
+      case EXPIRED -> EnumPoForNode.PO_EXPIRED_NOT_PAYABLE;
+      case INVALID, CANCELLED, TO_SYNC, UNPAYABLE, DRAFT -> EnumPoForNode.PO_INVALID;
     };
   }
 
-  private EnumInstallment mapInstallmentStatus(InstallmentStatus status) {
+  private EnumInstallmentForNode mapInstallmentStatus(InstallmentStatus status) {
     if (status == null) return null;
 
     return switch (status) {
-      case UNPAID -> EnumInstallment.POI_UNPAID;
-      case REPORTED, PAID -> EnumInstallment.POI_PAID;
-      case EXPIRED -> EnumInstallment.POI_EXPIRED_NOT_PAYABLE;
-      case INVALID, CANCELLED, TO_SYNC, UNPAYABLE, DRAFT ->
-        EnumInstallment.POI_INVALID;
+      case UNPAID -> EnumInstallmentForNode.POI_UNPAID;
+      case REPORTED, PAID -> EnumInstallmentForNode.POI_PAID;
+      case EXPIRED -> EnumInstallmentForNode.POI_EXPIRED_NOT_PAYABLE;
+      case INVALID, CANCELLED, TO_SYNC, UNPAYABLE, DRAFT -> EnumInstallmentForNode.POI_INVALID;
     };
   }
 }

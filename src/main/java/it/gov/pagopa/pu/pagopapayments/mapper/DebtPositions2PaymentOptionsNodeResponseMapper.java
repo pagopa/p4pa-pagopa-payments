@@ -51,8 +51,8 @@ public class DebtPositions2PaymentOptionsNodeResponseMapper {
 
     PaymentOptionForNode po = new PaymentOptionForNode();
     po.setDescription(poDTO.getDescription());
-    po.setNumberOfInstallments(poDTO.getInstallments().size());
-    po.setDueDate(calculateMaxDueDate(poDTO.getInstallments()));
+    po.setNumberOfInstallments(payable.size());
+    po.setDueDate(calculateMaxDueDate(payable));
     po.setValidFrom(
       dpDTO.getValidityDate() != null
         ? dpDTO.getValidityDate().atStartOfDay().toString()

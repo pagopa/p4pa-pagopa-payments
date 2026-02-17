@@ -113,6 +113,7 @@ logging:
     org.springframework.boot.availability: "\${LOG_LEVEL_SPRING_BOOT_AVAILABILITY:DEBUG}"
     org.springframework.kafka: "\${LOG_LEVEL_SPRING_KAFKA:INFO}"
     org.apache.kafka.clients.consumer.internals.ConsumerCoordinator: "\${LOG_LEVEL_KAFKA_CONSUMER_COORDINATOR:WARN}"
+    org.apache.kafka.clients.admin.internals.AdminMetadataManager: "\${LOG_LEVEL_KAFKA_ADMIN_METADATA_MANAGER:WARN}"
     it.gov.pagopa.pu.pagopapayments.exception.PagopaPaymentsExceptionHandler: "\${LOGGING_LEVEL_API_REQUEST_EXCEPTION:INFO}"
     org.springdoc.core.utils.SpringDocAnnotationsUtils: "\${LOG_LEVEL_SPRING_DOC:ERROR}"
     PERFORMANCE_LOG: "\${LOG_LEVEL_PERFORMANCE_LOG:INFO}"

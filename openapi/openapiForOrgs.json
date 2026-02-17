@@ -15,7 +15,7 @@
     "/payment-options/organizations/{organization-fiscal-code}/notices/{notice-number}": {
       "post": {
         "tags": [
-          "Payment Options For Node Resource"
+          "OrgForNode"
         ],
         "summary": "Get payment options by noticeNumber",
         "description": "Returns payment options for a given notice and organization",

@@ -19,6 +19,9 @@
     "name" : "aca",
     "description" : "the aca API"
   }, {
+    "name" : "OrgForNode",
+    "description" : "the OrgForNode API"
+  }, {
     "name" : "gpd",
     "description" : "the gpd API"
   }, {
@@ -27,9 +30,6 @@
   }, {
     "name" : "taxonomies",
     "description" : "the taxonomies API"
-  }, {
-    "name" : "Payment Options For Node Resource",
-    "description" : "the Payment Options For Node Resource API"
   } ],
   "paths" : {
     "/printpaymentnotice/generate" : {
@@ -176,9 +176,9 @@
         } ]
       }
     },
-    "/payment-options/organizations/{organization-fiscal-code}/notices/{notice-number}" : {
+    "/org-for-node/service/v1/payment-options/organizations/{organization-fiscal-code}/notices/{notice-number}" : {
       "post" : {
-        "tags" : [ "Payment Options For Node Resource" ],
+        "tags" : [ "OrgForNode" ],
         "summary" : "Get payment options by noticeNumber",
         "description" : "Returns payment options for a given notice and organization",
         "operationId" : "getPaymentOptionsByNoticeNumber",

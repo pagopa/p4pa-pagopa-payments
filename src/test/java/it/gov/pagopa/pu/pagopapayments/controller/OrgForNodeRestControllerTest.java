@@ -15,13 +15,13 @@ import org.springframework.http.ResponseEntity;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentOptionsForNodeControllerTest {
+class OrgForNodeRestControllerTest {
 
   @Mock
   private PaymentOptionsForNodeService serviceMock;
 
   @InjectMocks
-  private PaymentOptionsForNodeController controller;
+  private OrgForNodeRestController controller;
 
   @AfterEach
   void verifyNoMore() {

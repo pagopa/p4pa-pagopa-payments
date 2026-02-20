@@ -9,8 +9,10 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.pagopapayments.domain.OrganizationInfo;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import it.gov.pagopa.pu.pagopapayments.util.OrganizationInfoUtils;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,18 +47,8 @@ public class PaGetPaymentMapper {
 
     List<TransferDTO> transfers = Optional.ofNullable(installmentDTO.getTransfers()).orElse(List.of());
 
-    String companyName = organization.getOrgName();
-    if (broker != null && Boolean.TRUE.equals(broker.getFlagDelegate())) {
-      TransferDTO ownerTransfer = transfers.stream()
-        .filter(t -> Boolean.TRUE.equals(t.getFlagOwner()))
-        .findFirst()
-        .orElse(null);
-      if (ownerTransfer != null && StringUtils.isNotBlank(ownerTransfer.getOrgName())) {
-        companyName = ownerTransfer.getOrgName();
-      }
-    }
-
-    payment.setCompanyName(companyName);
+    OrganizationInfo info = OrganizationInfoUtils.resolveOrganizationInfo(organization, broker, transfers);
+    payment.setCompanyName(info.companyName());
     payment.setOfficeName(null);
     payment.setPaymentAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()));
 

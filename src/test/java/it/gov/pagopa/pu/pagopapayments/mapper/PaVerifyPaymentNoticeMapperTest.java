@@ -95,6 +95,70 @@ class PaVerifyPaymentNoticeMapperTest {
     assertEquals(postalPayment, response.getPaymentList().getPaymentOptionDescription().isAllCCP());
   }
 
+  @Test
+  void givenDelegateBrokerAndOwnerTransferWhenInstallmentDto2PaVerifyPaymentNoticeResThenOverrideOrganizationData() {
+    // given
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.getDebtor().setEntityType(PersonEntityType.F);
+
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setOrgFiscalCode("ORG_FISCAL_CODE");
+    organization.setOrgName("ORG_NAME");
+
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    TransferDTO owner = podamFactory.manufacturePojo(TransferDTO.class);
+    owner.setFlagOwner(true);
+    owner.setOrgFiscalCode("OWNER_FISCAL_CODE");
+    owner.setOrgName("OWNER_NAME");
+    owner.setAmountCents(100L);
+    owner.setPostalIban("IT00P0123456789012345678901");
+
+    TransferDTO other = podamFactory.manufacturePojo(TransferDTO.class);
+    other.setFlagOwner(false);
+    other.setAmountCents(200L);
+    other.setPostalIban("IT00P1123456789012345678901");
+
+    installmentDTO.setTransfers(List.of(other, owner));
+
+    // when
+    PaVerifyPaymentNoticeRes response =
+      PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(installmentDTO, organization, broker);
+
+    // then
+    assertNotNull(response);
+    assertNull(response.getFault());
+    assertEquals(StOutcome.OK, response.getOutcome());
+
+    assertEquals("OWNER_FISCAL_CODE", response.getFiscalCodePA());
+    assertEquals("OWNER_NAME", response.getCompanyName());
+
+    assertEquals(installmentDTO.getRemittanceInformation(), response.getPaymentDescription());
+
+    TestUtils.checkNotNullFields(response, "fault", "officeName");
+    assertNotNull(response.getPaymentList());
+    assertNotNull(response.getPaymentList().getPaymentOptionDescription());
+    TestUtils.checkNotNullFields(response.getPaymentList().getPaymentOptionDescription(), "detailDescription");
+
+    assertEquals(StAmountOption.EQ, response.getPaymentList().getPaymentOptionDescription().getOptions());
+    assertEquals(
+      ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()),
+      response.getPaymentList().getPaymentOptionDescription().getAmount()
+    );
+    assertEquals(
+      ConversionUtils.toXMLGregorianCalendar(ConversionUtils.localDate2RomeMaxTime(installmentDTO.getDueDate())),
+      response.getPaymentList().getPaymentOptionDescription().getDueDate()
+    );
+
+    boolean expectedAllCCP = installmentDTO.getTransfers().stream()
+      .filter(t -> t.getAmountCents() > 0)
+      .map(TransferDTO::getPostalIban)
+      .noneMatch(StringUtils::isBlank);
+
+    assertEquals(expectedAllCCP, response.getPaymentList().getPaymentOptionDescription().isAllCCP());
+  }
+
   //endregion
 
 }

@@ -231,6 +231,88 @@ class PaForNodeRequestValidatorServiceTest {
     Assertions.assertEquals(request.getIdStation(), response.getErrorEmitter());
   }
 
+  @Test
+  void givenDelegateBrokerWhenPaForNodeRequestValidateThenReturnAssociatedOrganization() {
+    // Given
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    Organization orgAssociated = podamFactory.manufacturePojo(Organization.class);
+
+    RetrievePaymentDTO request = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .idPA("ANY_IDPA")
+      .fiscalCode("ANY_FISCAL_CODE")
+      .noticeNumber("NAV")
+      .idBrokerPA("ANY_BROKER_PA")
+      .build();
+
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN))
+      .thenReturn(broker);
+
+    Mockito.when(organizationServiceMock.getOrganizationById(broker.getOrganizationId(), VALID_ACCEESS_TOKEN))
+      .thenReturn(orgAssociated);
+
+    // When
+    Pair<Broker, Organization> response =
+      paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN);
+
+    // Then
+    Assertions.assertTrue(new ReflectionEquals(Pair.of(broker, orgAssociated)).matches(response));
+
+    Mockito.verify(brokerServiceMock, Mockito.times(1))
+      .getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN);
+
+    Mockito.verify(organizationServiceMock, Mockito.times(1))
+      .getOrganizationById(broker.getOrganizationId(), VALID_ACCEESS_TOKEN);
+
+    Mockito.verify(organizationServiceMock, Mockito.never())
+      .getOrganizationByFiscalCode(Mockito.anyString(), Mockito.anyString());
+    Mockito.verify(brokerServiceMock, Mockito.never())
+      .getBrokerById(Mockito.any(), Mockito.anyString());
+  }
+
+  @Test
+  void givenDelegateBrokerAndOrgAssociatedNotFoundWhenPaForNodeRequestValidateThenFault() {
+    // Given
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    RetrievePaymentDTO request = RetrievePaymentDTO.builder()
+      .idStation(broker.getStationId())
+      .idPA("ANY_IDPA")
+      .fiscalCode("ANY_FISCAL_CODE")
+      .noticeNumber("NAV")
+      .idBrokerPA("ANY_BROKER_PA")
+      .build();
+
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN))
+      .thenReturn(broker);
+
+    Mockito.when(organizationServiceMock.getOrganizationById(broker.getOrganizationId(), VALID_ACCEESS_TOKEN))
+      .thenReturn(null);
+
+    // When
+    PagoPaNodeFaultException ex = Assertions.assertThrows(
+      PagoPaNodeFaultException.class,
+      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN)
+    );
+
+    // Then
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, ex.getErrorCode());
+    Assertions.assertEquals(request.getIdStation(), ex.getErrorEmitter());
+
+    Mockito.verify(brokerServiceMock, Mockito.times(1))
+      .getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(organizationServiceMock, Mockito.times(1))
+      .getOrganizationById(broker.getOrganizationId(), VALID_ACCEESS_TOKEN);
+
+    Mockito.verify(organizationServiceMock, Mockito.never())
+      .getOrganizationByFiscalCode(Mockito.anyString(), Mockito.anyString());
+    Mockito.verify(brokerServiceMock, Mockito.never())
+      .getBrokerById(Mockito.any(), Mockito.anyString());
+  }
+
   //endregion
 
   // region paSendRtRequestValidate

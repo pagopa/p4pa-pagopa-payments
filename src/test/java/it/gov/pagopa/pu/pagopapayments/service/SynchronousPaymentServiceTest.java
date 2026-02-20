@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
@@ -175,6 +176,192 @@ class SynchronousPaymentServiceTest {
     Assertions.assertEquals(retrievePaymentDTO.getFiscalCode(), exception.getErrorEmitter());
     Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
     Mockito.verifyNoInteractions(paForNodeRequestValidatorServiceMock, debtPositionServiceMock, synchronousPaymentStatusVerifierServiceMock);
+  }
+
+  @Test
+  void givenBrokerDelegateAndEmptyTransfersWhenRetrievePaymentThenSystemError() {
+    // Given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setTransfers(List.of());
+
+    List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
+
+    RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode());
+
+    Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
+    Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
+      .thenReturn(Pair.of(broker, organization));
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+      .thenReturn(null);
+
+    Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
+        organization.getOrganizationId(),
+        retrievePaymentDTO.getNoticeNumber(),
+        ORDINARY_DEBT_POSITION_ORIGINS,
+        VALID_ACCEESS_TOKEN))
+      .thenReturn(installmentDTOList);
+
+    Mockito.when(synchronousPaymentStatusVerifierServiceMock.verifyPaymentStatus(
+        organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer()))
+      .thenReturn(installmentDTO);
+
+    // When
+    PagoPaNodeFaultException exception = Assertions.assertThrows(
+      PagoPaNodeFaultException.class,
+      () -> synchronousPaymentService.retrievePayment(retrievePaymentDTO)
+    );
+
+    // Then
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR, exception.getErrorCode());
+    Assertions.assertEquals(retrievePaymentDTO.getIdPA(), exception.getErrorEmitter());
+  }
+
+  @Test
+  void givenBrokerDelegateAndNoOwnerTransferWhenRetrievePaymentThenSystemError() {
+    // Given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    TransferDTO notOwner = podamFactory.manufacturePojo(TransferDTO.class);
+    notOwner.setFlagOwner(false);
+
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setTransfers(List.of(notOwner));
+
+    List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
+
+    RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode());
+
+    Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
+    Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
+      .thenReturn(Pair.of(broker, organization));
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+      .thenReturn(null);
+
+    Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
+        organization.getOrganizationId(),
+        retrievePaymentDTO.getNoticeNumber(),
+        ORDINARY_DEBT_POSITION_ORIGINS,
+        VALID_ACCEESS_TOKEN))
+      .thenReturn(installmentDTOList);
+
+    Mockito.when(synchronousPaymentStatusVerifierServiceMock.verifyPaymentStatus(
+        organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer()))
+      .thenReturn(installmentDTO);
+
+    // When
+    PagoPaNodeFaultException exception = Assertions.assertThrows(
+      PagoPaNodeFaultException.class,
+      () -> synchronousPaymentService.retrievePayment(retrievePaymentDTO)
+    );
+
+    // Then
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR, exception.getErrorCode());
+    Assertions.assertEquals(retrievePaymentDTO.getIdPA(), exception.getErrorEmitter());
+  }
+
+  @Test
+  void givenBrokerDelegateAndOwnerTransferWithDifferentOrgFiscalCodeWhenRetrievePaymentThenIdDominioErrato() {
+    // Given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode());
+
+    TransferDTO owner = podamFactory.manufacturePojo(TransferDTO.class);
+    owner.setFlagOwner(true);
+    owner.setOrgFiscalCode(retrievePaymentDTO.getIdPA() + "DIFFERENT"); // mismatch
+
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setTransfers(List.of(owner));
+
+    List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
+
+    Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
+    Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
+      .thenReturn(Pair.of(broker, organization));
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+      .thenReturn(null);
+
+    Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
+        organization.getOrganizationId(),
+        retrievePaymentDTO.getNoticeNumber(),
+        ORDINARY_DEBT_POSITION_ORIGINS,
+        VALID_ACCEESS_TOKEN))
+      .thenReturn(installmentDTOList);
+
+    Mockito.when(synchronousPaymentStatusVerifierServiceMock.verifyPaymentStatus(
+        organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer()))
+      .thenReturn(installmentDTO);
+
+    // When
+    PagoPaNodeFaultException exception = Assertions.assertThrows(
+      PagoPaNodeFaultException.class,
+      () -> synchronousPaymentService.retrievePayment(retrievePaymentDTO)
+    );
+
+    // Then
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, exception.getErrorCode());
+    Assertions.assertEquals(retrievePaymentDTO.getIdPA(), exception.getErrorEmitter());
+  }
+
+  @Test
+  void givenBrokerDelegateAndOwnerTransferWithMatchingOrgFiscalCodeWhenRetrievePaymentThenOk() {
+    // Given
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode());
+
+    TransferDTO owner = podamFactory.manufacturePojo(TransferDTO.class);
+    owner.setFlagOwner(true);
+    owner.setOrgFiscalCode(retrievePaymentDTO.getIdPA());
+
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setTransfers(List.of(owner));
+
+    List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
+
+    Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
+    Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
+      .thenReturn(Pair.of(broker, organization));
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+      .thenReturn(null);
+
+    Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
+        organization.getOrganizationId(),
+        retrievePaymentDTO.getNoticeNumber(),
+        ORDINARY_DEBT_POSITION_ORIGINS,
+        VALID_ACCEESS_TOKEN))
+      .thenReturn(installmentDTOList);
+
+    Mockito.when(synchronousPaymentStatusVerifierServiceMock.verifyPaymentStatus(
+        organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer()))
+      .thenReturn(installmentDTO);
+
+    // When
+    Triple<InstallmentDTO, Organization, Broker> response = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
+
+    // Then
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(installmentDTO, response.getLeft());
+    Assertions.assertEquals(organization, response.getMiddle());
+    Assertions.assertEquals(broker, response.getRight());
   }
 
   //endregion

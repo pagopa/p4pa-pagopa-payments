@@ -187,6 +187,116 @@ class PaGetPaymentMapperTest {
     }
   }
 
+  @Test
+  void givenDelegateBrokerAndOwnerTransferWithOrgNameWhenInstallmentDto2PaGetPaymentV2ResponseThenCompanyNameIsOwnerOrgName() {
+    // given
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setLegacyPaymentMetadata(null);
+    installmentDTO.getDebtor().setEntityType(PersonEntityType.F);
+
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setOrgName("ORG_NAME");
+
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    TransferDTO owner = podamFactory.manufacturePojo(TransferDTO.class);
+    owner.setFlagOwner(true);
+    owner.setOrgName("OWNER_ORG_NAME");
+    owner.setAmountCents(100L);
+    owner.setTransferIndex(1);
+
+    installmentDTO.setTransfers(List.of(owner));
+
+    // when
+    PaGetPaymentV2Response response =
+      PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+        installmentDTO, organization, broker, StTransferType.PAGOPA);
+
+    // then
+    assertNotNull(response);
+    assertNotNull(response.getData());
+
+    TestUtils.checkNotNullFields(response.getData(), "officeName", "metadata");
+    TestUtils.checkNotNullFields(response.getData().getDebtor());
+    TestUtils.checkNotNullFields(response.getData().getTransferList().getTransfers().get(0), "metadata");
+
+    assertEquals("OWNER_ORG_NAME", response.getData().getCompanyName());
+  }
+
+  @Test
+  void givenDelegateBrokerAndNoOwnerTransferWhenInstallmentDto2PaGetPaymentV2ResponseThenCompanyNameIsOrganizationOrgName() {
+    // given
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setLegacyPaymentMetadata(null);
+    installmentDTO.getDebtor().setEntityType(PersonEntityType.F);
+
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setOrgName("ORG_NAME");
+
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    TransferDTO t1 = podamFactory.manufacturePojo(TransferDTO.class);
+    t1.setFlagOwner(false);
+    t1.setAmountCents(100L);
+    t1.setTransferIndex(1);
+
+    installmentDTO.setTransfers(List.of(t1));
+
+    // when
+    PaGetPaymentV2Response response =
+      PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+        installmentDTO, organization, broker, StTransferType.PAGOPA);
+
+    // then
+    assertNotNull(response);
+    assertNotNull(response.getData());
+
+    TestUtils.checkNotNullFields(response.getData(), "officeName", "metadata");
+    TestUtils.checkNotNullFields(response.getData().getDebtor());
+    TestUtils.checkNotNullFields(response.getData().getTransferList().getTransfers().get(0), "metadata");
+
+    assertEquals("ORG_NAME", response.getData().getCompanyName());
+  }
+
+  @Test
+  void givenDelegateBrokerAndOwnerTransferWithBlankOrgNameWhenInstallmentDto2PaGetPaymentV2ResponseThenCompanyNameIsOrganizationOrgName() {
+    // given
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setLegacyPaymentMetadata(null);
+    installmentDTO.getDebtor().setEntityType(PersonEntityType.F);
+
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setOrgName("ORG_NAME");
+
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    TransferDTO owner = podamFactory.manufacturePojo(TransferDTO.class);
+    owner.setFlagOwner(true);
+    owner.setOrgName("   ");
+    owner.setAmountCents(100L);
+    owner.setTransferIndex(1);
+
+    installmentDTO.setTransfers(List.of(owner));
+
+    // when
+    PaGetPaymentV2Response response =
+      PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+        installmentDTO, organization, broker, StTransferType.PAGOPA);
+
+    // then
+    assertNotNull(response);
+    assertNotNull(response.getData());
+
+    TestUtils.checkNotNullFields(response.getData(), "officeName", "metadata");
+    TestUtils.checkNotNullFields(response.getData().getDebtor());
+    TestUtils.checkNotNullFields(response.getData().getTransferList().getTransfers().get(0), "metadata");
+
+    assertEquals("ORG_NAME", response.getData().getCompanyName());
+  }
+
   //endregion
 
 }

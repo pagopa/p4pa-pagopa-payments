@@ -6,12 +6,12 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.pagopapayments.domain.OrganizationInfo;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.OrganizationInfoUtils;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,9 +36,9 @@ public class PaVerifyPaymentNoticeMapper {
 
     List<TransferDTO> transfers = Optional.ofNullable(installment.getTransfers()).orElse(List.of());
 
-    OrganizationInfo info = OrganizationInfoUtils.resolveOrganizationInfo(organization, broker, transfers);
-    response.setFiscalCodePA(info.fiscalCodePA());
-    response.setCompanyName(info.companyName());
+    Pair<String, String> orgInfo = OrganizationInfoUtils.resolveOrganizationInfo(organization, broker, transfers);
+    response.setFiscalCodePA(orgInfo.getLeft());
+    response.setCompanyName(orgInfo.getRight());
     response.setOfficeName(null);
 
     CtPaymentOptionDescriptionPA paymentOption = new CtPaymentOptionDescriptionPA();

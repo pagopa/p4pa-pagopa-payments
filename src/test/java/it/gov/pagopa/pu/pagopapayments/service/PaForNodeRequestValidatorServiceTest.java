@@ -39,7 +39,7 @@ class PaForNodeRequestValidatorServiceTest {
     podamFactory = TestUtils.getPodamFactory();
   }
 
-  private static final String VALID_ACCEESS_TOKEN = "VALID_ACCESS_TOKEN";
+  private static final String VALID_ACCESS_TOKEN = "VALID_ACCESS_TOKEN";
 
   @AfterEach
   void verifyNoMoreInteractions(){
@@ -61,11 +61,11 @@ class PaForNodeRequestValidatorServiceTest {
     organization.setBrokerId(broker.getBrokerId());
     organization.setStatus(OrganizationStatus.ACTIVE);
 
-    Mockito.when(brokerServiceMock.getBrokerByStationId(broker.getStationId(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerByStationId(broker.getStationId(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
-    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCESS_TOKEN))
       .thenReturn(organization);
-    Mockito.when(brokerServiceMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerById(broker.getBrokerId(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
 
     RetrievePaymentDTO request = RetrievePaymentDTO.builder()
@@ -77,7 +77,7 @@ class PaForNodeRequestValidatorServiceTest {
       .build();
 
     // When
-    Pair<Broker, Organization> response = paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN);
+    Pair<Broker, Organization> response = paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN);
 
     // Then
     Assertions.assertTrue(new ReflectionEquals(Pair.of(broker, organization)).matches(response));
@@ -93,11 +93,11 @@ class PaForNodeRequestValidatorServiceTest {
     organization.setBrokerId(broker.getBrokerId());
     organization.setStatus(OrganizationStatus.ACTIVE);
 
-    Mockito.when(brokerServiceMock.getBrokerByStationId(broker.getBroadcastStationId(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerByStationId(broker.getBroadcastStationId(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
-    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(organization.getOrgFiscalCode(), VALID_ACCESS_TOKEN))
       .thenReturn(organization);
-    Mockito.when(brokerServiceMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerById(broker.getBrokerId(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
 
     RetrievePaymentDTO request = RetrievePaymentDTO.builder()
@@ -109,7 +109,7 @@ class PaForNodeRequestValidatorServiceTest {
       .build();
 
     // When
-    Pair<Broker, Organization> response = paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN);
+    Pair<Broker, Organization> response = paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN);
 
     // Then
     Assertions.assertTrue(new ReflectionEquals(Pair.of(broker, organization)).matches(response));
@@ -125,15 +125,15 @@ class PaForNodeRequestValidatorServiceTest {
     broker.setFlagDelegate(false);
     request.setIdStation(broker.getStationId());
 
-    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
-    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCESS_TOKEN))
       .thenReturn(null);
 
     // When
     PagoPaNodeFaultException response = Assertions.assertThrows(
       PagoPaNodeFaultException.class,
-      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN)
+      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN)
     );
 
     // Then
@@ -156,16 +156,16 @@ class PaForNodeRequestValidatorServiceTest {
     organization.setOrgFiscalCode(request.getFiscalCode());
     organization.setBrokerId(broker.getBrokerId());
 
-    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
 
-    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCESS_TOKEN))
       .thenReturn(organization);
 
     // When
     PagoPaNodeFaultException response = Assertions.assertThrows(
       PagoPaNodeFaultException.class,
-      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN)
+      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN)
     );
 
     // Then
@@ -189,17 +189,17 @@ class PaForNodeRequestValidatorServiceTest {
     request.setIdStation(broker.getStationId());
     request.setIdBrokerPA(broker.getBrokerFiscalCode() + "xxx");
 
-    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
-    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCESS_TOKEN))
       .thenReturn(organization);
-    Mockito.when(brokerServiceMock.getBrokerById(organization.getBrokerId(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerById(organization.getBrokerId(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
 
     // When
     PagoPaNodeFaultException response = Assertions.assertThrows(
       PagoPaNodeFaultException.class,
-      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN)
+      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN)
     );
 
     // Then
@@ -217,13 +217,13 @@ class PaForNodeRequestValidatorServiceTest {
     request.setIdBrokerPA(broker.getBrokerFiscalCode());
     request.setIdStation(broker.getStationId() + "xxx");
 
-    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
       .thenReturn(null);
 
     // When
     PagoPaNodeFaultException response = Assertions.assertThrows(
       PagoPaNodeFaultException.class,
-      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN)
+      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN)
     );
 
     // Then
@@ -247,24 +247,24 @@ class PaForNodeRequestValidatorServiceTest {
       .idBrokerPA("ANY_BROKER_PA")
       .build();
 
-    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
 
-    Mockito.when(organizationServiceMock.getOrganizationById(broker.getOrganizationId(), VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationById(broker.getOrganizationId(), VALID_ACCESS_TOKEN))
       .thenReturn(orgAssociated);
 
     // When
     Pair<Broker, Organization> response =
-      paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN);
+      paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN);
 
     // Then
     Assertions.assertTrue(new ReflectionEquals(Pair.of(broker, orgAssociated)).matches(response));
 
     Mockito.verify(brokerServiceMock, Mockito.times(1))
-      .getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN);
+      .getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN);
 
     Mockito.verify(organizationServiceMock, Mockito.times(1))
-      .getOrganizationById(broker.getOrganizationId(), VALID_ACCEESS_TOKEN);
+      .getOrganizationById(broker.getOrganizationId(), VALID_ACCESS_TOKEN);
 
     Mockito.verify(organizationServiceMock, Mockito.never())
       .getOrganizationByFiscalCode(Mockito.anyString(), Mockito.anyString());
@@ -286,16 +286,16 @@ class PaForNodeRequestValidatorServiceTest {
       .idBrokerPA("ANY_BROKER_PA")
       .build();
 
-    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN))
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
 
-    Mockito.when(organizationServiceMock.getOrganizationById(broker.getOrganizationId(), VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationById(broker.getOrganizationId(), VALID_ACCESS_TOKEN))
       .thenReturn(null);
 
     // When
     PagoPaNodeFaultException ex = Assertions.assertThrows(
       PagoPaNodeFaultException.class,
-      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCEESS_TOKEN)
+      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN)
     );
 
     // Then
@@ -303,9 +303,9 @@ class PaForNodeRequestValidatorServiceTest {
     Assertions.assertEquals(request.getIdStation(), ex.getErrorEmitter());
 
     Mockito.verify(brokerServiceMock, Mockito.times(1))
-      .getBrokerByStationId(request.getIdStation(), VALID_ACCEESS_TOKEN);
+      .getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN);
     Mockito.verify(organizationServiceMock, Mockito.times(1))
-      .getOrganizationById(broker.getOrganizationId(), VALID_ACCEESS_TOKEN);
+      .getOrganizationById(broker.getOrganizationId(), VALID_ACCESS_TOKEN);
 
     Mockito.verify(organizationServiceMock, Mockito.never())
       .getOrganizationByFiscalCode(Mockito.anyString(), Mockito.anyString());
@@ -321,6 +321,7 @@ class PaForNodeRequestValidatorServiceTest {
   void givenValidPaSendRtRequestWhenPaSendRtRequestValidateThenOk() {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(false);
     organization.setBrokerId(broker.getBrokerId());
     organization.setStatus(OrganizationStatus.ACTIVE);
     organization.setOrganizationId(100L);
@@ -330,14 +331,15 @@ class PaForNodeRequestValidatorServiceTest {
     request.setIdBrokerPA(broker.getBrokerFiscalCode());
     request.setIdStation(broker.getStationId());
 
-    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN)).thenReturn(organization);
-    Mockito.when(brokerServiceMock.getBrokerById(broker.getBrokerId(), VALID_ACCEESS_TOKEN)).thenReturn(broker);
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN)).thenReturn(broker);
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCESS_TOKEN)).thenReturn(organization);
+    Mockito.when(brokerServiceMock.getBrokerById(broker.getBrokerId(), VALID_ACCESS_TOKEN)).thenReturn(broker);
 
-    Organization response = paForNodeRequestValidatorService.paSendRtRequestValidate(request, VALID_ACCEESS_TOKEN);
+    Organization response = paForNodeRequestValidatorService.paSendRtRequestValidate(request, VALID_ACCESS_TOKEN);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(organization.getOrgFiscalCode(), response.getOrgFiscalCode());
-    Mockito.verify(brokerServiceMock).getBrokerById(organization.getBrokerId(), VALID_ACCEESS_TOKEN);
+    Mockito.verify(brokerServiceMock).getBrokerById(organization.getBrokerId(), VALID_ACCESS_TOKEN);
   }
 
   @Test
@@ -346,30 +348,40 @@ class PaForNodeRequestValidatorServiceTest {
     String managedTransferFiscalCode = "FISCAL_CODE";
     request.getTransferList().getFirst().setFiscalCodePA(managedTransferFiscalCode);
 
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(false);
+
     Organization technicalOrg = new Organization();
     technicalOrg.setOrganizationId(-1L);
     technicalOrg.setStatus(OrganizationStatus.ACTIVE);
     technicalOrg.setOrgFiscalCode("TECHNICAL_ORG_FISCAL_CODE");
 
-    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCEESS_TOKEN)).thenReturn(null);
-    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(managedTransferFiscalCode, VALID_ACCEESS_TOKEN)).thenReturn(new Organization());
-    Mockito.when(organizationServiceMock.getOrganizationById(-1L, VALID_ACCEESS_TOKEN)).thenReturn(technicalOrg);
 
-    Organization response = paForNodeRequestValidatorService.paSendRtRequestValidate(request, VALID_ACCEESS_TOKEN);
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN)).thenReturn(broker);
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCESS_TOKEN)).thenReturn(null);
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(managedTransferFiscalCode, VALID_ACCESS_TOKEN)).thenReturn(new Organization());
+    Mockito.when(organizationServiceMock.getOrganizationById(-1L, VALID_ACCESS_TOKEN)).thenReturn(technicalOrg);
+
+    Organization response = paForNodeRequestValidatorService.paSendRtRequestValidate(request, VALID_ACCESS_TOKEN);
 
     Assertions.assertEquals(-1L, response.getOrganizationId());
-    Mockito.verifyNoInteractions(brokerServiceMock);
   }
 
   @Test
   void givenNoOrgAndNoManagedTransfersWhenPaSendRtRequestValidateThenThrowFault() {
     PaSendRtDTO request = podamFactory.manufacturePojo(PaSendRtDTO.class);
 
-    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(Mockito.anyString(), Mockito.eq(VALID_ACCEESS_TOKEN)))
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(false);
+
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
+      .thenReturn(broker);
+
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(Mockito.anyString(), Mockito.eq(VALID_ACCESS_TOKEN)))
       .thenReturn(null);
 
     PagoPaNodeFaultException ex = Assertions.assertThrows(PagoPaNodeFaultException.class,
-      () -> paForNodeRequestValidatorService.paSendRtRequestValidate(request, VALID_ACCEESS_TOKEN));
+      () -> paForNodeRequestValidatorService.paSendRtRequestValidate(request, VALID_ACCESS_TOKEN));
 
     Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, ex.getErrorCode());
   }

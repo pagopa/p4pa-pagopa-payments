@@ -29,19 +29,9 @@ public class PaForNodeRequestValidatorService {
   }
 
   public Pair<Broker, Organization> paForNodeRequestValidate(PaForNodeDTO request, String accessToken){
-    Broker broker = brokerService.getBrokerByStationId(request.getIdStation(), accessToken);
-    if (broker == null) {
-      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_STAZIONE_INT_ERRATA, request.getIdStation());
-    }
-
-    if (Boolean.TRUE.equals(broker.getFlagDelegate())) {
-      Organization orgAssociated = organizationService.getOrganizationById(broker.getOrganizationId(), accessToken);
-
-      if (orgAssociated == null) {
-        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdStation());
-      }
-
-      return Pair.of(broker, orgAssociated);
+    Pair<Broker, Organization> delegatedPair = retrieveDelegatedPair(request.getIdStation(), accessToken);
+    if (delegatedPair != null) {
+      return delegatedPair;
     }
 
     Organization organization = organizationService.getOrganizationByFiscalCode(request.getIdPA(), accessToken);
@@ -55,8 +45,12 @@ public class PaForNodeRequestValidatorService {
   }
 
   public Organization paSendRtRequestValidate(PaSendRtDTO request, String accessToken) {
-    Organization organization = organizationService.getOrganizationByFiscalCode(request.getIdPA(), accessToken);
+    Pair<Broker, Organization> delegatedPair = retrieveDelegatedPair(request.getIdStation(), accessToken);
+    if (delegatedPair != null) {
+      return delegatedPair.getRight();
+    }
 
+    Organization organization = organizationService.getOrganizationByFiscalCode(request.getIdPA(), accessToken);
     if(organization == null) {
       // Check if there is at least one organization managed in PU within the transfer list
       boolean hasValidTransferOrg = request.getTransferList().stream()
@@ -74,6 +68,24 @@ public class PaForNodeRequestValidatorService {
     validateOrganizationBrokerAndStation(organization, request, accessToken);
 
     return organization;
+  }
+
+  private Pair<Broker, Organization> retrieveDelegatedPair(String stationId, String accessToken) {
+    Broker broker = brokerService.getBrokerByStationId(stationId, accessToken);
+    if (broker == null) {
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_STAZIONE_INT_ERRATA, stationId);
+    }
+
+    if (Boolean.FALSE.equals(broker.getFlagDelegate())) {
+      return null;
+    }
+
+    Organization org = organizationService.getOrganizationById(broker.getOrganizationId(), accessToken);
+    if (org == null) {
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, stationId);
+    }
+
+    return Pair.of(broker, org);
   }
 
   private Broker validateOrganizationBrokerAndStation(Organization organization, PaForNodeDTO request, String accessToken) {

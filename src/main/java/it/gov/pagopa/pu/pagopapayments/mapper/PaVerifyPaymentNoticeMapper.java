@@ -8,7 +8,6 @@ import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
-import it.gov.pagopa.pu.pagopapayments.util.OrganizationInfoUtils;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,7 +35,7 @@ public class PaVerifyPaymentNoticeMapper {
 
     List<TransferDTO> transfers = Optional.ofNullable(installment.getTransfers()).orElse(List.of());
 
-    Pair<String, String> orgInfo = OrganizationInfoUtils.resolveOrganizationInfo(organization, broker, transfers);
+    Pair<String, String> orgInfo = resolveOrganizationInfo(organization, broker, transfers);
     response.setFiscalCodePA(orgInfo.getLeft());
     response.setCompanyName(orgInfo.getRight());
     response.setOfficeName(null);
@@ -60,5 +59,28 @@ public class PaVerifyPaymentNoticeMapper {
     response.setOutcome(StOutcome.OK);
 
     return response;
+  }
+
+  public static Pair<String, String> resolveOrganizationInfo(Organization organization, Broker broker, List<TransferDTO> transfers) {
+    String fiscalCodePA = organization.getOrgFiscalCode();
+    String companyName = organization.getOrgName();
+
+    if (broker != null && Boolean.TRUE.equals(broker.getFlagDelegate())) {
+      TransferDTO owner = transfers.stream()
+        .filter(t -> Boolean.TRUE.equals(t.getFlagOwner()))
+        .findFirst()
+        .orElse(null);
+
+      if (owner != null) {
+        if (StringUtils.isNotBlank(owner.getOrgFiscalCode())) {
+          fiscalCodePA = owner.getOrgFiscalCode();
+        }
+        if (StringUtils.isNotBlank(owner.getOrgName())) {
+          companyName = owner.getOrgName();
+        }
+      }
+    }
+
+    return Pair.of(fiscalCodePA, companyName);
   }
 }

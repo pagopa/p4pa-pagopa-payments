@@ -82,4 +82,12 @@ class OrganizationApiHolderTest extends BaseApiHolderTest {
       organizationApisHolder::unload);
   }
 
+  @Test
+  void whenGetBrokerSearchControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      accessToken -> organizationApisHolder.getBrokerSearchControllerApi(accessToken)
+        .crudBrokersFindByStationId("30002310206_01"),
+      new ParameterizedTypeReference<>() {},
+      organizationApisHolder::unload);
+  }
 }

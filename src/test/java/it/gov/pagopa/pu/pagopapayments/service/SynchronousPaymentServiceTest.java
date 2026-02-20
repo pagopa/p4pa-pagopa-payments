@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
@@ -20,6 +21,7 @@ import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import it.gov.pagopa.pu.pusil.dto.generated.ActualizationResultDTO;
 import it.gov.pagopa.pu.sendnotification.dto.generated.NotificationPriceResponseV23DTO;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,30 +71,41 @@ class SynchronousPaymentServiceTest {
   void givenValidInstallmentWhenRetrievePaymentThenOk() {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(false);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     List<InstallmentDTO> installmentDTOList = List.of(installmentDTO);
     RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
     retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode());
 
     Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
-    Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN)).thenReturn(organization);
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(null);
-    Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(),
-        ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN))
+    Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
+      .thenReturn(Pair.of(broker, organization));
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+      .thenReturn(null);
+    Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
+        organization.getOrganizationId(),
+        retrievePaymentDTO.getNoticeNumber(),
+        ORDINARY_DEBT_POSITION_ORIGINS,
+        VALID_ACCEESS_TOKEN))
       .thenReturn(installmentDTOList);
-    Mockito.when(synchronousPaymentStatusVerifierServiceMock.verifyPaymentStatus(organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer())).thenReturn(installmentDTO);
+    Mockito.when(synchronousPaymentStatusVerifierServiceMock.verifyPaymentStatus(
+        organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer()))
+      .thenReturn(installmentDTO);
 
-    Pair<InstallmentDTO, Organization> expectedResponse = Pair.of(installmentDTO, organization);
+    Triple<InstallmentDTO, Organization, Broker> expectedResponse = Triple.of(installmentDTO, organization, broker);
 
     // When
-    Pair<InstallmentDTO, Organization> response = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
+    Triple<InstallmentDTO, Organization, Broker> response = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
 
     // Then
     Assertions.assertTrue(new ReflectionEquals(expectedResponse).matches(response));
+
     Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
-    Mockito.verify(paForNodeRequestValidatorServiceMock, Mockito.times(1)).paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN);
-    Mockito.verify(debtPositionServiceMock, Mockito.times(1)).getInstallmentsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(),
-      ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN);
+    Mockito.verify(paForNodeRequestValidatorServiceMock, Mockito.times(1))
+      .paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN);
+    Mockito.verify(debtPositionServiceMock, Mockito.times(1))
+      .getInstallmentsByOrganizationIdAndNav(organization.getOrganizationId(), retrievePaymentDTO.getNoticeNumber(), ORDINARY_DEBT_POSITION_ORIGINS, VALID_ACCEESS_TOKEN);
     Mockito.verify(synchronousPaymentStatusVerifierServiceMock, Mockito.times(1))
       .verifyPaymentStatus(organization, installmentDTOList, retrievePaymentDTO.getNoticeNumber(), retrievePaymentDTO.getPostalTransfer());
   }
@@ -101,6 +114,8 @@ class SynchronousPaymentServiceTest {
   void givenNotificationFeeGreaterThanZeroWhenRetrievePaymentThenUpdateInstallmentNotificationFeeIsCalled() {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(false);
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     RetrievePaymentDTO retrievePaymentDTO = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
     retrievePaymentDTO.setIdPA(retrievePaymentDTO.getFiscalCode());
@@ -118,19 +133,23 @@ class SynchronousPaymentServiceTest {
 
     Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
-      .thenReturn(organization);
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
-    Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(organization.getOrganizationId(),
-      retrievePaymentDTO.getNoticeNumber(), VALID_ACCEESS_TOKEN)).thenReturn(notificationPriceResponse);
-    Mockito.when(debtPositionServiceMock.updateInstallmentNotificationFee(request,
+      .thenReturn(Pair.of(broker, organization));
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+      .thenReturn(apiKey);
+    Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(
+        organization.getOrganizationId(),
+        retrievePaymentDTO.getNoticeNumber(),
         VALID_ACCEESS_TOKEN))
+      .thenReturn(notificationPriceResponse);
+    Mockito.when(debtPositionServiceMock.updateInstallmentNotificationFee(request, VALID_ACCEESS_TOKEN))
       .thenReturn(installmentDTO);
 
     // When
-    Pair<InstallmentDTO, Organization> response = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
+    Triple<InstallmentDTO, Organization, Broker> response = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
 
     // Then
     Assertions.assertNotNull(response);
+
     Mockito.verify(authnServiceMock, Mockito.times(1)).getAccessToken();
     Mockito.verify(paForNodeRequestValidatorServiceMock, Mockito.times(1))
       .paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN);

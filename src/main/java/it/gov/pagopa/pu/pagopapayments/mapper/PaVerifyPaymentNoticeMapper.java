@@ -4,11 +4,15 @@ import it.gov.pagopa.pagopa_api.pa.pafornode.*;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
+import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.Optional;
 
 public class PaVerifyPaymentNoticeMapper {
 
@@ -25,23 +29,48 @@ public class PaVerifyPaymentNoticeMapper {
       .build();
   }
 
-  public static PaVerifyPaymentNoticeRes installmentDto2PaVerifyPaymentNoticeRes(InstallmentDTO installment, Organization organization) {
+  public static PaVerifyPaymentNoticeRes installmentDto2PaVerifyPaymentNoticeRes(InstallmentDTO installment, Organization organization, Broker broker) {
     PaVerifyPaymentNoticeRes response = new PaVerifyPaymentNoticeRes();
-    response.setFiscalCodePA(organization.getOrgFiscalCode());
-    response.setCompanyName(organization.getOrgName());
+
+    List<TransferDTO> transfers = Optional.ofNullable(installment.getTransfers()).orElse(List.of());
+
+    String fiscalCodePA = organization.getOrgFiscalCode();
+    String companyName = organization.getOrgName();
+
+    if (broker != null && Boolean.TRUE.equals(broker.getFlagDelegate())) {
+      TransferDTO ownerTransfer = transfers.stream()
+        .filter(t -> Boolean.TRUE.equals(t.getFlagOwner()))
+        .findFirst()
+        .orElse(null);
+
+      if (ownerTransfer != null) {
+        fiscalCodePA = ownerTransfer.getOrgFiscalCode();
+        companyName = ownerTransfer.getOrgName();
+      }
+    }
+
+    response.setFiscalCodePA(fiscalCodePA);
+    response.setCompanyName(companyName);
     response.setOfficeName(null);
+
     CtPaymentOptionDescriptionPA paymentOption = new CtPaymentOptionDescriptionPA();
     response.setPaymentDescription(Utilities.truncateRemittanceInformation(installment.getRemittanceInformation()));
     paymentOption.setOptions(StAmountOption.EQ);
     paymentOption.setAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(installment.getAmountCents()));
-    paymentOption.setDueDate(ConversionUtils.toXMLGregorianCalendar(
-      ConversionUtils.localDate2RomeMaxTime(installment.getDueDate())));
-    boolean postalPayment = installment.getTransfers().stream().map(TransferDTO::getPostalIban).noneMatch(StringUtils::isBlank);
+    paymentOption.setDueDate(ConversionUtils.toXMLGregorianCalendar(ConversionUtils.localDate2RomeMaxTime(installment.getDueDate())));
+
+    boolean postalPayment = transfers.stream()
+      .filter(t -> t.getAmountCents() > 0)
+      .map(TransferDTO::getPostalIban)
+      .noneMatch(StringUtils::isBlank);
+
     paymentOption.setAllCCP(postalPayment);
+
     CtPaymentOptionsDescriptionListPA paymentOptions = new CtPaymentOptionsDescriptionListPA();
     paymentOptions.setPaymentOptionDescription(paymentOption);
     response.setPaymentList(paymentOptions);
     response.setOutcome(StOutcome.OK);
+
     return response;
   }
 }

@@ -73,4 +73,21 @@ class BrokerRetrieverServiceTest {
     // Then
     assertSame(expected, result);
   }
+
+  @Test
+  void givenStationIdWhenGetBrokerByStationIdThenOk() {
+    // Given
+    String stationId = "30002310206_01";
+    String accessToken = "accessToken";
+    Broker expected = new Broker();
+
+    when(client.getBrokerByStationId(stationId, accessToken))
+      .thenReturn(expected);
+
+    // When
+    Broker result = service.getBrokerByStationId(stationId, accessToken);
+
+    // Then
+    assertSame(expected, result);
+  }
 }

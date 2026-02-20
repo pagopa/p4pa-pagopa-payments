@@ -6,6 +6,7 @@ import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtResponse;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.StOutcome;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
@@ -23,7 +24,6 @@ import it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPa
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -104,18 +104,14 @@ public class PaForNodeEndpoint {
       .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber()))
       .build();
 
-    return registryLogger.execute(
-      contextData,
-      request,
-      () -> {
+    return registryLogger.execute(contextData, request, () -> {
         log.info("processing paVerifyPaymentNotice idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
         RetrievePaymentDTO retrievePaymentDTO = PaVerifyPaymentNoticeMapper.paVerifyPaymentNoticeReq2RetrievePaymentDTO(request);
-        Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
-        return Triple.of(
-          PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
-            installmentAndOrganization.getLeft(), installmentAndOrganization.getRight()),
-          null,
-          RegistryOutcome.OK);
+
+        Triple<InstallmentDTO, Organization, Broker> triple = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
+
+        return Triple.of(PaVerifyPaymentNoticeMapper.installmentDto2PaVerifyPaymentNoticeRes(
+          triple.getLeft(), triple.getMiddle(), triple.getRight()), null, RegistryOutcome.OK);
       },
       e -> {
         if (e instanceof PagoPaNodeFaultException spe) {
@@ -145,18 +141,14 @@ public class PaForNodeEndpoint {
       .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber()))
       .build();
 
-    return registryLogger.execute(
-      contextData,
-      request,
-      () -> {
+    return registryLogger.execute(contextData, request, () -> {
         log.info("processing paGetPaymentV2 idPA[{}] notice[{}/{}]", request.getIdPA(), request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber());
         RetrievePaymentDTO retrievePaymentDTO = PaGetPaymentMapper.paPaGetPaymentV2Request2RetrievePaymentDTO(request);
-        Pair<InstallmentDTO, Organization> installmentAndOrganization = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
-        return Triple.of(
-          PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-            installmentAndOrganization.getLeft(), installmentAndOrganization.getRight(), request.getTransferType()),
-          null,
-          RegistryOutcome.OK);
+
+        Triple<InstallmentDTO, Organization, Broker> triple = synchronousPaymentService.retrievePayment(retrievePaymentDTO);
+
+        return Triple.of(PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+            triple.getLeft(), triple.getMiddle(), triple.getRight(), request.getTransferType()), null, RegistryOutcome.OK);
       },
       e -> {
         if (e instanceof PagoPaNodeFaultException spe) {

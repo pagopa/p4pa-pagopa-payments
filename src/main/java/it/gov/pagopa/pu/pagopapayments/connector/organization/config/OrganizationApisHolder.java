@@ -2,11 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.organization.config;
 
 import it.gov.pagopa.pu.organization.controller.ApiClient;
 import it.gov.pagopa.pu.organization.controller.BaseApi;
-import it.gov.pagopa.pu.organization.controller.generated.BrokerApi;
-import it.gov.pagopa.pu.organization.controller.generated.BrokerEntityControllerApi;
-import it.gov.pagopa.pu.organization.controller.generated.OrganizationApi;
-import it.gov.pagopa.pu.organization.controller.generated.OrganizationEntityControllerApi;
-import it.gov.pagopa.pu.organization.controller.generated.OrganizationSearchControllerApi;
+import it.gov.pagopa.pu.organization.controller.generated.*;
 import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
@@ -18,9 +14,10 @@ public class OrganizationApisHolder {
 
   private final OrganizationEntityControllerApi organizationEntityControllerApi;
   private final OrganizationSearchControllerApi organizationSearchControllerApi;
+  private final OrganizationApi organizationApi;
   private final BrokerEntityControllerApi brokerEntityControllerApi;
   private final BrokerApi brokerApi;
-  private final OrganizationApi organizationApi;
+  private final BrokerSearchControllerApi brokerSearchControllerApi;
 
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
@@ -40,9 +37,10 @@ public class OrganizationApisHolder {
 
     this.organizationEntityControllerApi = new OrganizationEntityControllerApi(apiClient);
     this.organizationSearchControllerApi = new OrganizationSearchControllerApi(apiClient);
+    this.organizationApi = new OrganizationApi(apiClient);
     this.brokerEntityControllerApi = new BrokerEntityControllerApi(apiClient);
     this.brokerApi = new BrokerApi(apiClient);
-    this.organizationApi = new OrganizationApi(apiClient);
+    this.brokerSearchControllerApi = new BrokerSearchControllerApi(apiClient);
   }
 
   @PreDestroy
@@ -59,6 +57,10 @@ public class OrganizationApisHolder {
     return getApi(accessToken, organizationSearchControllerApi);
   }
 
+  public OrganizationApi getOrganizationApi(String accessToken) {
+    return getApi(accessToken, organizationApi);
+  }
+
   public BrokerEntityControllerApi getBrokerEntityControllerApi(String accessToken) {
     bearerTokenHolder.set(accessToken);
     return getApi(accessToken, brokerEntityControllerApi);
@@ -69,8 +71,9 @@ public class OrganizationApisHolder {
     return getApi(accessToken, brokerApi);
   }
 
-  public OrganizationApi getOrganizationApi(String accessToken) {
-    return getApi(accessToken, organizationApi);
+  public BrokerSearchControllerApi getBrokerSearchControllerApi(String accessToken) {
+    bearerTokenHolder.set(accessToken);
+    return getApi(accessToken, brokerSearchControllerApi);
   }
 
   private <T extends BaseApi> T getApi(String accessToken, T api) {

@@ -48,4 +48,13 @@ public class BrokerClient {
     }
   }
 
+  public Broker getBrokerByStationId(String stationId, String accessToken) {
+    try {
+      return apisHolder.getBrokerSearchControllerApi(accessToken)
+        .crudBrokersFindByStationId(stationId);
+    } catch (HttpClientErrorException.NotFound e) {
+      log.info("Cannot find Broker having stationId {}", stationId);
+      return null;
+    }
+  }
 }

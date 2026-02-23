@@ -386,5 +386,26 @@ class PaForNodeRequestValidatorServiceTest {
     Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, ex.getErrorCode());
   }
 
+  @Test
+  void givenDelegateBrokerWhenPaSendRtRequestValidateThenReturnAssociatedOrganization() {
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(true);
+
+    Organization orgAssociated = podamFactory.manufacturePojo(Organization.class);
+    orgAssociated.setOrganizationId(123L);
+
+    PaSendRtDTO request = podamFactory.manufacturePojo(PaSendRtDTO.class);
+    request.setIdStation(broker.getStationId());
+
+    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
+      .thenReturn(broker);
+
+    Mockito.when(organizationServiceMock.getOrganizationById(broker.getOrganizationId(), VALID_ACCESS_TOKEN))
+      .thenReturn(orgAssociated);
+
+    Organization response = paForNodeRequestValidatorService.paSendRtRequestValidate(request, VALID_ACCESS_TOKEN);
+
+    Assertions.assertEquals(orgAssociated.getOrganizationId(), response.getOrganizationId());
+  }
   // endregion
 }

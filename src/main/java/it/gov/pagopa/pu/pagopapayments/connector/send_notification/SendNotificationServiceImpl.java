@@ -15,7 +15,7 @@ public class SendNotificationServiceImpl implements SendNotificationService{
   }
 
   @Override
-  @Cacheable(cacheNames = CacheConfig.Fields.notificationFee, key = "#organizationId + '-' + #nav", unless="#result == null")
+  @Cacheable(cacheNames = CacheConfig.Fields.notificationFee, key = "'send-'+#organizationId + '-' + #nav", unless="#result == null")
   public NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String nav, String accessToken) {
     return sendClient.retrieveNotificationPrice(organizationId, nav, accessToken);
   }

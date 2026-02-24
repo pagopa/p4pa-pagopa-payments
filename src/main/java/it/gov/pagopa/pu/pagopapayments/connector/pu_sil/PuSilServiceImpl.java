@@ -16,7 +16,7 @@ public class PuSilServiceImpl implements PuSilService {
   }
 
   @Override
-  @Cacheable(cacheNames = CacheConfig.Fields.notificationFee, key = "#orgSilServiceId + '-' + #nav", unless="#result == null")
+  @Cacheable(cacheNames = CacheConfig.Fields.notificationFee, key = "'sil-' + #orgSilServiceId + '-' + #nav", unless="#result == null")
   public ActualizationResultDTO actualize(Long orgSilServiceId, String nav, String accessToken) {
     return puSilClient.actualize(orgSilServiceId, nav, accessToken);
   }

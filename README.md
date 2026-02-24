@@ -122,7 +122,8 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | CACHE_BROKER_API_FISCAL_CODE_MINUTES       | Broker api keys and organization data cache retention (minutes)              | 60      |
 | CACHE_DEBTPOSITION_TYPE_ORG_SIZE           | DebtPositionTypeOrg data cache size                                          | 1000    |
 | CACHE_DEBTPOSITION_TYPE_ORG_MINUTES        | DebtPositionTypeOrg data cache retention (minutes)                           | 60      |
-
+| CACHE_NOTIFICATION_FEE_SIZE                | Notification fee data cache size                                             | 1000    |
+| CACHE_NOTIFICATION_FEE_MINUTES             | Notification fee data cache retention (minutes)                              | 10      |
 ##### 🔗 REST
 | ENV                                               | DESCRIPTION                               | DEFAULT |
 |---------------------------------------------------|-------------------------------------------|---------|

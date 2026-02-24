@@ -29,6 +29,8 @@ public class CacheConfig {
     private CacheConfigurationProperties brokerApiKeyAndFiscalCode;
     @NestedConfigurationProperty
     private CacheConfigurationProperties debtPositionTypeOrg;
+    @NestedConfigurationProperty
+    private CacheConfigurationProperties notificationFee;
 
     @Data
     @NoArgsConstructor
@@ -44,7 +46,8 @@ public class CacheConfig {
         cacheManager.registerCustomCache(Fields.brokerApiKeyAndSegregationCodes, buildCache(brokerApiKeyAndSegregationCodes));
         cacheManager.registerCustomCache(Fields.brokerApiKeyAndFiscalCode, buildCache(brokerApiKeyAndFiscalCode));
         cacheManager.registerCustomCache(Fields.debtPositionTypeOrg, buildCache(debtPositionTypeOrg));
-        return cacheManager;
+        cacheManager.registerCustomCache(Fields.notificationFee, buildCache(notificationFee));
+      return cacheManager;
     }
 
     private Cache<Object, Object> buildCache(CacheConfigurationProperties cacheConfig) {

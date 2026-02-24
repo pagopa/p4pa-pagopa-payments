@@ -221,3 +221,6 @@ cache:
   debtPositionTypeOrg:
     size: "\${CACHE_DEBTPOSITION_TYPE_ORG_SIZE:1000}"
     expire-in: "\${CACHE_DEBTPOSITION_TYPE_ORG_MINUTES:60}"
+  notificationFee:
+    size: "\${CACHE_NOTIFICATION_FEE_SIZE:1000}"
+    expire-in: "\${CACHE_NOTIFICATION_FEE_MINUTES:10}"

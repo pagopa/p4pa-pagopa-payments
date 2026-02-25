@@ -371,12 +371,6 @@ class PaForNodeRequestValidatorServiceTest {
   void givenNoOrgAndNoManagedTransfersWhenPaSendRtRequestValidateThenThrowFault() {
     PaSendRtDTO request = podamFactory.manufacturePojo(PaSendRtDTO.class);
 
-    Broker broker = podamFactory.manufacturePojo(Broker.class);
-    broker.setFlagDelegate(false);
-
-    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
-      .thenReturn(broker);
-
     Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(Mockito.anyString(), Mockito.eq(VALID_ACCESS_TOKEN)))
       .thenReturn(null);
 
@@ -394,8 +388,15 @@ class PaForNodeRequestValidatorServiceTest {
     Organization orgAssociated = podamFactory.manufacturePojo(Organization.class);
     orgAssociated.setOrganizationId(123L);
 
+    Organization inputOrg = podamFactory.manufacturePojo(Organization.class);
+    inputOrg.setStatus(OrganizationStatus.ACTIVE);
+
     PaSendRtDTO request = podamFactory.manufacturePojo(PaSendRtDTO.class);
     request.setIdStation(broker.getStationId());
+    request.setIdPA(inputOrg.getOrgFiscalCode());
+
+    Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCESS_TOKEN))
+      .thenReturn(inputOrg);
 
     Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);

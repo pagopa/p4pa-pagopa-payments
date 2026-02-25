@@ -45,11 +45,6 @@ public class PaForNodeRequestValidatorService {
   }
 
   public Organization paSendRtRequestValidate(PaSendRtDTO request, String accessToken) {
-    Pair<Broker, Organization> delegatedPair = retrieveDelegatedPair(request.getIdStation(), accessToken);
-    if (delegatedPair != null) {
-      return delegatedPair.getRight();
-    }
-
     Organization organization = organizationService.getOrganizationByFiscalCode(request.getIdPA(), accessToken);
     if(organization == null) {
       // Check if there is at least one organization managed in PU within the transfer list
@@ -63,6 +58,11 @@ public class PaForNodeRequestValidatorService {
         // If at least one transfer is managed, use the technical organization
         organization = organizationService.getOrganizationById(-1L, accessToken);
       }
+    }
+
+    Pair<Broker, Organization> delegatedPair = retrieveDelegatedPair(request.getIdStation(), accessToken);
+    if (delegatedPair != null) {
+      return delegatedPair.getRight();
     }
 
     validateOrganizationBrokerAndStation(organization, request, accessToken);

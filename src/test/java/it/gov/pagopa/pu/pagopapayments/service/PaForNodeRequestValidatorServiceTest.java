@@ -348,16 +348,12 @@ class PaForNodeRequestValidatorServiceTest {
     String managedTransferFiscalCode = "FISCAL_CODE";
     request.getTransferList().getFirst().setFiscalCodePA(managedTransferFiscalCode);
 
-    Broker broker = podamFactory.manufacturePojo(Broker.class);
-    broker.setFlagDelegate(false);
-
     Organization technicalOrg = new Organization();
     technicalOrg.setOrganizationId(-1L);
     technicalOrg.setStatus(OrganizationStatus.ACTIVE);
     technicalOrg.setOrgFiscalCode("TECHNICAL_ORG_FISCAL_CODE");
 
 
-    Mockito.when(brokerServiceMock.getBrokerByStationId(request.getIdStation(), VALID_ACCESS_TOKEN)).thenReturn(broker);
     Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCESS_TOKEN)).thenReturn(null);
     Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(managedTransferFiscalCode, VALID_ACCESS_TOKEN)).thenReturn(new Organization());
     Mockito.when(organizationServiceMock.getOrganizationById(-1L, VALID_ACCESS_TOKEN)).thenReturn(technicalOrg);

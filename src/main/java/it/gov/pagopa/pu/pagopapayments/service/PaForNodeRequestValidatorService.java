@@ -58,11 +58,11 @@ public class PaForNodeRequestValidatorService {
         // If at least one transfer is managed, use the technical organization
         organization = organizationService.getOrganizationById(-1L, accessToken);
       }
-    }
-
-    Pair<Broker, Organization> delegatedPair = retrieveDelegatedPair(request.getIdStation(), accessToken);
-    if (delegatedPair != null) {
-      return delegatedPair.getRight();
+    } else {
+      Pair<Broker, Organization> delegatedPair = retrieveDelegatedPair(request.getIdStation(), accessToken);
+      if (delegatedPair != null) {
+        return delegatedPair.getRight();
+      }
     }
 
     validateOrganizationBrokerAndStation(organization, request, accessToken);

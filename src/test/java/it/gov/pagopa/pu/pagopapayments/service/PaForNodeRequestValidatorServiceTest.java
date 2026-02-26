@@ -298,7 +298,7 @@ class PaForNodeRequestValidatorServiceTest {
     );
 
     // Then
-    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, ex.getErrorCode());
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR, ex.getErrorCode());
     Assertions.assertEquals(request.getIdPA(), ex.getErrorEmitter());
 
     Mockito.verify(brokerServiceMock, Mockito.times(1))

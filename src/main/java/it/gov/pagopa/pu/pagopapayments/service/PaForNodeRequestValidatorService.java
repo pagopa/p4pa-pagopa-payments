@@ -29,20 +29,21 @@ public class PaForNodeRequestValidatorService {
   }
 
   public Pair<Broker, Organization> paForNodeRequestValidate(PaForNodeDTO request, String accessToken){
-    Pair<Broker, Organization> brokerOrgPair = retrieveBrokerOrganization(request.getIdBrokerPA(), request.getIdPA(), accessToken);
+    Pair<Broker, Organization> brokerOrgPair = retrieveBrokerAndOrganization(request.getIdBrokerPA(), request.getIdPA(), accessToken);
 
     Organization organization = brokerOrgPair.getRight();
     if(organization == null) {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdBrokerPA());
     }
 
-    validateOrganizationBrokerAndStation(organization, brokerOrgPair.getLeft(), request);
+    Broker broker = brokerOrgPair.getLeft();
+    validateOrganizationBrokerAndStation(organization, broker, request);
 
     return Pair.of(brokerOrgPair.getLeft(), organization);
   }
 
   public Organization paSendRtRequestValidate(PaSendRtDTO request, String accessToken) {
-    Pair<Broker, Organization> brokerOrgPair = retrieveBrokerOrganization(request.getIdBrokerPA(), request.getIdPA(), accessToken);
+    Pair<Broker, Organization> brokerOrgPair = retrieveBrokerAndOrganization(request.getIdBrokerPA(), request.getIdPA(), accessToken);
 
     Organization organization = brokerOrgPair.getRight();
     if(organization == null) {
@@ -64,8 +65,7 @@ public class PaForNodeRequestValidatorService {
     return organization;
   }
 
-  private Pair<Broker, Organization> retrieveBrokerOrganization(String brokerFiscalCode, String orgFiscalCode, String accessToken) {
-    Broker broker = brokerService.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);
+  private Pair<Broker, Organization> retrieveBrokerAndOrganization(String brokerFiscalCode, String orgFiscalCode, String accessToken) {    Broker broker = brokerService.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);
     if (broker == null) {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO, brokerFiscalCode);
     }
@@ -73,7 +73,7 @@ public class PaForNodeRequestValidatorService {
     if (Boolean.TRUE.equals(broker.getFlagDelegate())) {
       Organization org = organizationService.getOrganizationById(broker.getOrganizationId(), accessToken);
       if (org == null) {
-        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, orgFiscalCode);
+        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, orgFiscalCode);
       }
 
       return Pair.of(broker, org);

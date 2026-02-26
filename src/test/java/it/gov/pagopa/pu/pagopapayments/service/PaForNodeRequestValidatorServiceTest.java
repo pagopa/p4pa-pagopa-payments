@@ -310,6 +310,24 @@ class PaForNodeRequestValidatorServiceTest {
       .getOrganizationByFiscalCode(Mockito.anyString(), Mockito.anyString());
   }
 
+  @Test
+  void givenNotFoundBrokerWhenPaForNodeRequestValidateThenFault() {
+    RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
+    String brokerFiscalCode = request.getIdBrokerPA();
+
+    Mockito.when(brokerServiceMock.getBrokerByBrokerFiscalCode(brokerFiscalCode, VALID_ACCESS_TOKEN))
+      .thenReturn(null);
+
+    PagoPaNodeFaultException response = Assertions.assertThrows(
+      PagoPaNodeFaultException.class,
+      () -> paForNodeRequestValidatorService.paForNodeRequestValidate(request, VALID_ACCESS_TOKEN)
+    );
+
+    Assertions.assertEquals(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO, response.getErrorCode());
+    Assertions.assertEquals(brokerFiscalCode, response.getErrorEmitter());
+  }
+
+
   //endregion
 
   // region paSendRtRequestValidate

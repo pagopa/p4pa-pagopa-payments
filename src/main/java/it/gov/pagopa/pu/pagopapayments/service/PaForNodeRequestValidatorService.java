@@ -39,7 +39,7 @@ public class PaForNodeRequestValidatorService {
     Broker broker = brokerOrgPair.getLeft();
     validateOrganizationBrokerAndStation(organization, broker, request);
 
-    return Pair.of(brokerOrgPair.getLeft(), organization);
+    return Pair.of(broker, organization);
   }
 
   public Organization paSendRtRequestValidate(PaSendRtDTO request, String accessToken) {

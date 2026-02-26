@@ -193,4 +193,41 @@ class BrokerEntityClientTest {
     // Then
     Assertions.assertNull(result);
   }
+
+  @Test
+  void whenGetBrokerByBrokerFiscalCodeThenInvokeWithAccessToken() {
+    // Given
+    String brokerFiscalCode = "brokerFiscalCode";
+    String accessToken = "ACCESSTOKEN";
+    Broker expectedResult = new Broker();
+
+    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
+      .thenReturn(brokerSearchControllerApiMock);
+    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByBrokerFiscalCode(brokerFiscalCode))
+      .thenReturn(expectedResult);
+
+    // When
+    Broker result = brokerClient.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNoExistentBrokerFiscalCodeWhenGetBrokerByBrokerFiscalCodeThenNotFound() {
+    // Given
+    String brokerFiscalCode = "brokerFiscalCode";
+    String accessToken = "ACCESSTOKEN";
+
+    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
+      .thenReturn(brokerSearchControllerApiMock);
+    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByBrokerFiscalCode(brokerFiscalCode))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    Broker result = brokerClient.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);
+
+    // Then
+    Assertions.assertNull(result);
+  }
 }

@@ -9,4 +9,5 @@ public interface BrokerService {
   Broker getBrokerById(Long brokerId, String accessToken);
   String getBrokerApiKey(Long brokerId, BrokerApiKeyType brokerApiKeyType, String accessToken);
   Broker getBrokerByStationId(String stationId, String accessToken);
+  Broker getBrokerByBrokerFiscalCode(String brokerFiscalCode, String accessToken);
 }

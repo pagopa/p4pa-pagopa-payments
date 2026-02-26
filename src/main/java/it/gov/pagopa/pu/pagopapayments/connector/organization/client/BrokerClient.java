@@ -57,4 +57,14 @@ public class BrokerClient {
       return null;
     }
   }
+
+  public Broker getBrokerByBrokerFiscalCode(String brokerFiscalCode, String accessToken) {
+    try {
+      return apisHolder.getBrokerSearchControllerApi(accessToken)
+        .crudBrokersFindByBrokerFiscalCode(brokerFiscalCode);
+    } catch (HttpClientErrorException.NotFound e) {
+      log.info("Cannot find Broker having fiscalCode {}", brokerFiscalCode);
+      return null;
+    }
+  }
 }

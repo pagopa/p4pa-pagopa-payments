@@ -238,6 +238,7 @@ class PaForNodeRequestValidatorServiceTest {
     broker.setFlagDelegate(true);
 
     Organization orgAssociated = podamFactory.manufacturePojo(Organization.class);
+    orgAssociated.setStatus(OrganizationStatus.ACTIVE);
 
     RetrievePaymentDTO request = RetrievePaymentDTO.builder()
       .idStation(broker.getStationId())

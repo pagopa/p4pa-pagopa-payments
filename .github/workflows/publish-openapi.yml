@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - 'openapi/generated.openapi.json'
+  workflow_dispatch:
 
 permissions:
   packages: write

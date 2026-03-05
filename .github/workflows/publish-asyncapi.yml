@@ -1,0 +1,48 @@
+name: Publish AsyncApi
+
+on:
+  workflow_run:
+    workflows: [Publish OpenApi]
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  packages: write
+  contents: write
+
+jobs:
+  release:
+    name: Publish OpenApi
+    runs-on: ubuntu-22.04
+
+    steps:
+
+      - name: Checkout sources
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+        with:
+          fetch-depth: 1
+
+      - name: Push changes
+        run: |
+          cd ..
+          git clone --depth=1 https://github.com/pagopa/p4pa-doc.git
+          cd p4pa-doc
+          DEST_DIR=asyncapi/internal
+          mkdir -p $DEST_DIR
+
+          REPO_NAME=${{ github.event.repository.name }}
+          ENV=${{ github.ref_name }}
+          ASYNCAPI_FILE_GENERATED=$DEST_DIR/$REPO_NAME.$ENV.generated.openapi.json
+
+          cp ../$REPO_NAME/asyncapi/generated.asyncapi.json $ASYNCAPI_FILE_GENERATED
+
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "p4pa-pagopa-github-bot"
+
+          git add $ASYNCAPI_FILE_GENERATED
+          git commit -m "Updated internal AsyncAPI spec for $REPO_NAME on environment $ENV"
+
+          git config --local remote.origin.url 'https://p4pa-pagopa-github-bot:${{ secrets.ADMIN_GITHUB_TOKEN_RW }}@github.com/pagopa/p4pa-doc.git'
+
+          git push origin 'refs/heads/main'

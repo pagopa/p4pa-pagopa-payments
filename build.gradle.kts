@@ -65,6 +65,7 @@ val xmlSchemaVersion = "2.3.2"
 val podamVersion = "8.0.2.RELEASE"
 val caffeineVersion = "3.2.3"
 val httpClientVersion = "5.6"
+val httpCoreVersion = "5.4.1"
 val springWolfAsyncApiVersion = "1.20.0"
 val commonsLang3Version = "3.20.0"
 val lz4JavaVersion = "1.10.4"
@@ -106,6 +107,7 @@ dependencies {
   implementation("org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion")
   implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
   implementation("org.apache.httpcomponents.client5:httpclient5:$httpClientVersion")
+  implementation("org.apache.httpcomponents.core5:httpcore5:$httpCoreVersion")
   implementation("io.github.springwolf:springwolf-kafka:${springWolfAsyncApiVersion}") {
     exclude(group = "org.lz4", module = "lz4-java")
   }

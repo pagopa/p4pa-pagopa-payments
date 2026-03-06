@@ -81,9 +81,9 @@ See [log configured pattern](/src/main/resources/logback-spring.xml).
 ### 🌍 External
 * pagoPA `Nodo dei Pagamenti SPC` - PagoPA services to handle payments:
   * [nodeForPa WSDL](src/main/resources/soap/wsdl/nodeForPa.wsdl): To fetch payments reporting data;
-  * [GPD openAPI](openapi/gpd.json): To handle GPD payment integration scenario;
-  * [ACA openAPI](openapi/paCreatePosition.yaml): To handle ACA payment integration scenario;
-  * [Print Payment Notices openApi](openapi/pagopa-stampa-avvisi.openapi.json): To retrieve pdf payment notices;
+  * [GPD openAPI](openapi/external/gpd.json): To handle GPD payment integration scenario;
+  * [ACA openAPI](openapi/external/paCreatePosition.yaml): To handle ACA payment integration scenario;
+  * [Print Payment Notices openApi](openapi/external/pagopa-stampa-avvisi.openapi.json): To retrieve pdf payment notices;
   * [Taxonomy json](https://api.platform.pagopa.it/taxonomy/service/v1/taxonomy): To retrieve taxonomy.
 
 ## 🔧 Configuration

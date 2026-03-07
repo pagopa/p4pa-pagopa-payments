@@ -66,7 +66,7 @@ val podamVersion = "8.0.2.RELEASE"
 val caffeineVersion = "3.2.3"
 val httpClientVersion = "5.6"
 val httpCoreVersion = "5.4.1"
-val springWolfAsyncApiVersion = "1.20.0"
+val springWolfAsyncApiVersion = "2.1.0"
 val commonsLang3Version = "3.20.0"
 val lz4JavaVersion = "1.10.4"
 

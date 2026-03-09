@@ -160,6 +160,10 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | PU_SIL_MAX_ATTEMPTS                     | PuSil API max attempts                             | 3       |
 | PU_SIL_WAIT_TIME_MILLIS                 | PuSil retry waiting time (milliseconds)            | 500     |
 | PU_SIL_PRINT_BODY_WHEN_ERROR            | To print body when an error occurs                 | true    |
+| CIE_BASE_URL                            | Cie microservice URL                               |         |
+| CIE_MAX_ATTEMPTS                        | Cie API max attempts                               | 3       |
+| CIE_WAIT_TIME_MILLIS                    | Cie retry waiting time (milliseconds)              | 500     |
+| CIE_PRINT_BODY_WHEN_ERROR               | To print body when an error occurs                 | true    |
 
 ##### 🌍 External services
 | ENV                                                        | DESCRIPTION                                                     | DEFAULT |

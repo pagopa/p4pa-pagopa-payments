@@ -36,7 +36,9 @@ class CieDebtPositionServiceImplTest {
 
   @AfterEach
   void mockitoVerify(){
-    Mockito.verifyNoMoreInteractions(cieDebtPositionClientMock);
+    Mockito.verifyNoMoreInteractions(
+      cieDebtPositionClientMock,
+      authnServiceMock);
   }
 
   @Test

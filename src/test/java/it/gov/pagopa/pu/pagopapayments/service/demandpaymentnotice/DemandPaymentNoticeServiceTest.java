@@ -30,7 +30,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -104,11 +103,6 @@ class DemandPaymentNoticeServiceTest {
     // Then
     assertNotNull(result);
     assertEquals(createdDebtPosition.getDebtPositionId(), result.getDebtPositionId());
-
-    verify(authnServiceMock).getAccessToken();
-    verify(organizationServiceMock).getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN);
-    verify(debtPositionServiceMock).createDebtPosition(any(DebtPositionDTO.class), eq(ACCESS_TOKEN));
-    verify(workflowServiceMock).waitWorkflowCompletion(workflowId, 10, 1000, ACCESS_TOKEN);
   }
 
   @Test

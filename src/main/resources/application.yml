@@ -195,6 +195,11 @@ rest:
     max-attempts: "\${WORKFLOW_HUB_MAX_ATTEMPTS:3}" # It's counting also the first attempt
     wait-time-millis: "\${WORKFLOW_HUB_WAIT_TIME_MILLIS:500}"
     print-body-when-error: "\${WORKFLOW_HUB_PRINT_BODY_WHEN_ERROR:true}"
+  cie:
+    base-url: "\${CIE_BASE_URL:}"
+    max-attempts: "\${CIE_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${CIE_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${CIE_PRINT_BODY_WHEN_ERROR:true}"
 
 springdoc:
   writer-with-default-pretty-printer: true

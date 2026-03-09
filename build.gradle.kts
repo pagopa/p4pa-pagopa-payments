@@ -1,8 +1,8 @@
-import java.util.*
-import com.github.jk1.license.render.*
 import com.github.jk1.license.filter.*
+import com.github.jk1.license.render.*
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import java.util.*
 
 plugins {
   java
@@ -208,7 +208,9 @@ tasks.register("dependenciesBuild") {
     "jaxbJavaGenPaForNode",
     "jaxbJavaGenNodeForPa",
     "jaxbJavaGenFlussoRiversamento",
-    "openApiGenerateOrgForNode"
+    "openApiGenerateOrgForNode",
+    "jaxbJavaGenCie",
+    "openApiGenerateCIE"
   )
 }
 
@@ -714,6 +716,43 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   library.set("resttemplate")
 }
 
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateCIE") {
+  group = "openapi"
+  description = "description"
+
+  generatorName.set("java")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/$targetEnv/internal/p4pa-cie.generated.openapi.json")
+  outputDir.set("$projectDir/build/generated")
+  apiPackage.set("it.gov.pagopa.pu.cie.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.cie.dto.generated")
+  configOptions.set(
+    mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
+      "dateLibrary" to "java8",
+      "serializableModel" to "true",
+      "useSpringBoot3" to "true",
+      "useJakartaEe" to "true",
+      "useOneOfInterfaces" to "true",
+      "useBeanValidation" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "enumPropertyNaming" to "original",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    )
+  )
+  typeMappings.set(
+    mapOf(
+      "DebtPositionDTO" to "it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO",
+      "PersonDTO" to "it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO",
+    )
+  )
+  library.set("resttemplate")
+}
+
 jaxb {
   javaGen {
     register("paForNode") {
@@ -738,6 +777,13 @@ jaxb {
       schema = file("src/main/resources/soap/xsd-pu/FlussoRiversamento.xsd")
       bindings =
         layout.files("src/main/resources/soap/xsd-pu/FlussoRiversamento.xjb")
+    }
+    register("cie") {
+      extension = true
+      args = listOf("-wsdl")
+      outputDir = file("$projectDir/build/generated/jaxb/java")
+      schema = file("src/main/resources/soap/xsd-cie/cie.xsd")
+      bindings = layout.files("src/main/resources/soap/xsd-cie/cie.xjb")
     }
   }
 }

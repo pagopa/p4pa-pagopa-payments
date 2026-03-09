@@ -152,7 +152,53 @@ class DemandPaymentNoticeServiceTest {
 
     // Then
     assertNotNull(result);
-    assertEquals(createdDebtPosition.getDebtPositionId(), result.getDebtPositionId());
+    assertEquals(createdDebtPosition, result);
+  }
+
+  @Test
+  void givenCieServiceIdAndNoWorkflowIdWhenHandleRequestThenSuccess() {
+    // Given
+    PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+    request.setIdServizio(DemandPaymentNoticeService.CIE_SEGREGATION_CODE);
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
+    debtPositionTypeOrg.setCode(Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE);
+    PagamentoCIE pagamentoCIE = podamFactory.manufacturePojo(PagamentoCIE.class);
+    SpontaneousForm spontaneousForm = podamFactory.manufacturePojo(SpontaneousForm.class);
+    SpontaneousFormField spontaneousFormField = podamFactory.manufacturePojo(SpontaneousFormField.class);
+    spontaneousFormField.setName("sys_type");
+    spontaneousForm.getStructure().setFields(List.of(spontaneousFormField));
+
+    when(authnServiceMock.getAccessToken()).thenReturn(ACCESS_TOKEN);
+    when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN))
+      .thenReturn(organization);
+
+    when(jaxbTransformServiceMock.unmarshalling(request.getDatiSpecificiServizioRequest(), PagamentoCIE.class))
+      .thenReturn(pagamentoCIE);
+    when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndCode(organization.getOrganizationId(),
+      pagamentoCIE.getCodiceCausale(), ACCESS_TOKEN))
+      .thenReturn(debtPositionTypeOrg);
+    when(spontaneousFormServiceMock.getSpontaneousForm(debtPositionTypeOrg.getSpontaneousFormId(),ACCESS_TOKEN))
+      .thenReturn(spontaneousForm);
+
+    when(cieDebtPositionServiceMock.createDebtPositionCie(argThat(dp->
+        DebtPositionCieOriginAllowedEnum.SPONTANEOUS_PSP.equals(dp.getOrigin())
+        && debtPositionTypeOrg.getCode().equals(dp.getDebtPositionTypeOrgCode())
+        && pagamentoCIE.getCodiceFiscaleComune().equals(dp.getOrgFiscalCode())
+        && spontaneousFormField.getDefaultValue().equals(dp.getRemittanceInformation())
+        && PersonEntityType.F.equals(dp.getDebtor().getEntityType())
+        && pagamentoCIE.getIntestatario().getCodiceFiscaleIntestatario().equals(dp.getDebtor().getFiscalCode())
+        && pagamentoCIE.getIntestatario().getDenominazioneIntestatario().equals(dp.getDebtor().getFullName())
+      ), eq(organization.getIpaCode())))
+      .thenReturn(Pair.of(createdDebtPosition, null));
+
+    // When
+    DebtPositionDTO result = demandPaymentNoticeService.handleRequest(request);
+
+    // Then
+    assertNotNull(result);
+    assertEquals(createdDebtPosition, result);
   }
 
   @Test
@@ -202,7 +248,7 @@ class DemandPaymentNoticeServiceTest {
 
     // Then
     assertNotNull(result);
-    assertEquals(createdDebtPosition.getDebtPositionId(), result.getDebtPositionId());
+    assertEquals(createdDebtPosition, result);
   }
 
   @Test
@@ -248,7 +294,7 @@ class DemandPaymentNoticeServiceTest {
 
     // Then
     assertNotNull(result);
-    assertEquals(createdDebtPosition.getDebtPositionId(), result.getDebtPositionId());
+    assertEquals(createdDebtPosition, result);
   }
 
   @Test
@@ -293,7 +339,7 @@ class DemandPaymentNoticeServiceTest {
 
     // Then
     assertNotNull(result);
-    assertEquals(createdDebtPosition.getDebtPositionId(), result.getDebtPositionId());
+    assertEquals(createdDebtPosition, result);
   }
 
   private String buildFallbackRemittanceInformation(DebtPositionTypeOrg debtPositionTypeOrg) {

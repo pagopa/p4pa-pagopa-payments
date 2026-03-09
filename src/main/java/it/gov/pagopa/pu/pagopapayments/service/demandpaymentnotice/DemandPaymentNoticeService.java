@@ -56,16 +56,15 @@ public class DemandPaymentNoticeService {
     }
     Long orgId = organization.getOrganizationId();
 
-    Pair<DebtPositionDTO, String> debtPositionWithWFId;
     if(CIE_SEGREGATION_CODE.equals(request.getIdServizio())){
       return handleCreateCieDebtPosition(request, orgId, organization, accessToken);
-    }else {
-      DebtPositionDTO debtPositionDTO = createDummyDebtPosition(orgId, accessToken);
-      debtPositionDTO.setOrganizationId(orgId);
-      debtPositionDTO.description("spontaneous psp for service " + request.getIdServizio());
-
-      debtPositionWithWFId = debtPositionService.createDebtPosition(debtPositionDTO, accessToken);
     }
+
+    DebtPositionDTO debtPositionDTO = createDummyDebtPosition(orgId, accessToken);
+    debtPositionDTO.setOrganizationId(orgId);
+    debtPositionDTO.description("spontaneous psp for service " + request.getIdServizio());
+
+    Pair<DebtPositionDTO, String> debtPositionWithWFId = debtPositionService.createDebtPosition(debtPositionDTO, accessToken);
     return syncDebtPosition(accessToken, debtPositionWithWFId);
   }
 

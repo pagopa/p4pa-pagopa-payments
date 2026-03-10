@@ -60,7 +60,7 @@ class DemandPaymentNoticeServiceTest {
   void givenCieServiceIdWhenHandleRequestThenSuccess() {
     // Given
     PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
-    request.setIdServizio(DemandPaymentNoticeService.CIE_SEGREGATION_CODE);
+    request.setIdServizio(DemandPaymentNoticeService.SERVICE_ID_CIE);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
@@ -89,7 +89,7 @@ class DemandPaymentNoticeServiceTest {
   void givenCieServiceIdAndNoWorkflowIdWhenHandleRequestThenSuccess() {
     // Given
     PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
-    request.setIdServizio(DemandPaymentNoticeService.CIE_SEGREGATION_CODE);
+    request.setIdServizio(DemandPaymentNoticeService.SERVICE_ID_CIE);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);

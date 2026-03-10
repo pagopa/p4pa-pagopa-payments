@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class DemandPaymentNoticeService {
 
-  public static final String CIE_SEGREGATION_CODE = "99";
+  public static final String SERVICE_ID_CIE = "99";
   private final OrganizationService organizationService;
   private final AuthnService authnService;
   private final WorkflowService workflowService;
@@ -39,20 +39,20 @@ public class DemandPaymentNoticeService {
     }
 
     return switch (request.getIdServizio()) {
-      case CIE_SEGREGATION_CODE -> handleCreateCieDebtPosition(request, organization, accessToken);
-      default -> throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdServizio());
+      case SERVICE_ID_CIE -> handleCreateCieDebtPosition(request, organization, accessToken);
+      default -> throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "There is no implementation for serviceId " + request.getIdServizio());
     };
   }
 
   private DebtPositionDTO handleCreateCieDebtPosition(PaDemandPaymentNoticeRequest request, Organization organization, String accessToken) {
     Pair<DebtPositionDTO, String> debtPositionWithWFId = cieDebtPositionFacadeService.createCieDebtPosition(request.getDatiSpecificiServizioRequest(), organization, accessToken);
     if(debtPositionWithWFId.getRight()!=null){
-      return syncDebtPosition(accessToken, debtPositionWithWFId);
+      return awaitSyncCompletion(accessToken, debtPositionWithWFId);
     }
     return debtPositionWithWFId.getLeft();
   }
 
-  private DebtPositionDTO syncDebtPosition(String accessToken, Pair<DebtPositionDTO, String> debtPosition) {
+  private DebtPositionDTO awaitSyncCompletion(String accessToken, Pair<DebtPositionDTO, String> debtPosition) {
     DebtPositionDTO dp = debtPosition.getLeft();
     String workflowId = debtPosition.getRight();
 

@@ -20,7 +20,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class CieDebtPositionFacadeService {
-  public static final String SPONTANEOUS_FORM_SYS_TYPE_FIELD_NAME = "sys_type";
+  public static final String SPONTANEOUS_FORM_FIELD_NAME_REMITTANCE_INFORMATION = "sys_type";
   private final JAXBTransformService jaxbTransformService;
   private final CieDebtPositionService cieDebtPositionService;
   private final SpontaneousFormService spontaneousFormService;
@@ -60,18 +60,17 @@ public class CieDebtPositionFacadeService {
   }
 
   private String buildRemittanceInformation(DebtPositionTypeOrg debtPositionTypeOrg, String accessToken) {
-    if (debtPositionTypeOrg.getSpontaneousFormId() == null) {
-      return handleFallbackRemittance(debtPositionTypeOrg);
+    SpontaneousForm spontaneousForm = null;
+    if (debtPositionTypeOrg.getSpontaneousFormId() != null) {
+      spontaneousForm = spontaneousFormService.getSpontaneousForm(debtPositionTypeOrg.getSpontaneousFormId(), accessToken);
     }
-
-    SpontaneousForm spontaneousForm = spontaneousFormService.getSpontaneousForm(debtPositionTypeOrg.getSpontaneousFormId(), accessToken);
     if (spontaneousForm == null) {
       return handleFallbackRemittance(debtPositionTypeOrg);
     }
 
     return Optional.ofNullable(spontaneousForm.getStructure().getFields())
       .flatMap(fields -> fields.stream()
-        .filter(f -> SPONTANEOUS_FORM_SYS_TYPE_FIELD_NAME.equals(f.getName()))
+        .filter(f -> SPONTANEOUS_FORM_FIELD_NAME_REMITTANCE_INFORMATION.equals(f.getName()))
         .findFirst())
       .map(SpontaneousFormField::getDefaultValue)
       .orElseGet(() -> handleFallbackRemittance(debtPositionTypeOrg));

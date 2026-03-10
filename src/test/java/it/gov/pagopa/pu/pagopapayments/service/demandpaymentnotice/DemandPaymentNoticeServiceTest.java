@@ -124,6 +124,6 @@ class DemandPaymentNoticeServiceTest {
     // When
     PagoPaNodeFaultException serviceNotImplementedException = assertThrows(PagoPaNodeFaultException.class, () -> demandPaymentNoticeService.handleRequest(request));
 
-    assertEquals(request.getIdServizio(),serviceNotImplementedException.getErrorEmitter());
+    assertEquals("There is no implementation for serviceId " + request.getIdServizio(),serviceNotImplementedException.getErrorEmitter());
   }
 }

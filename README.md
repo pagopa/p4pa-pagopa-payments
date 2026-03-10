@@ -77,6 +77,8 @@ See [log configured pattern](/src/main/resources/logback-spring.xml).
   * On synchronous scenario, to retrieve notification fee (actualization) if the organization has configured a service for a given debt position type;
 * [p4pa-send-notification](https://github.com/pagopa/p4pa-send-notification):
   * On synchronous scenario, to retrieve notification fee (actualization) if there is no a service configured on the organization debt position type but there is a SEND api key.
+* [p4pa-cie](https://github.com/pagopa/p4pa-cie):
+  * To create debt positions in the CIE scenario
 
 ### 🌍 External
 * pagoPA `Nodo dei Pagamenti SPC` - PagoPA services to handle payments:

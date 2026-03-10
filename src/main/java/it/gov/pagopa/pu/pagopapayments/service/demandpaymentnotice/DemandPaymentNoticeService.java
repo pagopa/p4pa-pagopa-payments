@@ -11,7 +11,6 @@ import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.service.debtposition.cie.CieDebtPositionFacadeService;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
@@ -41,9 +40,7 @@ public class DemandPaymentNoticeService {
 
     return switch (request.getIdServizio()) {
       case CIE_SEGREGATION_CODE -> handleCreateCieDebtPosition(request, organization, accessToken);
-      default -> throw new NotImplementedException(
-        "[DEMAND_PAYMENT_NOTICE_SERVICE_NOT_IMPLEMENTED] There is no implementation for serviceId " + request.getIdServizio()
-      );
+      default -> throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdServizio());
     };
   }
 

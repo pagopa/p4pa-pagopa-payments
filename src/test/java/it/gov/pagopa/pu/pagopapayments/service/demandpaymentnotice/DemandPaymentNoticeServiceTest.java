@@ -7,10 +7,10 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.workflow.service.WorkflowService;
+import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import it.gov.pagopa.pu.pagopapayments.service.debtposition.cie.CieDebtPositionFacadeService;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -122,8 +122,8 @@ class DemandPaymentNoticeServiceTest {
       .thenReturn(organization);
 
     // When
-    NotImplementedException serviceNotImplementedException = assertThrows(NotImplementedException.class, () -> demandPaymentNoticeService.handleRequest(request));
+    PagoPaNodeFaultException serviceNotImplementedException = assertThrows(PagoPaNodeFaultException.class, () -> demandPaymentNoticeService.handleRequest(request));
 
-    assertTrue(serviceNotImplementedException.getMessage().startsWith("[DEMAND_PAYMENT_NOTICE_SERVICE_NOT_IMPLEMENTED]"));
+    assertEquals(request.getIdServizio(),serviceNotImplementedException.getErrorEmitter());
   }
 }

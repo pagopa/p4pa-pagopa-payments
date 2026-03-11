@@ -67,14 +67,27 @@ public class OrgForNodeExceptionHandler {
     return response;
   }
 
+  private static String sanitizeForLog(String value) {
+    if (value == null) {
+      return null;
+    }
+    // Remove carriage return and newline characters to prevent log injection
+    return value
+      .replace('\r', ' ')
+      .replace('\n', ' ');
+  }
+
   private static void logException(Exception ex, HttpServletRequest request, HttpStatus httpStatus) {
     boolean printStackTrace = httpStatus.is5xxServerError();
     Level logLevel = printStackTrace ? Level.ERROR : Level.INFO;
 
+    String requestDescription = "%s %s".formatted(request.getMethod(), request.getRequestURI());
+    String sanitizedRequestDescription = sanitizeForLog(requestDescription);
+
     log.makeLoggingEventBuilder(logLevel)
       .log("A {} occurred handling request {}: HttpStatus {} - {}",
         ex.getClass(),
-        "%s %s".formatted(request.getMethod(), request.getRequestURI()),
+        sanitizedRequestDescription,
         httpStatus.value(),
         ex.getMessage(),
         printStackTrace ? ex : null

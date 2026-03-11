@@ -32,7 +32,9 @@ public class SynchronousPaymentService {
   public static final List<DebtPositionOrigin> ORDINARY_DEBT_POSITION_ORIGINS = List.of(
     DebtPositionOrigin.ORDINARY,
     DebtPositionOrigin.ORDINARY_SIL,
-    DebtPositionOrigin.SPONTANEOUS);
+    DebtPositionOrigin.SPONTANEOUS,
+    DebtPositionOrigin.SPONTANEOUS_PSP
+    );
 
   private final DebtPositionService debtPositionService;
   private final PaForNodeRequestValidatorService paForNodeRequestValidatorService;

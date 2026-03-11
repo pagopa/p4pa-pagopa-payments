@@ -46,22 +46,4 @@ class OrgForNodeRestControllerTest {
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertSame(expected, response.getBody());
   }
-
-  @Test
-  void givenServiceReturnsNullWhenGetPaymentOptionsByNoticeNumberThenNotFound() {
-    // given
-    String noticeNumber = "NAV123";
-    String organizationFiscalCode = "ORG_FISCAL_CODE";
-
-    when(serviceMock.getPaymentOptions(noticeNumber, organizationFiscalCode)).thenReturn(null);
-
-    // when
-    ResponseEntity<PaymentOptionsResponseForNode> response =
-      controller.getPaymentOptionsByNoticeNumber(noticeNumber, organizationFiscalCode);
-
-    // then
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    Assertions.assertNull(response.getBody());
-  }
 }

@@ -22,6 +22,6 @@ public class OrgForNodeRestController implements PaymentOptionsApi {
   @Override
   public ResponseEntity<PaymentOptionsResponseForNode> getPaymentOptionsByNoticeNumber(String noticeNumber, String organizationFiscalCode) {
     log.info("Retrieve Payment Options that have notice number {} and organization fiscal code {}", noticeNumber, organizationFiscalCode);
-    return ResponseEntity.ofNullable(service.getPaymentOptions(noticeNumber, organizationFiscalCode));
+    return ResponseEntity.ok(service.getPaymentOptions(noticeNumber, organizationFiscalCode));
   }
 }

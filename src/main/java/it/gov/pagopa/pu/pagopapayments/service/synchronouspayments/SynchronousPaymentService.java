@@ -1,9 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.service.synchronouspayments;
 
-import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.*;
+import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
@@ -20,19 +18,18 @@ import it.gov.pagopa.pu.pusil.dto.generated.ActualizationResultDTO;
 import it.gov.pagopa.pu.sendnotification.dto.generated.NotificationPriceResponseV23DTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
 
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.ORDINARY_DEBT_POSITION_ORIGINS;
+
 @Service
 @Slf4j
 public class SynchronousPaymentService {
-
-  public static final List<DebtPositionOrigin> ORDINARY_DEBT_POSITION_ORIGINS = List.of(
-    DebtPositionOrigin.ORDINARY,
-    DebtPositionOrigin.ORDINARY_SIL,
-    DebtPositionOrigin.SPONTANEOUS);
 
   private final DebtPositionService debtPositionService;
   private final PaForNodeRequestValidatorService paForNodeRequestValidatorService;
@@ -57,7 +54,7 @@ public class SynchronousPaymentService {
     this.puSilService = puSilService;
   }
 
-  public Pair<InstallmentDTO, Organization> retrievePayment(RetrievePaymentDTO request) {
+  public Triple<InstallmentDTO, Organization, Broker> retrievePayment(RetrievePaymentDTO request) {
     String accessToken = authnService.getAccessToken();
     String requestIdMessage = request.getFiscalCode()+"/"+request.getNoticeNumber();
     String nav = request.getNoticeNumber();
@@ -66,14 +63,36 @@ public class SynchronousPaymentService {
       log.warn("paymentRequestValidate [{}]: unexpected idPA[{}]", requestIdMessage, request.getIdPA());
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getFiscalCode());
     }
-    Organization organization = paForNodeRequestValidatorService.paForNodeRequestValidate(request, accessToken);
+
+    Pair<Broker, Organization> pair = paForNodeRequestValidatorService.paForNodeRequestValidate(request, accessToken);
+    Broker broker = pair.getLeft();
+    Organization organization = pair.getRight();
+
     ActualizeAmountRequestDTO actualizeAmountRequest = retrieveNotificationFeeCents(organization, nav, accessToken);
 
     InstallmentDTO installment = (actualizeAmountRequest.getNewFeeCents() > 0)
       ? debtPositionService.updateInstallmentNotificationFee(actualizeAmountRequest, accessToken)
       : getPayableDebtPositionByOrganizationAndNav(organization, nav, request.getPostalTransfer(), accessToken);
 
-    return Pair.of(installment, organization);
+    if (Boolean.TRUE.equals(broker.getFlagDelegate())) {
+
+      List<TransferDTO> transfers = installment.getTransfers();
+
+      if (CollectionUtils.isEmpty(transfers)) {
+        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA());
+      }
+
+      TransferDTO ownerTransfer = transfers.stream()
+        .filter(t -> Boolean.TRUE.equals(t.getFlagOwner()))
+        .findFirst()
+        .orElseThrow(() -> new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA()));
+
+      if (!Objects.equals(ownerTransfer.getOrgFiscalCode(), request.getIdPA())) {
+        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdPA());
+      }
+    }
+
+    return Triple.of(installment, organization, broker);
   }
 
   private InstallmentDTO getPayableDebtPositionByOrganizationAndNav(Organization organization, String noticeNumber, Boolean postalTransfer, String accessToken) {

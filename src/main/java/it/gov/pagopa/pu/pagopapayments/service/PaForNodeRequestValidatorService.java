@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,20 +28,24 @@ public class PaForNodeRequestValidatorService {
     this.organizationService = organizationService;
   }
 
-  public Organization paForNodeRequestValidate(PaForNodeDTO request, String accessToken){
-    Organization organization = organizationService.getOrganizationByFiscalCode(request.getIdPA(), accessToken);
+  public Pair<Broker, Organization> paForNodeRequestValidate(PaForNodeDTO request, String accessToken){
+    Pair<Broker, Organization> brokerOrgPair = retrieveBrokerAndOrganization(request.getIdBrokerPA(), request.getIdPA(), accessToken);
+
+    Organization organization = brokerOrgPair.getRight();
     if(organization == null) {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdBrokerPA());
     }
 
-    validateOrganizationBrokerAndStation(organization, request, accessToken);
+    Broker broker = brokerOrgPair.getLeft();
+    validateOrganizationBrokerAndStation(organization, broker, request);
 
-    return organization;
+    return Pair.of(broker, organization);
   }
 
   public Organization paSendRtRequestValidate(PaSendRtDTO request, String accessToken) {
-    Organization organization = organizationService.getOrganizationByFiscalCode(request.getIdPA(), accessToken);
+    Pair<Broker, Organization> brokerOrgPair = retrieveBrokerAndOrganization(request.getIdBrokerPA(), request.getIdPA(), accessToken);
 
+    Organization organization = brokerOrgPair.getRight();
     if(organization == null) {
       // Check if there is at least one organization managed in PU within the transfer list
       boolean hasValidTransferOrg = request.getTransferList().stream()
@@ -55,24 +60,37 @@ public class PaForNodeRequestValidatorService {
       }
     }
 
-    validateOrganizationBrokerAndStation(organization, request, accessToken);
+    validateOrganizationBrokerAndStation(organization, brokerOrgPair.getLeft(), request);
 
     return organization;
   }
 
-  private void validateOrganizationBrokerAndStation(Organization organization, PaForNodeDTO request, String accessToken) {
+  private Pair<Broker, Organization> retrieveBrokerAndOrganization(String brokerFiscalCode, String orgFiscalCode, String accessToken) {
+    Broker broker = brokerService.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);
+    if (broker == null) {
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO, brokerFiscalCode);
+    }
+
+    if (Boolean.TRUE.equals(broker.getFlagDelegate())) {
+      Organization org = organizationService.getOrganizationById(broker.getOrganizationId(), accessToken);
+      if (org == null) {
+        throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, orgFiscalCode);
+      }
+
+      return Pair.of(broker, org);
+    }
+
+    Organization organization = organizationService.getOrganizationByFiscalCode(orgFiscalCode, accessToken);
+
+    return Pair.of(broker, organization);
+  }
+
+  private void validateOrganizationBrokerAndStation(Organization organization, Broker broker, PaForNodeDTO request) {
     if (!Objects.equals(organization.getStatus(), OrganizationStatus.ACTIVE)) {
       log.warn("paymentRequestValidate [{}/{}]: organization is not active", request.getFiscalCode(), request.getNoticeNumber());
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, organization.getOrgFiscalCode());
     }
 
-    // If is a technical organization skip validation
-    if (organization.getOrganizationId() == -1L) {
-      return;
-    }
-
-    // Broker cannot be null if organization is found
-    Broker broker = brokerService.getBrokerById(organization.getBrokerId(), accessToken);
     if (!Objects.equals(request.getIdBrokerPA(), broker.getBrokerFiscalCode())) {
       log.warn("paymentRequestValidate [{}/{}]: invalid broken for organization expected/actual[{}/{}]",
         request.getFiscalCode(), request.getNoticeNumber(),
@@ -84,6 +102,7 @@ public class PaForNodeRequestValidatorService {
     List<String> expectedStations = List.of(
       Objects.requireNonNullElse(broker.getStationId(), "NOTCONFIGUREDSTATIONID"),
       Objects.requireNonNullElse(broker.getBroadcastStationId(), "NOTCONFIGUREBROADCASTSTATIONID"));
+
     if (!expectedStations.contains(request.getIdStation())) {
       log.warn("paymentRequestValidate [{}/{}]: invalid stationId for organization broker obtained[{}] expected one of {}",
         request.getFiscalCode(), request.getNoticeNumber(),

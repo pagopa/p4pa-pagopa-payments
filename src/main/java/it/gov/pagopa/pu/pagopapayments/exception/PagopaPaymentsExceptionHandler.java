@@ -37,6 +37,11 @@ public class PagopaPaymentsExceptionHandler {
     return handleException(ex, request, HttpStatus.NOT_FOUND, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_NOT_FOUND);
   }
 
+  @ExceptionHandler(ConflictException.class)
+  public ResponseEntity<PagoPaPaymentsErrorDTO> handleConflictException(ConflictException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.CONFLICT, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_CONFLICT);
+  }
+
   @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleViolationException(Exception ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST);

@@ -23,11 +23,11 @@ public class DebtPositionClient {
   }
 
   public DebtPositionTypeOrg getDebtPositionTypeOrgById(Long debtPositionTypeOrgId, String accessToken) {
-    try{
+    try {
       return debtPositionsApisHolder
         .getDebtPositionTypeOrgEntityControllerApi(accessToken)
         .crudGetDebtpositiontypeorg(String.valueOf(debtPositionTypeOrgId));
-    } catch (HttpClientErrorException.NotFound e){
+    } catch (HttpClientErrorException.NotFound e) {
       log.info("Cannot find DeptPositionTypeOrg having id {}", debtPositionTypeOrgId);
       return null;
     }
@@ -48,7 +48,7 @@ public class DebtPositionClient {
     } catch (HttpClientErrorException.Conflict e) {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_DUPLICATO, request.getNav());
     } catch (HttpClientErrorException ex) {
-      if(ex.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
+      if (ex.getStatusCode() == HttpStatus.PRECONDITION_FAILED) {
         throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_PAGAMENTO_SCADUTO, request.getNav());
       }
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getNav());
@@ -66,8 +66,8 @@ public class DebtPositionClient {
     }
   }
 
-  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndCode(Long organizationId, String code, String accessToken){
-    try{
+  public DebtPositionTypeOrg findDebtPositionTypeOrgByOrgIdAndCode(Long organizationId, String code, String accessToken) {
+    try {
       return debtPositionsApisHolder.getDebtPositionTypeOrgSearchControllerApi(accessToken)
         .crudDebtPositionTypeOrgsFindByOrganizationIdAndCode(organizationId, code);
     } catch (HttpClientErrorException.NotFound e) {
@@ -80,5 +80,10 @@ public class DebtPositionClient {
   public ResponseEntity<DebtPositionDTO> createDebtPosition(DebtPositionDTO debtPositionDTO, String accessToken) {
     return debtPositionsApisHolder.getDebtPositionApi(accessToken)
       .createDebtPositionWithHttpInfo(debtPositionDTO, false);
+  }
+
+  public List<DebtPositionDTO> getDebtPositionsByOrganizationIdAndNav(Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOrigins, String accessToken) {
+    return debtPositionsApisHolder.getDebtPositionApi(accessToken)
+      .getDebtPositionsByOrganizationIdAndNav(organizationId, nav, debtPositionOrigins);
   }
 }

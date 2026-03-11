@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 
 import it.gov.pagopa.pu.organization.controller.generated.BrokerApi;
 import it.gov.pagopa.pu.organization.controller.generated.BrokerEntityControllerApi;
+import it.gov.pagopa.pu.organization.controller.generated.BrokerSearchControllerApi;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
@@ -25,6 +26,8 @@ class BrokerEntityClientTest {
   private BrokerEntityControllerApi brokerEntityControllerApiMock;
   @Mock
   private BrokerApi brokerApiMock;
+  @Mock
+  private BrokerSearchControllerApi brokerSearchControllerApiMock;
 
   private BrokerClient brokerClient;
 
@@ -38,7 +41,8 @@ class BrokerEntityClientTest {
     Mockito.verifyNoMoreInteractions(
       organizationApisHolder,
       brokerEntityControllerApiMock,
-      brokerApiMock
+      brokerApiMock,
+      brokerSearchControllerApiMock
     );
   }
 
@@ -153,4 +157,77 @@ class BrokerEntityClientTest {
     Assertions.assertNull(result);
   }
 
+  @Test
+  void whenGetBrokerByStationIdThenInvokeWithAccessToken() {
+    // Given
+    String stationId = "32685440409_01";
+    String accessToken = "ACCESSTOKEN";
+    Broker expectedResult = new Broker();
+
+    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
+      .thenReturn(brokerSearchControllerApiMock);
+    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByStationId(stationId))
+      .thenReturn(expectedResult);
+
+    // When
+    Broker result = brokerClient.getBrokerByStationId(stationId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNoExistentStationIdWhenGetBrokerByStationIdThenNotFound() {
+    // Given
+    String stationId = "32685441234_01";
+    String accessToken = "ACCESSTOKEN";
+
+    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
+      .thenReturn(brokerSearchControllerApiMock);
+    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByStationId(stationId))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    Broker result = brokerClient.getBrokerByStationId(stationId, accessToken);
+
+    // Then
+    Assertions.assertNull(result);
+  }
+
+  @Test
+  void whenGetBrokerByBrokerFiscalCodeThenInvokeWithAccessToken() {
+    // Given
+    String brokerFiscalCode = "brokerFiscalCode";
+    String accessToken = "ACCESSTOKEN";
+    Broker expectedResult = new Broker();
+
+    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
+      .thenReturn(brokerSearchControllerApiMock);
+    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByBrokerFiscalCode(brokerFiscalCode))
+      .thenReturn(expectedResult);
+
+    // When
+    Broker result = brokerClient.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNoExistentBrokerFiscalCodeWhenGetBrokerByBrokerFiscalCodeThenNotFound() {
+    // Given
+    String brokerFiscalCode = "brokerFiscalCode";
+    String accessToken = "ACCESSTOKEN";
+
+    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
+      .thenReturn(brokerSearchControllerApiMock);
+    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByBrokerFiscalCode(brokerFiscalCode))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    Broker result = brokerClient.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);
+
+    // Then
+    Assertions.assertNull(result);
+  }
 }

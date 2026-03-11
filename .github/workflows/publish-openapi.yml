@@ -1,0 +1,55 @@
+name: Publish OpenApi
+
+on:
+  # Trigger the workflow on push on the env branches
+  push:
+    branches:
+      - develop
+      - uat
+      - main
+    paths:
+      - 'openapi/generated.openapi.json'
+  workflow_dispatch:
+
+permissions:
+  packages: write
+  contents: write
+
+jobs:
+  release:
+    name: Publish OpenApi
+    runs-on: ubuntu-22.04
+
+    steps:
+
+      - name: Checkout sources
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+        with:
+          fetch-depth: 1
+
+      - name: Push changes
+        run: |
+          cd ..
+          git clone --depth=1 https://github.com/pagopa/p4pa-doc.git
+          cd p4pa-doc
+          ENV=${{ github.ref_name }}
+          DEST_DIR=openapi/$ENV/internal
+          mkdir -p $DEST_DIR
+
+          REPO_NAME=${{ github.event.repository.name }}
+          OPENAPI_FILE_GENERATED=$DEST_DIR/$REPO_NAME.generated.openapi.json
+          OPENAPI_FILE_MANUAL=$DEST_DIR/$REPO_NAME.openapi.yaml
+
+          cp ../$REPO_NAME/openapi/generated.openapi.json $OPENAPI_FILE_GENERATED
+          cp ../$REPO_NAME/openapi/$REPO_NAME.openapi.yaml $OPENAPI_FILE_MANUAL
+
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "p4pa-pagopa-github-bot"
+
+          git add $OPENAPI_FILE_GENERATED
+          git add $OPENAPI_FILE_MANUAL
+          git diff-index --quiet HEAD || git commit -m "Updated internal OpenAPI spec for $REPO_NAME on environment $ENV"
+
+          git config --local remote.origin.url 'https://p4pa-pagopa-github-bot:${{ secrets.ADMIN_GITHUB_TOKEN_RW }}@github.com/pagopa/p4pa-doc.git'
+
+          git push origin 'refs/heads/main'

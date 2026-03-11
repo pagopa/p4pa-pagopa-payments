@@ -1,22 +1,22 @@
-import java.util.*
-import com.github.jk1.license.render.*
-import com.github.jk1.license.filter.*
+import com.github.jk1.license.filter.SpdxLicenseBundleNormalizer
+import com.github.jk1.license.render.XmlReportRenderer
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import java.util.*
 
 plugins {
   java
-  id("org.springframework.boot") version "4.0.0"
+  id("org.springframework.boot") version "4.0.3"
   id("io.spring.dependency-management") version "1.1.7"
   jacoco
-  id("org.sonarqube") version "7.2.1.6560"
+  id("org.sonarqube") version "7.2.3.7755"
   id("com.github.ben-manes.versions") version "0.53.0"
-  id("org.openapi.generator") version "7.17.0"
+  id("org.openapi.generator") version "7.20.0"
   id("org.ajoberstar.grgit") version "5.3.2"
   //code generation for soap webservices classes (via jaxb)
   id("com.intershop.gradle.jaxb") version "8.0.1"
-  id("com.gorylenko.gradle-git-properties") version "2.5.4"
-  id("com.github.jk1.dependency-license-report") version "3.0.1"
+  id("com.gorylenko.gradle-git-properties") version "2.5.7"
+  id("com.github.jk1.dependency-license-report") version "3.1.1"
 }
 
 group = "it.gov.pagopa.payhub"
@@ -52,23 +52,28 @@ repositories {
   mavenCentral()
 }
 
-val springDocOpenApiVersion = "3.0.0"
+val springDocOpenApiVersion = "3.0.2"
 val janinoVersion = "3.1.12"
-val openApiToolsVersion = "0.2.8"
-val micrometerVersion = "1.6.1"
+val openApiToolsVersion = "0.2.9"
+val micrometerVersion = "1.6.3"
 val bouncycastleVersion = "1.83"
 val jaxbVersion = "4.0.6"
 val jaxbApiVersion = "4.0.4"
 val activationVersion = "2.1.4"
-val wsdl4jVersion = "1.6.3"
 val xmlSchemaVersion = "2.3.2"
 val podamVersion = "8.0.2.RELEASE"
 val caffeineVersion = "3.2.3"
-val httpClientVersion = "5.5.1"
-val springWolfAsyncApiVersion = "1.20.0"
+val httpClientVersion = "5.6"
+val httpCoreVersion = "5.4.1"
+val springWolfAsyncApiVersion = "2.1.0"
 val commonsLang3Version = "3.20.0"
-val springCloudDepsVersion = "2025.1.0"
-val lz4JavaVersion = "1.10.1"
+val lz4JavaVersion = "1.10.4"
+
+// fix cve
+val jackson2CoreVersion = "2.21.1"
+val jackson3CoreVersion = "3.1.0"
+
+val springCloudDepsVersion = "2025.1.1"
 
 dependencyManagement {
   imports {
@@ -101,14 +106,18 @@ dependencies {
   implementation("org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion")
   implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
   implementation("org.apache.httpcomponents.client5:httpclient5:$httpClientVersion")
+  implementation("org.apache.httpcomponents.core5:httpcore5:$httpCoreVersion")
   implementation("io.github.springwolf:springwolf-kafka:${springWolfAsyncApiVersion}") {
     exclude(group = "org.lz4", module = "lz4-java")
   }
   implementation("io.github.springwolf:springwolf-ui:${springWolfAsyncApiVersion}")
   implementation("io.github.springwolf:springwolf-cloud-stream:${springWolfAsyncApiVersion}")
 
+  // CVE fix
+  implementation("tools.jackson.core:jackson-core:${jackson3CoreVersion}")
+  implementation("com.fasterxml.jackson.core:jackson-core:${jackson2CoreVersion}")
+
   //webservice soap
-  implementation("wsdl4j:wsdl4j:$wsdl4jVersion")
   implementation("org.apache.ws.xmlschema:xmlschema-core:$xmlSchemaVersion")
   runtimeOnly("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
   //jaxb
@@ -180,8 +189,8 @@ tasks.register("dependenciesBuild") {
   description = "grouping all together automatically generate code tasks"
 
   dependsOn(
-    "openApiGenerateP4PAAUTH",
     "openApiGenerate",
+    "openApiGenerateP4PAAUTH",
     "openApiGenerateDEBTPOSITIONS",
     "openApiGenerateORGANIZATION",
     "openApiGenerateFILESHARE",
@@ -196,7 +205,10 @@ tasks.register("dependenciesBuild") {
     "openApiGeneratePUSIL",
     "jaxbJavaGenPaForNode",
     "jaxbJavaGenNodeForPa",
-    "jaxbJavaGenFlussoRiversamento"
+    "jaxbJavaGenFlussoRiversamento",
+    "openApiGenerateOrgForNode",
+    "jaxbJavaGenCie",
+    "openApiGenerateCIE"
   )
 }
 
@@ -237,6 +249,42 @@ openApiGenerate {
       "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
     )
   )
+}
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateOrgForNode") {
+  group = "openapi"
+  description = "description"
+
+  generatorName.set("spring")
+  inputSpec.set("$rootDir/openapi/openapiForOrgs.json")
+  outputDir.set("$projectDir/build/generated")
+  apiPackage.set("it.gov.pagopa.pu.orgfornode.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.orgfornode.dto.generated")
+  modelNameSuffix.set("ForNode")
+  typeMappings.set(
+    mapOf(
+      "DateTime" to "String"
+    )
+  )
+  configOptions.set(
+    mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
+      "interfaceOnly" to "true",
+      "dateLibrary" to "java8",
+      "serializableModel" to "true",
+      "useSpringBoot3" to "true",
+      "useJakartaEe" to "true",
+      "useOneOfInterfaces" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "enumPropertyNaming" to "original",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    )
+  )
+  library.set("spring-boot")
 }
 
 var targetEnv = when (Objects.requireNonNullElse(
@@ -385,7 +433,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   description = "description"
 
   generatorName.set("java")
-  inputSpec.set("$rootDir/openapi/paCreatePosition.yaml")
+  inputSpec.set("$rootDir/openapi/external/paCreatePosition.yaml")
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.nodo.pacreateposition.controller.generated")
   modelPackage.set("it.gov.pagopa.nodo.pacreateposition.dto.generated")
@@ -414,7 +462,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   description = "description"
 
   generatorName.set("java")
-  inputSpec.set("$rootDir/openapi/gpd.json")
+  inputSpec.set("$rootDir/openapi/external/gpd.json")
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.nodo.gpd.controller.generated")
   modelPackage.set("it.gov.pagopa.nodo.gpd.dto.generated")
@@ -448,7 +496,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   description = "Generate ACA client from GPD v1 spec"
 
   generatorName.set("java")
-  inputSpec.set("$rootDir/openapi/aca-gpd-v1.json")
+  inputSpec.set("$rootDir/openapi/external/aca-gpd-v1.json")
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.pu.aca.gpd.v1.controller.generated")
   modelPackage.set("it.gov.pagopa.pu.aca.gpd.v1.dto.generated")
@@ -485,7 +533,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   description = "description"
 
   generatorName.set("java")
-  inputSpec.set("$rootDir/openapi/fdr_organization.json")
+  inputSpec.set("$rootDir/openapi/external/fdr_organization.json")
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.nodo.fdrorganization.controller.generated")
   modelPackage.set("it.gov.pagopa.nodo.fdrorganization.dto.generated")
@@ -514,7 +562,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   description = "description"
 
   generatorName.set("java")
-  inputSpec.set("$rootDir/openapi/pagopa-stampa-avvisi.openapi.json")
+  inputSpec.set("$rootDir/openapi/external/pagopa-stampa-avvisi.openapi.json")
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.api")
   modelPackage.set("it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto")
@@ -666,6 +714,43 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   library.set("resttemplate")
 }
 
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateCIE") {
+  group = "openapi"
+  description = "description"
+
+  generatorName.set("java")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/$targetEnv/internal/p4pa-cie.openapi.yaml")
+  outputDir.set("$projectDir/build/generated")
+  apiPackage.set("it.gov.pagopa.pu.cie.controller.generated")
+  modelPackage.set("it.gov.pagopa.pu.cie.dto.generated")
+  configOptions.set(
+    mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
+      "dateLibrary" to "java8",
+      "serializableModel" to "true",
+      "useSpringBoot3" to "true",
+      "useJakartaEe" to "true",
+      "useOneOfInterfaces" to "true",
+      "useBeanValidation" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "enumPropertyNaming" to "original",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    )
+  )
+  typeMappings.set(
+    mapOf(
+      "DebtPositionDTO" to "it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO",
+      "PersonDTO" to "it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO",
+    )
+  )
+  library.set("resttemplate")
+}
+
 jaxb {
   javaGen {
     register("paForNode") {
@@ -688,7 +773,15 @@ jaxb {
       args = listOf("-wsdl")
       outputDir = file("$projectDir/build/generated/jaxb/java")
       schema = file("src/main/resources/soap/xsd-pu/FlussoRiversamento.xsd")
-      bindings = layout.files("src/main/resources/soap/xsd-pu/FlussoRiversamento.xjb")
+      bindings =
+        layout.files("src/main/resources/soap/xsd-pu/FlussoRiversamento.xjb")
+    }
+    register("cie") {
+      extension = true
+      args = listOf("-wsdl")
+      outputDir = file("$projectDir/build/generated/jaxb/java")
+      schema = file("src/main/resources/soap/xsd-cie/cie.xsd")
+      bindings = layout.files("src/main/resources/soap/xsd-cie/cie.xjb")
     }
   }
 }

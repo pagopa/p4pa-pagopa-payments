@@ -113,6 +113,7 @@ logging:
     org.springframework.boot.availability: "\${LOG_LEVEL_SPRING_BOOT_AVAILABILITY:DEBUG}"
     org.springframework.kafka: "\${LOG_LEVEL_SPRING_KAFKA:INFO}"
     org.apache.kafka.clients.consumer.internals.ConsumerCoordinator: "\${LOG_LEVEL_KAFKA_CONSUMER_COORDINATOR:WARN}"
+    org.apache.kafka.clients.admin.internals.AdminMetadataManager: "\${LOG_LEVEL_KAFKA_ADMIN_METADATA_MANAGER:WARN}"
     it.gov.pagopa.pu.pagopapayments.exception.PagopaPaymentsExceptionHandler: "\${LOGGING_LEVEL_API_REQUEST_EXCEPTION:INFO}"
     org.springdoc.core.utils.SpringDocAnnotationsUtils: "\${LOG_LEVEL_SPRING_DOC:ERROR}"
     PERFORMANCE_LOG: "\${LOG_LEVEL_PERFORMANCE_LOG:INFO}"
@@ -194,6 +195,11 @@ rest:
     max-attempts: "\${WORKFLOW_HUB_MAX_ATTEMPTS:3}" # It's counting also the first attempt
     wait-time-millis: "\${WORKFLOW_HUB_WAIT_TIME_MILLIS:500}"
     print-body-when-error: "\${WORKFLOW_HUB_PRINT_BODY_WHEN_ERROR:true}"
+  cie:
+    base-url: "\${CIE_BASE_URL:}"
+    max-attempts: "\${CIE_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${CIE_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${CIE_PRINT_BODY_WHEN_ERROR:true}"
 
 springdoc:
   writer-with-default-pretty-printer: true
@@ -220,3 +226,9 @@ cache:
   debtPositionTypeOrg:
     size: "\${CACHE_DEBTPOSITION_TYPE_ORG_SIZE:1000}"
     expire-in: "\${CACHE_DEBTPOSITION_TYPE_ORG_MINUTES:60}"
+  notificationFee:
+    size: "\${CACHE_NOTIFICATION_FEE_SIZE:1000}"
+    expire-in: "\${CACHE_NOTIFICATION_FEE_MINUTES:10}"
+
+cie:
+  service-id: "\${CIE_SERVICE_ID:99}"

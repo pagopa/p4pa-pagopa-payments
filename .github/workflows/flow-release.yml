@@ -36,6 +36,7 @@ jobs:
 
   azure-devops-trigger:
     name: 🅰️ Azure DevOps Pipeline Trigger
+    if: github.ref_name == 'develop'
     needs: payments-flow-release
     runs-on: ubuntu-22.04
     steps:

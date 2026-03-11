@@ -77,13 +77,15 @@ See [log configured pattern](/src/main/resources/logback-spring.xml).
   * On synchronous scenario, to retrieve notification fee (actualization) if the organization has configured a service for a given debt position type;
 * [p4pa-send-notification](https://github.com/pagopa/p4pa-send-notification):
   * On synchronous scenario, to retrieve notification fee (actualization) if there is no a service configured on the organization debt position type but there is a SEND api key.
+* [p4pa-cie](https://github.com/pagopa/p4pa-cie):
+  * To handle the 99 serviceId of the demandPaymentNotice API exposed to the node
 
 ### 🌍 External
 * pagoPA `Nodo dei Pagamenti SPC` - PagoPA services to handle payments:
   * [nodeForPa WSDL](src/main/resources/soap/wsdl/nodeForPa.wsdl): To fetch payments reporting data;
-  * [GPD openAPI](openapi/gpd.json): To handle GPD payment integration scenario;
-  * [ACA openAPI](openapi/paCreatePosition.yaml): To handle ACA payment integration scenario;
-  * [Print Payment Notices openApi](openapi/pagopa-stampa-avvisi.openapi.json): To retrieve pdf payment notices;
+  * [GPD openAPI](openapi/external/gpd.json): To handle GPD payment integration scenario;
+  * [ACA openAPI](openapi/external/paCreatePosition.yaml): To handle ACA payment integration scenario;
+  * [Print Payment Notices openApi](openapi/external/pagopa-stampa-avvisi.openapi.json): To retrieve pdf payment notices;
   * [Taxonomy json](https://api.platform.pagopa.it/taxonomy/service/v1/taxonomy): To retrieve taxonomy.
 
 ## 🔧 Configuration
@@ -122,7 +124,8 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | CACHE_BROKER_API_FISCAL_CODE_MINUTES       | Broker api keys and organization data cache retention (minutes)              | 60      |
 | CACHE_DEBTPOSITION_TYPE_ORG_SIZE           | DebtPositionTypeOrg data cache size                                          | 1000    |
 | CACHE_DEBTPOSITION_TYPE_ORG_MINUTES        | DebtPositionTypeOrg data cache retention (minutes)                           | 60      |
-
+| CACHE_NOTIFICATION_FEE_SIZE                | Notification fee data cache size                                             | 1000    |
+| CACHE_NOTIFICATION_FEE_MINUTES             | Notification fee data cache retention (minutes)                              | 10      |
 ##### 🔗 REST
 | ENV                                               | DESCRIPTION                               | DEFAULT |
 |---------------------------------------------------|-------------------------------------------|---------|
@@ -159,6 +162,15 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | PU_SIL_MAX_ATTEMPTS                     | PuSil API max attempts                             | 3       |
 | PU_SIL_WAIT_TIME_MILLIS                 | PuSil retry waiting time (milliseconds)            | 500     |
 | PU_SIL_PRINT_BODY_WHEN_ERROR            | To print body when an error occurs                 | true    |
+| CIE_BASE_URL                            | Cie microservice URL                               |         |
+| CIE_MAX_ATTEMPTS                        | Cie API max attempts                               | 3       |
+| CIE_WAIT_TIME_MILLIS                    | Cie retry waiting time (milliseconds)              | 500     |
+| CIE_PRINT_BODY_WHEN_ERROR               | To print body when an error occurs                 | true    |
+
+    #### 💼 Business logic
+| ENV              | DESCRIPTION      | DEFAULT |
+|------------------|------------------|---------|
+| CIE_SERVICE_ID   | Cie's service id | 99      |
 
 ##### 🌍 External services
 | ENV                                                        | DESCRIPTION                                                     | DEFAULT |

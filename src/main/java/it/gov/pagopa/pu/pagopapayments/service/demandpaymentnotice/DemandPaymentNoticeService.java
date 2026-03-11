@@ -12,23 +12,26 @@ import it.gov.pagopa.pu.pagopapayments.service.debtposition.cie.CieDebtPositionF
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 public class DemandPaymentNoticeService {
 
-  public static final String SERVICE_ID_CIE = "99";
   private final OrganizationService organizationService;
   private final AuthnService authnService;
   private final WorkflowService workflowService;
   private final CieDebtPositionFacadeService cieDebtPositionFacadeService;
+  private final String cieServiceId;
 
-  public DemandPaymentNoticeService(OrganizationService organizationService, AuthnService authnService, WorkflowService workflowService, CieDebtPositionFacadeService cieDebtPositionFacadeService) {
+  public DemandPaymentNoticeService(OrganizationService organizationService, AuthnService authnService, WorkflowService workflowService,
+                                    CieDebtPositionFacadeService cieDebtPositionFacadeService, @Value("${cie.service-id}") String cieServiceId) {
     this.organizationService = organizationService;
     this.authnService = authnService;
     this.workflowService = workflowService;
     this.cieDebtPositionFacadeService = cieDebtPositionFacadeService;
+    this.cieServiceId = cieServiceId;
   }
 
   public DebtPositionDTO handleRequest(PaDemandPaymentNoticeRequest request) {
@@ -38,10 +41,12 @@ public class DemandPaymentNoticeService {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdPA());
     }
 
-    return switch (request.getIdServizio()) {
-      case SERVICE_ID_CIE -> handleCreateCieDebtPosition(request, organization, accessToken);
-      default -> throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "There is no implementation for serviceId " + request.getIdServizio());
-    };
+    String serviceId = request.getIdServizio();
+    if (cieServiceId.equals(serviceId)) {
+      return handleCreateCieDebtPosition(request, organization, accessToken);
+    } else {
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "There is no implementation for serviceId " + serviceId);
+    }
   }
 
   private DebtPositionDTO handleCreateCieDebtPosition(PaDemandPaymentNoticeRequest request, Organization organization, String accessToken) {

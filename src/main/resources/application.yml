@@ -229,3 +229,6 @@ cache:
   notificationFee:
     size: "\${CACHE_NOTIFICATION_FEE_SIZE:1000}"
     expire-in: "\${CACHE_NOTIFICATION_FEE_MINUTES:10}"
+
+cie:
+  service-id: "\${CIE_SERVICE_ID:99}"

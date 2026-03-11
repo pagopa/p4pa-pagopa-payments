@@ -167,6 +167,11 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | CIE_WAIT_TIME_MILLIS                    | Cie retry waiting time (milliseconds)              | 500     |
 | CIE_PRINT_BODY_WHEN_ERROR               | To print body when an error occurs                 | true    |
 
+    #### 💼 Business logic
+| ENV              | DESCRIPTION      | DEFAULT |
+|------------------|------------------|---------|
+| CIE_SERVICE_ID   | Cie's service id | 99      |
+
 ##### 🌍 External services
 | ENV                                                        | DESCRIPTION                                                     | DEFAULT |
 |------------------------------------------------------------|-----------------------------------------------------------------|---------|

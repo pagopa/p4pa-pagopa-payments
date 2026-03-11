@@ -13,9 +13,9 @@ import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,15 +35,26 @@ class DemandPaymentNoticeServiceTest {
   private WorkflowService workflowServiceMock;
   @Mock
   private CieDebtPositionFacadeService cieDebtPositionFacadeServiceMock;
-  @InjectMocks
   private DemandPaymentNoticeService demandPaymentNoticeService;
 
   private final PodamFactory podamFactory;
+  private final String cieServiceId = "99";
 
   private static final String ACCESS_TOKEN = "access-token";
 
   public DemandPaymentNoticeServiceTest() {
     podamFactory = TestUtils.getPodamFactory();
+  }
+
+  @BeforeEach
+  void setUp() {
+    demandPaymentNoticeService = new DemandPaymentNoticeService(
+      organizationServiceMock,
+      authnServiceMock,
+      workflowServiceMock,
+      cieDebtPositionFacadeServiceMock,
+      cieServiceId
+    );
   }
 
   @AfterEach
@@ -60,7 +71,7 @@ class DemandPaymentNoticeServiceTest {
   void givenCieServiceIdWhenHandleRequestThenSuccess() {
     // Given
     PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
-    request.setIdServizio(DemandPaymentNoticeService.SERVICE_ID_CIE);
+    request.setIdServizio(cieServiceId);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
@@ -89,7 +100,7 @@ class DemandPaymentNoticeServiceTest {
   void givenCieServiceIdAndNoWorkflowIdWhenHandleRequestThenSuccess() {
     // Given
     PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
-    request.setIdServizio(DemandPaymentNoticeService.SERVICE_ID_CIE);
+    request.setIdServizio(cieServiceId);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);

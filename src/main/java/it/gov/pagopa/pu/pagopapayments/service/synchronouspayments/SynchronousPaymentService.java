@@ -25,14 +25,11 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Objects;
 
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.ORDINARY_DEBT_POSITION_ORIGINS;
+
 @Service
 @Slf4j
 public class SynchronousPaymentService {
-
-  public static final List<DebtPositionOrigin> ORDINARY_DEBT_POSITION_ORIGINS = List.of(
-    DebtPositionOrigin.ORDINARY,
-    DebtPositionOrigin.ORDINARY_SIL,
-    DebtPositionOrigin.SPONTANEOUS);
 
   private final DebtPositionService debtPositionService;
   private final PaForNodeRequestValidatorService paForNodeRequestValidatorService;

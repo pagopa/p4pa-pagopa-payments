@@ -1,36 +1,37 @@
 package it.gov.pagopa.pu.pagopapayments.service.demandpaymentnotice;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaDemandPaymentNoticeRequest;
-import it.gov.pagopa.pu.debtpositions.dto.generated.*;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
-import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
+import it.gov.pagopa.pu.pagopapayments.service.debtposition.cie.CieDebtPositionFacadeService;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.time.OffsetDateTime;
-import java.util.List;
 
 @Service
 @Slf4j
 public class DemandPaymentNoticeService {
 
-  private final DebtPositionService debtPositionService;
   private final OrganizationService organizationService;
   private final AuthnService authnService;
   private final WorkflowService workflowService;
+  private final CieDebtPositionFacadeService cieDebtPositionFacadeService;
+  private final String cieServiceId;
 
-  public DemandPaymentNoticeService(DebtPositionService debtPositionService, OrganizationService organizationService, AuthnService authnService, WorkflowService workflowService) {
-    this.debtPositionService = debtPositionService;
+  public DemandPaymentNoticeService(OrganizationService organizationService, AuthnService authnService, WorkflowService workflowService,
+                                    CieDebtPositionFacadeService cieDebtPositionFacadeService, @Value("${cie.service-id}") String cieServiceId) {
     this.organizationService = organizationService;
     this.authnService = authnService;
     this.workflowService = workflowService;
+    this.cieDebtPositionFacadeService = cieDebtPositionFacadeService;
+    this.cieServiceId = cieServiceId;
   }
 
   public DebtPositionDTO handleRequest(PaDemandPaymentNoticeRequest request) {
@@ -39,51 +40,24 @@ public class DemandPaymentNoticeService {
     if(organization == null) {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, request.getIdPA());
     }
-    Long orgId = organization.getOrganizationId();
 
-    DebtPositionDTO debtPositionDTO = createDummyDebtPosition(orgId, accessToken);
-    debtPositionDTO.setOrganizationId(orgId);
-    debtPositionDTO.description("spontaneous psp for service "+request.getIdServizio());
-
-    Pair<DebtPositionDTO, String> debtPositionWithWFId = debtPositionService.createDebtPosition(debtPositionDTO, accessToken);
-    return syncDebtPosition(accessToken, debtPositionWithWFId);
-  }
-
-  private DebtPositionDTO createDummyDebtPosition(Long organizationId, String accessToken){
-    DebtPositionDTO dp = new DebtPositionDTO();
-    dp.status(DebtPositionStatus.UNPAID);
-    dp.debtPositionOrigin(DebtPositionOrigin.SPONTANEOUS_PSP);
-
-    dp.flagPuPagoPaPayment(true);
-    dp.multiDebtor(false);
-    dp.setCreationDate(OffsetDateTime.now());
-    DebtPositionTypeOrg debtPositionTypeOrg = debtPositionService.findDebtPositionTypeOrgByOrgIdAndCode(organizationId, Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE, accessToken);
-    if(debtPositionTypeOrg == null) {
-      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "DebptPositionTypeOrg with code "+Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE+" not found");
+    String serviceId = request.getIdServizio();
+    if (cieServiceId.equals(serviceId)) {
+      return handleCreateCieDebtPosition(request, organization, accessToken);
+    } else {
+      throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "There is no implementation for serviceId " + serviceId);
     }
-    dp.debtPositionTypeOrgId(debtPositionTypeOrg.getDebtPositionTypeOrgId()); // hardcoded sponstaneous psp
-
-    PaymentOptionDTO paymentOption = new PaymentOptionDTO();
-    paymentOption.paymentOptionType(PaymentOptionType.INSTALLMENTS);
-    paymentOption.totalAmountCents(100L);
-    paymentOption.setPaymentOptionIndex(1);
-
-    InstallmentDTO installmentDTO = new InstallmentDTO();
-    installmentDTO.setAmountCents(100L);
-    installmentDTO.remittanceInformation("spontaneous psp debt position");
-
-    PersonDTO personDTO = new PersonDTO();
-    personDTO.setEntityType(PersonEntityType.F);
-    personDTO.setFiscalCode("RSSMRA92A12B123A");
-    personDTO.setFullName("Mario Rossi");
-    installmentDTO.debtor(personDTO);
-
-    paymentOption.setInstallments(List.of(installmentDTO));
-    dp.setPaymentOptions(List.of(paymentOption));
-    return dp;
   }
 
-  private DebtPositionDTO syncDebtPosition(String accessToken, Pair<DebtPositionDTO, String> debtPosition) {
+  private DebtPositionDTO handleCreateCieDebtPosition(PaDemandPaymentNoticeRequest request, Organization organization, String accessToken) {
+    Pair<DebtPositionDTO, String> debtPositionWithWFId = cieDebtPositionFacadeService.createCieDebtPosition(request.getDatiSpecificiServizioRequest(), organization, accessToken);
+    if(debtPositionWithWFId.getRight()!=null){
+      return awaitSyncCompletion(accessToken, debtPositionWithWFId);
+    }
+    return debtPositionWithWFId.getLeft();
+  }
+
+  private DebtPositionDTO awaitSyncCompletion(String accessToken, Pair<DebtPositionDTO, String> debtPosition) {
     DebtPositionDTO dp = debtPosition.getLeft();
     String workflowId = debtPosition.getRight();
 

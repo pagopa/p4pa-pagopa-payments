@@ -77,6 +77,8 @@ See [log configured pattern](/src/main/resources/logback-spring.xml).
   * On synchronous scenario, to retrieve notification fee (actualization) if the organization has configured a service for a given debt position type;
 * [p4pa-send-notification](https://github.com/pagopa/p4pa-send-notification):
   * On synchronous scenario, to retrieve notification fee (actualization) if there is no a service configured on the organization debt position type but there is a SEND api key.
+* [p4pa-cie](https://github.com/pagopa/p4pa-cie):
+  * To handle the 99 serviceId of the demandPaymentNotice API exposed to the node
 
 ### 🌍 External
 * pagoPA `Nodo dei Pagamenti SPC` - PagoPA services to handle payments:
@@ -160,6 +162,15 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | PU_SIL_MAX_ATTEMPTS                     | PuSil API max attempts                             | 3       |
 | PU_SIL_WAIT_TIME_MILLIS                 | PuSil retry waiting time (milliseconds)            | 500     |
 | PU_SIL_PRINT_BODY_WHEN_ERROR            | To print body when an error occurs                 | true    |
+| CIE_BASE_URL                            | Cie microservice URL                               |         |
+| CIE_MAX_ATTEMPTS                        | Cie API max attempts                               | 3       |
+| CIE_WAIT_TIME_MILLIS                    | Cie retry waiting time (milliseconds)              | 500     |
+| CIE_PRINT_BODY_WHEN_ERROR               | To print body when an error occurs                 | true    |
+
+    #### 💼 Business logic
+| ENV              | DESCRIPTION      | DEFAULT |
+|------------------|------------------|---------|
+| CIE_SERVICE_ID   | Cie's service id | 99      |
 
 ##### 🌍 External services
 | ENV                                                        | DESCRIPTION                                                     | DEFAULT |

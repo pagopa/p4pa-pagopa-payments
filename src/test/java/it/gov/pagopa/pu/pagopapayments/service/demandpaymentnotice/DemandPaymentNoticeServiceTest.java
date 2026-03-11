@@ -5,41 +5,40 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
-import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.workflow.service.WorkflowService;
-import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
+import it.gov.pagopa.pu.pagopapayments.service.debtposition.cie.CieDebtPositionFacadeService;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DemandPaymentNoticeServiceTest {
 
   @Mock
-  private DebtPositionService debtPositionServiceMock;
-  @Mock
   private OrganizationService organizationServiceMock;
   @Mock
   private AuthnService authnServiceMock;
   @Mock
   private WorkflowService workflowServiceMock;
-  @InjectMocks
+  @Mock
+  private CieDebtPositionFacadeService cieDebtPositionFacadeServiceMock;
   private DemandPaymentNoticeService demandPaymentNoticeService;
 
   private final PodamFactory podamFactory;
+  private final String cieServiceId = "99";
 
   private static final String ACCESS_TOKEN = "access-token";
 
@@ -47,10 +46,32 @@ class DemandPaymentNoticeServiceTest {
     podamFactory = TestUtils.getPodamFactory();
   }
 
+  @BeforeEach
+  void setUp() {
+    demandPaymentNoticeService = new DemandPaymentNoticeService(
+      organizationServiceMock,
+      authnServiceMock,
+      workflowServiceMock,
+      cieDebtPositionFacadeServiceMock,
+      cieServiceId
+    );
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      organizationServiceMock,
+      authnServiceMock,
+      workflowServiceMock,
+      cieDebtPositionFacadeServiceMock
+    );
+  }
+
   @Test
-  void givenValidRequestWhenHandleRequestThenSuccess() {
+  void givenCieServiceIdWhenHandleRequestThenSuccess() {
     // Given
     PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+    request.setIdServizio(cieServiceId);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
@@ -61,12 +82,8 @@ class DemandPaymentNoticeServiceTest {
     when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN))
       .thenReturn(organization);
 
-    when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndCode(organization.getOrganizationId(),
-      Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE, ACCESS_TOKEN))
-      .thenReturn(debtPositionTypeOrg);
-
-    when(debtPositionServiceMock.createDebtPosition(any(DebtPositionDTO.class), eq(ACCESS_TOKEN)))
-      .thenReturn(Pair.of(createdDebtPosition, workflowId));
+    when(cieDebtPositionFacadeServiceMock.createCieDebtPosition(request.getDatiSpecificiServizioRequest(), organization, ACCESS_TOKEN))
+      .thenReturn(Pair.of(createdDebtPosition,workflowId));
 
     when(workflowServiceMock.waitWorkflowCompletion(workflowId, 10, 1000, ACCESS_TOKEN))
       .thenReturn(Constants.WORKFLOW_STATUS_COMPLETED_VALUE);
@@ -76,78 +93,48 @@ class DemandPaymentNoticeServiceTest {
 
     // Then
     assertNotNull(result);
-    assertEquals(createdDebtPosition.getDebtPositionId(), result.getDebtPositionId());
-
-    verify(authnServiceMock).getAccessToken();
-    verify(organizationServiceMock).getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN);
-    verify(debtPositionServiceMock).createDebtPosition(any(DebtPositionDTO.class), eq(ACCESS_TOKEN));
-    verify(workflowServiceMock).waitWorkflowCompletion(workflowId, 10, 1000, ACCESS_TOKEN);
+    assertEquals(createdDebtPosition, result);
   }
 
   @Test
-  void givenNonExistentOrganizationWhenHandleRequestThenThrowException() {
+  void givenCieServiceIdAndNoWorkflowIdWhenHandleRequestThenSuccess() {
     // Given
     PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
-
-    when(authnServiceMock.getAccessToken()).thenReturn(ACCESS_TOKEN);
-    when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN))
-      .thenReturn(null);
-
-    // When & Then
-    PagoPaNodeFaultException exception = assertThrows(PagoPaNodeFaultException.class,
-      () -> demandPaymentNoticeService.handleRequest(request));
-
-    assertEquals(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, exception.getErrorCode());
-  }
-
-  @Test
-  void givenNonExistentDebtPositionTypeOrgWhenHandleRequestThenThrowException() {
-    // Given
-    PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
-
-    when(authnServiceMock.getAccessToken()).thenReturn(ACCESS_TOKEN);
-    when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN))
-      .thenReturn(organization);
-
-    when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndCode(organization.getOrganizationId(),
-      Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE, ACCESS_TOKEN))
-      .thenReturn(null);
-
-    // When & Then
-    PagoPaNodeFaultException exception = assertThrows(PagoPaNodeFaultException.class,
-      () -> demandPaymentNoticeService.handleRequest(request));
-
-    assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR, exception.getErrorCode());
-  }
-
-  @Test
-  void givenWorkflowSyncErrorWhenHandleRequestThenThrowException() {
-    // Given
-    PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+    request.setIdServizio(cieServiceId);
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     DebtPositionDTO createdDebtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     DebtPositionTypeOrg debtPositionTypeOrg = podamFactory.manufacturePojo(DebtPositionTypeOrg.class);
     debtPositionTypeOrg.setCode(Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE);
-    String workflowId = "wf-failed";
 
     when(authnServiceMock.getAccessToken()).thenReturn(ACCESS_TOKEN);
     when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN))
       .thenReturn(organization);
-    when(debtPositionServiceMock.findDebtPositionTypeOrgByOrgIdAndCode(organization.getOrganizationId(),
-      Constants.SPONTANEOUS_PSP_DP_TYPE_ORG_CODE, ACCESS_TOKEN))
-      .thenReturn(debtPositionTypeOrg);
-    when(debtPositionServiceMock.createDebtPosition(any(DebtPositionDTO.class), eq(ACCESS_TOKEN)))
-      .thenReturn(Pair.of(createdDebtPosition, workflowId));
 
-    when(workflowServiceMock.waitWorkflowCompletion(workflowId, 10, 1000, ACCESS_TOKEN))
-      .thenReturn("FAILED");
+    when(cieDebtPositionFacadeServiceMock.createCieDebtPosition(request.getDatiSpecificiServizioRequest(), organization, ACCESS_TOKEN))
+      .thenReturn(Pair.of(createdDebtPosition,null));
 
-    // When & Then
-    PagoPaNodeFaultException exception = assertThrows(PagoPaNodeFaultException.class,
-      () -> demandPaymentNoticeService.handleRequest(request));
+    // When
+    DebtPositionDTO result = demandPaymentNoticeService.handleRequest(request);
 
-    assertEquals(PagoPaNodeFaults.PAA_SYSTEM_ERROR, exception.getErrorCode());
-    assertTrue(exception.getErrorEmitter().contains("Synchronization error"));
+    // Then
+    assertNotNull(result);
+    assertEquals(createdDebtPosition, result);
+  }
+
+  @Test
+  void givenWrongServiceIdWhenHandleRequestThenThrowException() {
+    // Given
+    PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+    request.setIdServizio("-1");
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+
+    when(authnServiceMock.getAccessToken()).thenReturn(ACCESS_TOKEN);
+    when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), ACCESS_TOKEN))
+      .thenReturn(organization);
+
+    // When
+    PagoPaNodeFaultException serviceNotImplementedException = assertThrows(PagoPaNodeFaultException.class, () -> demandPaymentNoticeService.handleRequest(request));
+
+    assertEquals("There is no implementation for serviceId " + request.getIdServizio(),serviceNotImplementedException.getErrorEmitter());
   }
 }

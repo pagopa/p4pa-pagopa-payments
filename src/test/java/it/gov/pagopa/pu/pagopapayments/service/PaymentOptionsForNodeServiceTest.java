@@ -6,8 +6,8 @@ import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOptionsResponseForNode;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
-import it.gov.pagopa.pu.pagopapayments.exception.ConflictException;
-import it.gov.pagopa.pu.pagopapayments.exception.NotFoundException;
+import it.gov.pagopa.pu.pagopapayments.enums.OrgForNodeError;
+import it.gov.pagopa.pu.pagopapayments.exception.OrgForNodeException;
 import it.gov.pagopa.pu.pagopapayments.mapper.DebtPositions2PaymentOptionsNodeResponseMapper;
 import it.gov.pagopa.pu.pagopapayments.service.orgfornode.PaymentOptionsForNodeService;
 import org.junit.jupiter.api.AfterEach;
@@ -93,12 +93,14 @@ class PaymentOptionsForNodeServiceTest {
     when(organizationServiceMock.getOrganizationByFiscalCode(organizationFiscalCode, accessToken))
       .thenReturn(null);
 
-    Assertions.assertThrows(NotFoundException.class,
+    OrgForNodeException ex = Assertions.assertThrows(OrgForNodeException.class,
       () -> service.getPaymentOptions(noticeNumber, organizationFiscalCode));
+
+    Assertions.assertEquals(OrgForNodeError.ODP_107, ex.getError());
   }
 
   @Test
-  void givenDebtPositionsNullWhenGetPaymentOptionsThenReturnNull() {
+  void givenDebtPositionsNullWhenGetPaymentOptionsThenThrowNotFound() {
     String noticeNumber = "NAV123";
     String organizationFiscalCode = "ORG_FISCAL_CODE";
     String accessToken = "ACCESS_TOKEN";
@@ -114,12 +116,14 @@ class PaymentOptionsForNodeServiceTest {
       organizationId, noticeNumber, ORDINARY_DEBT_POSITION_ORIGINS, accessToken
     )).thenReturn(null);
 
-    PaymentOptionsResponseForNode response = service.getPaymentOptions(noticeNumber, organizationFiscalCode);
-    Assertions.assertNull(response);
+    OrgForNodeException ex = Assertions.assertThrows(OrgForNodeException.class,
+      () -> service.getPaymentOptions(noticeNumber, organizationFiscalCode));
+
+    Assertions.assertEquals(OrgForNodeError.ODP_107, ex.getError());
   }
 
   @Test
-  void givenDebtPositionsEmptyWhenGetPaymentOptionsThenReturnNull() {
+  void givenDebtPositionsEmptyWhenGetPaymentOptionsThenThrowNotFound() {
     String noticeNumber = "NAV123";
     String organizationFiscalCode = "ORG_FISCAL_CODE";
     String accessToken = "ACCESS_TOKEN";
@@ -135,9 +139,10 @@ class PaymentOptionsForNodeServiceTest {
       organizationId, noticeNumber, ORDINARY_DEBT_POSITION_ORIGINS, accessToken
     )).thenReturn(List.of());
 
-    PaymentOptionsResponseForNode response = service.getPaymentOptions(noticeNumber, organizationFiscalCode);
+    OrgForNodeException ex = Assertions.assertThrows(OrgForNodeException.class,
+      () -> service.getPaymentOptions(noticeNumber, organizationFiscalCode));
 
-    Assertions.assertNull(response);
+    Assertions.assertEquals(OrgForNodeError.ODP_107, ex.getError());
   }
 
   @Test
@@ -157,8 +162,10 @@ class PaymentOptionsForNodeServiceTest {
       organizationId, noticeNumber, ORDINARY_DEBT_POSITION_ORIGINS, accessToken
     )).thenReturn(List.of(new DebtPositionDTO(), new DebtPositionDTO()));
 
-    Assertions.assertThrows(ConflictException.class,
+    OrgForNodeException ex = Assertions.assertThrows(OrgForNodeException.class,
       () -> service.getPaymentOptions(noticeNumber, organizationFiscalCode));
+
+    Assertions.assertEquals(OrgForNodeError.ODP_108, ex.getError());
   }
 
   @Test
@@ -188,8 +195,10 @@ class PaymentOptionsForNodeServiceTest {
       organizationId, noticeNumber, ORDINARY_DEBT_POSITION_ORIGINS, accessToken
     )).thenReturn(List.of(dp));
 
-    Assertions.assertThrows(ConflictException.class,
+    OrgForNodeException ex = Assertions.assertThrows(OrgForNodeException.class,
       () -> service.getPaymentOptions(noticeNumber, organizationFiscalCode));
+
+    Assertions.assertEquals(OrgForNodeError.ODP_108, ex.getError());
   }
 
   @Test

@@ -6,8 +6,7 @@ import it.gov.pagopa.pu.orgfornode.dto.generated.PaymentOptionsResponseForNode;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
-import it.gov.pagopa.pu.pagopapayments.exception.ConflictException;
-import it.gov.pagopa.pu.pagopapayments.exception.NotFoundException;
+import it.gov.pagopa.pu.pagopapayments.enums.OrgForNodeError;
 import it.gov.pagopa.pu.pagopapayments.mapper.DebtPositions2PaymentOptionsNodeResponseMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -37,16 +36,16 @@ public class PaymentOptionsForNodeService {
 
     Organization organization = organizationService.getOrganizationByFiscalCode(organizationFiscalCode, accessToken);
     if (organization == null) {
-      throw new NotFoundException("[ORGANIZATION_NOT_FOUND] Organization having fiscal code " + organizationFiscalCode + " not found");
+      throw OrgForNodeError.ODP_107.toException();
     }
 
     List<DebtPositionDTO> debtPositions = debtPositionService.getDebtPositionsByOrganizationIdAndNav(organization.getOrganizationId(), noticeNumber, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
     if (CollectionUtils.isEmpty(debtPositions)) {
-      return null;
+      throw OrgForNodeError.ODP_107.toException();
     }
 
     if (debtPositions.size() > 1) {
-      throw new ConflictException("[MULTIPLE_DEBT_POSITIONS_FOUND] More than one Debt Position having notice number " + noticeNumber + " and organization fiscal code " + organizationFiscalCode + " found");
+      throw OrgForNodeError.ODP_108.toException();
     }
 
     DebtPositionDTO dp = debtPositions.getFirst();
@@ -57,7 +56,7 @@ public class PaymentOptionsForNodeService {
       .anyMatch(inst -> PAID_INSTALLMENT_STATUSES.contains(inst.getStatus()));
 
     if (navPaidOrReported) {
-      throw new ConflictException("[INSTALLMENT_ALREADY_PAID] Installment having notice number " + noticeNumber + " already paid");
+      throw OrgForNodeError.ODP_108.toException();
     }
 
     return mapper.mapToResponse(dp, organization);

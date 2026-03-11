@@ -35,7 +35,7 @@ import uk.co.jemos.podam.api.PodamFactory;
 
 import java.util.List;
 
-import static it.gov.pagopa.pu.pagopapayments.service.synchronouspayments.SynchronousPaymentService.ORDINARY_DEBT_POSITION_ORIGINS;
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.ORDINARY_DEBT_POSITION_ORIGINS;
 
 @ExtendWith(MockitoExtension.class)
 class SynchronousPaymentServiceTest {

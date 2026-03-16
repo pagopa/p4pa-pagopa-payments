@@ -37,7 +37,7 @@ class PrintPaymentNoticeControllerTest {
   private GenerateNoticeService generateNoticeService;
 
   private static final Long ORG_ID = 1L;
-  private static final String IUV = "IUV123";
+  private static final String NAV = "NAV123";
   private final PodamFactory podamFactory;
   private static final String FOLDER_ID = "folder-id";
 
@@ -56,7 +56,7 @@ class PrintPaymentNoticeControllerTest {
         .build();
 
     Mockito.when(generateNoticeService.generateNotice(
-      Mockito.eq(IUV),
+      Mockito.eq(NAV),
       Mockito.any(DebtPositionDTO.class),
       Mockito.anyString())
     ).thenReturn(noticeData);
@@ -65,14 +65,14 @@ class PrintPaymentNoticeControllerTest {
 
     // When & Then
     mockMvc.perform(post("/printpaymentnotice/generate")
-        .param("iuv", IUV)
+        .param("nav", NAV)
         .contentType(MediaType.APPLICATION_JSON)
         .content(jsonMapper.writeValueAsString(debtPosition)))
       .andExpect(status().isOk())
       .andExpect(content().bytes(expectedResult));
 
     Mockito.verify(generateNoticeService, Mockito.times(1)).generateNotice(
-      Mockito.eq(IUV), Mockito.any(), Mockito.anyString()
+      Mockito.eq(NAV), Mockito.any(), Mockito.anyString()
     );
   }
 

@@ -40,7 +40,7 @@ class GenerateNoticeServiceTest {
   private final PodamFactory podamFactory;
 
   private static final String ACCESS_TOKEN = "access-token";
-  private static final String TEST_IUV = "IUV123";
+  private static final String TEST_NAV = "NAV123";
   private static final Long ORGANIZATION_ID = 1L;
   private static final String FOLDER_ID = "folder-id";
 
@@ -64,7 +64,7 @@ class GenerateNoticeServiceTest {
     organization.setIban("IT123456");
 
     InstallmentDTO installment = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installment.setIuv(TEST_IUV);
+    installment.setNav(TEST_NAV);
 
     PaymentOptionDTO paymentOption = podamFactory.manufacturePojo(PaymentOptionDTO.class);
     paymentOption.setInstallments(List.of(installment));
@@ -84,7 +84,7 @@ class GenerateNoticeServiceTest {
     byte[] expectedResult = "PDF-DATA".getBytes();
     NoticeDataDTO noticeData = NoticeDataDTO.builder()
       .notice(expectedResult)
-      .fileName("99999999982_IUV123.pdf")
+      .fileName("99999999982_NAV123.pdf")
       .build();
 
     Mockito.when(organizationServiceMock.getOrganizationById(debtPosition.getOrganizationId(), ACCESS_TOKEN))
@@ -97,7 +97,7 @@ class GenerateNoticeServiceTest {
     ).thenReturn(expectedResult);
 
     // when
-    NoticeDataDTO result = generateNoticeService.generateNotice(TEST_IUV, debtPosition, ACCESS_TOKEN);
+    NoticeDataDTO result = generateNoticeService.generateNotice(TEST_NAV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
@@ -112,7 +112,7 @@ class GenerateNoticeServiceTest {
     organization.setIban(null);
 
     InstallmentDTO installment = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installment.setIuv(TEST_IUV);
+    installment.setNav(TEST_NAV);
 
     PaymentOptionDTO paymentOption = podamFactory.manufacturePojo(PaymentOptionDTO.class);
     paymentOption.setInstallments(List.of(installment));
@@ -132,7 +132,7 @@ class GenerateNoticeServiceTest {
     byte[] expectedResult = "PDF-DATA".getBytes();
     NoticeDataDTO noticeData = NoticeDataDTO.builder()
       .notice(expectedResult)
-      .fileName("99999999982_IUV123.pdf")
+      .fileName("99999999982_NAV123.pdf")
       .build();
 
     Mockito.when(organizationServiceMock.getOrganizationById(debtPosition.getOrganizationId(), ACCESS_TOKEN))
@@ -145,7 +145,7 @@ class GenerateNoticeServiceTest {
     ).thenReturn(expectedResult);
 
     // when
-    NoticeDataDTO result = generateNoticeService.generateNotice(TEST_IUV, debtPosition, ACCESS_TOKEN);
+    NoticeDataDTO result = generateNoticeService.generateNotice(TEST_NAV, debtPosition, ACCESS_TOKEN);
 
     // then
     assertNotNull(result);
@@ -155,11 +155,11 @@ class GenerateNoticeServiceTest {
   @Test
   void givenInvalidIuvWhenGenerateNoticeThenThrowsException() {
     // given
-    String invalidIuv = "INVALID-IUV";
+    String invalidNav = "INVALID-NAV";
     Organization organization = podamFactory.manufacturePojo(Organization.class);
 
     InstallmentDTO installment = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installment.setIuv("DIFFERENT-IUV");
+    installment.setNav("DIFFERENT-NAV");
 
     PaymentOptionDTO paymentOption = new PaymentOptionDTO();
     paymentOption.setInstallments(List.of(installment));
@@ -172,20 +172,20 @@ class GenerateNoticeServiceTest {
     // when & then
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> generateNoticeService.generateNotice(invalidIuv, debtPosition, ACCESS_TOKEN)
+      () -> generateNoticeService.generateNotice(invalidNav, debtPosition, ACCESS_TOKEN)
     );
 
-    assertEquals("No installment found for the provided IUV: " + invalidIuv, exception.getMessage());
+    assertEquals("No installment found for the provided NAV: " + invalidNav, exception.getMessage());
     Mockito.verify(organizationServiceMock).getOrganizationById(debtPosition.getOrganizationId(), ACCESS_TOKEN);
     Mockito.verifyNoInteractions(printPaymentNoticeServiceMock);
   }
 
   @Test
-  void givenValidIuvWhenFindInstallmentAndDebtorByIuvThenReturnsPair() {
+  void givenValidIuvWhenFindInstallmentAndDebtorByNavThenReturnsPair() {
     // given
     PersonDTO debtor = podamFactory.manufacturePojo(PersonDTO.class);
     InstallmentDTO installment = new InstallmentDTO();
-    installment.setIuv(TEST_IUV);
+    installment.setNav(TEST_NAV);
     installment.setDebtor(debtor);
 
     PaymentOptionDTO paymentOption = new PaymentOptionDTO();
@@ -195,7 +195,7 @@ class GenerateNoticeServiceTest {
     debtPosition.setPaymentOptions(List.of(paymentOption));
 
     // when
-    InstallmentDTO result = generateNoticeService.findInstallmentAndDebtorByIuv(debtPosition, TEST_IUV);
+    InstallmentDTO result = generateNoticeService.findInstallmentAndDebtorByNav(debtPosition, TEST_NAV);
 
     // then
     assertNotNull(result);
@@ -203,10 +203,10 @@ class GenerateNoticeServiceTest {
   }
 
   @Test
-  void givenMissingIuvWhenFindInstallmentAndDebtorByIuvThenReturnsNull() {
+  void givenMissingIuvWhenFindInstallmentAndDebtorByNavThenReturnsNull() {
     // given
     InstallmentDTO installment = new InstallmentDTO();
-    installment.setIuv("OTHER-IUV");
+    installment.setNav("OTHER-NAV");
 
     PaymentOptionDTO paymentOption = new PaymentOptionDTO();
     paymentOption.setInstallments(List.of(installment));
@@ -215,7 +215,7 @@ class GenerateNoticeServiceTest {
     debtPosition.setPaymentOptions(List.of(paymentOption));
 
     // when
-   InstallmentDTO result = generateNoticeService.findInstallmentAndDebtorByIuv(debtPosition, TEST_IUV);
+   InstallmentDTO result = generateNoticeService.findInstallmentAndDebtorByNav(debtPosition, TEST_NAV);
 
     // then
     assertNull(result);
@@ -234,10 +234,10 @@ class GenerateNoticeServiceTest {
 
     InstallmentDTO installment = podamFactory.manufacturePojo(InstallmentDTO.class);
     installment.setStatus(InstallmentStatus.TO_SYNC);
-    installment.setNav("3" + TEST_IUV);
+    installment.setNav(TEST_NAV);
     InstallmentDTO secondInstallment = podamFactory.manufacturePojo(InstallmentDTO.class);
     secondInstallment.setStatus(InstallmentStatus.PAID);
-    secondInstallment.setNav("150" + TEST_IUV);
+    secondInstallment.setNav("150" + TEST_NAV);
 
     PaymentOptionDTO paymentOption = podamFactory.manufacturePojo(PaymentOptionDTO.class);
     paymentOption.setInstallments(List.of(installment, secondInstallment));
@@ -268,7 +268,7 @@ class GenerateNoticeServiceTest {
 
     //then
     assertEquals(1, requestMassive.getNotices().size());
-    assertEquals("3" + TEST_IUV, requestMassive.getNotices().getFirst().getData().getNotice().getCode());
+    assertEquals(TEST_NAV, requestMassive.getNotices().getFirst().getData().getNotice().getCode());
     assertNotNull(result);
   }
 
@@ -277,18 +277,18 @@ class GenerateNoticeServiceTest {
     //given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     NoticeRequestMassiveDTO request = podamFactory.manufacturePojo(NoticeRequestMassiveDTO.class);
-    request.setIuvList(List.of(TEST_IUV, "IUV456"));
+    request.setIuvList(List.of(TEST_NAV, "IUV456"));
 
     NoticeGenerationMassiveResourceDTO resourceDTO = podamFactory.manufacturePojo(NoticeGenerationMassiveResourceDTO.class);
 
     NoticeGenerationMassiveRequestDTO requestMassive = new NoticeGenerationMassiveRequestDTO();
 
     InstallmentDTO installment = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installment.setIuv(TEST_IUV);
-    installment.setNav("3" + TEST_IUV);
+    installment.setIuv(TEST_NAV);
+    installment.setNav("3" + TEST_NAV);
     InstallmentDTO secondInstallment = podamFactory.manufacturePojo(InstallmentDTO.class);
     secondInstallment.setIuv("IUVVV");
-    secondInstallment.setNav("150" + TEST_IUV);
+    secondInstallment.setNav("150" + TEST_NAV);
 
     PaymentOptionDTO paymentOption = podamFactory.manufacturePojo(PaymentOptionDTO.class);
     paymentOption.setInstallments(List.of(installment, secondInstallment));
@@ -319,7 +319,7 @@ class GenerateNoticeServiceTest {
 
     //then
     assertEquals(1, requestMassive.getNotices().size());
-    assertEquals("3" + TEST_IUV, requestMassive.getNotices().getFirst().getData().getNotice().getCode());
+    assertEquals("3" + TEST_NAV, requestMassive.getNotices().getFirst().getData().getNotice().getCode());
     assertNotNull(result);
   }
 

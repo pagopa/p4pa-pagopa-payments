@@ -12,8 +12,10 @@ import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.LocalDateTimeToOffse
 import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.LocalDateTimeToOffsetDateTimeJackson3Serializer;
 import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.OffsetDateTimeToLocalDateTimeJackson3Deserializer;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.json.JsonMapper;
@@ -54,6 +56,7 @@ public class JsonConfig {
   }
 
   @Bean
+  @Scope(BeanDefinition.SCOPE_PROTOTYPE)
   public JsonMapper.Builder objectMapperJackson3Builder() {
     return JsonMapper.builder()
       .addModule(configureJackson3DateTimeModule())

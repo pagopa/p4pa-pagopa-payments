@@ -38,15 +38,15 @@ public class GenerateNoticeService {
     this.organizationService = organizationService;
   }
 
-  public NoticeDataDTO generateNotice(String iuv, DebtPositionDTO debtPosition, String accessToken) {
+  public NoticeDataDTO generateNotice(String nav, DebtPositionDTO debtPosition, String accessToken) {
     Organization org = organizationService.getOrganizationById(debtPosition.getOrganizationId(), accessToken);
-    NoticeGenerationRequestItemDTO noticeData = generateNoticeRequest(org, iuv, debtPosition);
+    NoticeGenerationRequestItemDTO noticeData = generateNoticeRequest(org, nav, debtPosition);
     log.info("generateNotice for organization with id[{}], notice code[{}] and templateId[{}]", org.getOrganizationId(), noticeData.getData().getNotice().getCode(), noticeData.getTemplateId());
 
     byte[] noticeGenerated = printPaymentNoticeService.generateNotice(org.getOrganizationId(), noticeData, accessToken);
     return NoticeDataDTO.builder()
       .notice(noticeGenerated)
-      .fileName(org.getOrgFiscalCode() + "_" + iuv + ".pdf")
+      .fileName(org.getOrgFiscalCode() + "_" + nav + ".pdf")
       .build();
   }
 
@@ -90,10 +90,10 @@ public class GenerateNoticeService {
     return null;
   }
 
-  public NoticeGenerationRequestItemDTO generateNoticeRequest(Organization org, String iuv, DebtPositionDTO debtPosition) {
-    InstallmentDTO installment = findInstallmentAndDebtorByIuv(debtPosition, iuv);
+  public NoticeGenerationRequestItemDTO generateNoticeRequest(Organization org, String nav, DebtPositionDTO debtPosition) {
+    InstallmentDTO installment = findInstallmentAndDebtorByNav(debtPosition, nav);
     if (installment == null) {
-      throw new IllegalArgumentException("No installment found for the provided IUV: " + iuv);
+      throw new IllegalArgumentException("No installment found for the provided NAV: " + nav);
     }
 
     NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO = new NoticeGenerationRequestItemDTO();
@@ -149,11 +149,11 @@ public class GenerateNoticeService {
       : GenerateNoticeTemplates.TEMPLATE_SINGLE_INSTALMENT_POSTE.templateId();
   }
 
-  public InstallmentDTO findInstallmentAndDebtorByIuv(DebtPositionDTO debtPosition, String iuv) {
-    log.info("findInstallmentAndDebtorByIuv on debtPosition with id[{}] and iuv iuv[{}]", debtPosition.getDebtPositionId(), iuv);
+  public InstallmentDTO findInstallmentAndDebtorByNav(DebtPositionDTO debtPosition, String nav) {
+    log.info("findInstallmentAndDebtorByNav on debtPosition with id[{}] and nav [{}]", debtPosition.getDebtPositionId(), nav);
     return debtPosition.getPaymentOptions().stream()
       .flatMap(po -> po.getInstallments().stream())
-      .filter(installment -> iuv.equals(installment.getIuv()))
+      .filter(installment -> nav.equals(installment.getNav()))
       .findFirst()
       .orElse(null);
   }

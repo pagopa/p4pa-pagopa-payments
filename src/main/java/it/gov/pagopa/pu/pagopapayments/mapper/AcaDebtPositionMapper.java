@@ -3,7 +3,6 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.Stamp;
 import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.*;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
@@ -25,7 +24,7 @@ public class AcaDebtPositionMapper {
   private static final Set<InstallmentStatus> SYNC_STATUS_FROM_UPDATE_OR_DELETE = Set.of(InstallmentStatus.UNPAID, InstallmentStatus.EXPIRED);
   private static final Set<InstallmentStatus> SYNC_STATUS_FROM_INSERT = Set.of(InstallmentStatus.DRAFT, InstallmentStatus.UNPAYABLE);
 
-  public Pair<Operation, PaymentPositionModel> mapToNewPaymentPositionModel(String iud, DebtPositionDTO debtPosition, Organization org) {
+  public Pair<Operation, PaymentPositionModel> mapToNewPaymentPositionModel(String iud, DebtPositionDTO debtPosition, String orgName) {
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
       .filter(installment -> iud.equals(installment.getIud()))
@@ -46,7 +45,7 @@ public class AcaDebtPositionMapper {
           .country(debtor.getNation())
           .email(debtor.getEmail())
           .switchToExpired(Optional.ofNullable(installment.getSwitchToExpired()).orElse(false))
-          .companyName(org.getOrgName())
+          .companyName(orgName)
           .paymentOption(List.of(getPaymentOption(installment)))
           .validityDate(debtPosition.getValidityDate() != null ? debtPosition.getValidityDate().atStartOfDay().toString() : null)
         );
@@ -98,6 +97,7 @@ public class AcaDebtPositionMapper {
           .value(installment.getLegacyPaymentMetadata())
           .build()) : null)
       .transfer(installment.getTransfers().stream()
+        .filter(transferDTO -> transferDTO.getAmountCents() != 0)
         .map(this::getTransfer).toList())
       .build();
   }

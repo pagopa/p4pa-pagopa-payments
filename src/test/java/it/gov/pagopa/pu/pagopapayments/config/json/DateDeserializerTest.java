@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.config.json;
 
 import com.fasterxml.jackson.core.JsonParser;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -35,7 +36,7 @@ class DateDeserializerTest {
   }
 
   @Test
-  void givenInvalidDateWhenDeserializeThenIOException() throws IOException {
+  void givenInvalidDateWhenDeserializeThenInvalidValueException() throws IOException {
     // Given
     Date date = Date.from(LocalDate.now()
       .atStartOfDay(ZoneId.systemDefault())
@@ -47,7 +48,7 @@ class DateDeserializerTest {
         .format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
 
     // When
-    Assertions.assertThrows(IOException.class, () -> deserializer.deserialize(parser, null));
+    Assertions.assertThrows(InvalidValueException.class, () -> deserializer.deserialize(parser, null));
   }
 
   @Test

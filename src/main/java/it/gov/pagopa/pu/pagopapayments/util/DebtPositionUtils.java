@@ -13,6 +13,7 @@ public class DebtPositionUtils {
   private DebtPositionUtils() {
   }
 
+  // region DebtPositionOrigins filter
   public static final List<DebtPositionOrigin> ORDINARY_DEBT_POSITION_ORIGINS = List.of(
     DebtPositionOrigin.ORDINARY,
     DebtPositionOrigin.ORDINARY_SIL,
@@ -20,6 +21,14 @@ public class DebtPositionUtils {
     DebtPositionOrigin.SPONTANEOUS_SIL,
     DebtPositionOrigin.SPONTANEOUS_PSP);
 
+  public static final Set<DebtPositionOrigin> ACA_EXCLUDED_ORIGINS = Set.of(
+    DebtPositionOrigin.SPONTANEOUS,
+    DebtPositionOrigin.SPONTANEOUS_SIL,
+    DebtPositionOrigin.SPONTANEOUS_MIXED,
+    DebtPositionOrigin.SPONTANEOUS_PSP
+  );
+
+  // region Statuses filter
   public static final Set<InstallmentStatus> PAID_INSTALLMENT_STATUSES = Set.of(
     InstallmentStatus.PAID,
     InstallmentStatus.REPORTED);
@@ -31,13 +40,6 @@ public class DebtPositionUtils {
     PaymentOptionStatus.TO_SYNC,
     PaymentOptionStatus.UNPAID,
     PaymentOptionStatus.PARTIALLY_PAID);
-
-  public static final Set<DebtPositionOrigin> ACA_EXCLUDED_ORIGINS = Set.of(
-    DebtPositionOrigin.SPONTANEOUS,
-    DebtPositionOrigin.SPONTANEOUS_SIL,
-    DebtPositionOrigin.SPONTANEOUS_MIXED,
-    DebtPositionOrigin.SPONTANEOUS_PSP
-  );
 
   public static boolean isPayableInstallment(InstallmentDTO installment) {
     if (installment == null || installment.getStatus() == null) {

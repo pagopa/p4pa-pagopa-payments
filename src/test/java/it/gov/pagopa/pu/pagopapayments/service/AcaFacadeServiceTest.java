@@ -10,7 +10,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.mapper.AcaDebtPositionMapper;
-import it.gov.pagopa.pu.pagopapayments.service.aca.AcaFacadeService;
+import it.gov.pagopa.pu.pagopapayments.service.acagpdsync.aca.AcaFacadeService;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -61,7 +61,7 @@ class AcaFacadeServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
       .thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization.getOrgName()))
       .thenReturn(Pair.of(Operation.CREATE, model));
 
     // when
@@ -97,7 +97,7 @@ class AcaFacadeServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
       .thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization.getOrgName()))
       .thenReturn(Pair.of(Operation.UPDATE, model));
 
     // when
@@ -134,7 +134,7 @@ class AcaFacadeServiceTest {
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
       .thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization))
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization.getOrgName()))
       .thenReturn(Pair.of(Operation.DELETE, model));
 
     // when
@@ -162,5 +162,46 @@ class AcaFacadeServiceTest {
 
     // then
     Mockito.verifyNoInteractions(brokerRetrieverServiceMock, acaDebtPositionMapperMock, acaServiceMock);
+  }
+
+  @Test
+  void givenOperationCreateWithBrokerDelegateWhenSyncACAThenInvokePaCreateDPUsingOrgOfTransferOwner(){
+    // given
+    String iud = "IUD";
+    String accessToken = TestUtils.getFakeAccessToken();
+    String orgName = "ORG";
+    String orgFiscalCode = "11111222223";
+    DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
+    debtPosition.setDebtPositionOrigin(DebtPositionOrigin.ORDINARY);
+    debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers().getFirst().setFlagOwner(Boolean.TRUE);
+    debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers().getFirst().setOrgFiscalCode(orgFiscalCode);
+    debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers().getFirst().setOrgName(orgName);
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(Boolean.TRUE);
+    PaymentPositionModel model = podamFactory.manufacturePojo(PaymentPositionModel.class);
+
+    BrokerForNodoPaDTO brokerForNodoPaDTO = BrokerForNodoPaDTO.builder()
+      .organization(organization)
+      .brokerApiKeys(new BrokerApiKeys().acaKey(VALID_ACA_KEY).gpdKey("OTHER_KEY"))
+      .broker(broker)
+      .build();
+
+    Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
+      .thenReturn(brokerForNodoPaDTO);
+
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, orgName))
+      .thenReturn(Pair.of(Operation.CREATE, model));
+
+    // when
+    acaFacadeService.sync(iud, debtPosition, accessToken);
+
+    // then
+    Mockito.verify(acaServiceMock).paCreatePosition(
+      Mockito.eq(VALID_ACA_KEY),
+      Mockito.eq(orgFiscalCode),
+      Mockito.same(model)
+    );
+    Mockito.verifyNoMoreInteractions(acaServiceMock);
   }
 }

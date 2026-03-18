@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.controller.generated.AcaApi;
-import it.gov.pagopa.pu.pagopapayments.service.aca.AcaFacadeService;
+import it.gov.pagopa.pu.pagopapayments.service.acagpdsync.aca.AcaFacadeService;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

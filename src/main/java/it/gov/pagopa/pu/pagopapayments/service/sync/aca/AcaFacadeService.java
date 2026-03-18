@@ -2,18 +2,17 @@ package it.gov.pagopa.pu.pagopapayments.service.sync.aca;
 
 import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.mapper.AcaDebtPositionMapper;
-import it.gov.pagopa.pu.pagopapayments.service.sync.BaseSyncOperationService;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
+import it.gov.pagopa.pu.pagopapayments.service.sync.BaseSyncOperationService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import static it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils.ACA_EXCLUDED_ORIGINS;
 
 @Service
 @Slf4j
@@ -21,13 +20,6 @@ public class AcaFacadeService extends BaseSyncOperationService<PaymentPositionMo
 
   private final AcaService acaService;
   private final AcaDebtPositionMapper acaDebtPositionMapper;
-
-  private static final Set<DebtPositionOrigin> ACA_EXCLUDED_ORIGINS = Set.of(
-    DebtPositionOrigin.SPONTANEOUS,
-    DebtPositionOrigin.SPONTANEOUS_SIL,
-    DebtPositionOrigin.SPONTANEOUS_MIXED,
-    DebtPositionOrigin.SPONTANEOUS_PSP
-  );
 
   public AcaFacadeService(AcaService acaService, AcaDebtPositionMapper acaDebtPositionMapper,
                           BrokerRetrieverService brokerRetrieverService) {

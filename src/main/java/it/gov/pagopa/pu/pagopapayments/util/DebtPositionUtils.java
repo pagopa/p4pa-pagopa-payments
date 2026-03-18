@@ -32,6 +32,13 @@ public class DebtPositionUtils {
     PaymentOptionStatus.UNPAID,
     PaymentOptionStatus.PARTIALLY_PAID);
 
+  public static final Set<DebtPositionOrigin> ACA_EXCLUDED_ORIGINS = Set.of(
+    DebtPositionOrigin.SPONTANEOUS,
+    DebtPositionOrigin.SPONTANEOUS_SIL,
+    DebtPositionOrigin.SPONTANEOUS_MIXED,
+    DebtPositionOrigin.SPONTANEOUS_PSP
+  );
+
   public static boolean isPayableInstallment(InstallmentDTO installment) {
     if (installment == null || installment.getStatus() == null) {
       return false;

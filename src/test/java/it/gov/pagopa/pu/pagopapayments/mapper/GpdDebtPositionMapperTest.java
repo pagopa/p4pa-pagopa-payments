@@ -20,6 +20,7 @@ import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.common.AttributeStrategy;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,7 +61,9 @@ class GpdDebtPositionMapperTest {
       .syncStatusFrom(syncStatusFrom)
       .syncStatusTo(syncStatusTo)
       .build());
-    installmentDTO.setTransfers(List.of(installmentDTO.getTransfers().getFirst()));
+    List<TransferDTO> transfers = new ArrayList<>();
+    transfers.add(installmentDTO.getTransfers().getFirst());
+    installmentDTO.setTransfers(transfers);
     return installmentDTO;
   }
 

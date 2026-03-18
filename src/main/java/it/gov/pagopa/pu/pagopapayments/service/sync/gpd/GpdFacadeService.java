@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.service.acagpdsync.gpd;
+package it.gov.pagopa.pu.pagopapayments.service.sync.gpd;
 
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.GpdService;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.mapper.GpdDebtPositionMapper;
-import it.gov.pagopa.pu.pagopapayments.service.acagpdsync.BaseSyncOperationService;
+import it.gov.pagopa.pu.pagopapayments.service.sync.BaseSyncOperationService;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;

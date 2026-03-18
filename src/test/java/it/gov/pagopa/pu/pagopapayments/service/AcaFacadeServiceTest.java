@@ -10,7 +10,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.mapper.AcaDebtPositionMapper;
-import it.gov.pagopa.pu.pagopapayments.service.acagpdsync.aca.AcaFacadeService;
+import it.gov.pagopa.pu.pagopapayments.service.sync.aca.AcaFacadeService;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;

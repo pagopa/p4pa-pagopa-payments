@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.controller;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.controller.generated.GpdApi;
-import it.gov.pagopa.pu.pagopapayments.service.acagpdsync.gpd.GpdFacadeService;
+import it.gov.pagopa.pu.pagopapayments.service.sync.gpd.GpdFacadeService;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

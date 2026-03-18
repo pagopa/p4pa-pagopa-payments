@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.service.acagpdsync;
+package it.gov.pagopa.pu.pagopapayments.service.sync;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;

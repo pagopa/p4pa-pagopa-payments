@@ -13,7 +13,7 @@ public class DebtPositionUtils {
   private DebtPositionUtils() {
   }
 
-  // region DebtPositionOrigins filter
+  //region DebtPositionOrigins filter
   public static final List<DebtPositionOrigin> ORDINARY_DEBT_POSITION_ORIGINS = List.of(
     DebtPositionOrigin.ORDINARY,
     DebtPositionOrigin.ORDINARY_SIL,
@@ -27,8 +27,9 @@ public class DebtPositionUtils {
     DebtPositionOrigin.SPONTANEOUS_MIXED,
     DebtPositionOrigin.SPONTANEOUS_PSP
   );
+  //endregion
 
-  // region Statuses filter
+  //region Statuses filter
   public static final Set<InstallmentStatus> PAID_INSTALLMENT_STATUSES = Set.of(
     InstallmentStatus.PAID,
     InstallmentStatus.REPORTED);
@@ -52,4 +53,5 @@ public class DebtPositionUtils {
 
     return status != null && PAYABLE_INSTALLMENT_STATUSES.contains(status);
   }
+  //endregion
 }

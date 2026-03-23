@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -19,6 +20,7 @@ public class PagopaPrintPaymentNoticeApisHolder {
   private final PagopaPrintPaymentNoticeApiClientConfig clientConfig;
 
   private final Map<String, NoticeGenerationRequestApisApi> noticeGenerationRequestApisApiMap = new ConcurrentHashMap<>();
+  private final Function<String, NoticeGenerationRequestApisApi> noticeGenerationRequestApisApiBuilder = key -> new NoticeGenerationRequestApisApi(buildApiClient(key));
 
   public PagopaPrintPaymentNoticeApisHolder(
     PagopaPrintPaymentNoticeApiClientConfig clientConfig,
@@ -32,8 +34,7 @@ public class PagopaPrintPaymentNoticeApisHolder {
   }
 
   public NoticeGenerationRequestApisApi getNoticeGenerationRequestApisApiMap(String apiKey) {
-    return noticeGenerationRequestApisApiMap.computeIfAbsent(apiKey, key ->
-      new NoticeGenerationRequestApisApi(buildApiClient(key)));
+    return noticeGenerationRequestApisApiMap.computeIfAbsent(apiKey, noticeGenerationRequestApisApiBuilder);
   }
 
   private ApiClient buildApiClient(String apiKey) {

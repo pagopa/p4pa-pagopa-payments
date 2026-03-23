@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -19,6 +20,7 @@ public class PaymentsReportingApisHolder {
   private final PaymentsReportingApiClientConfig clientConfig;
 
   private final Map<String, OrganizationsApi> paymentsReportingApisApiMap = new ConcurrentHashMap<>();
+  private final Function<String, OrganizationsApi> organizationsApiBuilder = key -> new OrganizationsApi(buildApiClient(key));
 
   public PaymentsReportingApisHolder(
     RestTemplateBuilder restTemplateBuilder,
@@ -32,10 +34,7 @@ public class PaymentsReportingApisHolder {
   }
 
   public OrganizationsApi getOrganizationApiByApiKey(String apiKey) {
-    return paymentsReportingApisApiMap.computeIfAbsent(
-      apiKey,
-      key -> new OrganizationsApi(buildApiClient(key))
-    );
+    return paymentsReportingApisApiMap.computeIfAbsent(apiKey, organizationsApiBuilder);
   }
 
   private ApiClient buildApiClient(String apiKey) {

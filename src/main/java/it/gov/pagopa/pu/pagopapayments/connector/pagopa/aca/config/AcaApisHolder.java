@@ -10,13 +10,16 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Service
 @Slf4j
 public class AcaApisHolder {
   private final AcaApiClientConfig clientConfig;
   private final RestTemplate restTemplate;
+
   private final Map<String, DebtPositionsApiApi> apiMap = new ConcurrentHashMap<>();
+  private final Function<String, DebtPositionsApiApi> debtPositionsApiApiBuilder = key -> new DebtPositionsApiApi(buildApiClient(key));
 
   public AcaApisHolder(AcaApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder) {
     this.clientConfig = clientConfig;
@@ -28,8 +31,7 @@ public class AcaApisHolder {
   }
 
   public DebtPositionsApiApi getApiClientByApiKey(String apiKey) {
-    return apiMap.computeIfAbsent(apiKey, key ->
-      new DebtPositionsApiApi(buildApiClient(key)));
+    return apiMap.computeIfAbsent(apiKey, debtPositionsApiApiBuilder);
   }
 
   private ApiClient buildApiClient(String apiKey) {

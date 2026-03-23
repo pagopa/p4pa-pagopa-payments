@@ -10,13 +10,17 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Service
 @Slf4j
 public class GpdApisHolder {
   private final GpdApiClientConfig clientConfig;
   private final RestTemplate restTemplate;
+
   private final Map<String, DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi> apiMap = new ConcurrentHashMap<>();
+  private final Function<String, DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi> debtPositionsApiInstallmentsAndPaymentOptionsManagerApiBuilder = key ->
+    new DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(buildApiClient(key));
 
   public GpdApisHolder(GpdApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder) {
     this.clientConfig = clientConfig;
@@ -28,8 +32,7 @@ public class GpdApisHolder {
   }
 
   public DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi getApiClientByApiKey(String apiKey) {
-    return apiMap.computeIfAbsent(apiKey, key ->
-      new DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(buildApiClient(key)));
+    return apiMap.computeIfAbsent(apiKey, debtPositionsApiInstallmentsAndPaymentOptionsManagerApiBuilder);
   }
 
   private ApiClient buildApiClient(String apiKey) {

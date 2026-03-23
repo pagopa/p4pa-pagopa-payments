@@ -68,32 +68,39 @@ public class RegistryLogger {
       request,
       registryBodyRequestExtraInfoRetriever
     );
-    Triple<O, String, RegistryOutcome> response2outcome = Triple.of(null, null, RegistryOutcome.KO);
+    O response = null;
+    String responseIuv = null;
+    RegistryOutcome outcome = RegistryOutcome.KO;
+
     Exception blException = null;
     try {
-      response2outcome = requestHandler.get();
+      Triple<O, String, RegistryOutcome> response2outcome = requestHandler.get();
+
+      response = response2outcome.getLeft();
+      responseIuv = response2outcome.getMiddle();
+      outcome = response2outcome.getRight();
     } catch (Exception e) {
       if (exceptionHandler == null) {
         blException = e;
         throw e;
       }
       try {
-        response2outcome = Triple.of(exceptionHandler.apply(e), null, RegistryOutcome.KO);
+        response = exceptionHandler.apply(e);
       } catch (Exception e2) {
         blException = e2;
         throw e2;
       }
     } finally {
-      contextData.setIuv(StringUtils.firstNonBlank(response2outcome.getMiddle(), contextData.getIuv()));
+      contextData.setIuv(StringUtils.firstNonBlank(responseIuv, contextData.getIuv()));
       produceRespRegistryEvent(
         contextData,
-        response2outcome.getLeft(),
-        response2outcome.getRight(),
+        response,
+        outcome,
         registryBodyResponseExtraInfoExtractor,
         blException
       );
     }
-    return response2outcome.getLeft();
+    return response;
   }
 
   private <I> void produceReqRegistryEvent(

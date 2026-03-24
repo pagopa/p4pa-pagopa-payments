@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.performancelogger;
 
+import io.vavr.CheckedFunction3;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,21 +24,25 @@ public class ApiRequestPerformanceLogger implements Filter {
     "/swagger"
   );
 
+  private final CheckedFunction3<ServletRequest, ServletResponse, FilterChain, String> apiRequestHandler =
+    (ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) -> {
+      filterChain.doFilter(servletRequest, servletResponse);
+      return "ok";
+    };
+
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
     if (servletRequest instanceof HttpServletRequest httpServletRequest &&
       servletResponse instanceof HttpServletResponse httpServletResponse &&
       isPerformanceLoggedRequest(httpServletRequest)
     ) {
-      PerformanceLogger.execute(
+      PerformanceLogger.execute3(
         "API_REQUEST",
         getRequestDetails(httpServletRequest),
-        () -> {
-          filterChain.doFilter(servletRequest, servletResponse);
-          return "ok";
-        },
+        apiRequestHandler,
         x -> "HttpStatus: " + httpServletResponse.getStatus(),
-        null);
+        null,
+        servletRequest, servletResponse, filterChain);
     } else {
       filterChain.doFilter(servletRequest, servletResponse);
     }

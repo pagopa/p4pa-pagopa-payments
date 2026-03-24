@@ -68,6 +68,7 @@ val httpCoreVersion = "5.4.1"
 val springWolfAsyncApiVersion = "2.1.0"
 val commonsLang3Version = "3.20.0"
 val lz4JavaVersion = "1.10.4"
+val vavrVersion = "1.0.1"
 
 // fix cve
 val jackson2CoreVersion = "2.21.1"
@@ -112,6 +113,7 @@ dependencies {
   }
   implementation("io.github.springwolf:springwolf-ui:${springWolfAsyncApiVersion}")
   implementation("io.github.springwolf:springwolf-cloud-stream:${springWolfAsyncApiVersion}")
+  implementation("io.vavr:vavr:${vavrVersion}")
 
   // CVE fix
   implementation("tools.jackson.core:jackson-core:${jackson3CoreVersion}")

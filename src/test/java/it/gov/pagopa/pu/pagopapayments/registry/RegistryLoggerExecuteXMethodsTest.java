@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.registry;
 
+import io.vavr.Function4;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.tuple.Triple;
@@ -26,11 +27,11 @@ class RegistryLoggerExecuteXMethodsTest {
   private RegistryLogger registryLoggerSpy;
 
   @BeforeEach
-  void init(){
+  void init() {
     registryLoggerSpy = Mockito.spy(new RegistryLogger(null, null, null));
   }
 
-//region utility for executeX tests
+  //region utility for executeX tests
   private <I> void configureRegistryLoggerPreExecute(I request, RegistryContextData contextData, Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever) {
     doNothing()
       .when(registryLoggerSpy)
@@ -53,7 +54,34 @@ class RegistryLoggerExecuteXMethodsTest {
   }
 //endregion
 
-//region execute1
+  //region execute1
+  @ParameterizedTest
+  @CsvSource("request,response,ARG1")
+  <I, O, A1> void whenExecute1MinimalFormThenInvokeComplete(I request, O expectedResult, A1 arg1) {
+    // Given
+    Function<A1, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
+    Function<Exception, O> exceptionHandler = Mockito.mock();
+
+    RegistryContextData contextData = new RegistryContextData();
+
+    Mockito.doReturn(expectedResult)
+      .when(registryLoggerSpy)
+      .execute1(same(contextData), same(request),
+        same(requestHandler), same(exceptionHandler),
+        isNull(), isNull(),
+        Mockito.same(arg1)
+      );
+
+    // When
+    O result = registryLoggerSpy.execute1(
+      contextData, request,
+      requestHandler, exceptionHandler,
+      arg1);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
   @ParameterizedTest
   @CsvSource("request,response,ARG1")
   <I, O, A1> void whenExecute1ThenOk(I request, O expectedResult, A1 arg1) {
@@ -178,7 +206,36 @@ class RegistryLoggerExecuteXMethodsTest {
   }
 //endregion
 
+
+
 //region execute2
+  @ParameterizedTest
+  @CsvSource("request,response,ARG1,ARG2")
+  <I, O, A1, A2> void whenExecute2MinimalFormThenInvokeComplete(I request, O expectedResult, A1 arg1, A2 arg2) {
+    // Given
+    BiFunction<A1, A2, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
+    Function<Exception, O> exceptionHandler = Mockito.mock();
+
+    RegistryContextData contextData = new RegistryContextData();
+
+    Mockito.doReturn(expectedResult)
+      .when(registryLoggerSpy)
+      .execute2(same(contextData), same(request),
+        same(requestHandler), same(exceptionHandler),
+        isNull(), isNull(),
+        Mockito.same(arg1), Mockito.same(arg2)
+      );
+
+    // When
+    O result = registryLoggerSpy.execute2(
+      contextData, request,
+      requestHandler, exceptionHandler,
+      arg1, arg2);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
   @ParameterizedTest
   @CsvSource("request,response,ARG1,ARG2")
   <I, O, A1, A2> void whenExecute2ThenOk(I request, O expectedResult, A1 arg1, A2 arg2) {
@@ -303,10 +360,39 @@ class RegistryLoggerExecuteXMethodsTest {
   }
 //endregion
 
+
+
 //region execute3
   @ParameterizedTest
   @CsvSource("request,response,ARG1,ARG2,ARG3")
-  <I, O, A1, A2, A3> void whenExecute2ThenOk(I request, O expectedResult, A1 arg1, A2 arg2, A3 arg3) {
+  <I, O, A1, A2, A3> void whenExecute3MinimalFormThenInvokeComplete(I request, O expectedResult, A1 arg1, A2 arg2, A3 arg3) {
+    // Given
+    TriFunction<A1, A2, A3, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
+    Function<Exception, O> exceptionHandler = Mockito.mock();
+
+    RegistryContextData contextData = new RegistryContextData();
+
+    Mockito.doReturn(expectedResult)
+      .when(registryLoggerSpy)
+      .execute3(same(contextData), same(request),
+        same(requestHandler), same(exceptionHandler),
+        isNull(), isNull(),
+        Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3)
+      );
+
+    // When
+    O result = registryLoggerSpy.execute3(
+      contextData, request,
+      requestHandler, exceptionHandler,
+      arg1, arg2, arg3);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @ParameterizedTest
+  @CsvSource("request,response,ARG1,ARG2,ARG3")
+  <I, O, A1, A2, A3> void whenExecute3ThenOk(I request, O expectedResult, A1 arg1, A2 arg2, A3 arg3) {
     // Given
     TriFunction<A1, A2, A3, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
     Function<Exception, O> exceptionHandler = Mockito.mock();
@@ -336,7 +422,7 @@ class RegistryLoggerExecuteXMethodsTest {
 
   @ParameterizedTest
   @CsvSource("request,ARG1,ARG2,ARG3")
-  <I, O, A1, A2, A3> void givenNotHandledExceptionWhenExecute2ThenThrowException(I request, A1 arg1, A2 arg2, A3 arg3) {
+  <I, O, A1, A2, A3> void givenNotHandledExceptionWhenExecute3ThenThrowException(I request, A1 arg1, A2 arg2, A3 arg3) {
     // Given
     TriFunction<A1, A2, A3, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
     Function<Exception, O> exceptionHandler = null;
@@ -365,7 +451,7 @@ class RegistryLoggerExecuteXMethodsTest {
 
   @ParameterizedTest
   @CsvSource("request,response,ARG1,ARG2,ARG3")
-  <I, O, A1, A2, A3> void givenHandledExceptionWhenExecute2ThenOk(I request, O expectedResult, A1 arg1, A2 arg2, A3 arg3) {
+  <I, O, A1, A2, A3> void givenHandledExceptionWhenExecute3ThenOk(I request, O expectedResult, A1 arg1, A2 arg2, A3 arg3) {
     // Given
     TriFunction<A1, A2, A3, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
     Function<Exception, O> exceptionHandler = Mockito.mock();
@@ -396,7 +482,7 @@ class RegistryLoggerExecuteXMethodsTest {
 
   @ParameterizedTest
   @CsvSource("request,ARG1,ARG2,ARG3")
-  <I, O, A1, A2, A3> void givenHandledExceptionThrowingExceptionWhenExecute2ThenThrowNestedException(I request, A1 arg1, A2 arg2, A3 arg3) {
+  <I, O, A1, A2, A3> void givenHandledExceptionThrowingExceptionWhenExecute3ThenThrowNestedException(I request, A1 arg1, A2 arg2, A3 arg3) {
     // Given
     TriFunction<A1, A2, A3, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
     Function<Exception, O> exceptionHandler = Mockito.mock();
@@ -421,6 +507,160 @@ class RegistryLoggerExecuteXMethodsTest {
       requestHandler, exceptionHandler,
       registryBodyRequestExtraInfoRetriever, registryBodyResponseExtraInfoExtractor,
       arg1, arg2, arg3)
+    );
+
+    // Then
+    Assertions.assertSame(expectedNestedException, result);
+  }
+//endregion
+
+
+
+//region execute4
+  @ParameterizedTest
+  @CsvSource("request,response,ARG1,ARG2,ARG3,ARG4")
+  <I, O, A1, A2, A3, A4> void whenExecute4MinimalFormThenInvokeComplete(I request, O expectedResult, A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
+    // Given
+    Function4<A1, A2, A3, A4, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
+    Function<Exception, O> exceptionHandler = Mockito.mock();
+
+    RegistryContextData contextData = new RegistryContextData();
+
+    Mockito.doReturn(expectedResult)
+      .when(registryLoggerSpy)
+      .execute4(same(contextData), same(request),
+        same(requestHandler), same(exceptionHandler),
+        isNull(), isNull(),
+        Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3), Mockito.same(arg4)
+      );
+
+    // When
+    O result = registryLoggerSpy.execute4(
+      contextData, request,
+      requestHandler, exceptionHandler,
+      arg1, arg2, arg3, arg4);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @ParameterizedTest
+  @CsvSource("request,response,ARG1,ARG2,ARG3,ARG4")
+  <I, O, A1, A2, A3, A4> void whenExecute4ThenOk(I request, O expectedResult, A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
+    // Given
+    Function4<A1, A2, A3, A4, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
+    Function<Exception, O> exceptionHandler = Mockito.mock();
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor = Mockito.mock();
+
+    RegistryContextData contextData = new RegistryContextData();
+    Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever = Mockito.mock();
+
+    String expectedIuv = "iuv";
+    RegistryOutcome expectedOutcome = RegistryOutcome.OK;
+
+    Mockito.when(requestHandler.apply(Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3), Mockito.same(arg4)))
+      .thenReturn(Triple.of(expectedResult, expectedIuv, expectedOutcome));
+
+    configureRegistryLoggerSpyNoExceptionExpected(request, expectedResult, contextData, registryBodyRequestExtraInfoRetriever, registryBodyResponseExtraInfoExtractor, expectedIuv, expectedOutcome);
+
+    // When
+    O result = registryLoggerSpy.execute4(
+      contextData, request,
+      requestHandler, exceptionHandler,
+      registryBodyRequestExtraInfoRetriever, registryBodyResponseExtraInfoExtractor,
+      arg1, arg2, arg3, arg4);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @ParameterizedTest
+  @CsvSource("request,ARG1,ARG2,ARG3,ARG4")
+  <I, O, A1, A2, A3, A4> void givenNotHandledExceptionWhenExecute4ThenThrowException(I request, A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
+    // Given
+    Function4<A1, A2, A3, A4, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
+    Function<Exception, O> exceptionHandler = null;
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor = Mockito.mock();
+
+    RegistryContextData contextData = new RegistryContextData();
+    Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever = Mockito.mock();
+
+    RuntimeException expectedException = new RuntimeException("simulated exception");
+    Mockito.when(requestHandler.apply(Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3), Mockito.same(arg4)))
+      .thenThrow(expectedException);
+
+    configureRegistryLoggerSpyExceptionExpected(request, contextData, registryBodyRequestExtraInfoRetriever, registryBodyResponseExtraInfoExtractor, expectedException);
+
+    // When
+    RuntimeException result = assertThrows(RuntimeException.class, () -> registryLoggerSpy.execute4(
+      contextData, request,
+      requestHandler, exceptionHandler,
+      registryBodyRequestExtraInfoRetriever, registryBodyResponseExtraInfoExtractor,
+      arg1, arg2, arg3,  arg4)
+    );
+
+    // Then
+    Assertions.assertSame(expectedException, result);
+  }
+
+  @ParameterizedTest
+  @CsvSource("request,response,ARG1,ARG2,ARG3,ARG4")
+  <I, O, A1, A2, A3, A4> void givenHandledExceptionWhenExecute4ThenOk(I request, O expectedResult, A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
+    // Given
+    Function4<A1, A2, A3, A4, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
+    Function<Exception, O> exceptionHandler = Mockito.mock();
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor = Mockito.mock();
+
+    RegistryContextData contextData = new RegistryContextData();
+    Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever = Mockito.mock();
+
+    RuntimeException expectedException = new RuntimeException("simulated exception");
+    Mockito.when(requestHandler.apply(Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3), Mockito.same(arg4)))
+      .thenThrow(expectedException);
+
+    Mockito.when(exceptionHandler.apply(Mockito.same(expectedException)))
+      .thenReturn(expectedResult);
+
+    configureRegistryLoggerSpyNoExceptionExpected(request, expectedResult, contextData, registryBodyRequestExtraInfoRetriever, registryBodyResponseExtraInfoExtractor, null, RegistryOutcome.KO);
+
+    // When
+    O result = registryLoggerSpy.execute4(
+      contextData, request,
+      requestHandler, exceptionHandler,
+      registryBodyRequestExtraInfoRetriever, registryBodyResponseExtraInfoExtractor,
+      arg1, arg2, arg3, arg4);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @ParameterizedTest
+  @CsvSource("request,ARG1,ARG2,ARG3,ARG4")
+  <I, O, A1, A2, A3, A4> void givenHandledExceptionThrowingExceptionWhenExecute4ThenThrowNestedException(I request, A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
+    // Given
+    Function4<A1, A2, A3, A4, Triple<O, String, RegistryOutcome>> requestHandler = Mockito.mock();
+    Function<Exception, O> exceptionHandler = Mockito.mock();
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor = Mockito.mock();
+
+    RegistryContextData contextData = new RegistryContextData();
+    Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever = Mockito.mock();
+
+    RuntimeException expectedException = new RuntimeException("simulated exception");
+    Mockito.when(requestHandler.apply(Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3), Mockito.same(arg4)))
+      .thenThrow(expectedException);
+
+    RuntimeException expectedNestedException = new RuntimeException("simulated exception");
+    Mockito.when(exceptionHandler.apply(Mockito.same(expectedException)))
+      .thenThrow(expectedNestedException);
+
+    configureRegistryLoggerSpyExceptionExpected(request, contextData, registryBodyRequestExtraInfoRetriever, registryBodyResponseExtraInfoExtractor, expectedNestedException);
+
+    // When
+    RuntimeException result = assertThrows(RuntimeException.class, () -> registryLoggerSpy.execute4(
+      contextData, request,
+      requestHandler, exceptionHandler,
+      registryBodyRequestExtraInfoRetriever, registryBodyResponseExtraInfoExtractor,
+      arg1, arg2, arg3,  arg4)
     );
 
     // Then

@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.*;
@@ -63,12 +64,12 @@ class GpdClientTest {
 
     gpdClient.createPosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, paymentPositionModel);
 
-    verify(debtPositionsApiMock, times(1)).createPosition(ORGANIZATION_FISCAL_CODE, TO_PUBLISH, null,  paymentPositionModel);
+    verify(debtPositionsApiMock, times(1)).createPosition(ORGANIZATION_FISCAL_CODE, TO_PUBLISH, null, paymentPositionModel);
   }
 
   @Test
   void updatePosition_ShouldCallGpdApiClient() {
-    PaymentPositionModelV3 paymentPositionModel = configureMocks(RegistryEventType.GPD_updatePosition, null);
+    PaymentPositionModelV3 paymentPositionModel = configureMocks4(RegistryEventType.GPD_updatePosition, null, TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD);
 
     gpdClient.updatePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 
@@ -77,32 +78,36 @@ class GpdClientTest {
 
   @Test
   void deletePosition_ShouldCallGpdApiClient() {
-    PaymentPositionModelV3 paymentPositionModel = configureMocks(RegistryEventType.GPD_deletePosition, IUPD);
+    PaymentPositionModelV3 paymentPositionModel = configureMocks4(RegistryEventType.GPD_deletePosition, IUPD, TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD);
 
     gpdClient.deletePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 
     verify(debtPositionsApiMock, times(1)).deletePosition(ORGANIZATION_FISCAL_CODE, IUPD, null);
   }
 
-  private PaymentPositionModelV3 configureMocks(RegistryEventType registryEventType, Object request) {
-    PaymentPositionModelV3 paymentPositionModel = podamFactory.manufacturePojo(PaymentPositionModelV3.class);
-
-    when(gpdApisHolderMock.getApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
-
-    RegistryContextData contextData = RegistryContextData.builder()
-      .orgFiscalCode(ORGANIZATION_FISCAL_CODE)
-      .eventType(registryEventType)
-      .iuv(
-        paymentPositionModel.getPaymentOption().stream()
-          .flatMap(po -> po.getInstallments().stream())
-          .map(InstallmentModel::getIuv)
-          .collect(Collectors.joining(Utilities.IUV_SEPARATOR)))
-      .build();
-    RegistryLoggerTest.configureRegistryLoggerMock(registryLoggerMock, contextData, Objects.requireNonNullElse(request, paymentPositionModel), false, false);
-
-    return paymentPositionModel;
-  }
   private PaymentPositionModelV3 configureMocks3(RegistryEventType registryEventType, Object request, Object arg1, Object arg2) {
+    return configureMocks(registryEventType,
+      (contextData, paymentPositionModel) ->
+        RegistryLoggerTest.configureRegistryLoggerMockExecute3(
+          registryLoggerMock, contextData,
+          Objects.requireNonNullElse(request, paymentPositionModel),
+          false, false
+          , arg1, arg2, paymentPositionModel)
+    );
+  }
+
+  private PaymentPositionModelV3 configureMocks4(RegistryEventType registryEventType, Object request, Object arg1, Object arg2, Object arg3) {
+    return configureMocks(registryEventType,
+      (contextData, paymentPositionModel) ->
+        RegistryLoggerTest.configureRegistryLoggerMockExecute4(
+          registryLoggerMock, contextData,
+          Objects.requireNonNullElse(request, paymentPositionModel),
+          false, false,
+          arg1, arg2, arg3, paymentPositionModel)
+    );
+  }
+
+  private PaymentPositionModelV3 configureMocks(RegistryEventType registryEventType, BiConsumer<RegistryContextData, PaymentPositionModelV3> mockConfigurer) {
     PaymentPositionModelV3 paymentPositionModel = podamFactory.manufacturePojo(PaymentPositionModelV3.class);
 
     when(gpdApisHolderMock.getApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
@@ -116,7 +121,8 @@ class GpdClientTest {
           .map(InstallmentModel::getIuv)
           .collect(Collectors.joining(Utilities.IUV_SEPARATOR)))
       .build();
-    RegistryLoggerTest.configureRegistryLoggerMockExecute3(registryLoggerMock, contextData, Objects.requireNonNullElse(request, paymentPositionModel), false, false, arg1, arg2, paymentPositionModel);
+
+    mockConfigurer.accept(contextData, paymentPositionModel);
 
     return paymentPositionModel;
   }

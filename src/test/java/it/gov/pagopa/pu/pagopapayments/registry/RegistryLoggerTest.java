@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.registry;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vavr.Function4;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaSendRTV2Request;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaSendRTV2Response;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
@@ -880,77 +881,150 @@ public class RegistryLoggerTest {
                                                          Object arg1) {
     configureRegistryLoggerMock(registryLoggerMock, contextData, request, withExtraInfoReq, withExtraInfoResp);
 
-    Mockito.doAnswer(i -> {
+    Answer<?> answer = i -> {
       Function<Object, Triple<Object, String, RegistryOutcome>> requestHandler = i.getArgument(2);
       Function<Exception, Object> exceptionHandler = i.getArgument(3);
-      Supplier<Map<String, Object>> requestExtraInfoRetriever = i.getArgument(4);
-      Function<Object, Map<String, Object>>  responseExtraInfoExtractor = i.getArgument(5);
 
-      if(withExtraInfoReq || withExtraInfoResp) {
+      if (withExtraInfoReq || withExtraInfoResp) {
+        Supplier<Map<String, Object>> requestExtraInfoRetriever = i.getArgument(4);
+        Function<Object, Map<String, Object>> responseExtraInfoExtractor = i.getArgument(5);
         return registryLoggerMock.execute(contextData, request, () -> requestHandler.apply(arg1), exceptionHandler, requestExtraInfoRetriever, responseExtraInfoExtractor);
       } else {
         return registryLoggerMock.execute(contextData, request, () -> requestHandler.apply(arg1), exceptionHandler);
       }
-    }).when(registryLoggerMock).execute1(
-      Mockito.eq(contextData),
-      Mockito.same(request),
-      Mockito.any(),
-      Mockito.any(),
-      Mockito.any(),
-      Mockito.any(),
-      Mockito.same(arg1)
-    );
+    };
+
+    if (withExtraInfoReq || withExtraInfoResp) {
+      Mockito.doAnswer(answer).when(registryLoggerMock).execute1(
+        Mockito.eq(contextData),
+        Mockito.same(request),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.same(arg1)
+      );
+    } else {
+      Mockito.doAnswer(answer).when(registryLoggerMock).execute1(
+        Mockito.eq(contextData),
+        Mockito.same(request),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.same(arg1)
+      );
+    }
   }
 
   public static void configureRegistryLoggerMockExecute2(RegistryLogger registryLoggerMock, RegistryContextData contextData, Object request, boolean withExtraInfoReq, boolean withExtraInfoResp,
                                                          Object arg1, Object arg2) {
     configureRegistryLoggerMock(registryLoggerMock, contextData, request, withExtraInfoReq, withExtraInfoResp);
 
-    Mockito.doAnswer(i -> {
+    Answer<?> answer = i -> {
       BiFunction<Object, Object, Triple<Object, String, RegistryOutcome>> requestHandler = i.getArgument(2);
       Function<Exception, Object> exceptionHandler = i.getArgument(3);
-      Supplier<Map<String, Object>> requestExtraInfoRetriever = i.getArgument(4);
-      Function<Object, Map<String, Object>>  responseExtraInfoExtractor = i.getArgument(5);
 
-      if(withExtraInfoReq || withExtraInfoResp) {
+      if (withExtraInfoReq || withExtraInfoResp) {
+        Supplier<Map<String, Object>> requestExtraInfoRetriever = i.getArgument(4);
+        Function<Object, Map<String, Object>> responseExtraInfoExtractor = i.getArgument(5);
         return registryLoggerMock.execute(contextData, request, () -> requestHandler.apply(arg1, arg2), exceptionHandler, requestExtraInfoRetriever, responseExtraInfoExtractor);
       } else {
         return registryLoggerMock.execute(contextData, request, () -> requestHandler.apply(arg1, arg2), exceptionHandler);
       }
-    }).when(registryLoggerMock).execute2(
-      Mockito.eq(contextData),
-      Mockito.same(request),
-      Mockito.any(),
-      Mockito.any(),
-      Mockito.any(),
-      Mockito.any(),
-      Mockito.same(arg1), Mockito.same(arg2)
-    );
+    };
+    if (withExtraInfoReq || withExtraInfoResp) {
+      Mockito.doAnswer(answer).when(registryLoggerMock).execute2(
+        Mockito.eq(contextData),
+        Mockito.same(request),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.same(arg1), Mockito.same(arg2)
+      );
+    } else {
+      Mockito.doAnswer(answer).when(registryLoggerMock).execute2(
+        Mockito.eq(contextData),
+        Mockito.same(request),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.same(arg1), Mockito.same(arg2)
+      );
+    }
   }
 
   public static void configureRegistryLoggerMockExecute3(RegistryLogger registryLoggerMock, RegistryContextData contextData, Object request, boolean withExtraInfoReq, boolean withExtraInfoResp,
                                                          Object arg1, Object arg2, Object arg3) {
     configureRegistryLoggerMock(registryLoggerMock, contextData, request, withExtraInfoReq, withExtraInfoResp);
 
-    Mockito.doAnswer(i -> {
+    Answer<?> answer = i -> {
       TriFunction<Object, Object, Object, Triple<Object, String, RegistryOutcome>> requestHandler = i.getArgument(2);
       Function<Exception, Object> exceptionHandler = i.getArgument(3);
-      Supplier<Map<String, Object>> requestExtraInfoRetriever = i.getArgument(4);
-      Function<Object, Map<String, Object>>  responseExtraInfoExtractor = i.getArgument(5);
 
-      if(withExtraInfoReq || withExtraInfoResp) {
+      if (withExtraInfoReq || withExtraInfoResp) {
+        Supplier<Map<String, Object>> requestExtraInfoRetriever = i.getArgument(4);
+        Function<Object, Map<String, Object>> responseExtraInfoExtractor = i.getArgument(5);
         return registryLoggerMock.execute(contextData, request, () -> requestHandler.apply(arg1, arg2, arg3), exceptionHandler, requestExtraInfoRetriever, responseExtraInfoExtractor);
       } else {
         return registryLoggerMock.execute(contextData, request, () -> requestHandler.apply(arg1, arg2, arg3), exceptionHandler);
       }
-    }).when(registryLoggerMock).execute3(
-      Mockito.eq(contextData),
-      Mockito.same(request),
-      Mockito.any(),
-      Mockito.any(),
-      Mockito.any(),
-      Mockito.any(),
-      Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3)
-    );
+    };
+
+    if (withExtraInfoReq || withExtraInfoResp) {
+      Mockito.doAnswer(answer).when(registryLoggerMock).execute3(
+        Mockito.eq(contextData),
+        Mockito.same(request),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3)
+      );
+    } else {
+      Mockito.doAnswer(answer).when(registryLoggerMock).execute3(
+        Mockito.eq(contextData),
+        Mockito.same(request),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3)
+      );
+    }
+  }
+
+  public static void configureRegistryLoggerMockExecute4(RegistryLogger registryLoggerMock, RegistryContextData contextData, Object request, boolean withExtraInfoReq, boolean withExtraInfoResp,
+                                                         Object arg1, Object arg2, Object arg3, Object arg4) {
+    configureRegistryLoggerMock(registryLoggerMock, contextData, request, withExtraInfoReq, withExtraInfoResp);
+
+    Answer<?> answer = i -> {
+      Function4<Object, Object, Object, Object, Triple<Object, String, RegistryOutcome>> requestHandler = i.getArgument(2);
+      Function<Exception, Object> exceptionHandler = i.getArgument(3);
+
+      if (withExtraInfoReq || withExtraInfoResp) {
+        Supplier<Map<String, Object>> requestExtraInfoRetriever = i.getArgument(4);
+        Function<Object, Map<String, Object>> responseExtraInfoExtractor = i.getArgument(5);
+        return registryLoggerMock.execute(contextData, request, () -> requestHandler.apply(arg1, arg2, arg3, arg4), exceptionHandler, requestExtraInfoRetriever, responseExtraInfoExtractor);
+      } else {
+        return registryLoggerMock.execute(contextData, request, () -> requestHandler.apply(arg1, arg2, arg3, arg4), exceptionHandler);
+      }
+    };
+
+    if (withExtraInfoReq || withExtraInfoResp) {
+      Mockito.doAnswer(answer).when(registryLoggerMock).execute4(
+        Mockito.eq(contextData),
+        Mockito.same(request),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3), Mockito.same(arg4)
+      );
+    } else {
+      Mockito.doAnswer(answer).when(registryLoggerMock).execute4(
+        Mockito.eq(contextData),
+        Mockito.same(request),
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.same(arg1), Mockito.same(arg2), Mockito.same(arg3), Mockito.same(arg4)
+      );
+    }
   }
 }

@@ -69,20 +69,21 @@ public class PaymentsReportingClient {
 
   public List<Payment> fetchAllPaymentsForPaymentReportingFlow(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId, Long revision, String pspId, SingleFlowResponse singleFlowResponse) {
     RegistryContextData contextData = buildRegistryContextData(brokerForNodoPaDTO, pspId);
-    return registryLogger.execute(
+    return registryLogger.execute4(
       contextData,
       nodoChiediFlussoRendicontazioneMapper.createFlussoRendicontazioneRequest(
         brokerForNodoPaDTO,
         reportingId
       ),
-      () -> fetchAllPaymentsRequestHandler(brokerForNodoPaDTO, reportingId, revision, pspId),
+      this::fetchAllPaymentsRequestHandler,
       null,
       null,
       paymentList -> registryBodyResponseRetriever(
         brokerForNodoPaDTO,
         singleFlowResponse,
         paymentList
-      )
+      ),
+      brokerForNodoPaDTO, reportingId, revision, pspId
     );
   }
 

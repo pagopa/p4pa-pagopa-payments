@@ -194,7 +194,7 @@ class PaymentsReportingClientTest {
       )
     ).thenReturn(NODO_CHIEDI_FLUSSO_RENDICONTAZIONE);
 
-    this.mockRegistryLogger();
+    this.mockRegistryLogger(brokerForNodoPaDTO);
 
     FlussoRiversamento paymentsReporting = new FlussoRiversamento();
     PaPaymentReportingDTO paPaymentReportingDTO = new PaPaymentReportingDTO();
@@ -241,13 +241,16 @@ class PaymentsReportingClientTest {
     );
   }
 
-  private void mockRegistryLogger() {
+  private void mockRegistryLogger(BrokerForNodoPaDTO brokerForNodoPaDTO) {
     RegistryContextData contextData = RegistryContextData.builder()
       .orgFiscalCode(ORGANIZATION_FISCAL_CODE)
       .pspId(PSP_ID)
       .eventType(RegistryEventType.NodeForPa_fetchPaymentReporting)
       .build();
-    RegistryLoggerTest.configureRegistryLoggerMock(registryLogger, contextData, NODO_CHIEDI_FLUSSO_RENDICONTAZIONE, false, true);
+    RegistryLoggerTest.configureRegistryLoggerMockExecute4(
+      registryLogger, contextData, NODO_CHIEDI_FLUSSO_RENDICONTAZIONE,
+      false, true,
+      brokerForNodoPaDTO, PAYMENTS_REPORTING_ID, REVISION, PSP_ID);
   }
 
 }

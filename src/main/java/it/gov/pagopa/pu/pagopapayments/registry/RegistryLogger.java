@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.registry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vavr.Function4;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
 import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
@@ -42,8 +43,7 @@ public class RegistryLogger {
   }
 
   public <I, O> O execute(
-    RegistryContextData contextData,
-    I request,
+    RegistryContextData contextData, I request,
     Supplier<Triple<O, String, RegistryOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler
   ) {
@@ -58,8 +58,7 @@ public class RegistryLogger {
   }
 
   public <I, O> O execute(
-    RegistryContextData contextData,
-    I request,
+    RegistryContextData contextData, I request,
     Supplier<Triple<O, String, RegistryOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler,
     Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
@@ -92,6 +91,19 @@ public class RegistryLogger {
       postExecute(contextData, registryBodyResponseExtraInfoExtractor, responseIuv, response, outcome, blException);
     }
     return response;
+  }
+
+//region executeX methods
+  public <I, O, A1> O execute1(
+    RegistryContextData contextData, I request,
+    Function<A1, Triple<O, String, RegistryOutcome>> requestHandler,
+    Function<Exception, O> exceptionHandler,
+    A1 arg1
+  ) {
+    return this.execute1(contextData, request, requestHandler, exceptionHandler,
+      null, null,
+      arg1
+    );
   }
 
   public <I, O, A1> O execute1(
@@ -132,16 +144,26 @@ public class RegistryLogger {
     return response;
   }
 
+  public <I, O, A1, A2> O execute2(
+    RegistryContextData contextData, I request,
+    BiFunction<A1, A2, Triple<O, String, RegistryOutcome>> requestHandler,
+    Function<Exception, O> exceptionHandler,
+    A1 arg1, A2 arg2
+  ) {
+    return this.execute2(contextData, request, requestHandler, exceptionHandler,
+      null, null,
+      arg1, arg2
+    );
+  }
+
   @SuppressWarnings("squid:S107") // suppressing too many parameters exception: method introduced to reduce object creation
   public <I, O, A1, A2> O execute2(
-    RegistryContextData contextData,
-    I request,
+    RegistryContextData contextData, I request,
     BiFunction<A1, A2, Triple<O, String, RegistryOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler,
     Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
     Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor,
-    A1 arg1,
-    A2 arg2
+    A1 arg1, A2 arg2
   ) {
     preExecute(contextData, request, registryBodyRequestExtraInfoRetriever);
 
@@ -172,17 +194,26 @@ public class RegistryLogger {
     return response;
   }
 
+  public <I, O, A1, A2, A3> O execute3(
+    RegistryContextData contextData, I request,
+    TriFunction<A1, A2, A3, Triple<O, String, RegistryOutcome>> requestHandler,
+    Function<Exception, O> exceptionHandler,
+    A1 arg1, A2 arg2, A3 arg3
+  ) {
+    return this.execute3(contextData, request, requestHandler, exceptionHandler,
+      null, null,
+      arg1, arg2, arg3
+    );
+  }
+
   @SuppressWarnings("squid:S107") // suppressing too many parameters exception: method introduced to reduce object creation
   public <I, O, A1, A2, A3> O execute3(
-    RegistryContextData contextData,
-    I request,
+    RegistryContextData contextData, I request,
     TriFunction<A1, A2, A3, Triple<O, String, RegistryOutcome>> requestHandler,
     Function<Exception, O> exceptionHandler,
     Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
     Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor,
-    A1 arg1,
-    A2 arg2,
-    A3 arg3
+    A1 arg1, A2 arg2, A3 arg3
   ) {
     preExecute(contextData, request, registryBodyRequestExtraInfoRetriever);
 
@@ -212,6 +243,58 @@ public class RegistryLogger {
     }
     return response;
   }
+
+  @SuppressWarnings("squid:S107") // suppressing too many parameters exception: method introduced to reduce object creation
+  public <I, O, A1, A2, A3, A4> O execute4(
+    RegistryContextData contextData, I request,
+    Function4<A1, A2, A3, A4, Triple<O, String, RegistryOutcome>> requestHandler,
+    Function<Exception, O> exceptionHandler,
+    A1 arg1, A2 arg2, A3 arg3, A4 arg4
+  ) {
+    return this.execute4(contextData, request, requestHandler, exceptionHandler,
+      null, null,
+      arg1, arg2, arg3, arg4
+    );
+  }
+
+  @SuppressWarnings("squid:S107") // suppressing too many parameters exception: method introduced to reduce object creation
+  public <I, O, A1, A2, A3, A4> O execute4(
+    RegistryContextData contextData, I request,
+    Function4<A1, A2, A3, A4, Triple<O, String, RegistryOutcome>> requestHandler,
+    Function<Exception, O> exceptionHandler,
+    Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor,
+    A1 arg1, A2 arg2, A3 arg3, A4 arg4
+  ) {
+    preExecute(contextData, request, registryBodyRequestExtraInfoRetriever);
+
+    O response = null;
+    String responseIuv = null;
+    RegistryOutcome outcome = RegistryOutcome.KO;
+    Exception blException = null;
+    try {
+      Triple<O, String, RegistryOutcome> response2outcome = requestHandler.apply(arg1, arg2, arg3, arg4);
+
+      response = response2outcome.getLeft();
+      responseIuv = response2outcome.getMiddle();
+      outcome = response2outcome.getRight();
+    } catch (Exception e) {
+      if (exceptionHandler == null) {
+        blException = e;
+        throw e;
+      }
+      try {
+        response = exceptionHandler.apply(e);
+      } catch (Exception e2) {
+        blException = e2;
+        throw e2;
+      }
+    } finally {
+      postExecute(contextData, registryBodyResponseExtraInfoExtractor, responseIuv, response, outcome, blException);
+    }
+    return response;
+  }
+//endregion
 
   <I> void preExecute(RegistryContextData contextData, I request, Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever) {
     produceReqRegistryEvent(

@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.*;
@@ -61,7 +62,7 @@ class AcaClientTest {
   @Test
   void createPosition_ShouldCallAcaApiClient() {
     PaymentPositionModel paymentPositionModel =
-      configureMocks(RegistryEventType.ACA_createPosition, null);
+      configureMocks3(RegistryEventType.ACA_createPosition, null, TEST_API_KEY, ORGANIZATION_FISCAL_CODE);
 
     acaClient.createPosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, paymentPositionModel);
 
@@ -72,7 +73,7 @@ class AcaClientTest {
   @Test
   void updatePosition_ShouldCallAcaApiClient() {
     PaymentPositionModel paymentPositionModel =
-      configureMocks(RegistryEventType.ACA_updatePosition, null);
+      configureMocks4(RegistryEventType.ACA_updatePosition, null, TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD);
 
     acaClient.updatePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 
@@ -83,7 +84,7 @@ class AcaClientTest {
   @Test
   void deletePosition_ShouldCallAcaApiClient() {
     PaymentPositionModel paymentPositionModel =
-      configureMocks(RegistryEventType.ACA_deletePosition, IUPD);
+      configureMocks4(RegistryEventType.ACA_deletePosition, IUPD, TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD);
 
     acaClient.deletePosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, IUPD, paymentPositionModel);
 
@@ -91,7 +92,35 @@ class AcaClientTest {
       .deletePosition(ORGANIZATION_FISCAL_CODE, IUPD, null);
   }
 
-  private PaymentPositionModel configureMocks(RegistryEventType registryEventType, Object request) {
+  private PaymentPositionModel configureMocks3(RegistryEventType registryEventType, Object request, Object arg1, Object arg2) {
+    return configureMocks(registryEventType, request,
+      (contextData, paymentPositionModel) ->
+        RegistryLoggerTest.configureRegistryLoggerMockExecute3(
+          registryLoggerMock,
+          contextData,
+          Objects.requireNonNullElse(request, paymentPositionModel),
+          false,
+          false,
+          arg1, arg2, paymentPositionModel
+        )
+      );
+  }
+
+  private PaymentPositionModel configureMocks4(RegistryEventType registryEventType, Object request, Object arg1, Object arg2, Object arg3) {
+    return configureMocks(registryEventType, request,
+      (contextData, paymentPositionModel) ->
+        RegistryLoggerTest.configureRegistryLoggerMockExecute4(
+          registryLoggerMock,
+          contextData,
+          Objects.requireNonNullElse(request, paymentPositionModel),
+          false,
+          false,
+          arg1, arg2, arg3, paymentPositionModel
+        )
+    );
+  }
+
+  private PaymentPositionModel configureMocks(RegistryEventType registryEventType, Object request, BiConsumer<RegistryContextData, PaymentPositionModel> mockConfigurer) {
     PaymentPositionModel paymentPositionModel = podamFactory.manufacturePojo(PaymentPositionModel.class);
 
     when(acaApisHolderMock.getApiClientByApiKey(TEST_API_KEY))
@@ -111,13 +140,7 @@ class AcaClientTest {
       .iuv(expectedIuvConcat)
       .build();
 
-    RegistryLoggerTest.configureRegistryLoggerMock(
-      registryLoggerMock,
-      contextData,
-      Objects.requireNonNullElse(request, paymentPositionModel),
-      false,
-      false
-    );
+    mockConfigurer.accept(contextData, paymentPositionModel);
 
     return paymentPositionModel;
   }

@@ -59,7 +59,7 @@ class GpdClientTest {
 
   @Test
   void createPosition_ShouldCallGpdApiClient() {
-    PaymentPositionModelV3 paymentPositionModel = configureMocks(RegistryEventType.GPD_createPosition, null);
+    PaymentPositionModelV3 paymentPositionModel = configureMocks3(RegistryEventType.GPD_createPosition, null, TEST_API_KEY, ORGANIZATION_FISCAL_CODE);
 
     gpdClient.createPosition(TEST_API_KEY, ORGANIZATION_FISCAL_CODE, paymentPositionModel);
 
@@ -99,6 +99,24 @@ class GpdClientTest {
           .collect(Collectors.joining(Utilities.IUV_SEPARATOR)))
       .build();
     RegistryLoggerTest.configureRegistryLoggerMock(registryLoggerMock, contextData, Objects.requireNonNullElse(request, paymentPositionModel), false, false);
+
+    return paymentPositionModel;
+  }
+  private PaymentPositionModelV3 configureMocks3(RegistryEventType registryEventType, Object request, Object arg1, Object arg2) {
+    PaymentPositionModelV3 paymentPositionModel = podamFactory.manufacturePojo(PaymentPositionModelV3.class);
+
+    when(gpdApisHolderMock.getApiClientByApiKey(TEST_API_KEY)).thenReturn(debtPositionsApiMock);
+
+    RegistryContextData contextData = RegistryContextData.builder()
+      .orgFiscalCode(ORGANIZATION_FISCAL_CODE)
+      .eventType(registryEventType)
+      .iuv(
+        paymentPositionModel.getPaymentOption().stream()
+          .flatMap(po -> po.getInstallments().stream())
+          .map(InstallmentModel::getIuv)
+          .collect(Collectors.joining(Utilities.IUV_SEPARATOR)))
+      .build();
+    RegistryLoggerTest.configureRegistryLoggerMockExecute3(registryLoggerMock, contextData, Objects.requireNonNullElse(request, paymentPositionModel), false, false, arg1, arg2, paymentPositionModel);
 
     return paymentPositionModel;
   }

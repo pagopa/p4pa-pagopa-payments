@@ -9,6 +9,7 @@ import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import jakarta.xml.bind.annotation.XmlType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientResponseException;
@@ -16,6 +17,7 @@ import org.springframework.web.client.RestClientResponseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -63,15 +65,11 @@ public class RegistryLogger {
     Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
     Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor
   ) {
-    produceReqRegistryEvent(
-      contextData,
-      request,
-      registryBodyRequestExtraInfoRetriever
-    );
+    preExecute(contextData, request, registryBodyRequestExtraInfoRetriever);
+
     O response = null;
     String responseIuv = null;
     RegistryOutcome outcome = RegistryOutcome.KO;
-
     Exception blException = null;
     try {
       Triple<O, String, RegistryOutcome> response2outcome = requestHandler.get();
@@ -91,16 +89,147 @@ public class RegistryLogger {
         throw e2;
       }
     } finally {
-      contextData.setIuv(StringUtils.firstNonBlank(responseIuv, contextData.getIuv()));
-      produceRespRegistryEvent(
-        contextData,
-        response,
-        outcome,
-        registryBodyResponseExtraInfoExtractor,
-        blException
-      );
+      postExecute(contextData, registryBodyResponseExtraInfoExtractor, responseIuv, response, outcome, blException);
     }
     return response;
+  }
+
+  public <I, O, A1> O execute1(
+    RegistryContextData contextData,
+    I request,
+    Function<A1, Triple<O, String, RegistryOutcome>> requestHandler,
+    Function<Exception, O> exceptionHandler,
+    Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor,
+    A1 arg1
+  ) {
+    preExecute(contextData, request, registryBodyRequestExtraInfoRetriever);
+
+    O response = null;
+    String responseIuv = null;
+    RegistryOutcome outcome = RegistryOutcome.KO;
+    Exception blException = null;
+    try {
+      Triple<O, String, RegistryOutcome> response2outcome = requestHandler.apply(arg1);
+
+      response = response2outcome.getLeft();
+      responseIuv = response2outcome.getMiddle();
+      outcome = response2outcome.getRight();
+    } catch (Exception e) {
+      if (exceptionHandler == null) {
+        blException = e;
+        throw e;
+      }
+      try {
+        response = exceptionHandler.apply(e);
+      } catch (Exception e2) {
+        blException = e2;
+        throw e2;
+      }
+    } finally {
+      postExecute(contextData, registryBodyResponseExtraInfoExtractor, responseIuv, response, outcome, blException);
+    }
+    return response;
+  }
+
+  @SuppressWarnings("squid:S107") // suppressing too many parameters exception: method introduced to reduce object creation
+  public <I, O, A1, A2> O execute2(
+    RegistryContextData contextData,
+    I request,
+    BiFunction<A1, A2, Triple<O, String, RegistryOutcome>> requestHandler,
+    Function<Exception, O> exceptionHandler,
+    Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor,
+    A1 arg1,
+    A2 arg2
+  ) {
+    preExecute(contextData, request, registryBodyRequestExtraInfoRetriever);
+
+    O response = null;
+    String responseIuv = null;
+    RegistryOutcome outcome = RegistryOutcome.KO;
+    Exception blException = null;
+    try {
+      Triple<O, String, RegistryOutcome> response2outcome = requestHandler.apply(arg1, arg2);
+
+      response = response2outcome.getLeft();
+      responseIuv = response2outcome.getMiddle();
+      outcome = response2outcome.getRight();
+    } catch (Exception e) {
+      if (exceptionHandler == null) {
+        blException = e;
+        throw e;
+      }
+      try {
+        response = exceptionHandler.apply(e);
+      } catch (Exception e2) {
+        blException = e2;
+        throw e2;
+      }
+    } finally {
+      postExecute(contextData, registryBodyResponseExtraInfoExtractor, responseIuv, response, outcome, blException);
+    }
+    return response;
+  }
+
+  @SuppressWarnings("squid:S107") // suppressing too many parameters exception: method introduced to reduce object creation
+  public <I, O, A1, A2, A3> O execute3(
+    RegistryContextData contextData,
+    I request,
+    TriFunction<A1, A2, A3, Triple<O, String, RegistryOutcome>> requestHandler,
+    Function<Exception, O> exceptionHandler,
+    Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever,
+    Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor,
+    A1 arg1,
+    A2 arg2,
+    A3 arg3
+  ) {
+    preExecute(contextData, request, registryBodyRequestExtraInfoRetriever);
+
+    O response = null;
+    String responseIuv = null;
+    RegistryOutcome outcome = RegistryOutcome.KO;
+    Exception blException = null;
+    try {
+      Triple<O, String, RegistryOutcome> response2outcome = requestHandler.apply(arg1, arg2, arg3);
+
+      response = response2outcome.getLeft();
+      responseIuv = response2outcome.getMiddle();
+      outcome = response2outcome.getRight();
+    } catch (Exception e) {
+      if (exceptionHandler == null) {
+        blException = e;
+        throw e;
+      }
+      try {
+        response = exceptionHandler.apply(e);
+      } catch (Exception e2) {
+        blException = e2;
+        throw e2;
+      }
+    } finally {
+      postExecute(contextData, registryBodyResponseExtraInfoExtractor, responseIuv, response, outcome, blException);
+    }
+    return response;
+  }
+
+  <I> void preExecute(RegistryContextData contextData, I request, Supplier<Map<String, Object>> registryBodyRequestExtraInfoRetriever) {
+    produceReqRegistryEvent(
+      contextData,
+      request,
+      registryBodyRequestExtraInfoRetriever
+    );
+  }
+
+  <O> void postExecute(RegistryContextData contextData, Function<O, Map<String, Object>> registryBodyResponseExtraInfoExtractor, String responseIuv, O response, RegistryOutcome outcome, Exception blException) {
+    contextData.setIuv(StringUtils.firstNonBlank(responseIuv, contextData.getIuv()));
+    produceRespRegistryEvent(
+      contextData,
+      response,
+      outcome,
+      registryBodyResponseExtraInfoExtractor,
+      blException
+    );
   }
 
   private <I> void produceReqRegistryEvent(

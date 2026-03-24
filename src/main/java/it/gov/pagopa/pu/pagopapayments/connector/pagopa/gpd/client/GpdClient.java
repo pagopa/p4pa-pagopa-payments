@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.Objects;
@@ -18,25 +19,30 @@ public class GpdClient {
   private final GpdApisHolder apisHolder;
   private final RegistryLogger registryLogger;
 
+  private final TriFunction<String, String, PaymentPositionModelV3, Triple<PaymentPositionModelV3, String, RegistryOutcome>> createPositionHandler;
+
   public GpdClient(GpdApisHolder apisHolder, RegistryLogger registryLogger) {
     this.apisHolder = apisHolder;
     this.registryLogger = registryLogger;
+
+    this.createPositionHandler = (apiKey, orgFiscalCode, paymentPositionModel) -> {
+      PaymentPositionModelV3 response = apisHolder.getApiClientByApiKey(apiKey)
+        .createPosition(orgFiscalCode, true, null, paymentPositionModel);
+      return Triple.of(response, null, RegistryOutcome.OK);
+    };
   }
 
   public void createPosition(String apiKey, String orgFiscalCode, PaymentPositionModelV3 paymentPositionModel) {
-    registryLogger.execute(
+    registryLogger.execute3(
       getRegistryContextDataFromPaymentPositionModel(
         orgFiscalCode,
         RegistryEventType.GPD_createPosition,
         paymentPositionModel
       ),
       paymentPositionModel,
-      () -> {
-        PaymentPositionModelV3 response = apisHolder.getApiClientByApiKey(apiKey)
-          .createPosition(orgFiscalCode, true, null, paymentPositionModel);
-        return Triple.of(response, null, RegistryOutcome.OK);
-      },
-      null
+      createPositionHandler,
+      null, null, null,
+      apiKey, orgFiscalCode, paymentPositionModel
     );
   }
 

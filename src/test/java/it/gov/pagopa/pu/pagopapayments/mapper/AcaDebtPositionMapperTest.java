@@ -2,7 +2,6 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
@@ -19,6 +18,7 @@ import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.common.AttributeStrategy;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +30,7 @@ class AcaDebtPositionMapperTest {
   private final PodamFactory podamFactory;
 
   private DebtPositionDTO debtPosition;
-  private Organization organization;
+  private static final String ORG_NAME = "orgName";
 
   AcaDebtPositionMapperTest() {
     podamFactory = TestUtils.getPodamFactory();
@@ -51,8 +51,6 @@ class AcaDebtPositionMapperTest {
         installment.setDueDate(LocalDate.now().plusDays(10));
         installment.getTransfers().forEach(transfer ->
           transfer.setTransferIndex(1));
-
-        organization = podamFactory.manufacturePojo(Organization.class);
       }));
   }
 
@@ -63,7 +61,9 @@ class AcaDebtPositionMapperTest {
       .syncStatusFrom(syncStatusFrom)
       .syncStatusTo(syncStatusTo)
       .build());
-    installmentDTO.setTransfers(List.of(installmentDTO.getTransfers().getFirst()));
+    List<TransferDTO> transfers = new ArrayList<>();
+    transfers.add(installmentDTO.getTransfers().getFirst());
+    installmentDTO.setTransfers(transfers);
     return installmentDTO;
   }
 
@@ -71,9 +71,12 @@ class AcaDebtPositionMapperTest {
   void givenValidDebtPositionExpiringWhenMapToPaymentPositionModelThenOk() {
     //given
     InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID);
+    TransferDTO transferAmountZero = podamFactory.manufacturePojo(TransferDTO.class);
+    transferAmountZero.setAmountCents(0L);
+    toSync.getTransfers().add(transferAmountZero);
 
     //when
-    Pair<Operation, PaymentPositionModel> response = acaDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
+    Pair<Operation, PaymentPositionModel> response = acaDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, ORG_NAME);
 
     //verify
     Assertions.assertNotNull(response);
@@ -102,7 +105,7 @@ class AcaDebtPositionMapperTest {
 
     toSyncList.forEach(pair -> {
       //when
-      Pair<Operation, PaymentPositionModel> response = acaDebtPositionMapper.mapToNewPaymentPositionModel(pair.getLeft().getIud(), debtPosition, organization);
+      Pair<Operation, PaymentPositionModel> response = acaDebtPositionMapper.mapToNewPaymentPositionModel(pair.getLeft().getIud(), debtPosition, ORG_NAME);
 
       Assertions.assertNotNull(response);
       PaymentPositionModel paymentPositionModel = response.getRight();
@@ -123,7 +126,7 @@ class AcaDebtPositionMapperTest {
 
     //when
     String iud = installment.getIud();
-    InvalidValueException response = Assertions.assertThrows(InvalidValueException.class, () -> acaDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, organization));
+    InvalidValueException response = Assertions.assertThrows(InvalidValueException.class, () -> acaDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, ORG_NAME));
 
     //verify
     Assertions.assertNotNull(response);
@@ -135,9 +138,8 @@ class AcaDebtPositionMapperTest {
   void givenFineWithStatusUnpayableWhenMapToPaymentPositionModelThenOk() {
     //given
     InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.UNPAYABLE, InstallmentStatus.UNPAID);
-
     //when
-    Pair<Operation, PaymentPositionModel> response = acaDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
+    Pair<Operation, PaymentPositionModel> response = acaDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, ORG_NAME);
 
     //verify
     Assertions.assertNotNull(response);
@@ -153,7 +155,7 @@ class AcaDebtPositionMapperTest {
   @Test
   void givenInstallmentToSyncWithNullSyncStatusWhenMapToPaymentPositionModelThenException() {
     //given
-    InstallmentDTO installment = debtPosition.getPaymentOptions().get(0).getInstallments().get(0);
+    InstallmentDTO installment = debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst();
     installment.setStatus(InstallmentStatus.TO_SYNC);
     installment.setSyncStatus(null);
 
@@ -162,7 +164,7 @@ class AcaDebtPositionMapperTest {
     //when
     InvalidValueException ex = Assertions.assertThrows(
       InvalidValueException.class,
-      () -> acaDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, organization)
+      () -> acaDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, ORG_NAME)
     );
 
     //verify

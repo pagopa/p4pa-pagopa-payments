@@ -1,9 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.*;
 import it.gov.pagopa.nodo.gpd.dto.generated.Stamp;
+import it.gov.pagopa.nodo.gpd.dto.generated.*;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
@@ -28,7 +27,7 @@ public class GpdDebtPositionMapper {
     Set.of(InstallmentStatus.DRAFT, InstallmentStatus.UNPAYABLE);
 
 
-  public Pair<Operation, PaymentPositionModelV3> mapToNewPaymentPositionModel(String iud, DebtPositionDTO debtPosition, Organization org) {
+  public Pair<Operation, PaymentPositionModelV3> mapToNewPaymentPositionModel(String iud, DebtPositionDTO debtPosition, String orgName) {
     return debtPosition.getPaymentOptions().stream()
       .flatMap(paymentOption -> paymentOption.getInstallments().stream())
       .filter(installment -> iud.equals(installment.getIud()))
@@ -38,7 +37,7 @@ public class GpdDebtPositionMapper {
 
         PaymentPositionModelV3 model = new PaymentPositionModelV3()
           .iupd(installment.getIupdPagopa())
-          .companyName(org.getOrgName())
+          .companyName(orgName)
           .paymentOption(List.of(getPaymentOption(installment, debtPosition)));
 
         return Pair.of(operation, model);
@@ -106,6 +105,7 @@ public class GpdDebtPositionMapper {
       )
       .transfer(
         installment.getTransfers().stream()
+          .filter(transferDTO -> transferDTO.getAmountCents() != 0)
           .map(this::getTransfer)
           .toList()
       );

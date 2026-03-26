@@ -4,7 +4,6 @@ import it.gov.pagopa.nodo.gpd.dto.generated.InstallmentModel;
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentOptionModelV3;
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
@@ -21,6 +20,7 @@ import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.common.AttributeStrategy;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,7 +32,7 @@ class GpdDebtPositionMapperTest {
   private final PodamFactory podamFactory;
 
   private DebtPositionDTO debtPosition;
-  private Organization organization;
+  private static final String ORG_NAME = "orgName";
 
   GpdDebtPositionMapperTest() {
     podamFactory = TestUtils.getPodamFactory();
@@ -52,8 +52,6 @@ class GpdDebtPositionMapperTest {
         installment.setDueDate(LocalDate.now().plusDays(10));
         installment.getTransfers().forEach(transfer -> transfer.setTransferIndex(1));
       }));
-
-    organization = podamFactory.manufacturePojo(Organization.class);
   }
 
   private InstallmentDTO setSyncStatus(DebtPositionDTO debtPosition, int indexPaymentOption, int indexInstallment, InstallmentStatus syncStatusFrom, InstallmentStatus syncStatusTo) {
@@ -63,7 +61,9 @@ class GpdDebtPositionMapperTest {
       .syncStatusFrom(syncStatusFrom)
       .syncStatusTo(syncStatusTo)
       .build());
-    installmentDTO.setTransfers(List.of(installmentDTO.getTransfers().getFirst()));
+    List<TransferDTO> transfers = new ArrayList<>();
+    transfers.add(installmentDTO.getTransfers().getFirst());
+    installmentDTO.setTransfers(transfers);
     return installmentDTO;
   }
 
@@ -71,9 +71,12 @@ class GpdDebtPositionMapperTest {
   void givenValidDebtPositionExpiringWhenMapToPaymentPositionModelThenOk() {
     //given
     InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.DRAFT, InstallmentStatus.UNPAID);
+    TransferDTO transferAmountZero = podamFactory.manufacturePojo(TransferDTO.class);
+    transferAmountZero.setAmountCents(0L);
+    toSync.getTransfers().add(transferAmountZero);
 
     //when
-    Pair<Operation, PaymentPositionModelV3> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
+    Pair<Operation, PaymentPositionModelV3> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, ORG_NAME);
 
     //verify
     Assertions.assertNotNull(response);
@@ -82,7 +85,7 @@ class GpdDebtPositionMapperTest {
     PaymentPositionModelV3 paymentPositionModel = response.getRight();
     Assertions.assertNotNull(paymentPositionModel);
     Assertions.assertEquals(toSync.getIupdPagopa(), paymentPositionModel.getIupd());
-    Assertions.assertEquals(organization.getOrgName(), paymentPositionModel.getCompanyName());
+    Assertions.assertEquals(ORG_NAME, paymentPositionModel.getCompanyName());
     Assertions.assertFalse(paymentPositionModel.getPaymentOption().isEmpty());
 
     PaymentOptionModelV3 paymentOption = paymentPositionModel.getPaymentOption().getFirst();
@@ -110,7 +113,7 @@ class GpdDebtPositionMapperTest {
     toSyncList.forEach(pair -> {
       Pair<Operation, PaymentPositionModelV3> response =
         gpdDebtPositionMapper.mapToNewPaymentPositionModel(
-          pair.getLeft().getIud(), debtPosition, organization
+          pair.getLeft().getIud(), debtPosition, ORG_NAME
         );
 
       Assertions.assertNotNull(response);
@@ -138,7 +141,7 @@ class GpdDebtPositionMapperTest {
 
     //when
     String iud = installment.getIud();
-    InvalidValueException response = Assertions.assertThrows(InvalidValueException.class, () -> gpdDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, organization));
+    InvalidValueException response = Assertions.assertThrows(InvalidValueException.class, () -> gpdDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, ORG_NAME));
 
     //verify
     Assertions.assertNotNull(response);
@@ -152,7 +155,7 @@ class GpdDebtPositionMapperTest {
     InstallmentDTO toSync = setSyncStatus(debtPosition, 0, 0, InstallmentStatus.UNPAYABLE, InstallmentStatus.UNPAID);
 
     //when
-    Pair<Operation, PaymentPositionModelV3> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, organization);
+    Pair<Operation, PaymentPositionModelV3> response = gpdDebtPositionMapper.mapToNewPaymentPositionModel(toSync.getIud(), debtPosition, ORG_NAME);
 
     //verify
     Assertions.assertNotNull(response);
@@ -178,7 +181,7 @@ class GpdDebtPositionMapperTest {
     //when
     InvalidValueException ex = Assertions.assertThrows(
       InvalidValueException.class,
-      () -> gpdDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, organization)
+      () -> gpdDebtPositionMapper.mapToNewPaymentPositionModel(iud, debtPosition, ORG_NAME)
     );
 
     //verify

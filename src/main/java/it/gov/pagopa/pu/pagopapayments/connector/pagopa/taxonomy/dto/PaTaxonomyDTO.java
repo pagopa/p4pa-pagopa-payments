@@ -1,13 +1,17 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.dto;
 
-import java.io.Serializable;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.gov.pagopa.pu.pagopapayments.config.json.DateDeserializer;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
+
+import java.io.Serializable;
+import java.util.Date;
 
 @Data
 @SuperBuilder
@@ -42,10 +46,10 @@ public class PaTaxonomyDTO implements Serializable {
   @JsonProperty("DATI SPECIFICI INCASSO")
   private String datiSpecificiIncasso;
   @JsonProperty("DATA INIZIO VALIDITA")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+  @JsonDeserialize(using = DateDeserializer.class)
   private Date dataInizioValidita;
   @JsonProperty("DATA FINE VALIDITA")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+  @JsonDeserialize(using = DateDeserializer.class)
   private Date dataFineValidita;
 
 }

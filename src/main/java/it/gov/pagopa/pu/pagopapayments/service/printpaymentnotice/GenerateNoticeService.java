@@ -57,10 +57,10 @@ public class GenerateNoticeService {
     NoticeGenerationMassiveResourceDTO response;
     NoticeGenerationMassiveRequestDTO requestMassive;
 
-    if (CollectionUtils.isEmpty(request.getIuvList())) {
+    if (CollectionUtils.isEmpty(request.getNavList())) {
       requestMassive = generateMassiveFromToSync(org, request.getDebtPositions());
     } else {
-      requestMassive = generateMassiveFromIuvList(org, request.getDebtPositions(), request.getIuvList());
+      requestMassive = generateMassiveFromNavList(org, request.getDebtPositions(), request.getNavList());
     }
     log.info("calling generateNoticeMassive with organizationId[{}] and a list with [{}] notices", org.getOrganizationId(), requestMassive.getNotices().size());
 
@@ -114,9 +114,9 @@ public class GenerateNoticeService {
     return generateMassiveGeneric(org, debtPositions, inst -> Objects.equals(inst.getStatus(), InstallmentStatus.TO_SYNC));
   }
 
-  public NoticeGenerationMassiveRequestDTO generateMassiveFromIuvList(Organization org, List<DebtPositionDTO> debtPositions, List<String> iuvList) {
-    log.info("Generate massive notice from Iuv list given in input [{}]", iuvList);
-    return generateMassiveGeneric(org, debtPositions, inst -> iuvList.contains(inst.getIuv()));
+  public NoticeGenerationMassiveRequestDTO generateMassiveFromNavList(Organization org, List<DebtPositionDTO> debtPositions, List<String> navList) {
+    log.info("Generate massive notice from Nav list given in input [{}]", navList);
+    return generateMassiveGeneric(org, debtPositions, inst -> navList.contains(inst.getNav()));
   }
 
   private NoticeGenerationMassiveRequestDTO generateMassiveGeneric(Organization org, List<DebtPositionDTO> debtPositions, Predicate<InstallmentDTO> filter) {

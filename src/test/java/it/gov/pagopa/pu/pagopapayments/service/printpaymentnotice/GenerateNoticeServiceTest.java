@@ -222,11 +222,11 @@ class GenerateNoticeServiceTest {
   }
 
   @Test
-  void givenValidRequestWithoutIuvListWhenGenerateNoticeMassiveThenOk() {
+  void givenValidRequestWithoutNavListWhenGenerateNoticeMassiveThenOk() {
     //given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     NoticeRequestMassiveDTO request = podamFactory.manufacturePojo(NoticeRequestMassiveDTO.class);
-    request.setIuvList(null);
+    request.setNavList(null);
 
     NoticeGenerationMassiveResourceDTO resourceDTO = podamFactory.manufacturePojo(NoticeGenerationMassiveResourceDTO.class);
 
@@ -273,21 +273,19 @@ class GenerateNoticeServiceTest {
   }
 
   @Test
-  void givenValidRequestWithIuvListWhenGenerateNoticeMassiveThenOk() {
+  void givenValidRequestWithNavListWhenGenerateNoticeMassiveThenOk() {
     //given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     NoticeRequestMassiveDTO request = podamFactory.manufacturePojo(NoticeRequestMassiveDTO.class);
-    request.setIuvList(List.of(TEST_NAV, "IUV456"));
+    request.setNavList(List.of(TEST_NAV, "NAV456"));
 
     NoticeGenerationMassiveResourceDTO resourceDTO = podamFactory.manufacturePojo(NoticeGenerationMassiveResourceDTO.class);
 
     NoticeGenerationMassiveRequestDTO requestMassive = new NoticeGenerationMassiveRequestDTO();
 
     InstallmentDTO installment = podamFactory.manufacturePojo(InstallmentDTO.class);
-    installment.setIuv(TEST_NAV);
-    installment.setNav("3" + TEST_NAV);
+    installment.setNav(TEST_NAV);
     InstallmentDTO secondInstallment = podamFactory.manufacturePojo(InstallmentDTO.class);
-    secondInstallment.setIuv("IUVVV");
     secondInstallment.setNav("150" + TEST_NAV);
 
     PaymentOptionDTO paymentOption = podamFactory.manufacturePojo(PaymentOptionDTO.class);
@@ -319,7 +317,7 @@ class GenerateNoticeServiceTest {
 
     //then
     assertEquals(1, requestMassive.getNotices().size());
-    assertEquals("3" + TEST_NAV, requestMassive.getNotices().getFirst().getData().getNotice().getCode());
+    assertEquals(TEST_NAV, requestMassive.getNotices().getFirst().getData().getNotice().getCode());
     assertNotNull(result);
   }
 

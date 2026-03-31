@@ -33,6 +33,7 @@ import static com.nimbusds.jose.JOSEObjectType.JWT;
 public class WebSecurityConfig {
 
   public static final String SOAP_WS_BASE_PATH = "/soap";
+  public static final String ORG_FOR_NODE_BASE_PATH = "/org-for-node";
 
   @Bean
   public JwtDecoder jwtDecoder(
@@ -92,6 +93,11 @@ public class WebSecurityConfig {
         // WsSoap
         .requestMatchers(
           SOAP_WS_BASE_PATH+"/**"
+        ).permitAll()
+
+        // Org for node public APIs
+        .requestMatchers(
+          ORG_FOR_NODE_BASE_PATH + "/**"
         ).permitAll()
 
         .anyRequest().authenticated()

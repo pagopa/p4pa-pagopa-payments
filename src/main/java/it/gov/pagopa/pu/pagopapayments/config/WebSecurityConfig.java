@@ -33,6 +33,7 @@ import static com.nimbusds.jose.JOSEObjectType.JWT;
 public class WebSecurityConfig {
 
   public static final String SOAP_WS_BASE_PATH = "/soap";
+  public static final String ORG_FOR_NODE_BASE_PATH = "/org-for-node";
 
   @Bean
   public JwtDecoder jwtDecoder(
@@ -89,9 +90,10 @@ public class WebSecurityConfig {
           "/favicon.ico", "/error"
         ).permitAll()
 
-        // WsSoap
+        // mTLS endpoints (auth by infra)
         .requestMatchers(
-          SOAP_WS_BASE_PATH+"/**"
+          SOAP_WS_BASE_PATH + "/**",
+          ORG_FOR_NODE_BASE_PATH + "/**"
         ).permitAll()
 
         .anyRequest().authenticated()

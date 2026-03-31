@@ -90,13 +90,9 @@ public class WebSecurityConfig {
           "/favicon.ico", "/error"
         ).permitAll()
 
-        // WsSoap
+        // mTLS endpoints (auth by infra)
         .requestMatchers(
-          SOAP_WS_BASE_PATH+"/**"
-        ).permitAll()
-
-        // Org for node public APIs
-        .requestMatchers(
+          SOAP_WS_BASE_PATH + "/**",
           ORG_FOR_NODE_BASE_PATH + "/**"
         ).permitAll()
 

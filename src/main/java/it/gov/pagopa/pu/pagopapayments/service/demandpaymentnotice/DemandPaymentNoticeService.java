@@ -75,7 +75,7 @@ public class DemandPaymentNoticeService {
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_SYSTEM_ERROR, "Synchronization error for debt position");
     }
 
-    log.info("Workflow completed for debt position [{}] with workflowId: [{}] with result: [{}]",
+    log.debug("Workflow completed for debt position [{}] with workflowId: [{}] with result: [{}]",
       dp.getDebtPositionId(), workflowId, result);
 
     return dp;

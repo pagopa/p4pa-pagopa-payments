@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import it.gov.pagopa.pu.pagopapayments.util.DebtPositionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,7 +21,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper.resolveOrganizationInfo;
 
 public class PaGetPaymentMapper {
 
@@ -48,7 +48,7 @@ public class PaGetPaymentMapper {
 
     List<TransferDTO> transfers = Optional.ofNullable(installmentDTO.getTransfers()).orElse(List.of());
 
-    Pair<String, String> orgInfo  = resolveOrganizationInfo(organization, broker, transfers);
+    Pair<String, String> orgInfo  = DebtPositionUtils.resolveOrganizationInfo(organization, broker, transfers);
     payment.setCompanyName(orgInfo.getRight());
     payment.setOfficeName(null);
     payment.setPaymentAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getAmountCents()));

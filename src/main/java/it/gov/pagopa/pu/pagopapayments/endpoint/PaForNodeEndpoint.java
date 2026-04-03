@@ -12,6 +12,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaDemandPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
@@ -68,10 +69,9 @@ public class PaForNodeEndpoint {
       request,
       () -> {
         log.info("processing paDemandPaymentNotice idPA[{}] servizio[{}/{}]", request.getIdPA(), request.getIdSoggettoServizio(), request.getIdServizio());
-        DebtPositionDTO debtPositionDTO = demandPaymentNoticeService.handleRequest(request);
-        PaDemandPaymentNoticeResponse resp = new PaDemandPaymentNoticeResponse();
-        resp.setOutcome(StOutcome.OK);
-        resp.setPaymentDescription(debtPositionDTO.getDescription());
+        Triple<DebtPositionDTO, Organization, Broker> response = demandPaymentNoticeService.handleRequest(request);
+        DebtPositionDTO debtPositionDTO = response.getLeft();
+        PaDemandPaymentNoticeResponse resp = PaDemandPaymentNoticeMapper.debtPositionDto2PaVerifyPaymentNoticeRes(debtPositionDTO,response.getMiddle(),response.getRight());
         return Triple.of(resp,
           debtPositionDTO.getPaymentOptions().stream()
             .flatMap(option -> option.getInstallments().stream())

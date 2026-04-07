@@ -26,9 +26,9 @@ import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -52,10 +52,23 @@ class PaForNodeEndpointTest {
   @Mock
   private DemandPaymentNoticeService demandPaymentNoticeServiceMock;
 
-  @InjectMocks
+  private static final String AUX_DIGIT = "3";
+
   private PaForNodeEndpoint paForNodeEndpoint;
 
   private final PodamFactory podamFactory = TestUtils.getPodamFactory();
+
+  @BeforeEach
+  void setUp() {
+    paForNodeEndpoint = new PaForNodeEndpoint(
+      synchronousPaymentServiceMock,
+      receiptServiceMock,
+      paSendRTMapperMock,
+      registryLoggerMock,
+      demandPaymentNoticeServiceMock,
+      AUX_DIGIT
+    );
+  }
 
   @AfterEach
   void verifyNoMoreInteractions() {
@@ -464,7 +477,7 @@ class PaForNodeEndpointTest {
       .paymentMethod(request.getReceipt().getPaymentMethod())
       .ccp(request.getReceipt().getReceiptId())
       .eventType(RegistryEventType.PaForNode_paSendRTV2)
-      .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()))
+      .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber(), AUX_DIGIT))
       .build();
 
     configureRegistryLoggerMock(expectedContextData, request);

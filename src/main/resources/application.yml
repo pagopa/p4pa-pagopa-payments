@@ -232,3 +232,6 @@ cache:
 
 cie:
   service-id: "\${CIE_SERVICE_ID:99}"
+
+nav:
+  aux-digit: "\${NAV_AUX_DIGIT:3}"

@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class UtilitiesTest {
 
+  private static final String AUX_DIGIT = "3";
+
   @Test
   void testGetTraceId(){
     // Given
@@ -37,7 +39,7 @@ public class UtilitiesTest {
     String expectedResult = StringUtils.isBlank(iuv) ? null : ("IUV".equals(iuv) ? "3IUV" : "3IUV1,3IUV2,3IUV3");
 
     // When
-    String result = Utilities.iuv2Nav(iuv);
+    String result = Utilities.iuv2Nav(iuv, AUX_DIGIT);
 
     // Then
     Assertions.assertEquals(expectedResult, result);
@@ -51,7 +53,7 @@ public class UtilitiesTest {
     String expectedResult = StringUtils.isBlank(nav) ? null : ("3NAV".equals(nav) ? "NAV" : "NAV1,NAV2,NAV3");
 
     // When
-    String result = Utilities.nav2Iuv(nav);
+    String result = Utilities.nav2Iuv(nav, AUX_DIGIT);
 
     // Then
     Assertions.assertEquals(expectedResult, result);
@@ -63,7 +65,7 @@ public class UtilitiesTest {
     String nav = "INVALID_NAV";
 
     // When
-    IllegalArgumentException result = Assertions.assertThrows(IllegalArgumentException.class,()->Utilities.nav2Iuv(nav));
+    IllegalArgumentException result = Assertions.assertThrows(IllegalArgumentException.class,()->Utilities.nav2Iuv(nav, AUX_DIGIT));
 
     // Then
     Assertions.assertTrue(result.getMessage().startsWith("Invalid NAV format: "));

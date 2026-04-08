@@ -41,7 +41,7 @@ public abstract class BaseSyncOperationService<M> {
     M model = mapped.getRight();
     Operation operation = mapped.getLeft();
 
-    log.info("invoking {} with operation [{}] for installment[{}/{}]",
+    log.debug("invoking {} with operation [{}] for installment[{}/{}]",
       getServiceName(), operation.name(), extractIuv(model), iud);
 
     String apiKey = getApiKey(brokerForNodoPaDTO.getBrokerApiKeys());

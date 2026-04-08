@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaDemandPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
@@ -25,9 +26,9 @@ import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -51,10 +52,23 @@ class PaForNodeEndpointTest {
   @Mock
   private DemandPaymentNoticeService demandPaymentNoticeServiceMock;
 
-  @InjectMocks
+  private static final String AUX_DIGIT = "3";
+
   private PaForNodeEndpoint paForNodeEndpoint;
 
   private final PodamFactory podamFactory = TestUtils.getPodamFactory();
+
+  @BeforeEach
+  void setUp() {
+    paForNodeEndpoint = new PaForNodeEndpoint(
+      synchronousPaymentServiceMock,
+      receiptServiceMock,
+      paSendRTMapperMock,
+      registryLoggerMock,
+      demandPaymentNoticeServiceMock,
+      AUX_DIGIT
+    );
+  }
 
   @AfterEach
   void verifyNoMoreInteractions() {
@@ -73,29 +87,34 @@ class PaForNodeEndpointTest {
   //region paDemandPaymentNotice
   @Test
   void givenValidRequestWhenPaDemandPaymentNoticeThenSuccess() {
-    // given
-    PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
-    DebtPositionDTO debtPositionDTO = podamFactory.manufacturePojo(DebtPositionDTO.class);
-    debtPositionDTO.setDescription("Test Description");
+    try (MockedStatic<PaDemandPaymentNoticeMapper> mapperMock = Mockito.mockStatic(PaDemandPaymentNoticeMapper.class)) {
+      // given
+      PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+      DebtPositionDTO debtPositionDTO = podamFactory.manufacturePojo(DebtPositionDTO.class);
+      debtPositionDTO.setDescription("Test Description");
+      Organization organization = podamFactory.manufacturePojo(Organization.class);
+      Broker broker = podamFactory.manufacturePojo(Broker.class);
+      PaDemandPaymentNoticeResponse paDemandPaymentNoticeResponse = podamFactory.manufacturePojo(PaDemandPaymentNoticeResponse.class);
 
-    RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
-      .eventType(RegistryEventType.PaForNode_paDemandPaymentNotice)
-      .orgFiscalCode(request.getIdPA())
-      .brokerStationId(request.getIdStation())
-      .build();
-    configureRegistryLoggerMock(expectedRegistryContextData, request);
+      RegistryContextData expectedRegistryContextData = RegistryContextData.builder()
+        .eventType(RegistryEventType.PaForNode_paDemandPaymentNotice)
+        .orgFiscalCode(request.getIdPA())
+        .brokerStationId(request.getIdStation())
+        .build();
+      configureRegistryLoggerMock(expectedRegistryContextData, request);
 
-    when(demandPaymentNoticeServiceMock.handleRequest(request))
-      .thenReturn(debtPositionDTO);
+      when(demandPaymentNoticeServiceMock.handleRequest(request))
+        .thenReturn(Triple.of(debtPositionDTO, organization, broker));
+      mapperMock.when(() -> PaDemandPaymentNoticeMapper.debtPositionDto2PaVerifyPaymentNoticeRes(debtPositionDTO, organization, broker))
+        .thenReturn(paDemandPaymentNoticeResponse);
 
-    // when
-    PaDemandPaymentNoticeResponse response = paForNodeEndpoint.paDemandPaymentNotice(request);
+      // when
+      PaDemandPaymentNoticeResponse response = paForNodeEndpoint.paDemandPaymentNotice(request);
 
-    // verify
-    assertNotNull(response);
-    assertEquals(StOutcome.OK, response.getOutcome());
-    assertEquals("Test Description", response.getPaymentDescription());
-    assertNull(response.getFault());
+      // verify
+      assertNotNull(response);
+      assertEquals(paDemandPaymentNoticeResponse, response);
+    }
   }
 
   @Test
@@ -458,7 +477,7 @@ class PaForNodeEndpointTest {
       .paymentMethod(request.getReceipt().getPaymentMethod())
       .ccp(request.getReceipt().getReceiptId())
       .eventType(RegistryEventType.PaForNode_paSendRTV2)
-      .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()))
+      .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber(), AUX_DIGIT))
       .build();
 
     configureRegistryLoggerMock(expectedContextData, request);

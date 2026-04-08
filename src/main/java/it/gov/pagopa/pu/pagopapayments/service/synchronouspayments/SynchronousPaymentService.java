@@ -120,7 +120,7 @@ public class SynchronousPaymentService {
     try{
       if(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId()!=null)
       {
-        log.info("Retrieve notification fee from pu-sil by OrgSilServiceId {} and nav {}", debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav);
+        log.debug("Retrieve notification fee from pu-sil by OrgSilServiceId {} and nav {}", debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav);
         ActualizationResultDTO amountUpdatesDTO = puSilService.actualize(debtPositionTypeOrg.getAmountActualizationOrgSilServiceId(), nav, accessToken);
         amountRequest.setBalance(amountUpdatesDTO.getBalance());
         amountRequest.setIun(amountUpdatesDTO.getIun());
@@ -150,7 +150,7 @@ public class SynchronousPaymentService {
     if(sendAPIKey!=null && !sendAPIKey.isEmpty()){
       try{
         NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);
-        log.info("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);
+        log.debug("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);
         amountRequest.setNewFeeCents(Long.valueOf(Objects.requireNonNullElse(notificationPrice.getTotalPrice(), 0)));
       } catch (Exception e) {
         log.warn("Failed to retrieve notification price for organizationId {} and nav {}: {}", organizationId, nav, e.getMessage());

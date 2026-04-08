@@ -33,6 +33,8 @@ class RegistryProducerServiceTest {
   @Mock
   private StreamBridge streamBridge;
 
+  private static final String AUX_DIGIT = "3";
+
   private RegistryProducerService registryProducerService;
   private final ObjectMapper objectMapper;
 
@@ -43,7 +45,7 @@ class RegistryProducerServiceTest {
 
   @BeforeEach
   void setUp() {
-    registryProducerService = new RegistryProducerService(streamBridge, new ObjectMapper());
+    registryProducerService = new RegistryProducerService(streamBridge, new ObjectMapper(), AUX_DIGIT);
   }
 
   @AfterEach
@@ -61,7 +63,7 @@ class RegistryProducerServiceTest {
     String requestorId = "9cbb04c1-627b-4063-a09b-ee8f718bb9bd";
     String grantorId = "2add6c22-75bb-4fad-b186-56620a362def";
     String iuv = "31234567890123456789012345678901234567890";
-    String nav = Utilities.iuv2Nav(iuv);
+    String nav = Utilities.iuv2Nav(iuv, AUX_DIGIT);
     String brokerStationId = "45428ef5-53ab-4690-a565-d13b0af64d5f";
     String pspId = "23e19e1b-fcb8-43c0-b643-9396394f10ca";
     String pspChannelId = "channel-12345";

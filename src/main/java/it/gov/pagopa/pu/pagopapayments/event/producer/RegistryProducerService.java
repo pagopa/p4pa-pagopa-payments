@@ -35,9 +35,13 @@ public class RegistryProducerService {
 
   private final ObjectMapper objectMapper;
 
-  public RegistryProducerService(StreamBridge streamBridge, ObjectMapper objectMapper) {
+  private final String auxDigit;
+
+  public RegistryProducerService(StreamBridge streamBridge, ObjectMapper objectMapper,
+                                 @Value("${nav.aux-digit}") String auxDigit) {
     this.streamBridge = streamBridge;
     this.objectMapper = objectMapper;
+    this.auxDigit = auxDigit;
   }
 
   @Configuration
@@ -84,7 +88,7 @@ public class RegistryProducerService {
           .eventSubType(subType)
           .eventCategory(category)
           .iuv(contextData.getIuv())
-          .nav(Utilities.iuv2Nav(contextData.getIuv()))
+          .nav(Utilities.iuv2Nav(contextData.getIuv(), auxDigit))
           .requestorId(requestorId)
           .grantorId(grantorId)
           .outcome(outcome)

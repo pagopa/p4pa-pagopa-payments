@@ -52,7 +52,7 @@ public class GenerateNoticeService {
 
   public GeneratedNoticeMassiveFolderDTO generateNoticeMassive(NoticeRequestMassiveDTO request, String accessToken) {
     Organization org = organizationService.getOrganizationById(request.getDebtPositions().getFirst().getOrganizationId(), accessToken);
-    log.info("generateNoticeMassive - retrieved organization with id[{}]", org.getOrganizationId());
+    log.debug("generateNoticeMassive - retrieved organization with id[{}]", org.getOrganizationId());
 
     NoticeGenerationMassiveResourceDTO response;
     NoticeGenerationMassiveRequestDTO requestMassive;
@@ -62,7 +62,7 @@ public class GenerateNoticeService {
     } else {
       requestMassive = generateMassiveFromNavList(org, request.getDebtPositions(), request.getNavList());
     }
-    log.info("calling generateNoticeMassive with organizationId[{}] and a list with [{}] notices", org.getOrganizationId(), requestMassive.getNotices().size());
+    log.debug("calling generateNoticeMassive with organizationId[{}] and a list with [{}] notices", org.getOrganizationId(), requestMassive.getNotices().size());
 
     response = printPaymentNoticeService.generateNoticeMassive(org.getOrganizationId(), request.getRequestId(), requestMassive, accessToken);
     log.info("generateNoticeMassive - retrieved folderId[{}]", response.getFolderId());
@@ -72,7 +72,7 @@ public class GenerateNoticeService {
 
   public SignedUrlResultDTO getNoticeMassiveZip(Long organizationId, String folderId, String accessToken) {
     Organization org = organizationService.getOrganizationById(organizationId, accessToken);
-    log.info("getNoticeMassiveZip - retrieved organization with id and calling getFolderStatus with organizationId[{}], folderId[{}]", org.getOrganizationId(), folderId);
+    log.debug("getNoticeMassiveZip - retrieved organization with id and calling getFolderStatus with organizationId[{}], folderId[{}]", org.getOrganizationId(), folderId);
 
     GetGenerationRequestStatusResourceDTO folderStatus = printPaymentNoticeService.getFolderStatus(org.getOrganizationId(), folderId, accessToken);
     log.info("getFolderStatus - noticesInError[{}], processedNotices [{}]", folderStatus.getNoticesInError(), folderStatus.getProcessedNotices());
@@ -110,12 +110,12 @@ public class GenerateNoticeService {
   }
 
   public NoticeGenerationMassiveRequestDTO generateMassiveFromToSync(Organization org, List<DebtPositionDTO> debtPositions) {
-    log.info("Generate massive notice from Installments in TO_SYNC status for Organization with id[{}]", org.getOrganizationId());
+    log.debug("Generate massive notice from Installments in TO_SYNC status for Organization with id[{}]", org.getOrganizationId());
     return generateMassiveGeneric(org, debtPositions, inst -> Objects.equals(inst.getStatus(), InstallmentStatus.TO_SYNC));
   }
 
   public NoticeGenerationMassiveRequestDTO generateMassiveFromNavList(Organization org, List<DebtPositionDTO> debtPositions, List<String> navList) {
-    log.info("Generate massive notice from Nav list given in input [{}]", navList);
+    log.debug("Generate massive notice from Nav list given in input [{}]", navList);
     return generateMassiveGeneric(org, debtPositions, inst -> navList.contains(inst.getNav()));
   }
 
@@ -150,7 +150,7 @@ public class GenerateNoticeService {
   }
 
   public InstallmentDTO findInstallmentAndDebtorByNav(DebtPositionDTO debtPosition, String nav) {
-    log.info("findInstallmentAndDebtorByNav on debtPosition with id[{}] and nav [{}]", debtPosition.getDebtPositionId(), nav);
+    log.debug("findInstallmentAndDebtorByNav on debtPosition with id[{}] and nav [{}]", debtPosition.getDebtPositionId(), nav);
     return debtPosition.getPaymentOptions().stream()
       .flatMap(po -> po.getInstallments().stream())
       .filter(installment -> nav.equals(installment.getNav()))

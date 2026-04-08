@@ -12,6 +12,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
 import it.gov.pagopa.pu.pagopapayments.exception.PagoPaNodeFaultException;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaDemandPaymentNoticeMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaGetPaymentMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaSendRTMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaVerifyPaymentNoticeMapper;
@@ -25,6 +26,7 @@ import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
@@ -44,14 +46,20 @@ public class PaForNodeEndpoint {
   private final PaSendRTMapper paSendRTMapper;
   private final RegistryLogger registryLogger;
   private final DemandPaymentNoticeService demandPaymentNoticeService;
+  private final String auxDigit;
 
-
-  public PaForNodeEndpoint(SynchronousPaymentService synchronousPaymentService, ReceiptService receiptService, PaSendRTMapper paSendRTMapper, RegistryLogger registryLogger, DemandPaymentNoticeService demandPaymentNoticeService) {
+  public PaForNodeEndpoint(SynchronousPaymentService synchronousPaymentService,
+                           ReceiptService receiptService,
+                           PaSendRTMapper paSendRTMapper,
+                           RegistryLogger registryLogger,
+                           DemandPaymentNoticeService demandPaymentNoticeService,
+                           @Value("${nav.aux-digit}") String auxDigit) {
     this.synchronousPaymentService = synchronousPaymentService;
     this.receiptService = receiptService;
     this.paSendRTMapper = paSendRTMapper;
     this.registryLogger = registryLogger;
     this.demandPaymentNoticeService = demandPaymentNoticeService;
+    this.auxDigit = auxDigit;
   }
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "paDemandPaymentNoticeRequest")
@@ -68,10 +76,9 @@ public class PaForNodeEndpoint {
       request,
       () -> {
         log.info("processing paDemandPaymentNotice idPA[{}] servizio[{}/{}]", request.getIdPA(), request.getIdSoggettoServizio(), request.getIdServizio());
-        DebtPositionDTO debtPositionDTO = demandPaymentNoticeService.handleRequest(request);
-        PaDemandPaymentNoticeResponse resp = new PaDemandPaymentNoticeResponse();
-        resp.setOutcome(StOutcome.OK);
-        resp.setPaymentDescription(debtPositionDTO.getDescription());
+        Triple<DebtPositionDTO, Organization, Broker> response = demandPaymentNoticeService.handleRequest(request);
+        DebtPositionDTO debtPositionDTO = response.getLeft();
+        PaDemandPaymentNoticeResponse resp = PaDemandPaymentNoticeMapper.debtPositionDto2PaVerifyPaymentNoticeRes(debtPositionDTO,response.getMiddle(),response.getRight());
         return Triple.of(resp,
           debtPositionDTO.getPaymentOptions().stream()
             .flatMap(option -> option.getInstallments().stream())
@@ -101,7 +108,7 @@ public class PaForNodeEndpoint {
       .orgFiscalCode(request.getIdPA())
       .brokerStationId(request.getIdStation())
       .eventType(RegistryEventType.PaForNode_paVerifyPaymentNotice)
-      .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber()))
+      .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber(), auxDigit))
       .build();
 
     return registryLogger.execute(contextData, request, () -> {
@@ -138,7 +145,7 @@ public class PaForNodeEndpoint {
       .orgFiscalCode(request.getIdPA())
       .brokerStationId(request.getIdStation())
       .eventType(RegistryEventType.PaForNode_paGetPaymentV2)
-      .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber()))
+      .iuv(Utilities.nav2Iuv(request.getQrCode().getNoticeNumber(), auxDigit))
       .build();
 
     return registryLogger.execute(contextData, request, () -> {
@@ -179,7 +186,7 @@ public class PaForNodeEndpoint {
       .paymentMethod(request.getReceipt().getPaymentMethod())
       .ccp(request.getReceipt().getReceiptId())
       .eventType(RegistryEventType.PaForNode_paSendRTV2)
-      .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber()))
+      .iuv(Utilities.nav2Iuv(request.getReceipt().getNoticeNumber(), auxDigit))
       .build();
 
     return registryLogger.execute(

@@ -168,9 +168,10 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | CIE_PRINT_BODY_WHEN_ERROR               | To print body when an error occurs                 | true    |
 
     #### 💼 Business logic
-| ENV              | DESCRIPTION      | DEFAULT |
-|------------------|------------------|---------|
-| CIE_SERVICE_ID   | Cie's service id | 99      |
+| ENV            | DESCRIPTION          | DEFAULT |
+|----------------|----------------------|---------|
+| CIE_SERVICE_ID | Cie's service id     | 99      |
+| NAV_AUX_DIGIT  | The aux digit of NAV | 3       |
 
 ##### 🌍 External services
 | ENV                                                        | DESCRIPTION                                                     | DEFAULT |

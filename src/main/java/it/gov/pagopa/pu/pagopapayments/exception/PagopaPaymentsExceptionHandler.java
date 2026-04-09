@@ -9,6 +9,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.event.Level;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -42,7 +43,7 @@ public class PagopaPaymentsExceptionHandler {
     return handleException(ex, request, HttpStatus.CONFLICT, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_CONFLICT);
   }
 
-  @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class})
+  @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ConversionFailedException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleViolationException(Exception ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST);
   }

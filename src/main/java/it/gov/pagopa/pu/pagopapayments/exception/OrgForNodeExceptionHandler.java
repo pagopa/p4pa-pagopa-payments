@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.event.Level;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class OrgForNodeExceptionHandler {
       .body(buildErrorResponse(error));
   }
 
-  @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ConstraintViolationException.class})
+  @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ConversionFailedException.class, ConstraintViolationException.class})
   public ResponseEntity<ErrorResponseForNode> handleBadRequest(Exception ex, HttpServletRequest request) {
     logException(ex, request, HttpStatus.BAD_REQUEST);
 

@@ -13,6 +13,7 @@ import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
@@ -67,7 +68,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
         return Collections.emptyList();
       }
       else
-        throw new ApplicationException(ERROR_MESSAGE + response.getFault().getFaultCode());
+        throw new ApplicationException(response.getFault().getFaultCode(), ERROR_MESSAGE + response.getFault().getFaultCode());
     }
 
     List<PaymentsReportingIdDTO> reportingList = new ArrayList<>();
@@ -130,10 +131,10 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
       });
 
     if (response.getFault() != null) {
-      throw new ApplicationException(ERROR_MESSAGE + response.getFault().getFaultCode());
+      throw new ApplicationException(response.getFault().getFaultCode(), ERROR_MESSAGE + response.getFault().getFaultCode());
     }
     if(xmlReadingException[0] != null){
-      throw new ApplicationException(ERROR_MESSAGE + xmlReadingException[0].getMessage());
+      throw new ApplicationException(ErrorCodeConstants.ERROR_CODE_XML_READING_ERROR, ERROR_MESSAGE + xmlReadingException[0].getMessage());
     }
     return xmlBytes[0];
   }

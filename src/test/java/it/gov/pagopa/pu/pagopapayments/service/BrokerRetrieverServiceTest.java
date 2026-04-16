@@ -75,7 +75,8 @@ class BrokerRetrieverServiceTest {
     NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> brokerRetrieverService.getBrokerApiKeyAndSegregationCodesByOrganizationId(INVALID_ORG_ID, accessToken));
 
     //verify
-    Assertions.assertEquals("[ORGANIZATION_NOT_FOUND] organization [%s]".formatted(INVALID_ORG_ID), exception.getMessage());
+    Assertions.assertEquals("ORGANIZATION_NOT_FOUND", exception.getCode());
+    Assertions.assertEquals("organization [%s]".formatted(INVALID_ORG_ID), exception.getMessage());
   }
 
   @Test
@@ -104,7 +105,8 @@ class BrokerRetrieverServiceTest {
     //when
     NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(INVALID_ORG_ID, accessToken));
     //verify
-    Assertions.assertEquals("[ORGANIZATION_NOT_FOUND] organization [%s]".formatted(INVALID_ORG_ID), exception.getMessage());
+    Assertions.assertEquals("ORGANIZATION_NOT_FOUND", exception.getCode());
+    Assertions.assertEquals("organization [%s]".formatted(INVALID_ORG_ID), exception.getMessage());
   }
 
 }

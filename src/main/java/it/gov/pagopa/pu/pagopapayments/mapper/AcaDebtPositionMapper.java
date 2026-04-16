@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,7 +50,7 @@ public class AcaDebtPositionMapper {
           .paymentOption(List.of(getPaymentOption(installment)))
           .validityDate(debtPosition.getValidityDate() != null ? debtPosition.getValidityDate().atStartOfDay().toString() : null)
         );
-      }).findAny().orElseThrow(() -> new InvalidValueException("[INVALID_INSTALLMENT] Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));
+      }).findAny().orElseThrow(() -> new InvalidValueException(ErrorCodeConstants.ERROR_CODE_INVALID_INSTALLMENT, "Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state".formatted(iud, debtPosition.getDebtPositionId())));
   }
 
   private boolean installment2sendAca(InstallmentDTO installment) {
@@ -62,7 +63,7 @@ public class AcaDebtPositionMapper {
     InstallmentSyncStatus syncStatus = installment.getSyncStatus();
 
     if (syncStatus == null) {
-      throw new InvalidValueException("[INVALID_SYNC_STATUS] Sync status is null for installment [%s]".formatted(installment.getIud()));
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_INVALID_SYNC_STATUS, "Sync status is null for installment [%s]".formatted(installment.getIud()));
     }
 
     if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
@@ -75,7 +76,7 @@ public class AcaDebtPositionMapper {
       syncStatus.getSyncStatusTo().equals(InstallmentStatus.UNPAID)) {
       operation = Operation.CREATE;
     } else {
-      throw new InvalidValueException("[INVALID_SYNC_STATUS] Invalid sync status [%s->%s] for installment [%s]".formatted(
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_INVALID_SYNC_STATUS, "Invalid sync status [%s->%s] for installment [%s]".formatted(
         syncStatus.getSyncStatusFrom(), syncStatus.getSyncStatusTo(), installment.getIud()));
     }
     return operation;

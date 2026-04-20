@@ -34,6 +34,9 @@ public class ConversionUtils {
     return offsetDateTime != null ? DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR.newXMLGregorianCalendar(GregorianCalendar.from(offsetDateTime.toZonedDateTime())) : null;
   }
 
+  public static XMLGregorianCalendar toXMLGregorianCalendar(LocalDate localDate) {
+    return localDate != null ? DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR.newXMLGregorianCalendar(GregorianCalendar.from(localDate.atTime(LocalTime.MIDNIGHT).atZone(Constants.ZONEID))) : null;
+  }
 
   public static OffsetDateTime toOffsetDateTime(XMLGregorianCalendar xmlGregorianCalendar) {
     if(xmlGregorianCalendar == null) {

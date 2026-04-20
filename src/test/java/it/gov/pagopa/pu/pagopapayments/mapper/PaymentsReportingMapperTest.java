@@ -26,6 +26,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -358,7 +359,7 @@ class PaymentsReportingMapperTest {
     singleFlowResponse.setRevision(1L);
     singleFlowResponse.setFdrDate(OffsetDateTime.now());
     singleFlowResponse.setRegulation("regulation");
-    singleFlowResponse.setRegulationDate(OffsetDateTime.now());
+    singleFlowResponse.setRegulationDate(LocalDate.now());
     singleFlowResponse.setSender(sender);
     singleFlowResponse.setBicCodePouringBank("bicCodePouringBank");
     singleFlowResponse.setReceiver(receiver);

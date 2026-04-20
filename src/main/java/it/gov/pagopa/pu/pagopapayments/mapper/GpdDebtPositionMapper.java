@@ -1,11 +1,12 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.nodo.gpd.dto.generated.Stamp;
 import it.gov.pagopa.nodo.gpd.dto.generated.*;
+import it.gov.pagopa.nodo.gpd.dto.generated.Stamp;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
+import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -43,8 +44,8 @@ public class GpdDebtPositionMapper {
         return Pair.of(operation, model);
       })
       .findAny()
-      .orElseThrow(() -> new InvalidValueException(
-        "[INVALID_INSTALLMENT] Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state"
+      .orElseThrow(() -> new InvalidValueException(ErrorCodeConstants.ERROR_CODE_INVALID_INSTALLMENT,
+        "Installment with IUD[%s] on debtPosition[%s] not found or with invalid sync state"
           .formatted(iud, debtPosition.getDebtPositionId())
       ));
   }
@@ -57,7 +58,7 @@ public class GpdDebtPositionMapper {
     InstallmentSyncStatus syncStatus = installment.getSyncStatus();
 
     if (syncStatus == null) {
-      throw new InvalidValueException("[INVALID_SYNC_STATUS] Sync status is null for installment [%s]".formatted(installment.getIud()));
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_INVALID_SYNC_STATUS, "Sync status is null for installment [%s]".formatted(installment.getIud()));
     }
 
     if (SYNC_STATUS_FROM_UPDATE_OR_DELETE.contains(syncStatus.getSyncStatusFrom()) &&
@@ -73,7 +74,7 @@ public class GpdDebtPositionMapper {
       return Operation.CREATE;
     }
 
-    throw new InvalidValueException("[INVALID_SYNC_STATUS] Invalid sync status [%s->%s] for installment [%s]"
+    throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_INVALID_SYNC_STATUS, "Invalid sync status [%s->%s] for installment [%s]"
       .formatted(syncStatus.getSyncStatusFrom(), syncStatus.getSyncStatusTo(), installment.getIud()));
   }
 
@@ -143,7 +144,7 @@ public class GpdDebtPositionMapper {
     } else if ("G".equals(type)) {
       model.setType(DebtorModel.TypeEnum.G);
     } else {
-      throw new InvalidValueException("[INVALID_DEBTOR] Unsupported debtor entity type [%s]".formatted(type));
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_INVALID_DEBTOR, "Unsupported debtor entity type [%s]".formatted(type));
     }
 
     return model;

@@ -1,7 +1,11 @@
 package it.gov.pagopa.pu.pagopapayments.exception;
 
-import lombok.experimental.StandardException;
+public class ApplicationException extends BaseBusinessException{
+  public ApplicationException(String code, String message) {
+    this(code, message, null);
+  }
 
-@StandardException
-public class ApplicationException extends RuntimeException{
+  public ApplicationException(String code, String message, Throwable cause) {
+    super(code, message, cause);
+  }
 }

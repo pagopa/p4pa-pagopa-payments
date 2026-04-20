@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
+import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ public class PaymentsReportingSoapServiceImpl implements PaymentsReportingSoapSe
   @Override
   public Long fetchPaymentReporting(Long organizationId, String paymentsReportingId, String fileName, String accessToken) {
     if (paymentsReportingMapper.isFilenameInvalid(fileName, paymentsReportingId)) {
-      throw new InvalidValueException("[INVALID_FILE_NAME] PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_INVALID_FILE_NAME, "PaymentsReporting file name not valid " + fileName + " to fetch file " + paymentsReportingId);
     }
     BrokerForNodoPaDTO brokerForNodoPaDTO = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(organizationId, accessToken);
     PaPaymentReportingDTO response = nodeForPaClient.fetchPaymentReporting(brokerForNodoPaDTO, paymentsReportingId);

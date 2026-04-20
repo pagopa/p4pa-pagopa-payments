@@ -149,7 +149,8 @@ class PaymentsReportingRestServiceImplTest {
     String pspId = "pspId";
     String accessToken = "accessToken";
 
-    String expectedExceptionMessage = "[INVALID_FILE_NAME] PaymentsReporting file name not valid '%s' to fetch file with id %s"
+    String expectedErrorCode = "INVALID_FILE_NAME";
+    String expectedExceptionMessage = "PaymentsReporting file name not valid '%s' to fetch file with id %s"
       .formatted(paymentsReportingFileName, paymentsReportingId);
 
     Mockito.when(
@@ -169,6 +170,7 @@ class PaymentsReportingRestServiceImplTest {
     );
 
     //then
+    Assertions.assertEquals(expectedErrorCode, invalidValueException.getCode());
     Assertions.assertEquals(expectedExceptionMessage, invalidValueException.getMessage());
   }
 }

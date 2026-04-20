@@ -145,7 +145,8 @@ class GpdDebtPositionMapperTest {
 
     //verify
     Assertions.assertNotNull(response);
-    Assertions.assertEquals("[INVALID_SYNC_STATUS] Invalid sync status [%s->%s] for installment [%s]".formatted(
+    Assertions.assertEquals("INVALID_SYNC_STATUS", response.getCode());
+    Assertions.assertEquals("Invalid sync status [%s->%s] for installment [%s]".formatted(
       installment.getSyncStatus().getSyncStatusFrom(), installment.getSyncStatus().getSyncStatusTo(), installment.getIud()), response.getMessage());
   }
 
@@ -186,7 +187,7 @@ class GpdDebtPositionMapperTest {
 
     //verify
     Assertions.assertNotNull(ex);
-    Assertions.assertEquals("[INVALID_SYNC_STATUS] Sync status is null for installment [%s]".formatted(iud), ex.getMessage()
-    );
+    Assertions.assertEquals("INVALID_SYNC_STATUS", ex.getCode());
+    Assertions.assertEquals("Sync status is null for installment [%s]".formatted(iud), ex.getMessage());
   }
 }

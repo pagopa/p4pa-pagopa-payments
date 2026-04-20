@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.exception;
 
-import lombok.experimental.StandardException;
-
-@StandardException
-public class ConflictException extends ApplicationException {
+public class ConflictException extends BaseBusinessException {
+  public ConflictException(String code, String message) {
+    super(code, message);
+  }
 }

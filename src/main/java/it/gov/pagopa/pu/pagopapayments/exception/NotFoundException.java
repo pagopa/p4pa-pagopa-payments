@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.exception;
 
-import lombok.experimental.StandardException;
-
-@StandardException
-public class NotFoundException extends ApplicationException{
+public class NotFoundException extends BaseBusinessException{
+  public NotFoundException(String code, String message) {
+    super(code, message);
+  }
 }

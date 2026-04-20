@@ -152,6 +152,12 @@ dependencies {
   mockitoAgent("org.mockito:mockito-core") { isTransitive = false }
 }
 tasks {
+  jar {
+      from("${rootProject.projectDir}") {
+          include("LICENSE.md")
+          into("META-INF")
+      }
+  }
   test {
     jvmArgs("-javaagent:${mockitoAgent.asPath}")
     testLogging.events = setOf(TestLogEvent.FAILED)

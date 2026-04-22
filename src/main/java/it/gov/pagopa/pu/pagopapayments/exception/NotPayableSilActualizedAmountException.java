@@ -1,8 +1,14 @@
 package it.gov.pagopa.pu.pagopapayments.exception;
 
-import lombok.experimental.StandardException;
+import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 
-@StandardException
-public class NotPayableSilActualizedAmountException extends RuntimeException{
+public class NotPayableSilActualizedAmountException extends BaseBusinessException{
 
+  public NotPayableSilActualizedAmountException(String message) {
+    this(message, null);
+  }
+
+  public NotPayableSilActualizedAmountException(String message, Throwable cause) {
+    super(ErrorCodeConstants.ERROR_CODE_ACTUALIZATION_ERROR, message, cause);
+  }
 }

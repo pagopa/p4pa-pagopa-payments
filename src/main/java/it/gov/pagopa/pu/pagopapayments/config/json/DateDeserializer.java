@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import io.micrometer.common.util.StringUtils;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -26,7 +27,7 @@ public class DateDeserializer extends JsonDeserializer<Date> {
     try {
       return italianDateFormat.parse(dateStr);
     } catch (ParseException e) {
-      throw new InvalidValueException("Unknown date format: " + dateStr);
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_INVALID_DATE_FORMAT, "Unknown date format: " + dateStr);
     }
   }
 }

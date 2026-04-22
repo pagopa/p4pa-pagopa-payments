@@ -55,6 +55,7 @@ public class TestUtils {
       @Override
       public <T> T manufacturePojo(Class<T> pojoClass, Type... genericTypeArgs) {
         if (pojoClass.isAssignableFrom(XMLGregorianCalendar.class)) {
+          //noinspection unchecked: guarantee from assignable condition
           return (T) ConversionUtils.toXMLGregorianCalendar(OffsetDateTime.now());
         }
         return null;

@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.exception;
 
-import lombok.experimental.StandardException;
-
-@StandardException
-public class InvalidValueException extends ApplicationException{
+public class InvalidValueException extends BaseBusinessException{
+  public InvalidValueException(String code, String message) {
+    super(code, message);
+  }
 }

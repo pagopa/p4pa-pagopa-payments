@@ -64,7 +64,8 @@ class PaymentsReportingSoapServiceImplTest {
   void getReportingList_whenBrokerServiceThrowsException_thenThrowApplicationException() {
     String accessToken = TestUtils.getFakeAccessToken();
 
-    Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenThrow(new ApplicationException("Broker service error"));
+    Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken))
+      .thenThrow(new ApplicationException("ERRORCODE", "Broker service error"));
 
     ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingSoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
     Assertions.assertEquals("Broker service error", exception.getMessage());
@@ -94,7 +95,8 @@ class PaymentsReportingSoapServiceImplTest {
     String accessToken = TestUtils.getFakeAccessToken();
 
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(ORGANIZATION_ID, accessToken)).thenReturn(BROKER_FOR_NODO_PA_DTO);
-    Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO)).thenThrow(new ApplicationException("Node client error"));
+    Mockito.when(nodeForPaClientMock.getPaymentsReportingList(BROKER_FOR_NODO_PA_DTO))
+      .thenThrow(new ApplicationException("ERRORCODE", "Node client error"));
 
     ApplicationException exception = Assertions.assertThrows(ApplicationException.class, () -> paymentsReportingSoapServiceImpl.getPaymentsReportingList(ORGANIZATION_ID, accessToken));
     Assertions.assertEquals("Node client error", exception.getMessage());

@@ -80,7 +80,6 @@ public class PaGetPaymentMapper {
       transfer.setTransferAmount(ConversionUtils.centsAmountToBigDecimalEuroAmount(transferDTO.getAmountCents()));
       transfer.setTransferCategory(transferDTO.getCategory());
       transfer.setRemittanceInformation(Utilities.truncateRemittanceInformation(transferDTO.getRemittanceInformation()));
-      transfer.setIBAN(transferType.equals(StTransferType.POSTAL) ? transferDTO.getPostalIban() : transferDTO.getIban());
 
       if(transferDTO.getStampHashDocument() != null) {
         CtRichiestaMarcaDaBollo richiestaMarcaDaBollo = new CtRichiestaMarcaDaBollo();
@@ -88,6 +87,15 @@ public class PaGetPaymentMapper {
         richiestaMarcaDaBollo.setHashDocumento(transferDTO.getStampHashDocument().getBytes(StandardCharsets.UTF_8));
         richiestaMarcaDaBollo.setProvinciaResidenza(transferDTO.getStampProvincialResidence());
         transfer.setRichiestaMarcaDaBollo(richiestaMarcaDaBollo);
+      }
+
+      if(StTransferType.POSTAL.equals(transferType)) {
+        transfer.setIBAN(StringUtils.isNotBlank(transferDTO.getPostalIban()) ? transferDTO.getPostalIban() : transferDTO.getIban());
+      } else {
+        transfer.setIBAN(transferDTO.getIban());
+        if(StringUtils.isNotBlank(transferDTO.getPostalIban())){
+          createIbanAppoggioMetadata(transfer, transferDTO.getPostalIban());
+        }
       }
 
       transferList.getTransfers().add(transfer);
@@ -108,5 +116,14 @@ public class PaGetPaymentMapper {
     response.setData(payment);
     response.setOutcome(StOutcome.OK);
     return response;
+  }
+
+  private static void createIbanAppoggioMetadata(CtTransferPAV2 transferPA, String value) {
+    CtMapEntry mapEntry = new CtMapEntry();
+    mapEntry.setKey("IBANAPPOGGIO");
+    mapEntry.setValue(value);
+    CtMetadata ctMetadata = Optional.ofNullable(transferPA.getMetadata()).orElse(new CtMetadata());
+    ctMetadata.getMapEntries().add(mapEntry);
+    transferPA.setMetadata(ctMetadata);
   }
 }

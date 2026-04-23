@@ -144,7 +144,7 @@ public class PaForNodeEndpoint {
             log.error("Fault in paVerifyPaymentNotice [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), errorCode);
           }
 
-          return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaVerifyPaymentNoticeRes());
+          return handleFault(errorCode, spe.getErrorEmitter(), new PaVerifyPaymentNoticeRes());
         } else {
           log.error("Error in paVerifyPaymentNotice [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
           return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaVerifyPaymentNoticeRes());
@@ -188,7 +188,7 @@ public class PaForNodeEndpoint {
             log.error("Fault in paGetPaymentV2 [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), errorCode);
           }
 
-          return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaGetPaymentV2Response());
+          return handleFault(errorCode, spe.getErrorEmitter(), new PaGetPaymentV2Response());
         } else {
           log.error("Error in paGetPaymentV2 [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
           return handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaGetPaymentV2Response());
@@ -240,7 +240,7 @@ public class PaForNodeEndpoint {
             log.error("Fault in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), errorCode);
           }
 
-          resp = handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaSendRTV2Response());
+          resp = handleFault(errorCode, spe.getErrorEmitter(), new PaSendRTV2Response());
         } else {
           log.error("Error in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), request.getReceipt().getReceiptId(), e);
           resp = handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdPA(), new PaSendRTV2Response());

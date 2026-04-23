@@ -33,6 +33,7 @@ import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Endpoint
@@ -47,6 +48,12 @@ public class PaForNodeEndpoint {
   private final RegistryLogger registryLogger;
   private final DemandPaymentNoticeService demandPaymentNoticeService;
   private final String auxDigit;
+
+  // Faults that are expected to be caused by client errors and therefore logged at INFO level
+  private static final Set<PagoPaNodeFaults> INFO_LEVEL_FAULTS = Set.of(
+    PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO,
+    PagoPaNodeFaults.PAA_ID_INTERMEDIARIO_ERRATO
+  );
 
   public PaForNodeEndpoint(SynchronousPaymentService synchronousPaymentService,
                            ReceiptService receiptService,
@@ -89,8 +96,15 @@ public class PaForNodeEndpoint {
       e -> {
         PaDemandPaymentNoticeResponse resp;
         if (Objects.requireNonNull(e) instanceof PagoPaNodeFaultException spe) {
-          log.error("Error in paDemandPaymentNotice [{}/{}] {}", request.getIdBrokerPA(), request.getIdServizio(), request.getIdStation(), e);
-          resp = handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaDemandPaymentNoticeResponse());
+          PagoPaNodeFaults errorCode = spe.getErrorCode();
+
+          if (INFO_LEVEL_FAULTS.contains(errorCode)) {
+            log.info("Fault in paDemandPaymentNotice [{}/{}] {}", request.getIdBrokerPA(), request.getIdServizio(), request.getIdStation(), e);
+          } else {
+            log.error("Error in paDemandPaymentNotice [{}/{}] {}", request.getIdBrokerPA(), request.getIdServizio(), request.getIdStation(), e);
+          }
+
+          resp = handleFault(errorCode, spe.getErrorEmitter(), new PaDemandPaymentNoticeResponse());
         } else {
           log.error("Error in paDemandPaymentNotice [{}/{}] {}", request.getIdBrokerPA(), request.getIdServizio(), request.getIdStation(), e);
           resp = handleFault(PagoPaNodeFaults.PAA_SYSTEM_ERROR, request.getIdBrokerPA(), new PaDemandPaymentNoticeResponse());
@@ -122,7 +136,14 @@ public class PaForNodeEndpoint {
       },
       e -> {
         if (e instanceof PagoPaNodeFaultException spe) {
-          log.error("Fault in paVerifyPaymentNotice [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
+          PagoPaNodeFaults errorCode = spe.getErrorCode();
+
+          if (INFO_LEVEL_FAULTS.contains(errorCode)) {
+            log.info("Fault in paVerifyPaymentNotice [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), errorCode);
+          } else {
+            log.error("Fault in paVerifyPaymentNotice [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), errorCode);
+          }
+
           return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaVerifyPaymentNoticeRes());
         } else {
           log.error("Error in paVerifyPaymentNotice [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
@@ -159,7 +180,14 @@ public class PaForNodeEndpoint {
       },
       e -> {
         if (e instanceof PagoPaNodeFaultException spe) {
-          log.error("Fault in paGetPaymentV2 [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), spe.getErrorCode());
+          PagoPaNodeFaults errorCode = spe.getErrorCode();
+
+          if (INFO_LEVEL_FAULTS.contains(errorCode)) {
+            log.info("Fault in paGetPaymentV2 [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), errorCode);
+          } else {
+            log.error("Fault in paGetPaymentV2 [{}/{}] {}", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), errorCode);
+          }
+
           return handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaGetPaymentV2Response());
         } else {
           log.error("Error in paGetPaymentV2 [{}/{}]", request.getQrCode().getFiscalCode(), request.getQrCode().getNoticeNumber(), e);
@@ -204,7 +232,14 @@ public class PaForNodeEndpoint {
         PaSendRTV2Response resp;
 
         if (Objects.requireNonNull(e) instanceof PagoPaNodeFaultException spe) {
-          log.error("Fault in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), spe.getErrorCode());
+          PagoPaNodeFaults errorCode = spe.getErrorCode();
+
+          if (INFO_LEVEL_FAULTS.contains(errorCode)) {
+            log.info("Fault in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), errorCode);
+          } else {
+            log.error("Fault in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), errorCode);
+          }
+
           resp = handleFault(spe.getErrorCode(), spe.getErrorEmitter(), new PaSendRTV2Response());
         } else {
           log.error("Error in paSendRTV2 [{}/{}] {}", request.getReceipt().getNoticeNumber(), request.getReceipt().getFiscalCode(), request.getReceipt().getReceiptId(), e);

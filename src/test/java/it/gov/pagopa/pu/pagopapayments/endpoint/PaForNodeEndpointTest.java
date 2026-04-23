@@ -169,6 +169,32 @@ class PaForNodeEndpointTest {
     assertEquals(specificEmitter, response.getFault().getId());
     assertNotEquals(StOutcome.OK, response.getOutcome());
   }
+
+  @Test
+  void givenPagoPaNodeFaultExceptionNotInInfoLevelWhenPaDemandPaymentNoticeThenLogError() {
+    PaDemandPaymentNoticeRequest request = podamFactory.manufacturePojo(PaDemandPaymentNoticeRequest.class);
+    PagoPaNodeFaults specificError = PagoPaNodeFaults.PAA_SYSTEM_ERROR;
+    String specificEmitter = "SPECIFIC_EMITTER";
+    PagoPaNodeFaultException exceptionToThrow = new PagoPaNodeFaultException(specificError, specificEmitter);
+
+    RegistryContextData expectedContextData = RegistryContextData.builder()
+      .eventType(RegistryEventType.PaForNode_paDemandPaymentNotice)
+      .orgFiscalCode(request.getIdPA())
+      .brokerStationId(request.getIdStation())
+      .build();
+    configureRegistryLoggerMock(expectedContextData, request);
+
+    when(demandPaymentNoticeServiceMock.handleRequest(request))
+      .thenThrow(exceptionToThrow);
+
+    PaDemandPaymentNoticeResponse response = paForNodeEndpoint.paDemandPaymentNotice(request);
+
+    assertNotNull(response);
+    assertNotNull(response.getFault());
+    assertEquals(specificError.code(), response.getFault().getFaultCode());
+    assertEquals(specificEmitter, response.getFault().getId());
+    assertEquals(StOutcome.KO, response.getOutcome());
+  }
   //endregion
 
 

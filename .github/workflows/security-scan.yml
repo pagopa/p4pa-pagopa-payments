@@ -54,7 +54,7 @@ jobs:
           echo "CVE_HIGH=$(echo $SCAN_RESULTS | grep -o HIGH | wc -l)" >> $GITHUB_ENV
           echo "CVE_MEDIUM=$(echo $SCAN_RESULTS | grep -o MEDIUM | wc -l)" >> $GITHUB_ENV
 
-          printf "$SCAN_RESULTS"
+          printf '%b\n' "$SCAN_RESULTS"
       - name: Fails if CVE HIGH or CRITICAL are detected
         id: cve-threshold
         if: env.CVE_HIGH > 0 || env.CVE_CRITICAL > 0

@@ -13,12 +13,11 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.dto.RetrievePaymentDTO;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
-import org.junit.jupiter.api.Assertions;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 
@@ -69,11 +68,16 @@ class PaGetPaymentMapperTest {
     broker.setFlagDelegate(false);
 
     installmentDTO.getDebtor().setEntityType(PersonEntityType.F);
-    for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
-      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1);
+    for (int idx = 0; idx < installmentDTO.getTransfers().size(); idx++) {
+      installmentDTO.getTransfers().get(idx).setTransferIndex(idx + 1);
+      if (idx == 0) {
+        installmentDTO.getTransfers().get(idx).setAmountCents(0L);
+      }
     }
+
     //when
-    PaGetPaymentV2Response responseV2 = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, broker, StTransferType.PAGOPA);
+    PaGetPaymentV2Response responseV2 = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+      installmentDTO, organization, broker, StTransferType.PAGOPA);
 
     //verify
     assertNotNull(responseV2);
@@ -86,7 +90,7 @@ class PaGetPaymentMapperTest {
     assertEquals(organization.getOrgName(), responseV2.getData().getCompanyName());
     assertNull(responseV2.getData().getOfficeName());
 
-    TestUtils.checkNotNullFields(responseV2.getData(),"officeName");
+    TestUtils.checkNotNullFields(responseV2.getData(), "officeName");
     assertNotNull(responseV2.getData().getDebtor());
     assertEquals(installmentDTO.getDebtor().getLocation(), responseV2.getData().getDebtor().getCity());
     assertEquals(installmentDTO.getDebtor().getAddress(), responseV2.getData().getDebtor().getStreetName());
@@ -102,27 +106,30 @@ class PaGetPaymentMapperTest {
 
     assertNotNull(responseV2.getData().getMetadata());
     assertNotNull(responseV2.getData().getMetadata().getMapEntries());
-    assertTrue(responseV2.getData().getMetadata().getMapEntries().stream().anyMatch(e -> e.getKey().equals("datiSpecificiRiscossione")));
+    assertTrue(responseV2.getData().getMetadata().getMapEntries().stream()
+      .anyMatch(e -> e.getKey().equals("datiSpecificiRiscossione")));
     assertEquals(installmentDTO.getLegacyPaymentMetadata(), responseV2.getData().getMetadata().getMapEntries()
-      .stream().filter(e -> e.getKey().equals("datiSpecificiRiscossione")).findFirst().map(CtMapEntry::getValue).orElse(null));
+      .stream().filter(e -> e.getKey().equals("datiSpecificiRiscossione"))
+      .findFirst().map(CtMapEntry::getValue).orElse(null));
 
     List<TransferDTO> expectedTransfers = installmentDTO.getTransfers().stream()
       .filter(t -> t.getAmountCents() > 0)
       .toList();
 
-    assertEquals(installmentDTO.getTransfers().size(), responseV2.getData().getTransferList().getTransfers().size());
+    assertEquals(expectedTransfers.size(), responseV2.getData().getTransferList().getTransfers().size());
 
     for (int i = 0; i < responseV2.getData().getTransferList().getTransfers().size(); i++) {
       TransferDTO expected = expectedTransfers.get(i);
       CtTransferPAV2 actual = responseV2.getData().getTransferList().getTransfers().get(i);
 
-      assertEquals(installmentDTO.getTransfers().get(i).getTransferIndex(), responseV2.getData().getTransferList().getTransfers().get(i).getIdTransfer());
-      assertEquals(installmentDTO.getTransfers().get(i).getOrgFiscalCode(), responseV2.getData().getTransferList().getTransfers().get(i).getFiscalCodePA());
-      assertEquals(installmentDTO.getTransfers().get(i).getOrgName(), responseV2.getData().getTransferList().getTransfers().get(i).getCompanyName());
-      assertEquals(ConversionUtils.centsAmountToBigDecimalEuroAmount(installmentDTO.getTransfers().get(i).getAmountCents()), responseV2.getData().getTransferList().getTransfers().get(i).getTransferAmount());
-      assertEquals(installmentDTO.getTransfers().get(i).getCategory(), responseV2.getData().getTransferList().getTransfers().get(i).getTransferCategory());
-      assertEquals(installmentDTO.getTransfers().get(i).getRemittanceInformation(), responseV2.getData().getTransferList().getTransfers().get(i).getRemittanceInformation());
-      assertEquals(installmentDTO.getTransfers().get(i).getIban(), responseV2.getData().getTransferList().getTransfers().get(i).getIBAN());
+      assertEquals(expected.getTransferIndex(), actual.getIdTransfer());
+      assertEquals(expected.getOrgFiscalCode(), actual.getFiscalCodePA());
+      assertEquals(expected.getOrgName(), actual.getCompanyName());
+      assertEquals(ConversionUtils.centsAmountToBigDecimalEuroAmount(expected.getAmountCents()), actual.getTransferAmount());
+      assertEquals(expected.getCategory(), actual.getTransferCategory());
+      assertEquals(expected.getRemittanceInformation(), actual.getRemittanceInformation());
+      assertEquals(expected.getIban(), actual.getIBAN());
+
       if (expected.getStampHashDocument() != null) {
         assertNotNull(actual.getRichiestaMarcaDaBollo());
         assertEquals(expected.getStampType(), actual.getRichiestaMarcaDaBollo().getTipoBollo());
@@ -132,14 +139,31 @@ class PaGetPaymentMapperTest {
       } else {
         assertNull(actual.getRichiestaMarcaDaBollo());
       }
-      TestUtils.checkNotNullFields(responseV2.getData().getTransferList().getTransfers().get(i), "metadata");
+
+      // AGGIUNTO: verifica IBANAPPOGGIO per PAGOPA
+      if (StringUtils.isNotBlank(expected.getPostalIban())) {
+        assertNotNull(actual.getMetadata());
+        assertTrue(actual.getMetadata().getMapEntries().stream()
+          .anyMatch(e -> "IBANAPPOGGIO".equals(e.getKey())
+            && expected.getPostalIban().equals(e.getValue())));
+      } else {
+        boolean hasIbanAppoggio = actual.getMetadata() != null &&
+          actual.getMetadata().getMapEntries().stream()
+            .anyMatch(e -> "IBANAPPOGGIO".equals(e.getKey()));
+        assertFalse(hasIbanAppoggio);
+      }
     }
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"legacyPaymentMetadata"})
-  @NullSource
-  void givenValidInstallmentDTOPostalWhenInstallmentDto2PaGetPaymentV2ResponseThenOk(String legacyPaymentMetadata) {
+  @CsvSource({
+    "legacyPaymentMetadata, IT60X1111111101000000123456",
+    "legacyPaymentMetadata, ''",
+    "'   ', IT60X1111111101000000123456",
+    ", IT60X1111111101000000123456"
+  })
+  void givenValidInstallmentDTOPostalWhenInstallmentDto2PaGetPaymentV2ResponseThenOk(
+    String legacyPaymentMetadata, String postalIban) {
     //given
     InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
     installmentDTO.setLegacyPaymentMetadata(legacyPaymentMetadata);
@@ -148,26 +172,30 @@ class PaGetPaymentMapperTest {
     broker.setFlagDelegate(false);
 
     installmentDTO.getDebtor().setEntityType(PersonEntityType.F);
-    for(int idx = 0; idx<installmentDTO.getTransfers().size(); idx++){
-      installmentDTO.getTransfers().get(idx).setTransferIndex(idx+1);
+    for (int idx = 0; idx < installmentDTO.getTransfers().size(); idx++) {
+      installmentDTO.getTransfers().get(idx).setTransferIndex(idx + 1);
+      installmentDTO.getTransfers().get(idx).setPostalIban(postalIban);
     }
 
     //when
-    PaGetPaymentV2Response responseV2 = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(installmentDTO, organization, broker, StTransferType.POSTAL);
+    PaGetPaymentV2Response responseV2 = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+      installmentDTO, organization, broker, StTransferType.POSTAL);
 
     //verify
     assertNotNull(responseV2);
     assertNotNull(responseV2.getData());
-    TestUtils.checkNotNullFields(responseV2.getData(),"officeName", "metadata");
+    TestUtils.checkNotNullFields(responseV2.getData(), "officeName", "metadata");
 
-    if(legacyPaymentMetadata!=null){
+    if (StringUtils.isNotBlank(legacyPaymentMetadata)) {
       assertNotNull(responseV2.getData().getMetadata());
       assertNotNull(responseV2.getData().getMetadata().getMapEntries());
-      assertTrue(responseV2.getData().getMetadata().getMapEntries().stream().anyMatch(e -> e.getKey().equals("datiSpecificiRiscossione")));
+      assertTrue(responseV2.getData().getMetadata().getMapEntries().stream()
+        .anyMatch(e -> e.getKey().equals("datiSpecificiRiscossione")));
       assertEquals(legacyPaymentMetadata, responseV2.getData().getMetadata().getMapEntries()
-        .stream().filter(e -> e.getKey().equals("datiSpecificiRiscossione")).findFirst().map(CtMapEntry::getValue).orElse(null));
+        .stream().filter(e -> e.getKey().equals("datiSpecificiRiscossione"))
+        .findFirst().map(CtMapEntry::getValue).orElse(null));
     } else {
-      Assertions.assertNull(responseV2.getData().getMetadata());
+      assertNull(responseV2.getData().getMetadata());
     }
 
     TestUtils.checkNotNullFields(responseV2.getData().getDebtor());
@@ -176,15 +204,39 @@ class PaGetPaymentMapperTest {
       .filter(t -> t.getAmountCents() > 0)
       .toList();
 
-    assertEquals(installmentDTO.getTransfers().size(), responseV2.getData().getTransferList().getTransfers().size());
+    assertEquals(expectedTransfers.size(), responseV2.getData().getTransferList().getTransfers().size());
 
     for (int i = 0; i < responseV2.getData().getTransferList().getTransfers().size(); i++) {
       TransferDTO expected = expectedTransfers.get(i);
       CtTransferPAV2 actual = responseV2.getData().getTransferList().getTransfers().get(i);
 
-      assertEquals(expected.getPostalIban(), actual.getIBAN());
-      TestUtils.checkNotNullFields(responseV2.getData().getTransferList().getTransfers().get(i), "metadata");
+      String expectedIban = StringUtils.isNotBlank(expected.getPostalIban())
+        ? expected.getPostalIban()
+        : expected.getIban();
+      assertEquals(expectedIban, actual.getIBAN());
+      TestUtils.checkNotNullFields(actual, "metadata");
     }
+  }
+
+  @Test
+  void givenNullTransfersWhenInstallmentDto2PaGetPaymentV2ResponseThenEmptyTransferList() {
+    // given
+    InstallmentDTO installmentDTO = podamFactory.manufacturePojo(InstallmentDTO.class);
+    installmentDTO.setLegacyPaymentMetadata(null);
+    installmentDTO.setTransfers(null);
+    installmentDTO.getDebtor().setEntityType(PersonEntityType.F);
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    Broker broker = podamFactory.manufacturePojo(Broker.class);
+    broker.setFlagDelegate(false);
+
+    // when
+    PaGetPaymentV2Response response = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+      installmentDTO, organization, broker, StTransferType.PAGOPA);
+
+    // then
+    assertNotNull(response);
+    assertNotNull(response.getData().getTransferList());
+    assertTrue(response.getData().getTransferList().getTransfers().isEmpty());
   }
 
   @Test
@@ -209,9 +261,8 @@ class PaGetPaymentMapperTest {
     installmentDTO.setTransfers(List.of(owner));
 
     // when
-    PaGetPaymentV2Response response =
-      PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-        installmentDTO, organization, broker, StTransferType.PAGOPA);
+    PaGetPaymentV2Response response = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+      installmentDTO, organization, broker, StTransferType.PAGOPA);
 
     // then
     assertNotNull(response);
@@ -219,7 +270,7 @@ class PaGetPaymentMapperTest {
 
     TestUtils.checkNotNullFields(response.getData(), "officeName", "metadata");
     TestUtils.checkNotNullFields(response.getData().getDebtor());
-    TestUtils.checkNotNullFields(response.getData().getTransferList().getTransfers().get(0), "metadata");
+    TestUtils.checkNotNullFields(response.getData().getTransferList().getTransfers().getFirst(), "metadata");
 
     assertEquals("OWNER_ORG_NAME", response.getData().getCompanyName());
   }
@@ -245,9 +296,8 @@ class PaGetPaymentMapperTest {
     installmentDTO.setTransfers(List.of(t1));
 
     // when
-    PaGetPaymentV2Response response =
-      PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-        installmentDTO, organization, broker, StTransferType.PAGOPA);
+    PaGetPaymentV2Response response = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+      installmentDTO, organization, broker, StTransferType.PAGOPA);
 
     // then
     assertNotNull(response);
@@ -255,7 +305,7 @@ class PaGetPaymentMapperTest {
 
     TestUtils.checkNotNullFields(response.getData(), "officeName", "metadata");
     TestUtils.checkNotNullFields(response.getData().getDebtor());
-    TestUtils.checkNotNullFields(response.getData().getTransferList().getTransfers().get(0), "metadata");
+    TestUtils.checkNotNullFields(response.getData().getTransferList().getTransfers().getFirst(), "metadata");
 
     assertEquals("ORG_NAME", response.getData().getCompanyName());
   }
@@ -282,9 +332,8 @@ class PaGetPaymentMapperTest {
     installmentDTO.setTransfers(List.of(owner));
 
     // when
-    PaGetPaymentV2Response response =
-      PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
-        installmentDTO, organization, broker, StTransferType.PAGOPA);
+    PaGetPaymentV2Response response = PaGetPaymentMapper.installmentDto2PaGetPaymentV2Response(
+      installmentDTO, organization, broker, StTransferType.PAGOPA);
 
     // then
     assertNotNull(response);
@@ -292,7 +341,7 @@ class PaGetPaymentMapperTest {
 
     TestUtils.checkNotNullFields(response.getData(), "officeName", "metadata");
     TestUtils.checkNotNullFields(response.getData().getDebtor());
-    TestUtils.checkNotNullFields(response.getData().getTransferList().getTransfers().get(0), "metadata");
+    TestUtils.checkNotNullFields(response.getData().getTransferList().getTransfers().getFirst(), "metadata");
 
     assertEquals("ORG_NAME", response.getData().getCompanyName());
   }

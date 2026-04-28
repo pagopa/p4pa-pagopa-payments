@@ -6,11 +6,11 @@ import java.util.*
 
 plugins {
   java
-  id("org.springframework.boot") version "4.0.5"
+  id("org.springframework.boot") version "4.0.6"
   id("io.spring.dependency-management") version "1.1.7"
   jacoco
   id("org.sonarqube") version "7.2.3.7755"
-  id("com.github.ben-manes.versions") version "0.53.0"
+  id("com.github.ben-manes.versions") version "0.54.0"
   id("org.openapi.generator") version "7.21.0"
   id("org.ajoberstar.grgit") version "5.3.2"
   //code generation for soap webservices classes (via jaxb)
@@ -52,26 +52,23 @@ repositories {
   mavenCentral()
 }
 
-val springDocOpenApiVersion = "3.0.2"
+val springDocOpenApiVersion = "3.0.3"
 val janinoVersion = "3.1.12"
 val openApiToolsVersion = "0.2.10"
-val micrometerVersion = "1.6.4"
-val bouncycastleVersion = "1.83"
+val micrometerVersion = "1.6.5"
+val bouncycastleVersion = "1.84"
 val jaxbVersion = "4.0.7"
 val jaxbApiVersion = "4.0.5"
 val activationVersion = "2.1.4"
 val xmlSchemaVersion = "2.3.2"
 val podamVersion = "8.0.2.RELEASE"
 val caffeineVersion = "3.2.3"
-val httpClientVersion = "5.6"
+val httpClientVersion = "5.6.1"
 val httpCoreVersion = "5.4.2"
 val springWolfAsyncApiVersion = "1.20.0"
 val springWolfUiAsyncApiVersion = "1.20.0"
 val commonsLang3Version = "3.20.0"
-val lz4JavaVersion = "1.10.4"
-
-// fix cve
-val jackson3CoreVersion = "3.1.1"
+val lz4JavaVersion = "1.11.0"
 
 val springCloudDepsVersion = "2025.1.1"
 
@@ -112,9 +109,6 @@ dependencies {
   }
   implementation("io.github.springwolf:springwolf-ui:${springWolfAsyncApiVersion}")
   implementation("io.github.springwolf:springwolf-cloud-stream:${springWolfAsyncApiVersion}")
-
-  // CVE fix
-  implementation("tools.jackson.core:jackson-core:${jackson3CoreVersion}")
 
   //webservice soap
   implementation("org.apache.ws.xmlschema:xmlschema-core:$xmlSchemaVersion")

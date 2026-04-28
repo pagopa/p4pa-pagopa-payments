@@ -202,6 +202,7 @@ rest:
     print-body-when-error: "\${CIE_PRINT_BODY_WHEN_ERROR:true}"
 
 springdoc:
+  api-docs.version: openapi_3_0
   writer-with-default-pretty-printer: true
 
 jwt:

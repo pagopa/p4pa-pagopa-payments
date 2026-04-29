@@ -6,7 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springdoc.core.properties.SpringDocConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.MockMvcPrint;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,10 +40,13 @@ class OpenApiGeneratorTest {
   @Autowired
   private MockMvc mockMvc;
 
+  @Value("${springdoc.api-docs.version}")
+  private String apiDocsVersion;
+
   @BeforeEach
   void init() {
     // removing ModelConverters configured by SpringWolf which will cause the setting of the title in each schema
-    boolean openapi31 = true;
+    boolean openapi31 = apiDocsVersion.equalsIgnoreCase(SpringDocConfigProperties.ApiDocs.OpenApiVersion.OPENAPI_3_1.toString());
     ModelConverters modelConverters = ModelConverters.getInstance(openapi31);
     modelConverters.getConverters().stream()
       .filter(SchemaTitleModelConverter.class::isInstance)

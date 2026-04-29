@@ -34,11 +34,6 @@ public class BrokerServiceImpl implements BrokerService {
   }
 
   @Override
-  public Broker getBrokerByStationId(String stationId, String accessToken) {
-    return brokerClient.getBrokerByStationId(stationId, accessToken);
-  }
-
-  @Override
   public Broker getBrokerByBrokerFiscalCode(String brokerFiscalCode, String accessToken) {
     return brokerClient.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);
   }

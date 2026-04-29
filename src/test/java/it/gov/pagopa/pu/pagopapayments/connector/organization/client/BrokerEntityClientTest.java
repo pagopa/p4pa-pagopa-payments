@@ -158,43 +158,6 @@ class BrokerEntityClientTest {
   }
 
   @Test
-  void whenGetBrokerByStationIdThenInvokeWithAccessToken() {
-    // Given
-    String stationId = "32685440409_01";
-    String accessToken = "ACCESSTOKEN";
-    Broker expectedResult = new Broker();
-
-    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
-      .thenReturn(brokerSearchControllerApiMock);
-    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByStationId(stationId))
-      .thenReturn(expectedResult);
-
-    // When
-    Broker result = brokerClient.getBrokerByStationId(stationId, accessToken);
-
-    // Then
-    Assertions.assertSame(expectedResult, result);
-  }
-
-  @Test
-  void givenNoExistentStationIdWhenGetBrokerByStationIdThenNotFound() {
-    // Given
-    String stationId = "32685441234_01";
-    String accessToken = "ACCESSTOKEN";
-
-    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
-      .thenReturn(brokerSearchControllerApiMock);
-    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByStationId(stationId))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
-
-    // When
-    Broker result = brokerClient.getBrokerByStationId(stationId, accessToken);
-
-    // Then
-    Assertions.assertNull(result);
-  }
-
-  @Test
   void whenGetBrokerByBrokerFiscalCodeThenInvokeWithAccessToken() {
     // Given
     String brokerFiscalCode = "brokerFiscalCode";

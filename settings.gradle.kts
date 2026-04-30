@@ -1,1 +1,1 @@
-rootProject.name = "template-payments-java-repository"
+rootProject.name = "p4pa-pagopa-payments"

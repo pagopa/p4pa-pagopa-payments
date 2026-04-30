@@ -1,4 +1,4 @@
-name: TEMPLATE-PAYMENTS - Code Review
+name: p4pa-pagopa-payments - Code Review
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
 
       - name: Build with Gradle
         working-directory: ./
-        run: ./gradlew clean build jacocoTestReport
+        run: ./gradlew clean build jacocoTestReport -DtargetBranch=${{ github.event.pull_request.base.ref }}
 
       - name: Sonar Scan
         working-directory: ./

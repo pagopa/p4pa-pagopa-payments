@@ -1,0 +1,95 @@
+package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.client;
+
+import it.gov.pagopa.nodo.gpd.dto.generated.InstallmentModel;
+import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
+import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config.GpdApisHolder;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
+import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.util.Utilities;
+import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
+import org.apache.commons.lang3.tuple.Triple;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public class GpdClient {
+
+  private final GpdApisHolder apisHolder;
+  private final RegistryLogger registryLogger;
+
+  public GpdClient(GpdApisHolder apisHolder, RegistryLogger registryLogger) {
+    this.apisHolder = apisHolder;
+    this.registryLogger = registryLogger;
+  }
+
+  public void createPosition(String apiKey, String orgFiscalCode, PaymentPositionModelV3 paymentPositionModel) {
+    registryLogger.execute(
+      getRegistryContextDataFromPaymentPositionModel(
+        orgFiscalCode,
+        RegistryEventType.GPD_createPosition,
+        paymentPositionModel
+      ),
+      paymentPositionModel,
+      () -> {
+        PaymentPositionModelV3 response = apisHolder.getApiClientByApiKey(apiKey)
+          .createPosition(orgFiscalCode, true, null, paymentPositionModel);
+        return Triple.of(response, null, RegistryOutcome.OK);
+      },
+      null
+    );
+  }
+
+  public void updatePosition(String apiKey, String orgFiscalCode, String iupd, PaymentPositionModelV3 paymentPositionModel){
+    registryLogger.execute(
+      getRegistryContextDataFromPaymentPositionModel(
+        orgFiscalCode,
+        RegistryEventType.GPD_updatePosition,
+        paymentPositionModel
+      ),
+      paymentPositionModel,
+      () -> {
+        PaymentPositionModelV3 response = apisHolder.getApiClientByApiKey(apiKey)
+          .updatePosition(orgFiscalCode, iupd, true, null, paymentPositionModel);
+        return Triple.of(response, null, RegistryOutcome.OK);
+      },
+      null
+    );
+  }
+
+  public void deletePosition(String apiKey, String orgFiscalCode, String iupd, PaymentPositionModelV3 paymentPositionModel) {
+    registryLogger.execute(
+      getRegistryContextDataFromPaymentPositionModel(
+        orgFiscalCode,
+        RegistryEventType.GPD_deletePosition,
+        paymentPositionModel
+      ),
+      iupd,
+      () -> {
+        String response = apisHolder.getApiClientByApiKey(apiKey)
+          .deletePosition(orgFiscalCode, iupd, null);
+        return Triple.of(response, null, RegistryOutcome.OK);
+      },
+      null
+    );
+  }
+
+  private RegistryContextData getRegistryContextDataFromPaymentPositionModel(
+    String orgFiscalCode,
+    RegistryEventType eventType,
+    PaymentPositionModelV3 paymentPositionModel) {
+
+    String iuvConcat = paymentPositionModel.getPaymentOption().stream()
+              .filter(Objects::nonNull)
+              .flatMap(po -> po.getInstallments().stream())
+              .filter(Objects::nonNull)
+              .map(InstallmentModel::getIuv)
+              .collect(Collectors.joining(Utilities.IUV_SEPARATOR));
+
+      return RegistryContextData.builder()
+      .orgFiscalCode(orgFiscalCode)
+      .eventType(eventType)
+      .iuv(iuvConcat)
+      .build();
+  }
+}

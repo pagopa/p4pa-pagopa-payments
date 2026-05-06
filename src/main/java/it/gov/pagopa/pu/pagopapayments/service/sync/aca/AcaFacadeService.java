@@ -29,8 +29,8 @@ public class AcaFacadeService extends BaseSyncOperationService<PaymentPositionMo
   }
 
   @Override
-  public void sync(String iud, DebtPositionDTO debtPosition, String accessToken) {
-    if (ACA_EXCLUDED_ORIGINS.contains(debtPosition.getDebtPositionOrigin())) {
+  public void sync(String iud, DebtPositionDTO debtPosition, Boolean forceSpontaneous, String accessToken) {
+    if (!Boolean.TRUE.equals(forceSpontaneous) && ACA_EXCLUDED_ORIGINS.contains(debtPosition.getDebtPositionOrigin())) {
       log.info("Skipping ACA sync for debtPosition [{}] having origin [{}]",
         debtPosition.getDebtPositionId(), debtPosition.getDebtPositionOrigin());
       return;

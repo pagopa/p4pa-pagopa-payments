@@ -27,7 +27,7 @@ public class GpdFacadeService extends BaseSyncOperationService<PaymentPositionMo
   }
 
   @Override
-  public void sync(String iud, DebtPositionDTO debtPosition, String accessToken) {
+  public void sync(String iud, DebtPositionDTO debtPosition, Boolean forceSpontaneous, String accessToken) {
     invokeCreatePositionImpl(iud, debtPosition, accessToken);
   }
 

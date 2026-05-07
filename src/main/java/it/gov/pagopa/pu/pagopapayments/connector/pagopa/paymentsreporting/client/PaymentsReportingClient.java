@@ -39,7 +39,7 @@ public class PaymentsReportingClient {
     return PageUtils.fetchAllFromPaginatedApi(
         page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey())
           .iOrganizationsControllerGetAllPublishedFlows(
-            brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(), latestFlowDate,
+            brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode(), latestFlowDate,
             (long) page, null, null, null
           ),
         this::isPaginatedFlowsResponseEmpty,
@@ -62,7 +62,7 @@ public class PaymentsReportingClient {
   public SingleFlowResponse fetchPaymentReportingFlow(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId, Long revision, String pspId) {
     return apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey())
       .iOrganizationsControllerGetSinglePublishedFlow(
-              reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
+              reportingId, brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode(),
               pspId, revision
       );
   }
@@ -88,7 +88,7 @@ public class PaymentsReportingClient {
 
   private static RegistryContextData buildRegistryContextData(BrokerForNodoPaDTO brokerForNodoPaDTO, String pspId) {
     return RegistryContextData.builder()
-      .orgFiscalCode(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
+      .orgFiscalCode(brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode())
       .pspId(pspId)
       .eventType(RegistryEventType.NodeForPa_fetchPaymentReporting)
       .build();
@@ -98,7 +98,7 @@ public class PaymentsReportingClient {
     List<Payment> responseList = PageUtils.fetchAllFromPaginatedApi(
       page -> apisHolder.getOrganizationApiByApiKey(brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey())
         .iOrganizationsControllerGetPaymentsFromPublishedFlow(
-                reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
+                reportingId, brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode(),
                 pspId, revision, (long) page, null
         ),
       this::isPaginatedPaymentsResponseEmpty,

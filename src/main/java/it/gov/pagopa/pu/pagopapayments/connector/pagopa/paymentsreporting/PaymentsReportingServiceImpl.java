@@ -45,7 +45,7 @@ public class PaymentsReportingServiceImpl implements PaymentsReportingService {
       String exceptionMessage = exceptionResponse.getErrors() != null ?
         exceptionResponse.getErrors().getFirst().getMessage() :
         "Creditor institution with ID [%s] is invalid or unknown."
-          .formatted(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
+          .formatted(brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode());
       log.warn("{} Returning empty list", exceptionMessage);
       return Collections.emptyList();
     }

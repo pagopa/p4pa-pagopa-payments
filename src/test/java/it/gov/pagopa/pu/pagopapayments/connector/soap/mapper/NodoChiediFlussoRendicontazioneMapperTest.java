@@ -19,7 +19,7 @@ class NodoChiediFlussoRendicontazioneMapperTest {
     BrokerForNodoPaDTO brokerForNodoPaDTO = podamFactory.manufacturePojo(BrokerForNodoPaDTO.class);
 
     NodoChiediFlussoRendicontazione expectedResult = new NodoChiediFlussoRendicontazione();
-    expectedResult.setIdentificativoDominio(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
+    expectedResult.setIdentificativoDominio(brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode());
     expectedResult.setPassword("password");
     expectedResult.setIdentificativoIntermediarioPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode());
     expectedResult.setIdentificativoStazioneIntermediarioPA(brokerForNodoPaDTO.getBroker().getStationId());

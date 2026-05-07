@@ -81,10 +81,10 @@ public class PaymentsReportingMapper {
   public PaPaymentReportingDTO mapPaPaymentsReportingDTO(BrokerForNodoPaDTO brokerForNodoPaDTO, FlussoRiversamento flussoRiversamento) {
     String paymentReportingMarshalling = jaxbTransformService.marshalling(flussoRiversamento, FlussoRiversamento.class);
     return PaPaymentReportingDTO.builder()
-      .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
+      .idPA(brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode())
       .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())
       .idStation(brokerForNodoPaDTO.getBroker().getStationId())
-      .fiscalCode(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
+      .fiscalCode(brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode())
       .paymentReportingBytes(paymentReportingMarshalling.getBytes(StandardCharsets.UTF_8))
       .build();
   }

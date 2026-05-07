@@ -5,7 +5,7 @@ import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.nodo.fdrorganization.controller.generated.OrganizationsApi;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.PaymentsReportingApisHolder;
 import it.gov.pagopa.pu.pagopapayments.connector.soap.mapper.NodoChiediFlussoRendicontazioneMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
@@ -76,9 +76,9 @@ class PaymentsReportingClientTest {
     //given
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
     brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncPaymentsReportingKey(SYNC_PAYMENTS_REPORTING_API_KEY).build());
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
-    organization.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
-    brokerForNodoPaDTO.setOrganization(organization);
+    OrganizationStationDTO organizationStationDTO = podamFactory.manufacturePojo(OrganizationStationDTO.class);
+    organizationStationDTO.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
+    brokerForNodoPaDTO.setOrganizationStation(organizationStationDTO);
     OffsetDateTime latestFlowDate = OffsetDateTime.now();
 
     List<FlowByPSP> expectedResult = paginatedFlowsResponse == null ? new ArrayList<>() : paginatedFlowsResponse.getData();
@@ -138,9 +138,9 @@ class PaymentsReportingClientTest {
     //given
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
     brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncPaymentsReportingKey(SYNC_PAYMENTS_REPORTING_API_KEY).build());
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
-    organization.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
-    brokerForNodoPaDTO.setOrganization(organization);
+    OrganizationStationDTO organizationStationDTO = podamFactory.manufacturePojo(OrganizationStationDTO.class);
+    organizationStationDTO.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
+    brokerForNodoPaDTO.setOrganizationStation(organizationStationDTO);
 
     SingleFlowResponse expectedResponse = new SingleFlowResponse();
 
@@ -167,9 +167,9 @@ class PaymentsReportingClientTest {
   void fetchAllPaymentsForPaymentReportingFlow(PaginatedPaymentsResponse paginatedPaymentsResponse) {
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
     brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncPaymentsReportingKey(SYNC_PAYMENTS_REPORTING_API_KEY).build());
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
-    organization.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
-    brokerForNodoPaDTO.setOrganization(organization);
+    OrganizationStationDTO organizationStationDTO = podamFactory.manufacturePojo(OrganizationStationDTO.class);
+    organizationStationDTO.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
+    brokerForNodoPaDTO.setOrganizationStation(organizationStationDTO);
 
     SingleFlowResponse singleFlowResponse = new SingleFlowResponse();
 

@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting;
 
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.client.PaymentsReportingClient;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
@@ -104,9 +104,9 @@ class PaymentsReportingServiceImplTest {
   void givenPaymentsReportingClientThrowsBadRequestWhenFetchPaymentReportingIdListThenReturnEmptyList(ErrorResponse errorResponse) {
     //given
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
-    organization.setOrgFiscalCode(ORG_FISCAL_CODE);
-    brokerForNodoPaDTO.setOrganization(organization);
+    OrganizationStationDTO organizationStationDTO = podamFactory.manufacturePojo(OrganizationStationDTO.class);
+    organizationStationDTO.setOrgFiscalCode(ORG_FISCAL_CODE);
+    brokerForNodoPaDTO.setOrganizationStation(organizationStationDTO);
     OffsetDateTime latestFlowDate = OffsetDateTime.now();
 
     HttpClientErrorException badRequest =
@@ -147,9 +147,9 @@ class PaymentsReportingServiceImplTest {
   void givenPaymentsReportingClientThrowsBadRequestWhenFetchPaymentReportingIdListThenThrowException(ErrorResponse errorResponse) {
     //given
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
-    organization.setOrgFiscalCode(ORG_FISCAL_CODE);
-    brokerForNodoPaDTO.setOrganization(organization);
+    OrganizationStationDTO organizationStationDTO = podamFactory.manufacturePojo(OrganizationStationDTO.class);
+    organizationStationDTO.setOrgFiscalCode(ORG_FISCAL_CODE);
+    brokerForNodoPaDTO.setOrganizationStation(organizationStationDTO);
     OffsetDateTime latestFlowDate = OffsetDateTime.now();
 
     HttpClientErrorException badRequest =

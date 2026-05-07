@@ -4,7 +4,7 @@ import gov.telematici.pagamenti.ws.TipoIdRendicontazione;
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
@@ -238,9 +238,9 @@ class PaymentsReportingMapperTest {
     broker.setBrokerFiscalCode("brokerFiscalCode");
     broker.setStationId("stationId");
     brokerForNodoPaDTO.setBroker(broker);
-    Organization organization = new Organization();
-    organization.setOrgFiscalCode("orgFiscalCode");
-    brokerForNodoPaDTO.setOrganization(organization);
+    OrganizationStationDTO organizationStationDTO = new OrganizationStationDTO();
+    organizationStationDTO.setOrgFiscalCode("orgFiscalCode");
+    brokerForNodoPaDTO.setOrganizationStation(organizationStationDTO);
 
     FlussoRiversamento paymentReporting = new FlussoRiversamento();
 

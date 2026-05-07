@@ -28,14 +28,13 @@ public abstract class BaseSyncOperationService<M> {
     BrokerForNodoPaDTO brokerForNodoPaDTO =
       brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(debtPositionDTO.getOrganizationId(), accessToken);
 
-    Organization organization = brokerForNodoPaDTO.getOrganization();
     Broker broker = brokerForNodoPaDTO.getBroker();
 
     boolean isDelegate = Boolean.TRUE.equals(broker.getFlagDelegate());
     TransferDTO transferOwner = isDelegate ? getTransferOwner(debtPositionDTO) : null;
 
-    String orgName = isDelegate ? transferOwner.getOrgName() : organization.getOrgName();
-    String orgFiscalCode = isDelegate ? transferOwner.getOrgFiscalCode() : organization.getOrgFiscalCode();
+    String orgName = isDelegate ? transferOwner.getOrgName() : brokerForNodoPaDTO.getOrganizationStation().getOrgName();
+    String orgFiscalCode = isDelegate ? transferOwner.getOrgFiscalCode() : brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode();
 
     Pair<Operation, M> mapped = mapToPaymentPositionModel(iud, debtPositionDTO, orgName);
     M model = mapped.getRight();

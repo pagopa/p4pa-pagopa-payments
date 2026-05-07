@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
@@ -49,19 +49,19 @@ class AcaFacadeServiceTest {
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     debtPosition.setDebtPositionOrigin(DebtPositionOrigin.ORDINARY);
 
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    OrganizationStationDTO organizationStationDTO = podamFactory.manufacturePojo(OrganizationStationDTO.class);
     PaymentPositionModel model = podamFactory.manufacturePojo(PaymentPositionModel.class);
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = BrokerForNodoPaDTO.builder()
-      .organization(organization)
       .brokerApiKeys(new BrokerApiKeys().acaKey(VALID_ACA_KEY).gpdKey("OTHER_KEY"))
       .broker(new Broker())
+      .organizationStation(organizationStationDTO)
       .build();
 
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
       .thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization.getOrgName()))
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organizationStationDTO.getOrgName()))
       .thenReturn(Pair.of(Operation.CREATE, model));
 
     // when
@@ -70,7 +70,7 @@ class AcaFacadeServiceTest {
     // then
     Mockito.verify(acaServiceMock).paCreatePosition(
       Mockito.eq(VALID_ACA_KEY),
-      Mockito.eq(organization.getOrgFiscalCode()),
+      Mockito.eq(organizationStationDTO.getOrgFiscalCode()),
       Mockito.same(model)
     );
     Mockito.verifyNoMoreInteractions(acaServiceMock);
@@ -85,19 +85,19 @@ class AcaFacadeServiceTest {
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     debtPosition.setDebtPositionOrigin(DebtPositionOrigin.ORDINARY);
 
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    OrganizationStationDTO organizationStationDTO = podamFactory.manufacturePojo(OrganizationStationDTO.class);
     PaymentPositionModel model = podamFactory.manufacturePojo(PaymentPositionModel.class);
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = BrokerForNodoPaDTO.builder()
-      .organization(organization)
       .brokerApiKeys(new BrokerApiKeys().acaKey(VALID_ACA_KEY).gpdKey("OTHER_KEY"))
       .broker(new Broker())
+      .organizationStation(organizationStationDTO)
       .build();
 
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
       .thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization.getOrgName()))
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organizationStationDTO.getOrgName()))
       .thenReturn(Pair.of(Operation.UPDATE, model));
 
     // when
@@ -106,7 +106,7 @@ class AcaFacadeServiceTest {
     // then
     Mockito.verify(acaServiceMock).paUpdatePosition(
       Mockito.eq(VALID_ACA_KEY),
-      Mockito.eq(organization.getOrgFiscalCode()),
+      Mockito.eq(organizationStationDTO.getOrgFiscalCode()),
       Mockito.eq(model.getIupd()),
       Mockito.same(model)
     );
@@ -122,19 +122,19 @@ class AcaFacadeServiceTest {
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     debtPosition.setDebtPositionOrigin(DebtPositionOrigin.ORDINARY);
 
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    OrganizationStationDTO organizationStationDTO = podamFactory.manufacturePojo(OrganizationStationDTO.class);
     PaymentPositionModel model = podamFactory.manufacturePojo(PaymentPositionModel.class);
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = BrokerForNodoPaDTO.builder()
-      .organization(organization)
       .brokerApiKeys(new BrokerApiKeys().acaKey(VALID_ACA_KEY).gpdKey("OTHER_KEY"))
       .broker(new Broker())
+      .organizationStation(organizationStationDTO)
       .build();
 
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))
       .thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organization.getOrgName()))
+    Mockito.when(acaDebtPositionMapperMock.mapToNewPaymentPositionModel(iud, debtPosition, organizationStationDTO.getOrgName()))
       .thenReturn(Pair.of(Operation.DELETE, model));
 
     // when
@@ -143,7 +143,7 @@ class AcaFacadeServiceTest {
     // then
     Mockito.verify(acaServiceMock).paDeletePosition(
       Mockito.eq(VALID_ACA_KEY),
-      Mockito.eq(organization.getOrgFiscalCode()),
+      Mockito.eq(organizationStationDTO.getOrgFiscalCode()),
       Mockito.eq(model.getIupd()),
       Mockito.same(model)
     );
@@ -176,15 +176,15 @@ class AcaFacadeServiceTest {
     debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers().getFirst().setFlagOwner(Boolean.TRUE);
     debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers().getFirst().setOrgFiscalCode(orgFiscalCode);
     debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers().getFirst().setOrgName(orgName);
-    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    OrganizationStationDTO organizationStationDTO = podamFactory.manufacturePojo(OrganizationStationDTO.class);
     Broker broker = podamFactory.manufacturePojo(Broker.class);
     broker.setFlagDelegate(Boolean.TRUE);
     PaymentPositionModel model = podamFactory.manufacturePojo(PaymentPositionModel.class);
 
     BrokerForNodoPaDTO brokerForNodoPaDTO = BrokerForNodoPaDTO.builder()
-      .organization(organization)
       .brokerApiKeys(new BrokerApiKeys().acaKey(VALID_ACA_KEY).gpdKey("OTHER_KEY"))
       .broker(broker)
+      .organizationStation(organizationStationDTO)
       .build();
 
     Mockito.when(brokerRetrieverServiceMock.getBrokerForNodoPaDTOByOrganizationId(debtPosition.getOrganizationId(), accessToken))

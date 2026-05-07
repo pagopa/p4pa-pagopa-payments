@@ -64,7 +64,7 @@ public class NodeForPaClientImpl extends WebServiceGatewaySupport implements Nod
 
     if (response.getFault() != null) {
       if(response.getFault().getFaultCode().equals("PPT_DOMINIO_SCONOSCIUTO")) {
-        log.info("Retrieved fault code PPT_DOMINIO_SCONOSCIUTO for org {}. Returning empty list",brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
+        log.info("Retrieved fault code PPT_DOMINIO_SCONOSCIUTO for org {}. Returning empty list", brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode());
         return Collections.emptyList();
       }
       else
@@ -85,10 +85,10 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
   byte[] bytes = fetchPaymentReporting(brokerForNodoPaDTO, request);
 
   return PaPaymentReportingDTO.builder()
-    .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
+    .idPA(brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode())
     .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())
     .idStation(brokerForNodoPaDTO.getBroker().getStationId())
-    .fiscalCode(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
+    .fiscalCode(brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode())
     .paymentReportingBytes(bytes)
     .build();
   }
@@ -141,7 +141,7 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
 
   private NodoChiediElencoFlussiRendicontazione createElencoFlussiRendicontazioneRequest(BrokerForNodoPaDTO brokerForNodoPaDTO) {
     NodoChiediElencoFlussiRendicontazione request = new NodoChiediElencoFlussiRendicontazione();
-    request.setIdentificativoDominio(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
+    request.setIdentificativoDominio(brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode());
     request.setPassword("password"); //parameter for retrocompatibility but not used. it is required by the wsdl
     request.setIdentificativoIntermediarioPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode());
     request.setIdentificativoStazioneIntermediarioPA(brokerForNodoPaDTO.getBroker().getStationId());

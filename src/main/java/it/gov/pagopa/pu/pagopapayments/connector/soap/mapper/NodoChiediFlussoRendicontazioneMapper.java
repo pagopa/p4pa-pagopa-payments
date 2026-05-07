@@ -11,10 +11,9 @@ public class NodoChiediFlussoRendicontazioneMapper {
 
   public NodoChiediFlussoRendicontazione createFlussoRendicontazioneRequest(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId) {
     Broker broker = brokerForNodoPaDTO.getBroker();
-    Organization organization = brokerForNodoPaDTO.getOrganization();
 
     NodoChiediFlussoRendicontazione request = new NodoChiediFlussoRendicontazione();
-    request.setIdentificativoDominio(organization.getOrgFiscalCode());
+    request.setIdentificativoDominio(brokerForNodoPaDTO.getOrganizationStation().getOrgFiscalCode());
     request.setPassword("password");
     request.setIdentificativoIntermediarioPA(broker.getBrokerFiscalCode());
     request.setIdentificativoStazioneIntermediarioPA(broker.getStationId());

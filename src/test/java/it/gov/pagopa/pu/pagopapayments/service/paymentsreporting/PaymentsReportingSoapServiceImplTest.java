@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service.paymentsreporting;
 
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.fileshare.FileShareService;
 import it.gov.pagopa.pu.pagopapayments.connector.soap.NodeForPaClient;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
@@ -50,13 +50,13 @@ class PaymentsReportingSoapServiceImplTest {
 
   private static final BrokerApiKeys BROKER_API_KEYS = new BrokerApiKeys()
     .syncKey("syncKey");
-  private static final Organization ORGANIZATION = new Organization()
+  private static final OrganizationStationDTO ORGANIZATION_STATION_DTO = new OrganizationStationDTO()
     .orgFiscalCode("orgFiscalCode");
 
   private static final BrokerForNodoPaDTO BROKER_FOR_NODO_PA_DTO = BrokerForNodoPaDTO.builder()
     .broker(BROKER)
-    .organization(ORGANIZATION)
     .brokerApiKeys(BROKER_API_KEYS)
+    .organizationStation(ORGANIZATION_STATION_DTO)
     .build();
 
 

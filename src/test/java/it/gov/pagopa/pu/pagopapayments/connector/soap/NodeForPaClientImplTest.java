@@ -4,7 +4,7 @@ import gov.telematici.pagamenti.ws.*;
 import it.gov.pagopa.pagopa_api.xsd.common_types.v1_0.CtFaultBean;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.soap.mapper.NodoChiediFlussoRendicontazioneMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
@@ -80,13 +80,13 @@ class NodeForPaClientImplTest {
 
   private static final BrokerApiKeys BROKER_API_KEYS = new BrokerApiKeys()
     .syncKey("syncKey");
-  private static final Organization ORGANIZATION = new Organization()
+  private static final OrganizationStationDTO ORGANIZATION_STATION_DTO = new OrganizationStationDTO()
     .orgFiscalCode("orgFiscalCode");
 
   private static final BrokerForNodoPaDTO BROKER_FOR_NODO_PA_DTO = BrokerForNodoPaDTO.builder()
     .broker(BROKER)
-    .organization(ORGANIZATION)
     .brokerApiKeys(BROKER_API_KEYS)
+    .organizationStation(ORGANIZATION_STATION_DTO)
     .build();
 
   @Test
@@ -193,7 +193,7 @@ class NodeForPaClientImplTest {
 
   private void configureFetchPaymentsReportingMocks(String reportingId) {
     NodoChiediFlussoRendicontazione expectedRequest = new NodoChiediFlussoRendicontazione();
-    expectedRequest.setIdentificativoDominio(BROKER_FOR_NODO_PA_DTO.getOrganization().getOrgFiscalCode());
+    expectedRequest.setIdentificativoDominio(BROKER_FOR_NODO_PA_DTO.getOrganizationStation().getOrgFiscalCode());
     expectedRequest.setIdentificativoIntermediarioPA(BROKER_FOR_NODO_PA_DTO.getBroker().getBrokerFiscalCode());
     expectedRequest.setIdentificativoStazioneIntermediarioPA(BROKER_FOR_NODO_PA_DTO.getBroker().getStationId());
     expectedRequest.setIdentificativoFlusso(reportingId);
@@ -202,7 +202,7 @@ class NodeForPaClientImplTest {
       .thenReturn(expectedRequest);
 
     RegistryContextData expectedContextData = RegistryContextData.builder()
-      .orgFiscalCode(BROKER_FOR_NODO_PA_DTO.getOrganization().getOrgFiscalCode())
+      .orgFiscalCode(BROKER_FOR_NODO_PA_DTO.getOrganizationStation().getOrgFiscalCode())
       .brokerStationId(BROKER_FOR_NODO_PA_DTO.getBroker().getStationId())
       .eventType(RegistryEventType.NodeForPa_fetchPaymentReporting)
       .build();

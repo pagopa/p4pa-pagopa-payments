@@ -38,8 +38,8 @@ public class BrokerRetrieverService {
   @Cacheable(cacheNames = CacheConfig.Fields.brokerApiKeyAndFiscalCode, key = "#organizationId", unless="#result == null")
   public BrokerForNodoPaDTO getBrokerForNodoPaDTOByOrganizationId(Long organizationId, String accessToken){
     OrganizationStationDTO defaultOrganizationStation = organizationService.getOrganizationStationDTO(organizationId, null, accessToken);
-    if(defaultOrganizationStation==null){
-      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_NOT_FOUND, "organization [%s]".formatted(organizationId));
+    if(defaultOrganizationStation == null){
+      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_STATION_NOT_FOUND, "organization station for organization [%s]".formatted(organizationId));
     }
     BrokerApiKeys apiKeys = brokerService.getApiKeyByBrokerId(defaultOrganizationStation.getBrokerId(), accessToken);
     Broker broker = brokerService.getBrokerById(defaultOrganizationStation.getBrokerId(), accessToken);

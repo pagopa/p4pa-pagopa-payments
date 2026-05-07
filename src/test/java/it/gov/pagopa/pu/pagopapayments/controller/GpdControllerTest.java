@@ -84,13 +84,13 @@ class GpdControllerTest {
   @Test
   void givenValidDebtPositionWhenSyncGpdThenOk() {
     //given
-    Mockito.doNothing().when(gpdFacadeServiceMock).sync("IUD", VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
+    Mockito.doNothing().when(gpdFacadeServiceMock).sync("IUD", VALID_DEBT_POSITION, Boolean.FALSE, TestUtils.getFakeAccessToken());
     TestUtils.setFakeAccessTokenInContext();
     //when
     ResponseEntity<Void> response = gpdController.syncGpd("IUD", VALID_DEBT_POSITION);
     //verify
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-    Mockito.verify(gpdFacadeServiceMock, Mockito.times(1)).sync("IUD", VALID_DEBT_POSITION, TestUtils.getFakeAccessToken());
+    Mockito.verify(gpdFacadeServiceMock, Mockito.times(1)).sync("IUD", VALID_DEBT_POSITION, Boolean.FALSE, TestUtils.getFakeAccessToken());
   }
 }

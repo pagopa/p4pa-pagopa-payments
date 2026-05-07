@@ -22,7 +22,7 @@ public abstract class BaseSyncOperationService<M> {
     this.brokerRetrieverService = brokerRetrieverService;
   }
 
-  public abstract void sync(String iud, DebtPositionDTO debtPosition, String accessToken);
+  public abstract void sync(String iud, DebtPositionDTO debtPosition, Boolean forceSpontaneous, String accessToken);
 
   protected void invokeCreatePositionImpl(String iud, DebtPositionDTO debtPositionDTO, String accessToken) {
     BrokerForNodoPaDTO brokerForNodoPaDTO =

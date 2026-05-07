@@ -35,6 +35,7 @@ class GpdFacadeServiceTest {
   private GpdFacadeService gpdFacadeService;
 
   private static final String VALID_GPD_KEY = "validGpdKey";
+  private static final Boolean FORCE_SPONTANEOUS = Boolean.FALSE;
   private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   @Test
@@ -59,7 +60,7 @@ class GpdFacadeServiceTest {
       .thenReturn(Pair.of(Operation.CREATE, model));
 
     // when
-    gpdFacadeService.sync(iud, debtPosition, accessToken);
+    gpdFacadeService.sync(iud, debtPosition, FORCE_SPONTANEOUS, accessToken);
 
     // then
     Mockito.verify(gpdServiceMock).paCreatePosition(
@@ -92,7 +93,7 @@ class GpdFacadeServiceTest {
       .thenReturn(Pair.of(Operation.UPDATE, model));
 
     // when
-    gpdFacadeService.sync(iud, debtPosition, accessToken);
+    gpdFacadeService.sync(iud, debtPosition, FORCE_SPONTANEOUS, accessToken);
 
     // then
     Mockito.verify(gpdServiceMock).paUpdatePosition(
@@ -126,7 +127,7 @@ class GpdFacadeServiceTest {
       .thenReturn(Pair.of(Operation.DELETE, model));
 
     // when
-    gpdFacadeService.sync(iud, debtPosition, accessToken);
+    gpdFacadeService.sync(iud, debtPosition, FORCE_SPONTANEOUS, accessToken);
 
     // then
     Mockito.verify(gpdServiceMock).paDeletePosition(
@@ -167,7 +168,7 @@ class GpdFacadeServiceTest {
       .thenReturn(Pair.of(Operation.CREATE, model));
 
     // when
-    gpdFacadeService.sync(iud, debtPosition, accessToken);
+    gpdFacadeService.sync(iud, debtPosition, FORCE_SPONTANEOUS, accessToken);
 
     // then
     Mockito.verify(gpdServiceMock).paCreatePosition(

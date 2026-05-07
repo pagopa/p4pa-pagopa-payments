@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
@@ -81,19 +82,25 @@ class BrokerRetrieverServiceTest {
 
   @Test
   void givenValidBrokerIdWhenGetBrokerThenReturnBrokerForNodoPaDTO() {
+    //GIVEN
     String accessToken = TestUtils.getFakeAccessToken();
     Broker broker = new Broker();
+    OrganizationStationDTO defaultOrganizationStation = new OrganizationStationDTO();
 
     Mockito.when(organizationServiceMock.getOrganizationById(VALID_ORG_ID, accessToken)).thenReturn(VALID_ORG);
     Mockito.when(brokerServiceMock.getBrokerById(VALID_BROKER_ID, accessToken)).thenReturn(broker);
     Mockito.when(brokerServiceMock.getApiKeyByBrokerId(VALID_BROKER_ID, accessToken)).thenReturn(VALID_API_KEYS);
+    Mockito.when(organizationServiceMock.getOrganizationStationDTO(Mockito.eq(VALID_ORG_ID), Mockito.isNull(), Mockito.eq(accessToken)))
+      .thenReturn(defaultOrganizationStation);
 
+    //WHEN
     BrokerForNodoPaDTO result = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(VALID_ORG_ID, accessToken);
 
+    //THEN
     Assertions.assertNotNull(result);
     Assertions.assertSame(broker, result.getBroker());
+    Assertions.assertSame(defaultOrganizationStation, result.getOrganizationStation());
     Assertions.assertEquals(VALID_API_KEYS, result.getBrokerApiKeys());
-    Assertions.assertEquals(VALID_ORG, result.getOrganization());
   }
 
 

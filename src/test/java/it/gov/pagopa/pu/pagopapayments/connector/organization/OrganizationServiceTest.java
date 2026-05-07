@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.organization;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.client.OrganizationClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,5 +69,23 @@ class OrganizationServiceTest {
 
     // Then
     Assertions.assertSame(apiKey, result);
+  }
+
+  @Test
+  void whenGetOrganizationStationDTOThenInvokeClient(){
+    // Given
+    Long organizationId = 1L;
+    String stationId = "stationId";
+    String accessToken = "accessToken";
+    OrganizationStationDTO expectedOrganizationStationDTO = new OrganizationStationDTO();
+
+    Mockito.when(client.getOrganizationStationDTO(organizationId, stationId, accessToken))
+      .thenReturn(expectedOrganizationStationDTO);
+
+    // When
+    OrganizationStationDTO result = service.getOrganizationStationDTO(organizationId, stationId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedOrganizationStationDTO, result);
   }
 }

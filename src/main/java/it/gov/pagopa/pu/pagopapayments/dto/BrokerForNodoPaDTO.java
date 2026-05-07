@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.dto;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,4 +17,5 @@ public class BrokerForNodoPaDTO {
   private Broker broker;
   private Organization organization;
   private BrokerApiKeys brokerApiKeys;
+  private OrganizationStationDTO organizationStation;
 }

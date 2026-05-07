@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,16 @@ public class OrganizationClient {
         .getOrganizationApiKey(organizationId, organizationApiKeyType);
     } catch (HttpClientErrorException.NotFound e){
       log.info("Cannot find organization having organizationId {}", organizationId);
+      return null;
+    }
+  }
+
+  public OrganizationStationDTO getOrganizationStationDTO(Long organizationId, String stationId, String accessToken) {
+    try{
+      return apisHolder.getOrganizationApi(accessToken)
+        .getOrganizationStation(organizationId, stationId);
+    } catch (HttpClientErrorException.NotFound e){
+      log.info("Cannot find organization_station having organizationId {} and stationId {}", organizationId, stationId);
       return null;
     }
   }

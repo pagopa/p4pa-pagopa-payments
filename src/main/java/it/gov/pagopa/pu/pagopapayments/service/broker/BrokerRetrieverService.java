@@ -1,8 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service.broker;
 
-import it.gov.pagopa.pu.organization.dto.generated.Broker;
-import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.config.CacheConfig;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
@@ -39,17 +37,17 @@ public class BrokerRetrieverService {
 
   @Cacheable(cacheNames = CacheConfig.Fields.brokerApiKeyAndFiscalCode, key = "#organizationId", unless="#result == null")
   public BrokerForNodoPaDTO getBrokerForNodoPaDTOByOrganizationId(Long organizationId, String accessToken){
-    Organization organization = organizationService.getOrganizationById(organizationId, accessToken);
-    if(organization==null){
+    OrganizationStationDTO defaultOrganizationStation = organizationService.getOrganizationStationDTO(organizationId, null, accessToken);
+    if(defaultOrganizationStation==null){
       throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_NOT_FOUND, "organization [%s]".formatted(organizationId));
     }
-    BrokerApiKeys apiKeys = brokerService.getApiKeyByBrokerId(organization.getBrokerId(), accessToken);
-    Broker broker = brokerService.getBrokerById(organization.getBrokerId(), accessToken);
+    BrokerApiKeys apiKeys = brokerService.getApiKeyByBrokerId(defaultOrganizationStation.getBrokerId(), accessToken);
+    Broker broker = brokerService.getBrokerById(defaultOrganizationStation.getBrokerId(), accessToken);
 
     return BrokerForNodoPaDTO.builder()
       .broker(broker)
-      .organization(organization)
       .brokerApiKeys(apiKeys)
+      .organizationStation(defaultOrganizationStation)
       .build();
   }
 }

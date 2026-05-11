@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -59,6 +60,25 @@ class StationClientTest {
   }
 
   @Test
+  void givenNotFoundExceptionWhenGetStationByBrokerIdAndStationIdThenReturnNull() {
+    // Given
+    Long brokerId = 1L;
+    String stationId = "STATIONID";
+    String accessToken = "ACCESSTOKEN";
+
+    Mockito.when(organizationApisHolder.getStationSearchControllerApi(accessToken))
+      .thenReturn(stationSearchControllerApiMock);
+    Mockito.when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndStationId(brokerId, stationId))
+      .thenThrow(Mockito.mock(HttpClientErrorException.NotFound.class));
+
+    // When
+    Station result = stationClient.getStationByBrokerIdAndStationId(brokerId, stationId, accessToken);
+
+    // Then
+    Assertions.assertNull(result);
+  }
+
+  @Test
   void whenGetStationByBrokerIdAndBroadcastStationIdThenInvokeWithAccessToken() {
     // Given
     Long brokerId = 1L;
@@ -82,5 +102,4 @@ class StationClientTest {
     // Then
     Assertions.assertEquals(expectedStationList, result);
   }
-
 }

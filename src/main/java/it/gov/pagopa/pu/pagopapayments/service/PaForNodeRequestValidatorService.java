@@ -103,7 +103,7 @@ public class PaForNodeRequestValidatorService {
     }
 
     // Sync brokers expects to receive RT on stationId, async brokers expects to receive RT on broadcastStationId. accepting both
-    Boolean isValidStation = isValidStation(broker.getBrokerId(), request.getIdStation(), accessToken);
+    boolean isValidStation = isValidStation(broker.getBrokerId(), request.getIdStation(), accessToken);
 
     if (!isValidStation) {
       log.warn("paymentRequestValidate [{}/{}]: invalid stationId for organization broker obtained[{}]",
@@ -115,7 +115,7 @@ public class PaForNodeRequestValidatorService {
     }
   }
 
-  private Boolean isValidStation(Long brokerId, String stationId, String accessToken) {
+  private boolean isValidStation(Long brokerId, String stationId, String accessToken) {
     Station station = stationService.getStationByBrokerIdAndStationId(brokerId, stationId, accessToken);
 
     if (station != null) {

@@ -106,16 +106,16 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | APP_NODE_FOR_PA_URL           | Base URL through which the service is exposed, used to expose the WSDL document |                       |
 
 #### ✏️ Logging
-| ENV                                   | DESCRIPTION                                                                                                                                                                     | DEFAULT |
-|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
-| LOG_LEVEL_ROOT                        | Base level                                                                                                                                                                      | INFO    |
-| LOG_LEVEL_PAGOPA                      | Base level of custom classes                                                                                                                                                    | INFO    |
-| LOG_LEVEL_SPRING                      | Level applied to Spring framework                                                                                                                                               | INFO    |
-| LOG_LEVEL_SPRING_BOOT_AVAILABILITY    | To print availability events                                                                                                                                                    | DEBUG   |
-| LOGGING_LEVEL_API_REQUEST_EXCEPTION   | Level applied to APIs exception                                                                                                                                                 | INFO    |
-| LOG_LEVEL_PERFORMANCE_LOG             | Level applied to [PerformanceLog](https://pagopa.atlassian.net/wiki/spaces/SPAC/pages/1540096383/Logging#2.2.-Log-di-performance)                                               | INFO    |
-| LOG_LEVEL_PERFORMANCE_LOG_API_REQUEST | Level applied to [API Performance Log](https://pagopa.atlassian.net/wiki/spaces/SPAC/pages/1540096383/Logging#2.2.2.1.-Log-di-perfomance-per-le-API)                            | INFO    |
-| LOG_LEVEL_PERFORMANCE_LOG_REST_INVOKE | Level applied to [REST invoke Performance Log](https://pagopa.atlassian.net/wiki/spaces/SPAC/pages/1540096383/Logging#2.2.2.2.-Log-di-performance-per-i-servizi-REST-integrati) | INFO    |
+| ENV                                   | DESCRIPTION                                                                                                                                            | DEFAULT |
+|---------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| LOG_LEVEL_ROOT                        | Base level                                                                                                                                             | INFO    |
+| LOG_LEVEL_PAGOPA                      | Base level of custom classes                                                                                                                           | INFO    |
+| LOG_LEVEL_SPRING                      | Level applied to Spring framework                                                                                                                      | INFO    |
+| LOG_LEVEL_SPRING_BOOT_AVAILABILITY    | To print availability events                                                                                                                           | DEBUG   |
+| LOGGING_LEVEL_API_REQUEST_EXCEPTION   | Level applied to APIs exception                                                                                                                        | INFO    |
+| LOG_LEVEL_PERFORMANCE_LOG             | Level applied to [PerformanceLog](https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/reference/technical-docs/Logging.pdf)              | INFO    |
+| LOG_LEVEL_PERFORMANCE_LOG_API_REQUEST | Level applied to [API Performance Log](https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/reference/technical-docs/Logging.pdf)         | INFO    |
+| LOG_LEVEL_PERFORMANCE_LOG_REST_INVOKE | Level applied to [REST invoke Performance Log](https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/reference/technical-docs/Logging.pdf) | INFO    |
 
 #### 🔁 Integrations
 

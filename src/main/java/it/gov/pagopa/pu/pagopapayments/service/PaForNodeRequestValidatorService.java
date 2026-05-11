@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -102,9 +103,9 @@ public class PaForNodeRequestValidatorService {
     }
 
     // Sync brokers expects to receive RT on stationId, async brokers expects to receive RT on broadcastStationId. accepting both
-    Station station = retrieveStationByBrokerIdAndStationOrBroadcastStationId(broker.getBrokerId(), request.getIdStation(), accessToken);
+    Boolean isValidStation = isValidStation(broker.getBrokerId(), request.getIdStation(), accessToken);
 
-    if (station == null) {
+    if (!isValidStation) {
       log.warn("paymentRequestValidate [{}/{}]: invalid stationId for organization broker obtained[{}]",
         request.getFiscalCode(),
         request.getNoticeNumber(),
@@ -114,13 +115,15 @@ public class PaForNodeRequestValidatorService {
     }
   }
 
-  private Station retrieveStationByBrokerIdAndStationOrBroadcastStationId(Long brokerId, String stationId, String accessToken) {
+  private Boolean isValidStation(Long brokerId, String stationId, String accessToken) {
     Station station = stationService.getStationByBrokerIdAndStationId(brokerId, stationId, accessToken);
 
     if (station != null) {
-      return station;
+      return true;
     }
 
-    return stationService.getStationByBrokerIdAndBroadcastStationId(brokerId, stationId, accessToken);
+    List<Station> broadcastStations = stationService.getStationByBrokerIdAndBroadcastStationId(brokerId, stationId, accessToken);
+
+    return !broadcastStations.isEmpty();
   }
 }

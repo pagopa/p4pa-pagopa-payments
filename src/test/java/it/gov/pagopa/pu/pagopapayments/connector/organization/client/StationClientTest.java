@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 
 import it.gov.pagopa.pu.organization.controller.generated.StationSearchControllerApi;
+import it.gov.pagopa.pu.organization.dto.generated.CollectionModelStation;
+import it.gov.pagopa.pu.organization.dto.generated.PagedModelStationEmbedded;
 import it.gov.pagopa.pu.organization.dto.generated.Station;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
 import org.junit.jupiter.api.AfterEach;
@@ -11,7 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.HttpClientErrorException;
+
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class StationClientTest {
@@ -56,60 +59,28 @@ class StationClientTest {
   }
 
   @Test
-  void givenNotFoundExceptionWhenGetStationByBrokerIdAndStationIdThenReturnNull() {
-    // Given
-    Long brokerId = 1L;
-    String stationId = "STATIONID";
-    String accessToken = "ACCESSTOKEN";
-
-    Mockito.when(organizationApisHolder.getStationSearchControllerApi(accessToken))
-      .thenReturn(stationSearchControllerApiMock);
-    Mockito.when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndStationId(brokerId, stationId))
-      .thenThrow(Mockito.mock(HttpClientErrorException.NotFound.class));
-
-    // When
-    Station result = stationClient.getStationByBrokerIdAndStationId(brokerId, stationId, accessToken);
-
-    // Then
-    Assertions.assertNull(result);
-  }
-
-  @Test
   void whenGetStationByBrokerIdAndBroadcastStationIdThenInvokeWithAccessToken() {
     // Given
     Long brokerId = 1L;
     String broadcastStationId = "BROADCASTSTATIONID";
     String accessToken = "ACCESSTOKEN";
-    Station expectedResult = new Station();
+
+    List<Station> expectedStationList = List.of(new Station());
+    PagedModelStationEmbedded pagedModelStationEmbedded = new PagedModelStationEmbedded();
+    pagedModelStationEmbedded.setStations(expectedStationList);
+    CollectionModelStation collectionModelStation = new CollectionModelStation();
+    collectionModelStation.setEmbedded(pagedModelStationEmbedded);
 
     Mockito.when(organizationApisHolder.getStationSearchControllerApi(accessToken))
       .thenReturn(stationSearchControllerApiMock);
     Mockito.when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId))
-      .thenReturn(expectedResult);
+      .thenReturn(collectionModelStation);
 
     // When
-    Station result = stationClient.getStationByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId, accessToken);
+    List<Station> result = stationClient.getStationByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId, accessToken);
 
     // Then
-    Assertions.assertSame(expectedResult, result);
+    Assertions.assertEquals(expectedStationList, result);
   }
 
-  @Test
-  void givenNotFoundExceptionWhenGetStationByBrokerIdAndBroadcastStationIdThenReturnNull() {
-    // Given
-    Long brokerId = 1L;
-    String broadcastStationId = "BROADCASTSTATIONID";
-    String accessToken = "ACCESSTOKEN";
-
-    Mockito.when(organizationApisHolder.getStationSearchControllerApi(accessToken))
-      .thenReturn(stationSearchControllerApiMock);
-    Mockito.when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId))
-      .thenThrow(Mockito.mock(HttpClientErrorException.NotFound.class));
-
-    // When
-    Station result = stationClient.getStationByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId, accessToken);
-
-    // Then
-    Assertions.assertNull(result);
-  }
 }

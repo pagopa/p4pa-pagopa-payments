@@ -1,10 +1,16 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 
+import it.gov.pagopa.pu.organization.dto.generated.CollectionModelStation;
+import it.gov.pagopa.pu.organization.dto.generated.PagedModelStationEmbedded;
 import it.gov.pagopa.pu.organization.dto.generated.Station;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -26,13 +32,13 @@ public class StationClient {
     }
   }
 
-  public Station getStationByBrokerIdAndBroadcastStationId(Long brokerId, String broadcastStationId, String accessToken) {
-    try {
-      return apisHolder.getStationSearchControllerApi(accessToken)
-        .crudStationsFindByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId);
-    } catch (HttpClientErrorException.NotFound e) {
-      log.info("Cannot find Station having brokerId {} and broadcastStationId {}", brokerId, broadcastStationId);
-      return null;
-    }
+  public List<Station> getStationByBrokerIdAndBroadcastStationId(Long brokerId, String broadcastStationId, String accessToken) {
+    CollectionModelStation collectionModelStation = apisHolder.getStationSearchControllerApi(accessToken)
+      .crudStationsFindByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId);
+
+    return Optional.ofNullable(collectionModelStation)
+      .map(CollectionModelStation::getEmbedded)
+      .map(PagedModelStationEmbedded::getStations)
+      .orElse(Collections.emptyList());
   }
 }

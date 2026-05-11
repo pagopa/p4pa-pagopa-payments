@@ -24,6 +24,9 @@ import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
 
+import java.util.Collections;
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class PaForNodeRequestValidatorServiceTest {
   @Mock
@@ -92,7 +95,7 @@ class PaForNodeRequestValidatorServiceTest {
     // Given
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     Broker broker = podamFactory.manufacturePojo(Broker.class);
-    Station station = podamFactory.manufacturePojo(Station.class);
+    List<Station> station = List.of(podamFactory.manufacturePojo(Station.class));
 
     broker.setFlagDelegate(false);
     organization.setBrokerId(broker.getBrokerId());
@@ -233,7 +236,7 @@ class PaForNodeRequestValidatorServiceTest {
     Mockito.when(stationServiceMock.getStationByBrokerIdAndStationId(broker.getBrokerId(), request.getIdStation(), VALID_ACCESS_TOKEN))
       .thenReturn(null);
     Mockito.when(stationServiceMock.getStationByBrokerIdAndBroadcastStationId(broker.getBrokerId(), request.getIdStation(), VALID_ACCESS_TOKEN))
-      .thenReturn(null);
+      .thenReturn(Collections.emptyList());
 
     // When
     PagoPaNodeFaultException response = Assertions.assertThrows(

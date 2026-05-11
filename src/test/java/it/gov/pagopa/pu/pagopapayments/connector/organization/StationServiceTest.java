@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,13 +45,13 @@ class StationServiceTest {
     Long brokerId = 1L;
     String broadcastStationId = "BROADCASTSTATIONID";
     String accessToken = "accessToken";
-    Station expectedStation = new Station();
+    List<Station> expectedStationList = List.of(new Station());
 
     Mockito.when(client.getStationByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId, accessToken))
-      .thenReturn(expectedStation);
+      .thenReturn(expectedStationList);
 
-    Station result = service.getStationByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId, accessToken);
+    List<Station> result = service.getStationByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId, accessToken);
 
-    assertEquals(expectedStation, result);
+    assertEquals(expectedStationList, result);
   }
 }

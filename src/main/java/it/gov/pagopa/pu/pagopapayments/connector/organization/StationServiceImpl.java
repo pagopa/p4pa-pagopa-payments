@@ -4,6 +4,8 @@ import it.gov.pagopa.pu.organization.dto.generated.Station;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.client.StationClient;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class StationServiceImpl implements StationService {
 
@@ -19,7 +21,7 @@ public class StationServiceImpl implements StationService {
   }
 
   @Override
-  public Station getStationByBrokerIdAndBroadcastStationId(Long brokerId, String broadcastStationId, String accessToken) {
+  public List<Station> getStationByBrokerIdAndBroadcastStationId(Long brokerId, String broadcastStationId, String accessToken) {
     return stationClient.getStationByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId, accessToken);
   }
 }

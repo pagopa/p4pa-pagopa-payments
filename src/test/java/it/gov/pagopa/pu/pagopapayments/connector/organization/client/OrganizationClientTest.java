@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.organization.controller.generated.OrganizationEntityCont
 import it.gov.pagopa.pu.organization.controller.generated.OrganizationSearchControllerApi;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -157,5 +158,44 @@ class OrganizationClientTest {
 
     // Then
     assertNull(result);
+  }
+
+  @Test
+  void whenFindOrganizationStationThenInvokeWithAccessToken() {
+    // Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String stationId = "STATIONID";
+    OrganizationStationDTO expectedResult = new OrganizationStationDTO();
+
+    Mockito.when(organizationApisHolder.getOrganizationApi(accessToken))
+      .thenReturn(organizationApiMock);
+    Mockito.when(organizationApiMock.getOrganizationStation(organizationId, stationId))
+      .thenReturn(expectedResult);
+
+    // When
+    OrganizationStationDTO result = organizationClient.findOrganizationStation(organizationId, stationId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNotExistentStationIdWhenFindOrganizationStationThenNull() {
+    // Given
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String stationId = "STATIONID";
+
+    Mockito.when(organizationApisHolder.getOrganizationApi(accessToken))
+      .thenReturn(organizationApiMock);
+    Mockito.when(organizationApiMock.getOrganizationStation(organizationId, stationId))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    OrganizationStationDTO result = organizationClient.findOrganizationStation(organizationId, stationId, accessToken);
+
+    // Then
+    Assertions.assertNull(result);
   }
 }

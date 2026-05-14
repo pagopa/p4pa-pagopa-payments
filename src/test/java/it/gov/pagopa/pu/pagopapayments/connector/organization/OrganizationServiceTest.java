@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.organization;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.client.OrganizationClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +12,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,5 +72,23 @@ class OrganizationServiceTest {
 
     // Then
     Assertions.assertSame(apiKey, result);
+  }
+
+  @Test
+  void whenFindOrganizationStationThenInvokeClient(){
+    // Given
+    Long organizationId = 1L;
+    String stationId = "STATIONID";
+    String accessToken = "accessToken";
+    OrganizationStationDTO expectedResult = new OrganizationStationDTO();
+    Mockito.when(client.findOrganizationStation(organizationId, stationId, accessToken))
+      .thenReturn(expectedResult);
+
+    // When
+    Optional<OrganizationStationDTO> result = service.findOrganizationStation(organizationId, stationId, accessToken);
+
+    // Then
+    Assertions.assertTrue(result.isPresent());
+    assertSame(expectedResult, result.get());
   }
 }

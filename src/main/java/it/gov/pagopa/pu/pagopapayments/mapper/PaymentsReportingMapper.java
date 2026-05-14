@@ -83,7 +83,7 @@ public class PaymentsReportingMapper {
     return PaPaymentReportingDTO.builder()
       .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
       .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())
-      .idStation(brokerForNodoPaDTO.getBroker().getStationId())
+      .idStation(brokerForNodoPaDTO.getBroker().getDefaultStationId())
       .fiscalCode(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
       .paymentReportingBytes(paymentReportingMarshalling.getBytes(StandardCharsets.UTF_8))
       .build();

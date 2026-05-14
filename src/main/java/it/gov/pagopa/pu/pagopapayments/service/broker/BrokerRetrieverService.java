@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service.broker;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.config.CacheConfig;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
@@ -28,12 +29,12 @@ public class BrokerRetrieverService {
 
   @Cacheable(cacheNames = CacheConfig.Fields.brokerApiKeyAndSegregationCodes, key = "#organizationId", unless="#result == null")
   public Pair<BrokerApiKeys, String> getBrokerApiKeyAndSegregationCodesByOrganizationId(Long organizationId, String accessToken){
-    Organization organization = organizationService.getOrganizationById(organizationId, accessToken);
-    if(organization==null){
-      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_NOT_FOUND, "organization [%s]".formatted(organizationId));
-    }
-    BrokerApiKeys apiKeys = brokerService.getApiKeyByBrokerId(organization.getBrokerId(), accessToken);
-    String segregationCodes = organization.getSegregationCode();
+    OrganizationStationDTO organizationStationDTO = organizationService.findOrganizationStation(organizationId, null, accessToken)
+      .orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_STATION_NOT_FOUND,
+        String.format("Cannot find default Station for organizationId %s",  organizationId)));
+
+    BrokerApiKeys apiKeys = brokerService.getApiKeyByBrokerId(organizationStationDTO.getBrokerId(), accessToken);
+    String segregationCodes = organizationStationDTO.getSegregationCode();
     return Pair.of(apiKeys, segregationCodes);
   }
 

@@ -69,7 +69,7 @@ class PaForNodeRequestValidatorServiceTest {
     organization.setStatus(OrganizationStatus.ACTIVE);
 
     RetrievePaymentDTO request = RetrievePaymentDTO.builder()
-      .idStation(broker.getStationId())
+      .idStation(broker.getDefaultStationId())
       .fiscalCode(organization.getOrgFiscalCode())
       .idPA(organization.getOrgFiscalCode())
       .noticeNumber("NAV")
@@ -102,7 +102,7 @@ class PaForNodeRequestValidatorServiceTest {
     organization.setStatus(OrganizationStatus.ACTIVE);
 
     RetrievePaymentDTO request = RetrievePaymentDTO.builder()
-      .idStation(broker.getBroadcastStationId())
+      .idStation(broker.getDefaultStationId())
       .fiscalCode(organization.getOrgFiscalCode())
       .idPA(organization.getOrgFiscalCode())
       .noticeNumber("NAV")
@@ -133,7 +133,7 @@ class PaForNodeRequestValidatorServiceTest {
 
     Broker broker = podamFactory.manufacturePojo(Broker.class);
     broker.setFlagDelegate(false);
-    request.setIdStation(broker.getStationId());
+    request.setIdStation(broker.getDefaultStationId());
 
     Mockito.when(brokerServiceMock.getBrokerByBrokerFiscalCode(request.getIdBrokerPA(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
@@ -159,7 +159,7 @@ class PaForNodeRequestValidatorServiceTest {
 
     Broker broker = podamFactory.manufacturePojo(Broker.class);
     broker.setFlagDelegate(false);
-    request.setIdStation(broker.getStationId());
+    request.setIdStation(broker.getDefaultStationId());
 
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     organization.setStatus(OrganizationStatus.DRAFT);
@@ -196,7 +196,7 @@ class PaForNodeRequestValidatorServiceTest {
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
     request.setFiscalCode(organization.getOrgFiscalCode());
     request.setIdPA(request.getFiscalCode());
-    request.setIdStation(broker.getStationId());
+    request.setIdStation(broker.getDefaultStationId());
     request.setIdBrokerPA(broker.getBrokerFiscalCode() + "xxx");
 
     Mockito.when(brokerServiceMock.getBrokerByBrokerFiscalCode(request.getIdBrokerPA(), VALID_ACCESS_TOKEN))
@@ -227,7 +227,7 @@ class PaForNodeRequestValidatorServiceTest {
     RetrievePaymentDTO request = podamFactory.manufacturePojo(RetrievePaymentDTO.class);
     request.setIdPA(organization.getOrgFiscalCode());
     request.setIdBrokerPA(broker.getBrokerFiscalCode());
-    request.setIdStation(broker.getStationId() + "xxx");
+    request.setIdStation(broker.getDefaultStationId() + "xxx");
 
     Mockito.when(brokerServiceMock.getBrokerByBrokerFiscalCode(request.getIdBrokerPA(), VALID_ACCESS_TOKEN))
       .thenReturn(broker);
@@ -261,7 +261,7 @@ class PaForNodeRequestValidatorServiceTest {
     Station station = podamFactory.manufacturePojo(Station.class);
 
     RetrievePaymentDTO request = RetrievePaymentDTO.builder()
-      .idStation(broker.getStationId())
+      .idStation(broker.getDefaultStationId())
       .idPA("ANY_IDPA")
       .fiscalCode("ANY_FISCAL_CODE")
       .noticeNumber("NAV")
@@ -299,7 +299,7 @@ class PaForNodeRequestValidatorServiceTest {
     broker.setFlagDelegate(true);
 
     RetrievePaymentDTO request = RetrievePaymentDTO.builder()
-      .idStation(broker.getStationId())
+      .idStation(broker.getDefaultStationId())
       .idPA("ANY_IDPA")
       .fiscalCode("ANY_FISCAL_CODE")
       .noticeNumber("NAV")
@@ -365,7 +365,7 @@ class PaForNodeRequestValidatorServiceTest {
     PaSendRtDTO request = podamFactory.manufacturePojo(PaSendRtDTO.class);
     request.setIdPA(organization.getOrgFiscalCode());
     request.setIdBrokerPA(broker.getBrokerFiscalCode());
-    request.setIdStation(broker.getStationId());
+    request.setIdStation(broker.getDefaultStationId());
 
     Mockito.when(brokerServiceMock.getBrokerByBrokerFiscalCode(request.getIdBrokerPA(), VALID_ACCESS_TOKEN)).thenReturn(broker);
     Mockito.when(organizationServiceMock.getOrganizationByFiscalCode(request.getIdPA(), VALID_ACCESS_TOKEN)).thenReturn(organization);
@@ -387,7 +387,7 @@ class PaForNodeRequestValidatorServiceTest {
     Broker broker = podamFactory.manufacturePojo(Broker.class);
     broker.setFlagDelegate(false);
     request.setIdBrokerPA(broker.getBrokerFiscalCode());
-    request.setIdStation(broker.getStationId());
+    request.setIdStation(broker.getDefaultStationId());
 
     Organization technicalOrg = new Organization();
     technicalOrg.setOrganizationId(-1L);
@@ -438,7 +438,7 @@ class PaForNodeRequestValidatorServiceTest {
     Station station = podamFactory.manufacturePojo(Station.class);
 
     PaSendRtDTO request = podamFactory.manufacturePojo(PaSendRtDTO.class);
-    request.setIdStation(broker.getStationId());
+    request.setIdStation(broker.getDefaultStationId());
     request.setIdBrokerPA(broker.getBrokerFiscalCode());
     request.setIdPA("ANY_ID_PA");
 

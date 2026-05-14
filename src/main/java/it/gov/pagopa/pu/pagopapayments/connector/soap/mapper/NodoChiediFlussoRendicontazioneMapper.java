@@ -17,7 +17,7 @@ public class NodoChiediFlussoRendicontazioneMapper {
     request.setIdentificativoDominio(organization.getOrgFiscalCode());
     request.setPassword("password");
     request.setIdentificativoIntermediarioPA(broker.getBrokerFiscalCode());
-    request.setIdentificativoStazioneIntermediarioPA(broker.getStationId());
+    request.setIdentificativoStazioneIntermediarioPA(broker.getDefaultStationId());
     request.setIdentificativoPSP(null);
     request.setIdentificativoFlusso(reportingId);
     return request;

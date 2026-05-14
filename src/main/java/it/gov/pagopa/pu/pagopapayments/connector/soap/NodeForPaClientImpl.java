@@ -87,7 +87,7 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
   return PaPaymentReportingDTO.builder()
     .idPA(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
     .idBrokerPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode())
-    .idStation(brokerForNodoPaDTO.getBroker().getStationId())
+    .idStation(brokerForNodoPaDTO.getBroker().getDefaultStationId())
     .fiscalCode(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode())
     .paymentReportingBytes(bytes)
     .build();
@@ -144,7 +144,7 @@ public PaPaymentReportingDTO fetchPaymentReporting(BrokerForNodoPaDTO brokerForN
     request.setIdentificativoDominio(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
     request.setPassword("password"); //parameter for retrocompatibility but not used. it is required by the wsdl
     request.setIdentificativoIntermediarioPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode());
-    request.setIdentificativoStazioneIntermediarioPA(brokerForNodoPaDTO.getBroker().getStationId());
+    request.setIdentificativoStazioneIntermediarioPA(brokerForNodoPaDTO.getBroker().getDefaultStationId());
     request.setIdentificativoPSP(null);
     return request;
   }

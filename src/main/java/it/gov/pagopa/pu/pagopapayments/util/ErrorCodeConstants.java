@@ -6,6 +6,7 @@ public class ErrorCodeConstants {
   public static final String ERROR_CODE_ACTUALIZATION_ERROR = "ACTUALIZATION_ERROR";
 
   public static final String ERROR_CODE_ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND";
+  public static final String ERROR_CODE_ORGANIZATION_STATION_NOT_FOUND = "ORGANIZATION_STATION_NOT_FOUND";
 
   public static final String ERROR_CODE_INVALID_FILE_NAME = "INVALID_FILE_NAME";
   public static final String ERROR_CODE_INVALID_DATE_FORMAT = "INVALID_DATE_FORMAT";

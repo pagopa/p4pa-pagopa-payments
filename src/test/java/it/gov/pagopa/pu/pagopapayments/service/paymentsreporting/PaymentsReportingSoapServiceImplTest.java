@@ -46,7 +46,7 @@ class PaymentsReportingSoapServiceImplTest {
   private static final String REPORTING_ID = "2";
   private static final Broker BROKER = new Broker()
     .brokerFiscalCode("brokerCode")
-    .broadcastStationId("stationId");
+    .defaultStationId("stationId");
 
   private static final BrokerApiKeys BROKER_API_KEYS = new BrokerApiKeys()
     .syncKey("syncKey");

@@ -22,7 +22,7 @@ class NodoChiediFlussoRendicontazioneMapperTest {
     expectedResult.setIdentificativoDominio(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode());
     expectedResult.setPassword("password");
     expectedResult.setIdentificativoIntermediarioPA(brokerForNodoPaDTO.getBroker().getBrokerFiscalCode());
-    expectedResult.setIdentificativoStazioneIntermediarioPA(brokerForNodoPaDTO.getBroker().getStationId());
+    expectedResult.setIdentificativoStazioneIntermediarioPA(brokerForNodoPaDTO.getBroker().getDefaultStationId());
     expectedResult.setIdentificativoFlusso(paymentReportingId);
 
     // When

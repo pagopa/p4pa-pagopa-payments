@@ -236,7 +236,7 @@ class PaymentsReportingMapperTest {
     BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
     Broker broker = new Broker();
     broker.setBrokerFiscalCode("brokerFiscalCode");
-    broker.setStationId("stationId");
+    broker.setDefaultStationId("stationId");
     brokerForNodoPaDTO.setBroker(broker);
     Organization organization = new Organization();
     organization.setOrgFiscalCode("orgFiscalCode");

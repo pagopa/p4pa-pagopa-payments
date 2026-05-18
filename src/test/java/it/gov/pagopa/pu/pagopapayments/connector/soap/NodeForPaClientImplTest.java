@@ -75,8 +75,7 @@ class NodeForPaClientImplTest {
 
   private static final Broker BROKER = new Broker()
     .brokerFiscalCode("brokerCode")
-    .broadcastStationId("stationId")
-    .stationId("stationId");
+    .defaultStationId("stationId");
 
   private static final BrokerApiKeys BROKER_API_KEYS = new BrokerApiKeys()
     .syncKey("syncKey");
@@ -195,7 +194,7 @@ class NodeForPaClientImplTest {
     NodoChiediFlussoRendicontazione expectedRequest = new NodoChiediFlussoRendicontazione();
     expectedRequest.setIdentificativoDominio(BROKER_FOR_NODO_PA_DTO.getOrganization().getOrgFiscalCode());
     expectedRequest.setIdentificativoIntermediarioPA(BROKER_FOR_NODO_PA_DTO.getBroker().getBrokerFiscalCode());
-    expectedRequest.setIdentificativoStazioneIntermediarioPA(BROKER_FOR_NODO_PA_DTO.getBroker().getStationId());
+    expectedRequest.setIdentificativoStazioneIntermediarioPA(BROKER_FOR_NODO_PA_DTO.getBroker().getDefaultStationId());
     expectedRequest.setIdentificativoFlusso(reportingId);
 
     when(fetchPaymentsReportingRequestMapperMock.createFlussoRendicontazioneRequest(Mockito.same(BROKER_FOR_NODO_PA_DTO), Mockito.endsWith(reportingId)))
@@ -203,7 +202,7 @@ class NodeForPaClientImplTest {
 
     RegistryContextData expectedContextData = RegistryContextData.builder()
       .orgFiscalCode(BROKER_FOR_NODO_PA_DTO.getOrganization().getOrgFiscalCode())
-      .brokerStationId(BROKER_FOR_NODO_PA_DTO.getBroker().getStationId())
+      .brokerStationId(BROKER_FOR_NODO_PA_DTO.getBroker().getDefaultStationId())
       .eventType(RegistryEventType.NodeForPa_fetchPaymentReporting)
       .build();
     configureRegistryLoggerMock(expectedContextData, expectedRequest);

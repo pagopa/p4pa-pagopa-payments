@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
@@ -19,6 +20,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 @ExtendWith(MockitoExtension.class)
 class BrokerRetrieverServiceTest {
   @Mock
@@ -34,6 +37,9 @@ class BrokerRetrieverServiceTest {
   private static final Long VALID_BROKER_ID = 10L;
   private static final String VALID_SEGREGATION_CODE = "01";
   private static final Organization VALID_ORG = new Organization()
+    .organizationId(VALID_ORG_ID)
+    .brokerId(VALID_BROKER_ID);
+  private static final OrganizationStationDTO VALID_ORG_STATION = new OrganizationStationDTO()
     .organizationId(VALID_ORG_ID)
     .brokerId(VALID_BROKER_ID)
     .segregationCode(VALID_SEGREGATION_CODE);
@@ -53,7 +59,8 @@ class BrokerRetrieverServiceTest {
   void givenValidOrganizationWhenGetBrokerApiKeyAndSegregationCodesByOrganizationIdThenOk() {
     //given
     String accessToken = TestUtils.getFakeAccessToken();
-    Mockito.when(organizationServiceMock.getOrganizationById(VALID_ORG_ID, accessToken)).thenReturn(VALID_ORG);
+    Mockito.when(organizationServiceMock.findOrganizationStation(VALID_ORG_ID, null, accessToken))
+      .thenReturn(Optional.of(VALID_ORG_STATION));
     Mockito.when(brokerServiceMock.getApiKeyByBrokerId(VALID_BROKER_ID, accessToken)).thenReturn(VALID_API_KEYS);
 
     //when
@@ -66,17 +73,17 @@ class BrokerRetrieverServiceTest {
   }
 
   @Test
-  void givenNotFoundOrganizationWhenGetBrokerApiKeyAndSegregationCodesByOrganizationIdThenException() {
+  void givenNotFoundOrganizationStationWhenGetBrokerApiKeyAndSegregationCodesByOrganizationIdThenException() {
     //given
     String accessToken = TestUtils.getFakeAccessToken();
-    Mockito.when(organizationServiceMock.getOrganizationById(INVALID_ORG_ID, accessToken)).thenReturn(null);
+    Mockito.when(organizationServiceMock.findOrganizationStation(INVALID_ORG_ID, null, accessToken))
+      .thenReturn(Optional.empty());
 
     //when
     NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> brokerRetrieverService.getBrokerApiKeyAndSegregationCodesByOrganizationId(INVALID_ORG_ID, accessToken));
 
     //verify
-    Assertions.assertEquals("ORGANIZATION_NOT_FOUND", exception.getCode());
-    Assertions.assertEquals("organization [%s]".formatted(INVALID_ORG_ID), exception.getMessage());
+    Assertions.assertEquals("ORGANIZATION_STATION_NOT_FOUND", exception.getCode());
   }
 
   @Test

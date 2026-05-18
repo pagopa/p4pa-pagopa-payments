@@ -3,8 +3,10 @@ package it.gov.pagopa.pu.pagopapayments.service;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStatus;
+import it.gov.pagopa.pu.organization.dto.generated.Station;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
+import it.gov.pagopa.pu.pagopapayments.connector.organization.StationService;
 import it.gov.pagopa.pu.pagopapayments.dto.PaForNodeDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaSendRtDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.PagoPaNodeFaults;
@@ -22,10 +24,12 @@ public class PaForNodeRequestValidatorService {
 
   private final BrokerService brokerService;
   private final OrganizationService organizationService;
+  private final StationService stationService;
 
-  public PaForNodeRequestValidatorService(BrokerService brokerService, OrganizationService organizationService) {
+  public PaForNodeRequestValidatorService(BrokerService brokerService, OrganizationService organizationService, StationService stationService) {
     this.brokerService = brokerService;
     this.organizationService = organizationService;
+    this.stationService = stationService;
   }
 
   public Pair<Broker, Organization> paForNodeRequestValidate(PaForNodeDTO request, String accessToken){
@@ -37,7 +41,7 @@ public class PaForNodeRequestValidatorService {
     }
 
     Broker broker = brokerOrgPair.getLeft();
-    validateOrganizationBrokerAndStation(organization, broker, request);
+    validateOrganizationBrokerAndStation(organization, broker, request, accessToken);
 
     return Pair.of(broker, organization);
   }
@@ -60,7 +64,7 @@ public class PaForNodeRequestValidatorService {
       }
     }
 
-    validateOrganizationBrokerAndStation(organization, brokerOrgPair.getLeft(), request);
+    validateOrganizationBrokerAndStation(organization, brokerOrgPair.getLeft(), request, accessToken);
 
     return organization;
   }
@@ -85,7 +89,7 @@ public class PaForNodeRequestValidatorService {
     return Pair.of(broker, organization);
   }
 
-  private void validateOrganizationBrokerAndStation(Organization organization, Broker broker, PaForNodeDTO request) {
+  private void validateOrganizationBrokerAndStation(Organization organization, Broker broker, PaForNodeDTO request, String accessToken) {
     if (!Objects.equals(organization.getStatus(), OrganizationStatus.ACTIVE)) {
       log.warn("paymentRequestValidate [{}/{}]: organization is not active", request.getFiscalCode(), request.getNoticeNumber());
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_ID_DOMINIO_ERRATO, organization.getOrgFiscalCode());
@@ -99,15 +103,27 @@ public class PaForNodeRequestValidatorService {
     }
 
     // Sync brokers expects to receive RT on stationId, async brokers expects to receive RT on broadcastStationId. accepting both
-    List<String> expectedStations = List.of(
-      Objects.requireNonNullElse(broker.getStationId(), "NOTCONFIGUREDSTATIONID"),
-      Objects.requireNonNullElse(broker.getBroadcastStationId(), "NOTCONFIGUREBROADCASTSTATIONID"));
+    boolean isValidStation = isValidStation(broker.getBrokerId(), request.getIdStation(), accessToken);
 
-    if (!expectedStations.contains(request.getIdStation())) {
-      log.warn("paymentRequestValidate [{}/{}]: invalid stationId for organization broker obtained[{}] expected one of {}",
-        request.getFiscalCode(), request.getNoticeNumber(),
-        request.getIdStation(), expectedStations);
+    if (!isValidStation) {
+      log.warn("paymentRequestValidate [{}/{}]: invalid stationId for organization broker obtained[{}]",
+        request.getFiscalCode(),
+        request.getNoticeNumber(),
+        request.getIdStation()
+      );
       throw new PagoPaNodeFaultException(PagoPaNodeFaults.PAA_STAZIONE_INT_ERRATA, broker.getBrokerFiscalCode());
     }
+  }
+
+  private boolean isValidStation(Long brokerId, String stationId, String accessToken) {
+    Station station = stationService.getStationByBrokerIdAndStationId(brokerId, stationId, accessToken);
+
+    if (station != null) {
+      return true;
+    }
+
+    List<Station> broadcastStations = stationService.getStationByBrokerIdAndBroadcastStationId(brokerId, stationId, accessToken);
+
+    return !broadcastStations.isEmpty();
   }
 }

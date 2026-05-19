@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config;
 
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
+import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorHandler;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,11 +31,14 @@ class GpdApisHolderTest extends BaseApiHolderTest {
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
     GpdApiClientConfig apiClient = new GpdApiClientConfig();
     apiClient.setBaseUrl("http://example.com");
-    gpdApisHolder = new GpdApisHolder(apiClient, restTemplateBuilderMock);
+    gpdApisHolder = new GpdApisHolder(apiClient, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
   }
 
   @AfterEach
   void verifyNoMoreInteractions() {
+    Mockito.verify(restTemplateMock)
+      .setErrorHandler(Mockito.any(HttpClientErrorHandler.class));
+
     Mockito.verifyNoMoreInteractions(
       restTemplateBuilderMock,
       restTemplateMock

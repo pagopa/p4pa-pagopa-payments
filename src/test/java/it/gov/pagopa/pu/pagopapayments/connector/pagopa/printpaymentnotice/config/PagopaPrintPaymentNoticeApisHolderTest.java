@@ -1,5 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config;
 
+import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorHandler;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import org.junit.jupiter.api.AfterEach;
@@ -26,11 +28,14 @@ class PagopaPrintPaymentNoticeApisHolderTest extends BaseApiHolderTest {
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
     PagopaPrintPaymentNoticeApiClientConfig apiClient = new PagopaPrintPaymentNoticeApiClientConfig();
     apiClient.setBaseUrl("http://example.com");
-    apisHolder = new PagopaPrintPaymentNoticeApisHolder(apiClient, restTemplateBuilderMock);
+    apisHolder = new PagopaPrintPaymentNoticeApisHolder(apiClient, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
   }
 
   @AfterEach
   void verifyNoMoreInteractions() {
+    Mockito.verify(restTemplateMock)
+      .setErrorHandler(Mockito.any(HttpClientErrorHandler.class));
+
     Mockito.verifyNoMoreInteractions(
       restTemplateBuilderMock,
       restTemplateMock

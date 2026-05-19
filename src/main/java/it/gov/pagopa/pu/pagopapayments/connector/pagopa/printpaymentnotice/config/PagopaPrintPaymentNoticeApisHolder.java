@@ -1,12 +1,14 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config;
 
-import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorHandler;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.ApiClient;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.api.NoticeGenerationRequestApisApi;
+import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.ProblemJsonDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,13 +24,13 @@ public class PagopaPrintPaymentNoticeApisHolder {
 
   public PagopaPrintPaymentNoticeApisHolder(
     PagopaPrintPaymentNoticeApiClientConfig clientConfig,
-    RestTemplateBuilder restTemplateBuilder){
+    RestTemplateBuilder restTemplateBuilder,
+    JsonMapper jsonMapper){
     this.restTemplate = restTemplateBuilder.build();
     this.clientConfig = clientConfig;
 
-    if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("PRINT-PAYMENT-NOTICE"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorHandler<>(jsonMapper, "PAGOPA_PRINT_PAYMENT_NOTICE", clientConfig.isPrintBodyWhenError(),
+      ProblemJsonDTO.class, null, ProblemJsonDTO::getDetail));
   }
 
   public NoticeGenerationRequestApisApi getNoticeGenerationRequestApisApiMap(String apiKey) {

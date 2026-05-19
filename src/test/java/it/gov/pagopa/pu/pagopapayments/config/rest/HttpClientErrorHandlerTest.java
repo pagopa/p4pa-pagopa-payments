@@ -1,9 +1,14 @@
 package it.gov.pagopa.pu.pagopapayments.config.rest;
 
 import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
+import it.gov.pagopa.pu.pagopapayments.exception.BaseBusinessException;
+import it.gov.pagopa.pu.pagopapayments.exception.ConflictException;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.exception.TooManyRequestsException;
 import it.gov.pagopa.pu.registries.dto.generated.CategoryEnum;
 import it.gov.pagopa.pu.registries.dto.generated.ErrorDTO;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpMethod;
@@ -11,25 +16,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 class HttpClientErrorHandlerTest {
 
   private final JsonMapper jsonMapper = new JsonConfig().objectMapperJackson3();
-  private final RuntimeException transcodedException = new RuntimeException("DUMMYERROR");
 
   HttpClientErrorHandlerTest() throws URISyntaxException {
   }
 
   private HttpClientErrorHandler<ErrorDTO> buildHttpClientErrorHandler(boolean bodyPrinterWhenError) {
-    return new HttpClientErrorHandler<>(jsonMapper, "APPNAME", bodyPrinterWhenError, ErrorDTO.class,
-      (ex, errorDTO) -> {
-        Assertions.assertEquals(expectedErrorDTO, errorDTO);
-        return transcodedException;
-      });
+    return new HttpClientErrorHandler<>(jsonMapper, "APPNAME", bodyPrinterWhenError,
+      ErrorDTO.class, ErrorDTO::getCode, ErrorDTO::getMessage);
   }
 
   private final URI url = new URI("http://www.sample.com");
@@ -88,10 +92,11 @@ class HttpClientErrorHandlerTest {
     try (MockClientHttpResponse response = new MockClientHttpResponse(jsonMapper.writeValueAsBytes(expectedErrorDTO), HttpStatus.BAD_REQUEST)) {
 
       // When
-      RuntimeException result = Assertions.assertThrows(RuntimeException.class, () -> httpClientHandler.handleError(url, HttpMethod.GET, response));
+      InvalidValueException result = Assertions.assertThrows(InvalidValueException.class, () -> httpClientHandler.handleError(url, HttpMethod.GET, response));
 
       // Then
-      Assertions.assertSame(transcodedException, result);
+      Assertions.assertEquals(expectedErrorDTO.getCode(), result.getCode());
+      Assertions.assertEquals(expectedErrorDTO.getMessage(), result.getMessage());
     }
   }
 
@@ -107,6 +112,50 @@ class HttpClientErrorHandlerTest {
 
       // Then
       Assertions.assertEquals("400 Bad Request on GET request for \"http://www.sample.com\": \"INVALIDJSON\"", result.getMessage());
+    }
+  }
+
+  @Test
+  void testBuildDefaultHttpClientExceptionTranscoder(){
+    BiFunction<HttpStatusCodeException, ErrorDTO, RuntimeException> httpErrorTranscoder = HttpClientErrorHandler.buildDefaultHttpClientExceptionTranscoder("TEST", ErrorDTO::getCode, ErrorDTO::getMessage);
+    ErrorDTO errorDTO = new ErrorDTO(null, "BAD_REQUEST", "MESSAGE", null);
+    Map<HttpStatus, Class<? extends BaseBusinessException>> httpStatus2ExpectedException = Map.of(
+      HttpStatus.CONFLICT, ConflictException.class,
+      HttpStatus.TOO_MANY_REQUESTS, TooManyRequestsException.class
+    );
+
+    for (HttpStatus httpStatus : HttpStatus.values()) {
+      RuntimeException result = httpErrorTranscoder
+        .apply(new HttpClientErrorException(httpStatus), errorDTO);
+
+      Assertions.assertInstanceOf(BaseBusinessException.class, result);
+      Assertions.assertSame(errorDTO.getCode(), ((BaseBusinessException)result).getCode());
+      Assertions.assertSame(errorDTO.getMessage(), result.getMessage());
+
+      Class<? extends BaseBusinessException> expectedException = httpStatus2ExpectedException.getOrDefault(httpStatus, InvalidValueException.class);
+      Assertions.assertInstanceOf(expectedException, result);
+    }
+  }
+
+  @Test
+  void testBuildDefaultHttpClientExceptionTranscoder_noErrorCodeFunction(){
+    BiFunction<HttpStatusCodeException, ErrorDTO, RuntimeException> httpErrorTranscoder = HttpClientErrorHandler.buildDefaultHttpClientExceptionTranscoder("TEST", null, ErrorDTO::getMessage);
+    ErrorDTO errorDTO = new ErrorDTO(null, "BAD_REQUEST", "MESSAGE", null);
+    Map<HttpStatus, Class<? extends BaseBusinessException>> httpStatus2ExpectedException = Map.of(
+      HttpStatus.CONFLICT, ConflictException.class,
+      HttpStatus.TOO_MANY_REQUESTS, TooManyRequestsException.class
+    );
+
+    for (HttpStatus httpStatus : HttpStatus.values()) {
+      RuntimeException result = httpErrorTranscoder
+        .apply(new HttpClientErrorException(httpStatus), errorDTO);
+
+      Assertions.assertInstanceOf(BaseBusinessException.class, result);
+      Assertions.assertSame("TEST_" + httpStatus.getReasonPhrase().toUpperCase(), ((BaseBusinessException)result).getCode());
+      Assertions.assertSame(errorDTO.getMessage(), result.getMessage());
+
+      Class<? extends BaseBusinessException> expectedException = httpStatus2ExpectedException.getOrDefault(httpStatus, InvalidValueException.class);
+      Assertions.assertInstanceOf(expectedException, result);
     }
   }
 }

@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config;
 
 import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,11 +57,14 @@ class AcaApisHolderTest {
     AcaApiClientConfig apiClient = new AcaApiClientConfig();
     apiClient.setBaseUrl("http://example.com");
 
-    acaApisHolder = new AcaApisHolder(apiClient, restTemplateBuilderMock);
+    acaApisHolder = new AcaApisHolder(apiClient, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
   }
 
   @AfterEach
   void verifyNoMoreInteractions() {
+    Mockito.verify(restTemplateMock)
+      .setErrorHandler(Mockito.any(HttpClientErrorHandler.class));
+
     Mockito.verifyNoMoreInteractions(
       restTemplateBuilderMock,
       restTemplateMock

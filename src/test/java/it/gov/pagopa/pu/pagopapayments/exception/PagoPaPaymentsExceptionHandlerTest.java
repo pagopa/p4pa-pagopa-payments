@@ -131,7 +131,30 @@ class PagoPaPaymentsExceptionHandlerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
 
+  @Test
+  void handleConflictException() throws Exception {
+    doThrow(new ConflictException("ERRORCODE", "Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isConflict())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("PAGOPA_PAYMENTS_CONFLICT"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
+
+  @Test
+  void handleTooManyRequestsException() throws Exception {
+    doThrow(new TooManyRequestsException("ERRORCODE", "Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isTooManyRequests())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("PAGOPA_PAYMENTS_TOO_MANY_REQUESTS"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
   @Test

@@ -48,6 +48,11 @@ public class PagopaPaymentsExceptionHandler {
     return handleException(ex, request, HttpStatus.CONFLICT, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_CONFLICT);
   }
 
+  @ExceptionHandler(TooManyRequestsException.class)
+  public ResponseEntity<PagoPaPaymentsErrorDTO> handleTooManyRequestsException(TooManyRequestsException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.TOO_MANY_REQUESTS, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_TOO_MANY_REQUESTS);
+  }
+
   @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ConversionFailedException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleViolationException(Exception ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST);

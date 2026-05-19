@@ -1,12 +1,14 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config;
 
 import it.gov.pagopa.pu.aca.gpd.v1.controller.generated.DebtPositionsApiApi;
+import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.ProblemJson;
 import it.gov.pagopa.pu.aca.gpd.v1.generated.ApiClient;
-import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,13 +20,12 @@ public class AcaApisHolder {
   private final RestTemplate restTemplate;
   private final Map<String, DebtPositionsApiApi> apiMap = new ConcurrentHashMap<>();
 
-  public AcaApisHolder(AcaApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder) {
+  public AcaApisHolder(AcaApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder, JsonMapper jsonMapper) {
     this.clientConfig = clientConfig;
     this.restTemplate = restTemplateBuilder.build();
 
-    if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("ACA"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorHandler<>(jsonMapper, "ACA", clientConfig.isPrintBodyWhenError(),
+      ProblemJson.class, null, ProblemJson::getDetail));
   }
 
   public DebtPositionsApiApi getApiClientByApiKey(String apiKey) {

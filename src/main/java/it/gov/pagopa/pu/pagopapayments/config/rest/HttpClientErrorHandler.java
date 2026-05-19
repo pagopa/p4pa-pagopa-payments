@@ -70,7 +70,7 @@ public class HttpClientErrorHandler<T> extends DefaultResponseErrorHandler {
     return (exception, errorDTO) -> {
       String code = errorDto2CodeFunction != null
         ? errorDto2CodeFunction.apply(errorDTO)
-        : applicationName + "_" + exception.getStatusText().toUpperCase();
+        : applicationName + "_" + ((HttpStatus)exception.getStatusCode()).name();
       String message = errorDto2MessageFunction.apply(errorDTO);
       return switch (exception.getStatusCode()) {
         case HttpStatus.CONFLICT -> new ConflictException(code, message);

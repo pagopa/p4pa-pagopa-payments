@@ -1,5 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config;
 
+import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorHandler;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,11 +35,14 @@ class PaymentsReportingApisHolderTest extends BaseApiHolderTest {
     PaymentsReportingApiClientConfig clientConfig = PaymentsReportingApiClientConfig.builder()
       .baseUrl("http://example.com")
       .build();
-    paymentsReportingApisHolder = new PaymentsReportingApisHolder(restTemplateBuilderMock, clientConfig);
+    paymentsReportingApisHolder = new PaymentsReportingApisHolder(restTemplateBuilderMock, clientConfig, new JsonConfig().objectMapperJackson3());
   }
 
   @AfterEach
   void verifyNoMoreInteractions() {
+    Mockito.verify(restTemplateMock)
+      .setErrorHandler(Mockito.any(HttpClientErrorHandler.class));
+
     Mockito.verifyNoMoreInteractions(
       restTemplateBuilderMock,
       restTemplateMock

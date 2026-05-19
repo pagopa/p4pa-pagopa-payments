@@ -151,7 +151,9 @@ class HttpClientErrorHandlerTest {
         .apply(new HttpClientErrorException(httpStatus), errorDTO);
 
       Assertions.assertInstanceOf(BaseBusinessException.class, result);
-      Assertions.assertSame("TEST_" + httpStatus.getReasonPhrase().toUpperCase(), ((BaseBusinessException)result).getCode());
+      Assertions.assertEquals(
+        "TEST_" + httpStatus.name(),
+        ((BaseBusinessException)result).getCode());
       Assertions.assertSame(errorDTO.getMessage(), result.getMessage());
 
       Class<? extends BaseBusinessException> expectedException = httpStatus2ExpectedException.getOrDefault(httpStatus, InvalidValueException.class);

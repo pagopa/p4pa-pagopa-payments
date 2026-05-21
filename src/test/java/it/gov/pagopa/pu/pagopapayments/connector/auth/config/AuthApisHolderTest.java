@@ -14,45 +14,59 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
 class AuthApisHolderTest extends BaseApiHolderTest {
-    @Mock
-    private RestTemplateBuilder restTemplateBuilderMock;
+  @Mock
+  private RestTemplateBuilder restTemplateBuilderMock;
 
-    private AuthApisHolder authApisHolder;
+  private AuthApisHolder authApisHolder;
+  private AuthApiClientConfig apiClientConfig;
 
-    @BeforeEach
-    void setUp() {
-        Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-        Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-        AuthApiClientConfig clientConfig = AuthApiClientConfig.builder()
-          .baseUrl("http://example.com")
-          .build();
-        authApisHolder = new AuthApisHolder(clientConfig, restTemplateBuilderMock);
-    }
+  @BeforeEach
+  void setUp() {
+    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+    apiClientConfig = AuthApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    authApisHolder = new AuthApisHolder(apiClientConfig, restTemplateBuilderMock);
+  }
 
-    @AfterEach
-    void verifyNoMoreInteractions() {
-        Mockito.verifyNoMoreInteractions(
-                restTemplateBuilderMock,
-                restTemplateMock
-        );
-    }
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      restTemplateBuilderMock,
+      restTemplateMock
+    );
+  }
 
-    @Test
-    void whenGetAuthzApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
-        assertAuthenticationShouldBeSetInThreadSafeMode(
-                accessToken -> authApisHolder.getAuthzApi(accessToken)
-                        .getUserInfoFromMappedExternaUserId("externalUserId"),
-                new ParameterizedTypeReference<>() {},
-                authApisHolder::unload);
-    }
+  @Test
+  void whenGetAuthzApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      accessToken -> authApisHolder.getAuthzApi(accessToken)
+        .getUserInfoFromMappedExternaUserId("externalUserId"),
+      new ParameterizedTypeReference<>() {
+      },
+      authApisHolder::unload);
+  }
 
-    @Test
-    void whenGetAuthnApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
-        assertAuthenticationShouldBeSetInThreadSafeMode(
-                accessToken -> authApisHolder.getAuthnApi(accessToken)
-                        .getUserInfo(),
-                new ParameterizedTypeReference<>() {},
-                authApisHolder::unload);
-    }
+  @Test
+  void whenGetAuthnApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      accessToken -> authApisHolder.getAuthnApi(accessToken)
+        .getUserInfo(),
+      new ParameterizedTypeReference<>() {
+      },
+      authApisHolder::unload);
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      apiKey -> authApisHolder.getAuthnApi(apiKey)
+        .getUserInfo(),
+      new ParameterizedTypeReference<>() {
+      }
+    );
+  }
 
 }

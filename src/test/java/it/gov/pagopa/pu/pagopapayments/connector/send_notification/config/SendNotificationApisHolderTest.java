@@ -19,15 +19,19 @@ class SendNotificationApisHolderTest extends BaseApiHolderTest {
   private RestTemplateBuilder restTemplateBuilderMock;
 
   private SendNotificationApisHolder sendNotificationApisHolder;
+  private SendNotificationApiClientConfig apiClientConfig;
 
   @BeforeEach
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    SendNotificationApiClientConfig clientConfig = SendNotificationApiClientConfig.builder()
+
+    apiClientConfig = SendNotificationApiClientConfig.builder()
       .baseUrl("http://example.com")
+      .maxAttempts(3)
       .build();
-    sendNotificationApisHolder = new SendNotificationApisHolder(clientConfig, restTemplateBuilderMock);
+
+    sendNotificationApisHolder = new SendNotificationApisHolder(apiClientConfig, restTemplateBuilderMock);
   }
 
   @AfterEach
@@ -43,8 +47,19 @@ class SendNotificationApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> sendNotificationApisHolder.getSendApi(accessToken)
         .retrieveNotificationPrice(1L, "NAV"),
-      new ParameterizedTypeReference<>() {},
+      new ParameterizedTypeReference<>() {
+      },
       sendNotificationApisHolder::unload
+    );
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      accessToken -> sendNotificationApisHolder.getSendApi(accessToken)
+        .retrieveNotificationPrice(1L, "NAV"),
+      new ParameterizedTypeReference<>() {
+      }
     );
   }
 }

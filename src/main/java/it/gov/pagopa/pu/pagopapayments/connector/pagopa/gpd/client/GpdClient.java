@@ -32,7 +32,7 @@ public class GpdClient {
       ),
       paymentPositionModel,
       () -> {
-        PaymentPositionModelV3 response = apisHolder.getApiClientByApiKey(apiKey)
+        PaymentPositionModelV3 response = apisHolder.getDebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(apiKey)
           .createPosition(orgFiscalCode, true, null, paymentPositionModel);
         return Triple.of(response, null, RegistryOutcome.OK);
       },
@@ -49,7 +49,7 @@ public class GpdClient {
       ),
       paymentPositionModel,
       () -> {
-        PaymentPositionModelV3 response = apisHolder.getApiClientByApiKey(apiKey)
+        PaymentPositionModelV3 response = apisHolder.getDebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(apiKey)
           .updatePosition(orgFiscalCode, iupd, true, null, paymentPositionModel);
         return Triple.of(response, null, RegistryOutcome.OK);
       },
@@ -66,7 +66,7 @@ public class GpdClient {
       ),
       iupd,
       () -> {
-        String response = apisHolder.getApiClientByApiKey(apiKey)
+        String response = apisHolder.getDebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(apiKey)
           .deletePosition(orgFiscalCode, iupd, null);
         return Triple.of(response, null, RegistryOutcome.OK);
       },

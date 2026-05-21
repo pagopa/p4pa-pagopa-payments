@@ -94,7 +94,7 @@ class AcaClientTest {
   private PaymentPositionModel configureMocks(RegistryEventType registryEventType, Object request) {
     PaymentPositionModel paymentPositionModel = podamFactory.manufacturePojo(PaymentPositionModel.class);
 
-    when(acaApisHolderMock.getApiClientByApiKey(TEST_API_KEY))
+    when(acaApisHolderMock.getDebtPositionsApi(TEST_API_KEY))
       .thenReturn(debtPositionsApiMock);
 
     String expectedIuvConcat = "";

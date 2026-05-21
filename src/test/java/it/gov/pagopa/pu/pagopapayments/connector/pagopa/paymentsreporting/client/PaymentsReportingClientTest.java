@@ -83,7 +83,7 @@ class PaymentsReportingClientTest {
 
     List<FlowByPSP> expectedResult = paginatedFlowsResponse == null ? new ArrayList<>() : paginatedFlowsResponse.getData();
 
-    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_PAYMENTS_REPORTING_API_KEY))
+    Mockito.when(paymentsReportingApisHolder.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
       .thenReturn(organizationsApi);
     Mockito.when(
       organizationsApi.iOrganizationsControllerGetAllPublishedFlows(
@@ -144,7 +144,7 @@ class PaymentsReportingClientTest {
 
     SingleFlowResponse expectedResponse = new SingleFlowResponse();
 
-    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_PAYMENTS_REPORTING_API_KEY))
+    Mockito.when(paymentsReportingApisHolder.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
       .thenReturn(organizationsApi);
     Mockito.when(
       organizationsApi.iOrganizationsControllerGetSinglePublishedFlow(
@@ -175,7 +175,7 @@ class PaymentsReportingClientTest {
 
     List<Payment> expectedResult = paginatedPaymentsResponse == null ? new ArrayList<>() : paginatedPaymentsResponse.getData();
 
-    Mockito.when(paymentsReportingApisHolder.getOrganizationApiByApiKey(SYNC_PAYMENTS_REPORTING_API_KEY))
+    Mockito.when(paymentsReportingApisHolder.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
       .thenReturn(organizationsApi);
     Mockito.when(
       organizationsApi.iOrganizationsControllerGetPaymentsFromPublishedFlow(

@@ -31,7 +31,7 @@ public class AcaClient {
       ),
       paymentPositionModel,
       () -> {
-        PaymentPositionModel response = apisHolder.getApiClientByApiKey(apiKey)
+        PaymentPositionModel response = apisHolder.getDebtPositionsApi(apiKey)
           .createPosition(orgFiscalCode, paymentPositionModel, null, true);
         return Triple.of(response, null, RegistryOutcome.OK);
       },
@@ -48,7 +48,7 @@ public class AcaClient {
       ),
       paymentPositionModel,
       () -> {
-        PaymentPositionModel response = apisHolder.getApiClientByApiKey(apiKey)
+        PaymentPositionModel response = apisHolder.getDebtPositionsApi(apiKey)
           .updatePosition(orgFiscalCode, iupd, paymentPositionModel, null, true);
         return Triple.of(response, null, RegistryOutcome.OK);
       },
@@ -65,7 +65,7 @@ public class AcaClient {
       ),
       iupd,
       () -> {
-        String response = apisHolder.getApiClientByApiKey(apiKey)
+        String response = apisHolder.getDebtPositionsApi(apiKey)
           .deletePosition(orgFiscalCode, iupd, null);
         return Triple.of(response, null, RegistryOutcome.OK);
       },

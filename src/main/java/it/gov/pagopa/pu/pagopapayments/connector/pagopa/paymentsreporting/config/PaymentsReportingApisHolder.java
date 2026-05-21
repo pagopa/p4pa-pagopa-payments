@@ -5,7 +5,7 @@ import it.gov.pagopa.nodo.fdrorganization.controller.auth.ApiKeyAuth;
 import it.gov.pagopa.nodo.fdrorganization.controller.generated.OrganizationsApi;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.ErrorMessage;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.ErrorResponse;
-import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorHandler;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class PaymentsReportingApisHolder {
     this.restTemplate = restTemplateBuilder.build();
     this.clientConfig = clientConfig;
 
-    restTemplate.setErrorHandler(new HttpClientErrorHandler<>(jsonMapper, "PAGOPA_PAYMENTS_REPORTING", clientConfig.isPrintBodyWhenError(),
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "PAGOPA_PAYMENTS_REPORTING", clientConfig.isPrintBodyWhenError(),
       ErrorResponse.class, null,
       errorDTO -> Optional.ofNullable(errorDTO.getErrors())
         .map(e -> e.stream().map(ErrorMessage::getMessage).collect(Collectors.joining(",")))
@@ -40,9 +40,8 @@ public class PaymentsReportingApisHolder {
     ));
   }
 
-  public OrganizationsApi getOrganizationApiByApiKey(String apiKey) {
-    return paymentsReportingApisApiMap.computeIfAbsent(
-      apiKey,
+  public OrganizationsApi getOrganizationApi(String apiKey) {
+    return paymentsReportingApisApiMap.computeIfAbsent(apiKey,
       key -> new OrganizationsApi(buildApiClient(key))
     );
   }

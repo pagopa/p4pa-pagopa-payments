@@ -40,34 +40,39 @@ public class PagopaPaymentsExceptionHandler {
   @ExceptionHandler(NotFoundException.class)
   @ResponseStatus(value = HttpStatus.NOT_FOUND)
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleResourceNotFoundException(NotFoundException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.NOT_FOUND, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_NOT_FOUND);
+    return handleException(ex, request, HttpStatus.NOT_FOUND, CategoryEnum.PAGOPA_PAYMENTS_NOT_FOUND);
   }
 
   @ExceptionHandler(ConflictException.class)
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleConflictException(ConflictException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.CONFLICT, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_CONFLICT);
+    return handleException(ex, request, HttpStatus.CONFLICT, CategoryEnum.PAGOPA_PAYMENTS_CONFLICT);
   }
 
-  @ExceptionHandler(TooManyRequestsException.class)
-  public ResponseEntity<PagoPaPaymentsErrorDTO> handleTooManyRequestsException(TooManyRequestsException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.TOO_MANY_REQUESTS, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_TOO_MANY_REQUESTS);
+  @ExceptionHandler(ForbiddenException.class)
+  public ResponseEntity<PagoPaPaymentsErrorDTO> handleForbiddenException(ForbiddenException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.FORBIDDEN, CategoryEnum.PAGOPA_PAYMENTS_FORBIDDEN);
   }
 
   @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ConversionFailedException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleViolationException(Exception ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.BAD_REQUEST, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST);
+    return handleException(ex, request, HttpStatus.BAD_REQUEST, CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST);
+  }
+
+  @ExceptionHandler(NotAuthorizedException.class)
+  public ResponseEntity<PagoPaPaymentsErrorDTO> handleNotAuthorizedException(Exception ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.UNAUTHORIZED, CategoryEnum.PAGOPA_PAYMENTS_UNAUTHORIZED);
   }
 
   @ExceptionHandler({ServletException.class, ErrorResponseException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleServletException(Exception ex, HttpServletRequest request) {
     HttpStatusCode httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-    PagoPaPaymentsErrorDTO.CategoryEnum errorCode = PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_GENERIC_ERROR;
+    CategoryEnum errorCode = CategoryEnum.PAGOPA_PAYMENTS_GENERIC_ERROR;
     if (ex instanceof ErrorResponse errorResponse) {
       httpStatus = errorResponse.getStatusCode();
       if (httpStatus.isSameCodeAs(HttpStatus.NOT_FOUND)) {
-        errorCode = PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_NOT_FOUND;
+        errorCode = CategoryEnum.PAGOPA_PAYMENTS_NOT_FOUND;
       } else if (httpStatus.is4xxClientError()) {
-        errorCode = PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST;
+        errorCode = CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST;
       }
     }
     return handleException(ex, request, httpStatus, errorCode);
@@ -75,7 +80,7 @@ public class PagopaPaymentsExceptionHandler {
 
   @ExceptionHandler({RuntimeException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, PagoPaPaymentsErrorDTO.CategoryEnum.PAGOPA_PAYMENTS_GENERIC_ERROR);
+    return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, CategoryEnum.PAGOPA_PAYMENTS_GENERIC_ERROR);
   }
 
   @ExceptionHandler({NotPayableSilActualizedAmountException.class})
@@ -83,7 +88,7 @@ public class PagopaPaymentsExceptionHandler {
     return handleException(ex, request, HttpStatus.CONFLICT, CategoryEnum.PAGOPA_PAYMENTS_NOT_PAYABLE);
   }
 
-  static ResponseEntity<PagoPaPaymentsErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, PagoPaPaymentsErrorDTO.CategoryEnum errorEnum) {
+  static ResponseEntity<PagoPaPaymentsErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, CategoryEnum errorEnum) {
     logException(ex, request, httpStatus);
 
     Pair<String, String> code2message = buildReturnedMessage(ex);

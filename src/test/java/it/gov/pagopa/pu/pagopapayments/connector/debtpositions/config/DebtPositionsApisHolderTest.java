@@ -15,46 +15,51 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
 class DebtPositionsApisHolderTest extends BaseApiHolderTest {
-    @Mock
-    private RestTemplateBuilder restTemplateBuilderMock;
+  @Mock
+  private RestTemplateBuilder restTemplateBuilderMock;
 
-    private DebtPositionsApisHolder apisHolder;
+  private DebtPositionsApisHolder apisHolder;
+  private DebtPositionsApiClientConfig apiClientConfig;
 
-    @BeforeEach
-    void setUp() {
-        Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-        Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-        DebtPositionsApiClientConfig clientConfig = DebtPositionsApiClientConfig.builder()
-          .baseUrl("http://example.com")
-          .build();
-        apisHolder = new DebtPositionsApisHolder(clientConfig, restTemplateBuilderMock);
-    }
+  @BeforeEach
+  void setUp() {
+    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
 
-    @AfterEach
-    void verifyNoMoreInteractions() {
-        Mockito.verifyNoMoreInteractions(
-                restTemplateBuilderMock,
-                restTemplateMock
-        );
-    }
+    apiClientConfig = DebtPositionsApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    apisHolder = new DebtPositionsApisHolder(apiClientConfig, restTemplateBuilderMock);
+  }
 
-    @Test
-    void whenGetDebtPositionTypeOrgEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
-        assertAuthenticationShouldBeSetInThreadSafeMode(
-                accessToken -> apisHolder.getDebtPositionTypeOrgEntityControllerApi(accessToken)
-                        .crudGetDebtpositiontypeorg("debtPositionId"),
-                new ParameterizedTypeReference<>() {},
-                apisHolder::unload);
-    }
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      restTemplateBuilderMock,
+      restTemplateMock
+    );
+  }
 
-    @Test
-    void whenGetInstallmentApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
-      assertAuthenticationShouldBeSetInThreadSafeMode(
-        accessToken -> apisHolder.getInstallmentApi(accessToken)
-          .getInstallmentsByOrganizationIdAndNav(1L, "nav", null),
-        new ParameterizedTypeReference<>() {},
-        apisHolder::unload);
-    }
+  @Test
+  void whenGetDebtPositionTypeOrgEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      accessToken -> apisHolder.getDebtPositionTypeOrgEntityControllerApi(accessToken)
+        .crudGetDebtpositiontypeorg("debtPositionId"),
+      new ParameterizedTypeReference<>() {
+      },
+      apisHolder::unload);
+  }
+
+  @Test
+  void whenGetInstallmentApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      accessToken -> apisHolder.getInstallmentApi(accessToken)
+        .getInstallmentsByOrganizationIdAndNav(1L, "nav", null),
+      new ParameterizedTypeReference<>() {
+      },
+      apisHolder::unload);
+  }
 
   @Test
   void whenGetDebtPositionApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
@@ -68,7 +73,8 @@ class DebtPositionsApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> apisHolder.getDebtPositionApi(accessToken)
         .updateInstallmentNotificationFee(request),
-      new ParameterizedTypeReference<>() {},
+      new ParameterizedTypeReference<>() {
+      },
       apisHolder::unload);
   }
 
@@ -77,7 +83,8 @@ class DebtPositionsApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> apisHolder.getDebtPositionTypeOrgSearchControllerApi(accessToken)
         .crudDebtPositionTypeOrgsGetDebtPositionTypeOrgByInstallmentId(1L),
-      new ParameterizedTypeReference<>() {},
+      new ParameterizedTypeReference<>() {
+      },
       apisHolder::unload);
   }
 
@@ -86,7 +93,18 @@ class DebtPositionsApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> apisHolder.getSpontaneousFormEntityControllerApi(accessToken)
         .crudGetSpontaneousform("1L"),
-      new ParameterizedTypeReference<>() {},
+      new ParameterizedTypeReference<>() {
+      },
       apisHolder::unload);
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      accessToken -> apisHolder.getSpontaneousFormEntityControllerApi(accessToken)
+        .crudGetSpontaneousform("1L"),
+      new ParameterizedTypeReference<>() {
+      }
+    );
   }
 }

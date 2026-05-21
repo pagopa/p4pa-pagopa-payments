@@ -1,10 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.config.rest;
 
 import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
-import it.gov.pagopa.pu.pagopapayments.exception.BaseBusinessException;
-import it.gov.pagopa.pu.pagopapayments.exception.ConflictException;
-import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
-import it.gov.pagopa.pu.pagopapayments.exception.TooManyRequestsException;
+import it.gov.pagopa.pu.pagopapayments.exception.*;
 import it.gov.pagopa.pu.registries.dto.generated.CategoryEnum;
 import it.gov.pagopa.pu.registries.dto.generated.ErrorDTO;
 import org.junit.jupiter.api.Assertions;
@@ -24,15 +21,15 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-class HttpClientErrorHandlerTest {
+class HttpClientErrorJsonBodyHandlerTest {
 
   private final JsonMapper jsonMapper = new JsonConfig().objectMapperJackson3();
 
-  HttpClientErrorHandlerTest() throws URISyntaxException {
+  HttpClientErrorJsonBodyHandlerTest() throws URISyntaxException {
   }
 
-  private HttpClientErrorHandler<ErrorDTO> buildHttpClientErrorHandler(boolean bodyPrinterWhenError) {
-    return new HttpClientErrorHandler<>(jsonMapper, "APPNAME", bodyPrinterWhenError,
+  private HttpClientErrorJsonBodyHandler<ErrorDTO> buildHttpClientErrorHandler(boolean bodyPrinterWhenError) {
+    return new HttpClientErrorJsonBodyHandler<>(jsonMapper, "APPNAME", bodyPrinterWhenError,
       ErrorDTO.class, ErrorDTO::getCode, ErrorDTO::getMessage);
   }
 
@@ -43,7 +40,7 @@ class HttpClientErrorHandlerTest {
   @ValueSource(booleans = {true, false})
   void testNo4xxException(boolean bodyPrinterWhenError) {
     // Given
-    HttpClientErrorHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
+    HttpClientErrorJsonBodyHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
     try (MockClientHttpResponse response = new MockClientHttpResponse(new byte[0], HttpStatus.SERVICE_UNAVAILABLE)) {
 
       // When
@@ -58,7 +55,7 @@ class HttpClientErrorHandlerTest {
   @ValueSource(booleans = {true, false})
   void testNoBodyException(boolean bodyPrinterWhenError) {
     // Given
-    HttpClientErrorHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
+    HttpClientErrorJsonBodyHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
     try (MockClientHttpResponse response = new MockClientHttpResponse(new byte[0], HttpStatus.BAD_REQUEST)) {
 
       // When
@@ -73,7 +70,7 @@ class HttpClientErrorHandlerTest {
   @ValueSource(booleans = {true, false})
   void testNotFoundException(boolean bodyPrinterWhenError) {
     // Given
-    HttpClientErrorHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
+    HttpClientErrorJsonBodyHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
     try (MockClientHttpResponse response = new MockClientHttpResponse(new byte[0], HttpStatus.NOT_FOUND)) {
 
       // When
@@ -88,7 +85,7 @@ class HttpClientErrorHandlerTest {
   @ValueSource(booleans = {true, false})
   void testBodyException(boolean bodyPrinterWhenError) {
     // Given
-    HttpClientErrorHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
+    HttpClientErrorJsonBodyHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
     try (MockClientHttpResponse response = new MockClientHttpResponse(jsonMapper.writeValueAsBytes(expectedErrorDTO), HttpStatus.BAD_REQUEST)) {
 
       // When
@@ -104,7 +101,7 @@ class HttpClientErrorHandlerTest {
   @ValueSource(booleans = {true, false})
   void testNoJsonBodyException(boolean bodyPrinterWhenError) {
     // Given
-    HttpClientErrorHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
+    HttpClientErrorJsonBodyHandler<ErrorDTO> httpClientHandler = buildHttpClientErrorHandler(bodyPrinterWhenError);
     try (MockClientHttpResponse response = new MockClientHttpResponse("INVALIDJSON".getBytes(), HttpStatus.BAD_REQUEST)) {
 
       // When
@@ -115,14 +112,17 @@ class HttpClientErrorHandlerTest {
     }
   }
 
+
+  private final Map<HttpStatus, Class<? extends BaseBusinessException>> httpStatus2ExpectedException = Map.of(
+    HttpStatus.CONFLICT, ConflictException.class,
+    HttpStatus.FORBIDDEN, ForbiddenException.class,
+    HttpStatus.UNAUTHORIZED, NotAuthorizedException.class
+  );
+
   @Test
   void testBuildDefaultHttpClientExceptionTranscoder(){
-    BiFunction<HttpStatusCodeException, ErrorDTO, RuntimeException> httpErrorTranscoder = HttpClientErrorHandler.buildDefaultHttpClientExceptionTranscoder("TEST", ErrorDTO::getCode, ErrorDTO::getMessage);
+    BiFunction<HttpStatusCodeException, ErrorDTO, RuntimeException> httpErrorTranscoder = HttpClientErrorJsonBodyHandler.buildDefaultHttpClientExceptionTranscoder("TEST", ErrorDTO::getCode, ErrorDTO::getMessage);
     ErrorDTO errorDTO = new ErrorDTO(null, "BAD_REQUEST", "MESSAGE", null);
-    Map<HttpStatus, Class<? extends BaseBusinessException>> httpStatus2ExpectedException = Map.of(
-      HttpStatus.CONFLICT, ConflictException.class,
-      HttpStatus.TOO_MANY_REQUESTS, TooManyRequestsException.class
-    );
 
     for (HttpStatus httpStatus : HttpStatus.values()) {
       RuntimeException result = httpErrorTranscoder
@@ -139,12 +139,8 @@ class HttpClientErrorHandlerTest {
 
   @Test
   void testBuildDefaultHttpClientExceptionTranscoder_noErrorCodeFunction(){
-    BiFunction<HttpStatusCodeException, ErrorDTO, RuntimeException> httpErrorTranscoder = HttpClientErrorHandler.buildDefaultHttpClientExceptionTranscoder("TEST", null, ErrorDTO::getMessage);
+    BiFunction<HttpStatusCodeException, ErrorDTO, RuntimeException> httpErrorTranscoder = HttpClientErrorJsonBodyHandler.buildDefaultHttpClientExceptionTranscoder("TEST", null, ErrorDTO::getMessage);
     ErrorDTO errorDTO = new ErrorDTO(null, "BAD_REQUEST", "MESSAGE", null);
-    Map<HttpStatus, Class<? extends BaseBusinessException>> httpStatus2ExpectedException = Map.of(
-      HttpStatus.CONFLICT, ConflictException.class,
-      HttpStatus.TOO_MANY_REQUESTS, TooManyRequestsException.class
-    );
 
     for (HttpStatus httpStatus : HttpStatus.values()) {
       RuntimeException result = httpErrorTranscoder

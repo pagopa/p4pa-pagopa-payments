@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config;
 
-import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorHandler;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.ApiClient;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.api.NoticeGenerationRequestApisApi;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.ProblemJsonDTO;
@@ -29,11 +29,11 @@ public class PagopaPrintPaymentNoticeApisHolder {
     this.restTemplate = restTemplateBuilder.build();
     this.clientConfig = clientConfig;
 
-    restTemplate.setErrorHandler(new HttpClientErrorHandler<>(jsonMapper, "PAGOPA_PRINT_PAYMENT_NOTICE", clientConfig.isPrintBodyWhenError(),
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "PAGOPA_PRINT_PAYMENT_NOTICE", clientConfig.isPrintBodyWhenError(),
       ProblemJsonDTO.class, null, ProblemJsonDTO::getDetail));
   }
 
-  public NoticeGenerationRequestApisApi getNoticeGenerationRequestApisApiMap(String apiKey) {
+  public NoticeGenerationRequestApisApi getNoticeGenerationRequestApi(String apiKey) {
     return noticeGenerationRequestApisApiMap.computeIfAbsent(apiKey, key ->
       new NoticeGenerationRequestApisApi(buildApiClient(key)));
   }

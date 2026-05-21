@@ -21,15 +21,18 @@ class FileShareApisHolderTest extends BaseApiHolderTest {
     private RestTemplateBuilder restTemplateBuilderMock;
 
     private FileShareApisHolder apisHolder;
+    private FileShareApiClientConfig apiClientConfig;
 
     @BeforeEach
     void setUp() {
         Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
         Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-        FileShareApiClientConfig clientConfig = FileShareApiClientConfig.builder()
+
+        apiClientConfig = FileShareApiClientConfig.builder()
           .baseUrl("http://example.com")
+          .maxAttempts(3)
           .build();
-        apisHolder = new FileShareApisHolder(clientConfig, restTemplateBuilderMock);
+        apisHolder = new FileShareApisHolder(apiClientConfig, restTemplateBuilderMock);
     }
 
     @AfterEach
@@ -48,5 +51,15 @@ class FileShareApisHolderTest extends BaseApiHolderTest {
                 new ParameterizedTypeReference<>() {},
                 apisHolder::unload);
     }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      accessToken -> apisHolder.getIngestionFlowFileApi(accessToken)
+        .uploadIngestionFlowFile(1L, IngestionFlowFileType.PAYMENTS_REPORTING, FileOrigin.PORTAL, "FILENAME", null, Mockito.mock(Resource.class), null),
+      new ParameterizedTypeReference<>() {
+      }
+    );
+  }
 
 }

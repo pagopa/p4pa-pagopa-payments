@@ -19,14 +19,18 @@ class OrganizationApiHolderTest extends BaseApiHolderTest {
   private RestTemplateBuilder restTemplateBuilderMock;
 
   private OrganizationApisHolder organizationApisHolder;
+  private OrganizationApiClientConfig apiClientConfig;
 
   @BeforeEach
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    OrganizationApiClientConfig apiClient = new OrganizationApiClientConfig();
-    apiClient.setBaseUrl("http://example.com");
-    organizationApisHolder = new OrganizationApisHolder(apiClient, restTemplateBuilderMock);
+
+    apiClientConfig = new OrganizationApiClientConfig();
+    apiClientConfig.setBaseUrl("http://example.com");
+    apiClientConfig.setMaxAttempts(3);
+
+    organizationApisHolder = new OrganizationApisHolder(apiClientConfig, restTemplateBuilderMock);
   }
 
   @AfterEach
@@ -98,5 +102,15 @@ class OrganizationApiHolderTest extends BaseApiHolderTest {
         .crudStationsFindByBrokerIdAndStationId(1L, "STATIONID"),
       new ParameterizedTypeReference<>() {},
       organizationApisHolder::unload);
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      accessToken -> organizationApisHolder.getStationSearchControllerApi(accessToken)
+        .crudStationsFindByBrokerIdAndStationId(1L, "STATIONID"),
+      new ParameterizedTypeReference<>() {
+      }
+    );
   }
 }

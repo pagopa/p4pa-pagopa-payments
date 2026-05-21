@@ -1,8 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.config.rest;
 
 import it.gov.pagopa.pu.pagopapayments.exception.ConflictException;
+import it.gov.pagopa.pu.pagopapayments.exception.ForbiddenException;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
-import it.gov.pagopa.pu.pagopapayments.exception.TooManyRequestsException;
+import it.gov.pagopa.pu.pagopapayments.exception.NotAuthorizedException;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
@@ -18,23 +19,35 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+/** It will transcode Http client errors (see ignoredClientErrors for exceptions) using the provided transcoder. */
 @Slf4j
-public class HttpClientErrorHandler<T> extends DefaultResponseErrorHandler {
+public class HttpClientErrorJsonBodyHandler<T> extends DefaultResponseErrorHandler {
 
   private final JsonMapper jsonMapper;
   private final Class<T> errorDtoClass;
   private final BiFunction<HttpStatusCodeException, T, RuntimeException> errorTranscoder;
   private final ResponseErrorHandler errorHandler;
 
-  public HttpClientErrorHandler(JsonMapper jsonMapper, String applicationName, boolean bodyPrinterWhenError, Class<T> errorDtoClass, Function<T, String> errorDto2CodeFunction, Function<T, String> errorDto2MessageFunction) {
+  /**
+   * Skipped Http client errors:
+   * <li>404 is normally catch in order to transcode it as null
+   * <li>429 is handled by openApiGenerator code in order to retry it
+   */
+  private final Set<HttpStatusCode> ignoredClientErrors = Set.of(
+    HttpStatus.NOT_FOUND,
+    HttpStatus.TOO_MANY_REQUESTS
+  );
+
+  public HttpClientErrorJsonBodyHandler(JsonMapper jsonMapper, String applicationName, boolean bodyPrinterWhenError, Class<T> errorDtoClass, Function<T, String> errorDto2CodeFunction, Function<T, String> errorDto2MessageFunction) {
     this(jsonMapper, applicationName, bodyPrinterWhenError, errorDtoClass,
       buildDefaultHttpClientExceptionTranscoder(applicationName, errorDto2CodeFunction, errorDto2MessageFunction));
   }
 
-  public HttpClientErrorHandler(JsonMapper jsonMapper, String applicationName, boolean bodyPrinterWhenError, Class<T> errorDtoClass, BiFunction<HttpStatusCodeException, T, RuntimeException> httpClientExceptionTranscoder) {
+  public HttpClientErrorJsonBodyHandler(JsonMapper jsonMapper, String applicationName, boolean bodyPrinterWhenError, Class<T> errorDtoClass, BiFunction<HttpStatusCodeException, T, RuntimeException> httpClientExceptionTranscoder) {
     this.jsonMapper = jsonMapper;
     this.errorDtoClass = errorDtoClass;
     this.errorTranscoder = httpClientExceptionTranscoder;
@@ -49,7 +62,7 @@ public class HttpClientErrorHandler<T> extends DefaultResponseErrorHandler {
     try {
       errorHandler.handleError(url, method, response);
     } catch (HttpStatusCodeException ex) {
-      if (statusCode.is4xxClientError() && statusCode.value() != 404) {
+      if (statusCode.is4xxClientError() && !ignoredClientErrors.contains(statusCode)) {
         try {
           T errorDTO = jsonMapper.readValue(ex.getResponseBodyAsString(), errorDtoClass);
           throw errorTranscoder.apply(ex, errorDTO);
@@ -66,16 +79,18 @@ public class HttpClientErrorHandler<T> extends DefaultResponseErrorHandler {
     }
   }
 
+  /** A default transcoder required to invoke {@link HttpClientErrorJsonBodyHandler} which will transcode the Http client error into a BaseBusinessException using code and message extracted from the errorDTO */
   public static <T> BiFunction<HttpStatusCodeException, T, RuntimeException> buildDefaultHttpClientExceptionTranscoder(String applicationName, Function<T, String> errorDto2CodeFunction, Function<T, String> errorDto2MessageFunction) {
     return (exception, errorDTO) -> {
       String code = errorDto2CodeFunction != null
         ? errorDto2CodeFunction.apply(errorDTO)
-        : applicationName + "_" + ((HttpStatus)exception.getStatusCode()).name();
+        : applicationName + "_" + ((HttpStatus) exception.getStatusCode()).name();
       String message = errorDto2MessageFunction.apply(errorDTO);
       return switch (exception.getStatusCode()) {
         case HttpStatus.CONFLICT -> new ConflictException(code, message);
-        case HttpStatus.TOO_MANY_REQUESTS ->
-          new TooManyRequestsException(code, message);
+        case HttpStatus.FORBIDDEN -> new ForbiddenException(code, message);
+        case HttpStatus.UNAUTHORIZED ->
+          new NotAuthorizedException(code, message);
         default -> new InvalidValueException(code, message);
       };
     };

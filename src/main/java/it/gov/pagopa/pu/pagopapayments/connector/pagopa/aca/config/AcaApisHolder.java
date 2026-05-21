@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config;
 import it.gov.pagopa.pu.aca.gpd.v1.controller.generated.DebtPositionsApiApi;
 import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.ProblemJson;
 import it.gov.pagopa.pu.aca.gpd.v1.generated.ApiClient;
-import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorHandler;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -24,11 +24,11 @@ public class AcaApisHolder {
     this.clientConfig = clientConfig;
     this.restTemplate = restTemplateBuilder.build();
 
-    restTemplate.setErrorHandler(new HttpClientErrorHandler<>(jsonMapper, "ACA", clientConfig.isPrintBodyWhenError(),
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "ACA", clientConfig.isPrintBodyWhenError(),
       ProblemJson.class, null, ProblemJson::getDetail));
   }
 
-  public DebtPositionsApiApi getApiClientByApiKey(String apiKey) {
+  public DebtPositionsApiApi getDebtPositionsApi(String apiKey) {
     return apiMap.computeIfAbsent(apiKey, key ->
       new DebtPositionsApiApi(buildApiClient(key)));
   }

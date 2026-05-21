@@ -28,25 +28,25 @@ public class PrintPaymentNoticeClient {
 
   public byte[] generateNotice(Long organizationId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {
     String apiKey = getApiKeyFromOrganizationOrBroker(organizationId, accessToken);
-    return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
+    return apisHolder.getNoticeGenerationRequestApi(apiKey)
       .generateNotice(noticeGenerationRequestItemDTO, null, null);
   }
 
   public NoticeGenerationMassiveResourceDTO generateNoticeMassive(Long organizationId, String idempotencyKey, NoticeGenerationMassiveRequestDTO noticeMassive, String accessToken) {
     String apiKey = getApiKeyFromOrganizationOrBroker(organizationId, accessToken);
-    return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
+    return apisHolder.getNoticeGenerationRequestApi(apiKey)
       .generateNoticeMassiveRequest(idempotencyKey, noticeMassive, null);
   }
 
   public GetGenerationRequestStatusResourceDTO getFolderStatus(Long organizationId, String folderId, String accessToken) {
     String apiKey = getApiKeyFromOrganizationOrBroker(organizationId, accessToken);
-    return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
+    return apisHolder.getNoticeGenerationRequestApi(apiKey)
       .getFolderStatus(folderId, null);
   }
 
   public GetSignedUrlResourceDTO getFolderSignedUrlResource(Long organizationId, String folderId, String accessToken) {
     String apiKey = getApiKeyFromOrganizationOrBroker(organizationId, accessToken);
-    return apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
+    return apisHolder.getNoticeGenerationRequestApi(apiKey)
       .getFolderSignedUrlResource(folderId, null);
   }
 }

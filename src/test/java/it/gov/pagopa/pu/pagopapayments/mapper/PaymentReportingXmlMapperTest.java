@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.connector.soap.mapper;
+package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import gov.telematici.pagamenti.ws.NodoChiediFlussoRendicontazione;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 
-class NodoChiediFlussoRendicontazioneMapperTest {
+class PaymentReportingXmlMapperTest {
 
-  private final NodoChiediFlussoRendicontazioneMapper mapper = new NodoChiediFlussoRendicontazioneMapper();
+  private final PaymentReportingXmlMapper mapper = new PaymentReportingXmlMapper();
   private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   @Test

@@ -23,7 +23,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentsReportingRestServiceImplTest {
+class PaymentsReportingFacadeServiceImplTest {
 
   @Mock
   private PaymentsReportingService paymentsReportingService;
@@ -35,7 +35,7 @@ class PaymentsReportingRestServiceImplTest {
   private PaymentsReportingMapper paymentsReportingMapper;
 
   @InjectMocks
-  private PaymentsReportingRestServiceImpl paymentsReportingRestService;
+  private PaymentsReportingFacadeServiceImpl paymentsReportingRestService;
 
   @AfterEach
   void tearDown() {

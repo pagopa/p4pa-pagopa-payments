@@ -7,7 +7,7 @@ import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.PaymentsReportingApisHolder;
-import it.gov.pagopa.pu.pagopapayments.connector.soap.mapper.NodoChiediFlussoRendicontazioneMapper;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaymentReportingXmlMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
@@ -46,7 +46,7 @@ class PaymentsReportingClientTest {
   @Mock
   private PaymentsReportingMapper paymentsReportingMapper;
   @Mock
-  private NodoChiediFlussoRendicontazioneMapper nodoChiediFlussoRendicontazioneMapper;
+  private PaymentReportingXmlMapper paymentReportingXmlMapper;
 
   @InjectMocks
   private PaymentsReportingClient paymentsReportingClient;
@@ -66,7 +66,7 @@ class PaymentsReportingClientTest {
       organizationsApi,
       registryLogger,
       paymentsReportingMapper,
-      nodoChiediFlussoRendicontazioneMapper
+      paymentReportingXmlMapper
     );
   }
 
@@ -188,7 +188,7 @@ class PaymentsReportingClientTest {
       )
     ).thenReturn(paginatedPaymentsResponse);
     Mockito.when(
-      nodoChiediFlussoRendicontazioneMapper.createFlussoRendicontazioneRequest(
+      paymentReportingXmlMapper.createFlussoRendicontazioneRequest(
         brokerForNodoPaDTO,
         PAYMENTS_REPORTING_ID
       )

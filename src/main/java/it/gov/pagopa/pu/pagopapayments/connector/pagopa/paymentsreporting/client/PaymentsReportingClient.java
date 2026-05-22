@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.clien
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.PaymentsReportingApisHolder;
-import it.gov.pagopa.pu.pagopapayments.connector.soap.mapper.NodoChiediFlussoRendicontazioneMapper;
+import it.gov.pagopa.pu.pagopapayments.mapper.PaymentReportingXmlMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
@@ -26,13 +26,13 @@ public class PaymentsReportingClient {
   private final PaymentsReportingApisHolder apisHolder;
   private final RegistryLogger registryLogger;
   private final PaymentsReportingMapper paymentsReportingMapper;
-  private final NodoChiediFlussoRendicontazioneMapper nodoChiediFlussoRendicontazioneMapper;
+  private final PaymentReportingXmlMapper paymentReportingXmlMapper;
 
-  public PaymentsReportingClient(PaymentsReportingApisHolder apisHolder, RegistryLogger registryLogger, PaymentsReportingMapper paymentsReportingMapper, NodoChiediFlussoRendicontazioneMapper nodoChiediFlussoRendicontazioneMapper) {
+  public PaymentsReportingClient(PaymentsReportingApisHolder apisHolder, RegistryLogger registryLogger, PaymentsReportingMapper paymentsReportingMapper, PaymentReportingXmlMapper paymentReportingXmlMapper) {
     this.apisHolder = apisHolder;
     this.registryLogger = registryLogger;
     this.paymentsReportingMapper = paymentsReportingMapper;
-    this.nodoChiediFlussoRendicontazioneMapper = nodoChiediFlussoRendicontazioneMapper;
+    this.paymentReportingXmlMapper = paymentReportingXmlMapper;
   }
 
   public List<FlowByPSP> fetchIdList(BrokerForNodoPaDTO brokerForNodoPaDTO, OffsetDateTime latestFlowDate) {
@@ -71,7 +71,7 @@ public class PaymentsReportingClient {
     RegistryContextData contextData = buildRegistryContextData(brokerForNodoPaDTO, pspId);
     return registryLogger.execute(
       contextData,
-      nodoChiediFlussoRendicontazioneMapper.createFlussoRendicontazioneRequest(
+      paymentReportingXmlMapper.createFlussoRendicontazioneRequest(
         brokerForNodoPaDTO,
         reportingId
       ),

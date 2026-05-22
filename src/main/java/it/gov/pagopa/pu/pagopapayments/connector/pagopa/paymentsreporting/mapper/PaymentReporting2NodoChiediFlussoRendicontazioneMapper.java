@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.pagopapayments.mapper;
+package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.mapper;
 
 import gov.telematici.pagamenti.ws.NodoChiediFlussoRendicontazione;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
@@ -7,7 +7,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PaymentReportingXmlMapper {
+public class PaymentReporting2NodoChiediFlussoRendicontazioneMapper {
 
   public NodoChiediFlussoRendicontazione createFlussoRendicontazioneRequest(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId) {
     Broker broker = brokerForNodoPaDTO.getBroker();

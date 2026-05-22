@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.time.OffsetDateTime;
@@ -30,6 +31,8 @@ class PaymentsReportingApisHolderTest extends BaseApiHolderTest {
 
   @BeforeEach
   void setUp() {
+    Mockito.when(restTemplateBuilderMock.messageConverters(Mockito.any(JacksonJsonHttpMessageConverter.class)))
+      .thenReturn(restTemplateBuilderMock);
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
 

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import tools.jackson.core.JsonParser;
 
-import java.io.IOException;
 import java.time.LocalDate;
 
 class LocalDateDeserializerWithFallbackOnDateTimeTest {

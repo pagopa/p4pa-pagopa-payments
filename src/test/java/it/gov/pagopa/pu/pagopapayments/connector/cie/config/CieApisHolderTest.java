@@ -15,35 +15,48 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
 class CieApisHolderTest extends BaseApiHolderTest {
-    @Mock
-    private RestTemplateBuilder restTemplateBuilderMock;
+  @Mock
+  private RestTemplateBuilder restTemplateBuilderMock;
 
-    private CieApisHolder apisHolder;
+  private CieApisHolder apisHolder;
+  private CieApiClientConfig apiClientConfig;
 
-    @BeforeEach
-    void setUp() {
-        Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-        Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-        CieApiClientConfig clientConfig = CieApiClientConfig.builder()
-          .baseUrl("http://example.com")
-          .build();
-        apisHolder = new CieApisHolder(clientConfig, restTemplateBuilderMock);
-    }
+  @BeforeEach
+  void setUp() {
+    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+    apiClientConfig = CieApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    apisHolder = new CieApisHolder(apiClientConfig, restTemplateBuilderMock);
+  }
 
-    @AfterEach
-    void verifyNoMoreInteractions() {
-        Mockito.verifyNoMoreInteractions(
-                restTemplateBuilderMock,
-                restTemplateMock
-        );
-    }
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      restTemplateBuilderMock,
+      restTemplateMock
+    );
+  }
 
-    @Test
-    void whenGetDebtPositionCieApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
-        assertAuthenticationShouldBeSetInThreadSafeMode(
-                accessToken -> apisHolder.getDebtPositionCieApi(accessToken)
-                        .createDebtPositionCie(new DebtPositionCieRequestDTO()),
-                new ParameterizedTypeReference<>() {},
-                apisHolder::unload);
-    }
+  @Test
+  void whenGetDebtPositionCieApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      accessToken -> apisHolder.getDebtPositionCieApi(accessToken)
+        .createDebtPositionCie(new DebtPositionCieRequestDTO()),
+      new ParameterizedTypeReference<>() {
+      },
+      apisHolder::unload);
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      accessToken -> apisHolder.getDebtPositionCieApi(accessToken)
+        .createDebtPositionCie(new DebtPositionCieRequestDTO()),
+      new ParameterizedTypeReference<>() {
+      }
+    );
+  }
 }

@@ -131,7 +131,42 @@ class PagoPaPaymentsExceptionHandlerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
 
+  @Test
+  void handleConflictException() throws Exception {
+    doThrow(new ConflictException("ERRORCODE", "Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isConflict())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("PAGOPA_PAYMENTS_CONFLICT"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
+
+  @Test
+  void handleForbiddenException() throws Exception {
+    doThrow(new ForbiddenException("ERRORCODE", "Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isForbidden())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("PAGOPA_PAYMENTS_FORBIDDEN"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
+
+  @Test
+  void handleNotAuthorized() throws Exception {
+    doThrow(new NotAuthorizedException("ERRORCODE", "Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("PAGOPA_PAYMENTS_UNAUTHORIZED"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
   @Test

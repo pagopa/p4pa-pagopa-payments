@@ -1,5 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config;
 
+import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import org.junit.jupiter.api.AfterEach;
@@ -19,14 +21,21 @@ class PagopaPrintPaymentNoticeApisHolderTest extends BaseApiHolderTest {
   private RestTemplateBuilder restTemplateBuilderMock;
 
   private PagopaPrintPaymentNoticeApisHolder apisHolder;
+  private PagopaPrintPaymentNoticeApiClientConfig apiClientConfig;
 
   @BeforeEach
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    PagopaPrintPaymentNoticeApiClientConfig apiClient = new PagopaPrintPaymentNoticeApiClientConfig();
-    apiClient.setBaseUrl("http://example.com");
-    apisHolder = new PagopaPrintPaymentNoticeApisHolder(apiClient, restTemplateBuilderMock);
+
+    apiClientConfig = new PagopaPrintPaymentNoticeApiClientConfig();
+    apiClientConfig.setBaseUrl("http://example.com");
+    apiClientConfig.setMaxAttempts(3);
+
+    apisHolder = new PagopaPrintPaymentNoticeApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
+
+    Mockito.verify(restTemplateMock)
+      .setErrorHandler(Mockito.any(HttpClientErrorJsonBodyHandler.class));
   }
 
   @AfterEach
@@ -38,15 +47,26 @@ class PagopaPrintPaymentNoticeApisHolderTest extends BaseApiHolderTest {
   }
 
   @Test
-  void whenGetNoticeGenerationRequestApisApiMapThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+  void whenGetNoticeGenerationRequestApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      apiKey -> apisHolder.getNoticeGenerationRequestApisApiMap(apiKey)
+      apiKey -> apisHolder.getNoticeGenerationRequestApi(apiKey)
         .generateNotice(new NoticeGenerationRequestItemDTO(), null, null),
       new ParameterizedTypeReference<>() {
       },
-      () -> {},
+      () -> {
+      },
       AUTH_TYPE.API_KEY,
       "Ocp-Apim-Subscription-Key"
+    );
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      apiKey -> apisHolder.getNoticeGenerationRequestApi(apiKey)
+        .generateNotice(new NoticeGenerationRequestItemDTO(), null, null),
+      new ParameterizedTypeReference<>() {
+      }
     );
   }
 }

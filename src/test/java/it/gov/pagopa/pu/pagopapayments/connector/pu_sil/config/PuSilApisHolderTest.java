@@ -19,15 +19,19 @@ class PuSilApisHolderTest extends BaseApiHolderTest {
   private RestTemplateBuilder restTemplateBuilderMock;
 
   private PuSilApisHolder puSilApisHolder;
+  private PuSilApiClientConfig apiClientConfig;
 
   @BeforeEach
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    PuSilApiClientConfig clientConfig = PuSilApiClientConfig.builder()
+
+    apiClientConfig = PuSilApiClientConfig.builder()
       .baseUrl("http://example.com")
+      .maxAttempts(3)
       .build();
-    puSilApisHolder = new PuSilApisHolder(clientConfig, restTemplateBuilderMock);
+
+    puSilApisHolder = new PuSilApisHolder(apiClientConfig, restTemplateBuilderMock);
   }
 
   @AfterEach
@@ -43,8 +47,19 @@ class PuSilApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       accessToken -> puSilApisHolder.getActualizationApi(accessToken)
         .actualize(1L, "NAV"),
-      new ParameterizedTypeReference<>() {},
+      new ParameterizedTypeReference<>() {
+      },
       puSilApisHolder::unload
+    );
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      accessToken -> puSilApisHolder.getActualizationApi(accessToken)
+        .actualize(1L, "NAV"),
+      new ParameterizedTypeReference<>() {
+      }
     );
   }
 }

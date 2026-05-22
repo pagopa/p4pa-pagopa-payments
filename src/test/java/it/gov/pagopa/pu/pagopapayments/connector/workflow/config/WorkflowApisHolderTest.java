@@ -18,15 +18,19 @@ class WorkflowApisHolderTest extends BaseApiHolderTest {
   private RestTemplateBuilder restTemplateBuilderMock;
 
   private WorkflowApisHolder workflowApisHolder;
+  private WorkflowApiClientConfig apiClientConfig;
 
   @BeforeEach
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    WorkflowApiClientConfig clientConfig = WorkflowApiClientConfig.builder()
+
+    apiClientConfig = WorkflowApiClientConfig.builder()
       .baseUrl("http://example.com")
+      .maxAttempts(3)
       .build();
-    workflowApisHolder = new WorkflowApisHolder(clientConfig, restTemplateBuilderMock);
+
+    workflowApisHolder = new WorkflowApisHolder(apiClientConfig, restTemplateBuilderMock);
   }
 
   @AfterEach
@@ -45,6 +49,16 @@ class WorkflowApisHolderTest extends BaseApiHolderTest {
       new ParameterizedTypeReference<>() {
       },
       workflowApisHolder::unload);
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      accessToken -> workflowApisHolder.getWorkflowApi(accessToken)
+        .waitWorkflowCompletion("1234", 1, 1000),
+      new ParameterizedTypeReference<>() {
+      }
+    );
   }
 
 }

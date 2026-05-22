@@ -57,7 +57,7 @@ class PrintPaymentNoticeClientTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
-    Mockito.when(apisHolder.getNoticeGenerationRequestApisApiMap(apiKey))
+    Mockito.when(apisHolder.getNoticeGenerationRequestApi(apiKey))
       .thenReturn(noticeGenerationRequestApisApiMock);
     Mockito.when(noticeGenerationRequestApisApiMock.generateNotice(requestDTO, null, null))
       .thenReturn(response);
@@ -81,7 +81,7 @@ class PrintPaymentNoticeClientTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
-    Mockito.when(apisHolder.getNoticeGenerationRequestApisApiMap(apiKey))
+    Mockito.when(apisHolder.getNoticeGenerationRequestApi(apiKey))
       .thenReturn(noticeGenerationRequestApisApiMock);
     Mockito.when(noticeGenerationRequestApisApiMock.generateNoticeMassiveRequest(idempotenceKey, noticeMassive, null))
       .thenReturn(expectedResult);
@@ -103,7 +103,7 @@ class PrintPaymentNoticeClientTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
-    Mockito.when(apisHolder.getNoticeGenerationRequestApisApiMap(apiKey))
+    Mockito.when(apisHolder.getNoticeGenerationRequestApi(apiKey))
       .thenReturn(noticeGenerationRequestApisApiMock);
     Mockito.when(noticeGenerationRequestApisApiMock.getFolderStatus(folderId, null))
       .thenReturn(expectedResult);
@@ -125,7 +125,7 @@ class PrintPaymentNoticeClientTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, VALID_ACCESS_TOKEN))
       .thenReturn(apiKey);
-    Mockito.when(apisHolder.getNoticeGenerationRequestApisApiMap(apiKey))
+    Mockito.when(apisHolder.getNoticeGenerationRequestApi(apiKey))
       .thenReturn(noticeGenerationRequestApisApiMock);
     Mockito.when(noticeGenerationRequestApisApiMock.getFolderSignedUrlResource(folderId, null))
       .thenReturn(expectedResult);

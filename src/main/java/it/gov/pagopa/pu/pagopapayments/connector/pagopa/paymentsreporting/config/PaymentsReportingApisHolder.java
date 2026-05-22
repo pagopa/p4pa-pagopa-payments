@@ -3,14 +3,19 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.confi
 import it.gov.pagopa.nodo.fdrorganization.controller.ApiClient;
 import it.gov.pagopa.nodo.fdrorganization.controller.auth.ApiKeyAuth;
 import it.gov.pagopa.nodo.fdrorganization.controller.generated.OrganizationsApi;
-import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
+import it.gov.pagopa.nodo.fdrorganization.dto.generated.ErrorMessage;
+import it.gov.pagopa.nodo.fdrorganization.dto.generated.ErrorResponse;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -22,18 +27,21 @@ public class PaymentsReportingApisHolder {
 
   public PaymentsReportingApisHolder(
     RestTemplateBuilder restTemplateBuilder,
-    PaymentsReportingApiClientConfig clientConfig) {
+    PaymentsReportingApiClientConfig clientConfig,
+    JsonMapper jsonMapper) {
     this.restTemplate = restTemplateBuilder.build();
     this.clientConfig = clientConfig;
 
-    if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("PAGOPA-PAYMENTS-REPORTING"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "PAGOPA_PAYMENTS_REPORTING", clientConfig.isPrintBodyWhenError(),
+      ErrorResponse.class, null,
+      errorDTO -> Optional.ofNullable(errorDTO.getErrors())
+        .map(e -> e.stream().map(ErrorMessage::getMessage).collect(Collectors.joining(",")))
+        .orElse(errorDTO.getHttpStatusDescription())
+    ));
   }
 
-  public OrganizationsApi getOrganizationApiByApiKey(String apiKey) {
-    return paymentsReportingApisApiMap.computeIfAbsent(
-      apiKey,
+  public OrganizationsApi getOrganizationApi(String apiKey) {
+    return paymentsReportingApisApiMap.computeIfAbsent(apiKey,
       key -> new OrganizationsApi(buildApiClient(key))
     );
   }

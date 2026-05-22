@@ -12,7 +12,7 @@ class LocalDateDeserializerWithFallbackOnDateTimeTest {
   private final LocalDateDeserializerWithFallbackOnDateTime deserializer = new LocalDateDeserializerWithFallbackOnDateTime();
 
   @Test
-  void givenLocalDateWhenDeserializeThenOk() throws IOException {
+  void givenLocalDateWhenDeserializeThenOk() {
     JsonParser parser = Mockito.mock(JsonParser.class);
     Mockito.when(parser.getValueAsString()).thenReturn("2025-12-25");
 
@@ -22,7 +22,7 @@ class LocalDateDeserializerWithFallbackOnDateTimeTest {
   }
 
   @Test
-  void givenOffsetDateTimeWhenDeserializeThenExtractedLocalDate() throws IOException {
+  void givenOffsetDateTimeWhenDeserializeThenExtractedLocalDate() {
     JsonParser parser = Mockito.mock(JsonParser.class);
     Mockito.when(parser.getValueAsString()).thenReturn("2025-12-25T10:30:00+01:00");
 
@@ -32,7 +32,7 @@ class LocalDateDeserializerWithFallbackOnDateTimeTest {
   }
 
   @Test
-  void givenEmptyStringWhenDeserializeThenNull() throws IOException {
+  void givenEmptyStringWhenDeserializeThenNull() {
     JsonParser parser = Mockito.mock(JsonParser.class);
     Mockito.when(parser.getValueAsString()).thenReturn("");
 
@@ -42,7 +42,7 @@ class LocalDateDeserializerWithFallbackOnDateTimeTest {
   }
 
   @Test
-  void givenNullStringWhenDeserializeThenNull() throws IOException {
+  void givenNullStringWhenDeserializeThenNull() {
     JsonParser parser = Mockito.mock(JsonParser.class);
     Mockito.when(parser.getValueAsString()).thenReturn(null);
 

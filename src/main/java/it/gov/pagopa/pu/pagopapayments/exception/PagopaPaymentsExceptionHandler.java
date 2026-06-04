@@ -24,6 +24,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DatabindException;
@@ -53,7 +54,7 @@ public class PagopaPaymentsExceptionHandler {
     return handleException(ex, request, HttpStatus.FORBIDDEN, CategoryEnum.PAGOPA_PAYMENTS_FORBIDDEN);
   }
 
-  @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ConversionFailedException.class})
+  @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ConversionFailedException.class, InvalidValueException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleViolationException(Exception ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, CategoryEnum.PAGOPA_PAYMENTS_BAD_REQUEST);
   }
@@ -61,6 +62,11 @@ public class PagopaPaymentsExceptionHandler {
   @ExceptionHandler(NotAuthorizedException.class)
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleNotAuthorizedException(Exception ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.UNAUTHORIZED, CategoryEnum.PAGOPA_PAYMENTS_UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(HttpClientErrorException.TooManyRequests.class)
+  public ResponseEntity<PagoPaPaymentsErrorDTO> handleInvokedHttpClientTooManyRequestsError(Exception ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.TOO_MANY_REQUESTS, CategoryEnum.PAGOPA_PAYMENTS_TOO_MANY_REQUESTS);
   }
 
   @ExceptionHandler({ServletException.class, ErrorResponseException.class})
@@ -152,6 +158,9 @@ public class PagopaPaymentsExceptionHandler {
             .map(e -> " " + e.getPropertyPath() + ": " + e.getMessage())
             .sorted()
             .collect(Collectors.joining(";")));
+      }
+      case HttpClientErrorException.TooManyRequests tooManyRequestsException -> {
+        return Pair.of(CategoryEnum.PAGOPA_PAYMENTS_TOO_MANY_REQUESTS.name(), tooManyRequestsException.getMessage());
       }
       case BaseBusinessException businessException -> {
         return Pair.of(businessException.getCode(), businessException.getMessage());

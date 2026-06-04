@@ -20,14 +20,14 @@ import static it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper.PAY
 
 @Slf4j
 @Service
-public class PaymentsReportingRestServiceImpl implements PaymentsReportingRestService {
+public class PaymentsReportingFacadeServiceImpl implements PaymentsReportingFacadeService {
 
   private final PaymentsReportingService paymentsReportingService;
   private final BrokerRetrieverService brokerRetrieverService;
   private final FileShareService fileShareService;
   private final PaymentsReportingMapper paymentsReportingMapper;
 
-  public PaymentsReportingRestServiceImpl(
+  public PaymentsReportingFacadeServiceImpl(
     PaymentsReportingService paymentsReportingService,
     BrokerRetrieverService brokerRetrieverService,
     FileShareService fileShareService, PaymentsReportingMapper paymentsReportingMapper) {

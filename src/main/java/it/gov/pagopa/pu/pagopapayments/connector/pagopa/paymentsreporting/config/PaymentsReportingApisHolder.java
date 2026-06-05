@@ -5,17 +5,13 @@ import it.gov.pagopa.nodo.fdrorganization.controller.auth.ApiKeyAuth;
 import it.gov.pagopa.nodo.fdrorganization.controller.generated.OrganizationsApi;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.ErrorMessage;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.ErrorResponse;
-import it.gov.pagopa.pu.pagopapayments.config.json.LocalDateDeserializerWithFallbackOnDateTime;
 import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
-import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.module.SimpleModule;
 
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,18 +29,8 @@ public class PaymentsReportingApisHolder {
     RestTemplateBuilder restTemplateBuilder,
     PaymentsReportingApiClientConfig clientConfig,
     JsonMapper jsonMapper) {
+    this.restTemplate = restTemplateBuilder.build();
     this.clientConfig = clientConfig;
-
-    SimpleModule localDateDeserializerWithFallbackOnDateTimeModule = new SimpleModule("LocalDateDeserializerWithFallbackOnDateTimeModule");
-    localDateDeserializerWithFallbackOnDateTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializerWithFallbackOnDateTime());
-
-    JsonMapper mapper = jsonMapper.rebuild()
-      .addModule(localDateDeserializerWithFallbackOnDateTimeModule)
-      .build();
-
-    this.restTemplate = restTemplateBuilder
-      .messageConverters(new JacksonJsonHttpMessageConverter(mapper))
-      .build();
 
     restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "PAGOPA_PAYMENTS_REPORTING", clientConfig.isPrintBodyWhenError(),
       ErrorResponse.class, null,

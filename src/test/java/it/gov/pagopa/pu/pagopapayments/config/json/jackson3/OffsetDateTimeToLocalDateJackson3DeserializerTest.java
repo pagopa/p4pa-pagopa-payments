@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import tools.jackson.core.JsonParser;
 
 import java.time.LocalDate;
+import java.time.Month;
 
 class OffsetDateTimeToLocalDateJackson3DeserializerTest {
   private final OffsetDateTimeToLocalDateJackson3Deserializer deserializer = new OffsetDateTimeToLocalDateJackson3Deserializer();
@@ -15,8 +16,7 @@ class OffsetDateTimeToLocalDateJackson3DeserializerTest {
   @Test
   void whenDeserializeThenCallHandler(){
     try (MockedStatic<OffsetDateTimeToLocalDateDeserializer> deserializerStatic = Mockito.mockStatic(OffsetDateTimeToLocalDateDeserializer.class)) {
-
-      LocalDate expectedResult = LocalDate.now();
+      LocalDate expectedResult = LocalDate.of(2025, Month.DECEMBER, 1);
       JsonParser jsonParser = Mockito.mock(JsonParser.class);
 
       deserializerStatic.when(() -> OffsetDateTimeToLocalDateDeserializer.parse("dateString"))

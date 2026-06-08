@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.LocalDateTimeToOffsetDateTimeJackson3Deserializer;
 import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.LocalDateTimeToOffsetDateTimeJackson3Serializer;
+import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.OffsetDateTimeToLocalDateJackson3Deserializer;
 import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.OffsetDateTimeToLocalDateTimeJackson3Deserializer;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -20,6 +21,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
@@ -52,7 +54,8 @@ public class JsonConfig {
     return new JavaTimeModule()
       .addSerializer(LocalDateTime.class, new LocalDateTimeToOffsetDateTimeSerializer())
       .addDeserializer(LocalDateTime.class, new OffsetDateTimeToLocalDateTimeDeserializer())
-      .addDeserializer(OffsetDateTime.class, new LocalDateTimeToOffsetDateTimeDeserializer());
+      .addDeserializer(OffsetDateTime.class, new LocalDateTimeToOffsetDateTimeDeserializer())
+      .addDeserializer(LocalDate.class, new OffsetDateTimeToLocalDateDeserializer());
   }
 
   @Bean
@@ -78,6 +81,7 @@ public class JsonConfig {
     return new tools.jackson.databind.module.SimpleModule()
       .addSerializer(LocalDateTime.class, new LocalDateTimeToOffsetDateTimeJackson3Serializer())
       .addDeserializer(LocalDateTime.class, new OffsetDateTimeToLocalDateTimeJackson3Deserializer())
-      .addDeserializer(OffsetDateTime.class, new LocalDateTimeToOffsetDateTimeJackson3Deserializer());
+      .addDeserializer(OffsetDateTime.class, new LocalDateTimeToOffsetDateTimeJackson3Deserializer())
+      .addDeserializer(LocalDate.class, new OffsetDateTimeToLocalDateJackson3Deserializer());
   }
 }

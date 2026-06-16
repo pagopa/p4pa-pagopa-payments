@@ -141,7 +141,7 @@ public class SynchronousPaymentService {
   }
 
   private ActualizeAmountRequestDTO retrieveNotificationFeeCentsFromSend(Long organizationId, String nav, String accessToken) {
-    String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
+    String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null, accessToken);
     ActualizeAmountRequestDTO amountRequest = new ActualizeAmountRequestDTO();
     amountRequest.setOrganizationId(organizationId);
     amountRequest.setNav(nav);

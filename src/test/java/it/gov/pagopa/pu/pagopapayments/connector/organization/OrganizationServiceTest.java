@@ -63,12 +63,13 @@ class OrganizationServiceTest {
     Long organizationId = 1L;
     String accessToken = "accessToken";
     String apiKey = "apiKey";
+    String subUnitCode = "CODE";
 
-    Mockito.when(client.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken))
+    Mockito.when(client.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode, accessToken))
       .thenReturn(apiKey);
 
     // When
-    String result = service.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, accessToken);
+    String result = service.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode, accessToken);
 
     // Then
     Assertions.assertSame(apiKey, result);

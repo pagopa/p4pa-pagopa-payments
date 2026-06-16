@@ -28,8 +28,8 @@ public class OrganizationServiceImpl implements OrganizationService {
   }
 
   @Override
-  public String getOrganizationApiKey(Long organizationId, OrganizationApiKeyType organizationApiKeyType, String accessToken) {
-    return organizationClient.getOrganizationApiKey(organizationId, organizationApiKeyType, accessToken);
+  public String getOrganizationApiKey(Long organizationId, OrganizationApiKeyType organizationApiKeyType, String subUnitCode, String accessToken) {
+    return organizationClient.getOrganizationApiKey(organizationId, organizationApiKeyType, subUnitCode, accessToken);
   }
 
   @Override

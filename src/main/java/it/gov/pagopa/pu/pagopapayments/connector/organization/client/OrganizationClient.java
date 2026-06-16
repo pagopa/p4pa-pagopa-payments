@@ -39,12 +39,12 @@ public class OrganizationClient {
   }
 
   public String getOrganizationApiKey(Long organizationId,
-    OrganizationApiKeyType organizationApiKeyType, String accessToken) {
+    OrganizationApiKeyType organizationApiKeyType, String subUnitCode, String accessToken) {
     try{
       return apisHolder.getOrganizationApi(accessToken)
-        .getOrganizationApiKey(organizationId, organizationApiKeyType);
+        .getOrganizationApiKey(organizationId, organizationApiKeyType, subUnitCode);
     } catch (HttpClientErrorException.NotFound e){
-      log.info("Cannot find organization having organizationId {}", organizationId);
+      log.info("Cannot find organization having organizationId {} and subUnitCode {}", organizationId, subUnitCode);
       return null;
     }
   }

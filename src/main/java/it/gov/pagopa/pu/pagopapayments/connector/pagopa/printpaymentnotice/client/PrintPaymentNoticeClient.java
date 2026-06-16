@@ -19,7 +19,7 @@ public class PrintPaymentNoticeClient {
   }
 
   private String getApiKeyFromOrganizationOrBroker(Long organizationId, String accessToken) {
-    String orgOrBrokerApiKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, accessToken);
+    String orgOrBrokerApiKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, null, accessToken);
     if(!StringUtils.hasText(orgOrBrokerApiKey)){
       throw new IllegalStateException("Organization " + organizationId + " has not GENERATE_NOTICE apiKey configured!");
     }
@@ -33,7 +33,7 @@ public class PrintPaymentNoticeClient {
   }
 
   public NoticeGenerationMassiveResourceDTO generateNoticeMassive(Long organizationId, String idempotencyKey, NoticeGenerationMassiveRequestDTO noticeMassive, String accessToken) {
-    String apiKey = getApiKeyFromOrganizationOrBroker(organizationId, accessToken);
+    String apiKey = getApiKeyFromOrganizationOrBroker(organizationId,  accessToken);
     return apisHolder.getNoticeGenerationRequestApi(apiKey)
       .generateNoticeMassiveRequest(idempotencyKey, noticeMassive, null);
   }

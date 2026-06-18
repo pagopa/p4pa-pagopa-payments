@@ -82,7 +82,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
       .thenReturn(Pair.of(broker, organization));
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN))
       .thenReturn(null);
     Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
         organization.getOrganizationId(),
@@ -135,7 +135,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(authnServiceMock.getAccessToken()).thenReturn(VALID_ACCEESS_TOKEN);
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
       .thenReturn(Pair.of(broker, organization));
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN))
       .thenReturn(apiKey);
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(
         organization.getOrganizationId(),
@@ -197,7 +197,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
       .thenReturn(Pair.of(broker, organization));
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN))
       .thenReturn(null);
 
     Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
@@ -244,7 +244,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
       .thenReturn(Pair.of(broker, organization));
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN))
       .thenReturn(null);
 
     Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
@@ -292,7 +292,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
       .thenReturn(Pair.of(broker, organization));
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN))
       .thenReturn(null);
 
     Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
@@ -340,7 +340,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
       .thenReturn(Pair.of(broker, organization));
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN))
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN))
       .thenReturn(null);
 
     Mockito.when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(
@@ -383,7 +383,7 @@ class SynchronousPaymentServiceTest {
 
     NotificationPriceResponseV23DTO mockResponse = Mockito.mock(NotificationPriceResponseV23DTO.class);
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(orgId, nav, VALID_ACCEESS_TOKEN)).thenReturn(mockResponse);
     Mockito.when(mockResponse.getTotalPrice()).thenReturn(Math.toIntExact(expectedRequest.getNewFeeCents()));
 
@@ -407,7 +407,7 @@ class SynchronousPaymentServiceTest {
       .actualizedFromPuSil(false)
       .build();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(emptyApiKey);
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN)).thenReturn(emptyApiKey);
 
     ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
 
@@ -428,7 +428,7 @@ class SynchronousPaymentServiceTest {
       .actualizedFromPuSil(false)
       .build();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(orgId, nav, VALID_ACCEESS_TOKEN))
       .thenThrow(new RuntimeException("Not Found"));
 

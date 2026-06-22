@@ -399,6 +399,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateFILESHARE") {
@@ -436,6 +438,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGeneratePaCreatePosition") {
@@ -626,6 +630,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateREGISTRIES") {
@@ -657,6 +663,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGeneratePUSIL") {
@@ -688,6 +696,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateWORKFLOWHUB") {

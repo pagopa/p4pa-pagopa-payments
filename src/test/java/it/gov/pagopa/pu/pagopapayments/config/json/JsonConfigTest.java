@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
@@ -44,6 +46,14 @@ class JsonConfigTest {
       this.name = name;
     }
 
+  }
+
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @JsonUnknownPropertiesNotAllowed
+  public static class SampleUknownFieldsNotAllowedDTO {
+    private String name;
   }
 
   @BeforeEach
@@ -91,7 +101,7 @@ class JsonConfigTest {
     SampleDTO expectedResult = new SampleDTO();
     expectedResult.setName("NAME");
     expectedResult.setValue(42);
-    expectedResult.setDateTime(LocalDateTime.of(2025, 12, 22, 18, 17, 39, 940891000));
+    expectedResult.setDateTime(LocalDateTime.of(2025, Month.DECEMBER, 22, 18, 17, 39, 940891000));
     expectedResult.setOffsetDateTime(OffsetDateTime.of(2025, 12, 22, 18, 17, 39, 941234000, ZoneOffset.of("+01:00")));
     expectedResult.setImplicitField(expectedResult.getName());
 
@@ -102,5 +112,32 @@ class JsonConfigTest {
     // Then
     Assertions.assertEquals(expectedResult, j2Deserialized);
     Assertions.assertEquals(expectedResult, j3Deserialized);
+  }
+
+  @Test
+  void testJsonUnknownPropertiesNotAllowed() throws JsonProcessingException {
+    String validJson = "{\"name\":\"PROVA\"}";
+    SampleUknownFieldsNotAllowedDTO expectedValidResult = new SampleUknownFieldsNotAllowedDTO("PROVA");
+
+    String invalidJson = "{\"UNKNOWNFIELD\":\"PROVA\"}";
+
+    SampleUknownFieldsNotAllowedDTO validDto = j3JsonMapper.readValue(validJson, SampleUknownFieldsNotAllowedDTO.class);
+    Assertions.assertEquals(
+      expectedValidResult,
+      validDto
+    );
+    validDto = j2ObjectMapper.readValue(validJson, SampleUknownFieldsNotAllowedDTO.class);
+    Assertions.assertEquals(
+      expectedValidResult,
+      validDto
+    );
+
+    Assertions.assertThrows(UnrecognizedPropertyException.class, () ->
+      j3JsonMapper.readValue(invalidJson, SampleUknownFieldsNotAllowedDTO.class));
+    Assertions.assertThrows(com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class, () ->
+      j2ObjectMapper.readValue(invalidJson, SampleUknownFieldsNotAllowedDTO.class));
+
+    j3JsonMapper.readValue(invalidJson, SampleDTO.class);
+    j2ObjectMapper.readValue(invalidJson, SampleDTO.class);
   }
 }

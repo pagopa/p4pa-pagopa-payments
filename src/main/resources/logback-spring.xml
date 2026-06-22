@@ -18,22 +18,6 @@
         </encoder>
     </appender>
 
-    <appender name="SYNC_AUDIT"
-              class="ch.qos.logback.core.ConsoleAppender">
-        <encoder
-                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <appender name="AUDIT"
-              class="ch.qos.logback.classic.AsyncAppender">
-        <neverBlock>true</neverBlock>
-        <queueSize>${ASYNC_LOG_QUEUE_SIZE:-500000}</queueSize>
-        <discardingThreshold>0</discardingThreshold>
-        <appender-ref ref="SYNC_AUDIT"/>
-    </appender>
-
     <appender name="ASYNC_STDOUT"
               class="ch.qos.logback.classic.AsyncAppender">
         <neverBlock>true</neverBlock>
@@ -42,12 +26,74 @@
         <appender-ref ref="STDOUT"/>
     </appender>
 
-    <logger name="AUDIT" additivity="false">
-        <appender-ref ref="AUDIT"/>
-    </logger>
+    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+        <key>ENABLE_AUDIT_APPENDER</key>
+        <value>TRUE</value>
+    </condition>
+    <if>
+        <then>
+            <appender name="SYNC_AUDIT"
+                      class="ch.qos.logback.core.ConsoleAppender">
+                <encoder
+                        class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <pattern>%msg%n</pattern>
+                </encoder>
+            </appender>
+
+            <appender name="AUDIT"
+                      class="ch.qos.logback.classic.AsyncAppender">
+                <neverBlock>true</neverBlock>
+                <queueSize>${ASYNC_LOG_QUEUE_SIZE:-500000}</queueSize>
+                <discardingThreshold>0</discardingThreshold>
+                <appender-ref ref="SYNC_AUDIT"/>
+            </appender>
+
+            <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                <key>ENABLE_KAFKA_AUDIT_APPENDER</key>
+                <value>TRUE</value>
+            </condition>
+            <if>
+                <then>
+                  <appender name="SYNC_KAFKA_AUDIT" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+                    <encoder>
+                      <pattern>%msg%n</pattern>
+                    </encoder>
+                    <topic>${KAFKA_AUDIT_TOPIC}</topic>
+                    <producerConfig>bootstrap.servers=${KAFKA_BINDER_BROKER}</producerConfig>
+                    <producerConfig>security.protocol=${KAFKA_CONFIG_SECURITY_PROTOCOL:-SASL_SSL}</producerConfig>
+                    <producerConfig>sasl.mechanism=${KAFKA_CONFIG_SASL_MECHANISM:-PLAIN}</producerConfig>
+                    <producerConfig>sasl.jaas.config=${KAFKA_AUDIT_PRODUCER_SASL_JAAS_CONFIG}</producerConfig>
+                    <producerConfig>client.id=auth</producerConfig>
+                    <producerConfig>retries=${KAFKA_AUDIT_RETRIES:-3}</producerConfig>
+                    <producerConfig>request.timeout.ms=${KAFKA_AUDIT_REQUEST_TIMEOUT_MS:-60000}</producerConfig>
+                    <producerConfig>block.on.buffer.full=false</producerConfig>
+                  </appender>
+
+                  <appender name="KAFKA_AUDIT" class="ch.qos.logback.classic.AsyncAppender">
+                    <neverBlock>true</neverBlock>
+                    <queueSize>${ASYNC_LOG_QUEUE_SIZE:-500000}</queueSize>
+                    <discardingThreshold>0</discardingThreshold>
+                    <appender-ref ref="SYNC_KAFKA_AUDIT"/>
+                  </appender>
+
+                    <logger name="AUDIT" additivity="false">
+                        <appender-ref ref="AUDIT"/>
+                        <appender-ref ref="KAFKA_AUDIT"/>
+                    </logger>
+                </then>
+                <else>
+                    <logger name="AUDIT" additivity="false">
+                        <appender-ref ref="AUDIT"/>
+                    </logger>
+                </else>
+            </if>
+        </then>
+        <else>
+            <logger name="AUDIT" additivity="false" level="OFF" />
+        </else>
+    </if>
 
     <root level="INFO">
         <appender-ref ref="ASYNC_STDOUT"/>
     </root>
-
 </configuration>

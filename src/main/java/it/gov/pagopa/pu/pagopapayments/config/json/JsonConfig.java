@@ -8,10 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.LocalDateTimeToOffsetDateTimeJackson3Deserializer;
-import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.LocalDateTimeToOffsetDateTimeJackson3Serializer;
-import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.OffsetDateTimeToLocalDateJackson3Deserializer;
-import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.OffsetDateTimeToLocalDateTimeJackson3Deserializer;
+import it.gov.pagopa.pu.pagopapayments.config.json.jackson3.*;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
@@ -44,6 +41,7 @@ public class JsonConfig {
     mapper.setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
     mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
     mapper.setTimeZone(Constants.DEFAULT_TIMEZONE);
+    mapper.addHandler(new JsonDeserializationProblemHandler());
     return mapper;
   }
 
@@ -66,7 +64,8 @@ public class JsonConfig {
       .configure(tools.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
       .configure(tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
       .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
-      .defaultTimeZone(Constants.DEFAULT_TIMEZONE);
+      .defaultTimeZone(Constants.DEFAULT_TIMEZONE)
+      .addHandler(new JsonDeserializationJackson3ProblemHandler());
   }
 
   @Bean

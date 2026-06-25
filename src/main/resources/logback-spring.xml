@@ -63,7 +63,7 @@
                     <producerConfig>security.protocol=${KAFKA_CONFIG_SECURITY_PROTOCOL:-SASL_SSL}</producerConfig>
                     <producerConfig>sasl.mechanism=${KAFKA_CONFIG_SASL_MECHANISM:-PLAIN}</producerConfig>
                     <producerConfig>sasl.jaas.config=${KAFKA_AUDIT_PRODUCER_SASL_JAAS_CONFIG}</producerConfig>
-                    <producerConfig>client.id=auth</producerConfig>
+                    <producerConfig>client.id=${appName:-}_audit</producerConfig>
                     <producerConfig>retries=${KAFKA_AUDIT_RETRIES:-3}</producerConfig>
                     <producerConfig>request.timeout.ms=${KAFKA_AUDIT_REQUEST_TIMEOUT_MS:-60000}</producerConfig>
                     <producerConfig>block.on.buffer.full=false</producerConfig>

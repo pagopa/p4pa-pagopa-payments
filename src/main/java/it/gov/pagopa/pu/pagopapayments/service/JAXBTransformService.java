@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import jakarta.xml.bind.*;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ResourceLoader;
@@ -107,6 +108,10 @@ public class JAXBTransformService {
       }
       Source source = new StreamSource(bais);
       JAXBElement<T> element = unmarshaller.unmarshal(source, clazz);
+      XmlRootElement rootElement = clazz.getAnnotation(XmlRootElement.class);
+      if(rootElement != null && !rootElement.name().equals(element.getName().getLocalPart())) {
+        throw new ApplicationException(ErrorCodeConstants.ERROR_CODE_XML_UNMARSHALLING_ERROR, "Unexpected root element name: found " + element.getName().getLocalPart() + " instead of " + rootElement.name());
+      }
       return element.getValue();
     } catch (SAXException | IOException | JAXBException e ) {
       if(tryStrippingNonValidChars && e instanceof UnmarshalException unmarshalException &&

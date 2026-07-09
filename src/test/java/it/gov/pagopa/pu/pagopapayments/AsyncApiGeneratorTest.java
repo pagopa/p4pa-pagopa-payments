@@ -49,13 +49,14 @@ class AsyncApiGeneratorTest {
 
     Path asyncApiGeneratedPath = Path.of("asyncapi/generated.asyncapi.json");
     boolean toStore=true;
+    String observedChanges = "";
     if(Files.exists(asyncApiGeneratedPath)){
-      String storedOpenApi = Files.readString(asyncApiGeneratedPath);
+      String storedAsyncApi = Files.readString(asyncApiGeneratedPath);
       try {
-        JsonAssert.comparator(JsonCompareMode.STRICT).assertIsMatch(storedOpenApi, asyncApiResult);
+        JsonAssert.comparator(JsonCompareMode.STRICT).assertIsMatch(storedAsyncApi, asyncApiResult);
         toStore=false;
       } catch (Throwable e){
-        log.info("Observed the following changes: {}", e.getMessage());
+        observedChanges = "\nObserved the following changes: " + e.getMessage();
       }
     }
     if(toStore){
@@ -63,7 +64,7 @@ class AsyncApiGeneratorTest {
     }
 
     String gitStatus = execCmd("git", "status");
-    Assertions.assertFalse(gitStatus.contains("asyncapi/generated.asyncapi.json"), "Generated AsyncApi not committed");
+    Assertions.assertFalse(gitStatus.contains("openapi/generated.asyncapi.json"), "Generated AsyncApi not committed" + observedChanges);
   }
 
   public static String execCmd(String... cmd) throws java.io.IOException {

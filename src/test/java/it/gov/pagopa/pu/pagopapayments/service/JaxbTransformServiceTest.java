@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeReq;
+import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeRes;
+import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.Assertions;
@@ -165,6 +167,22 @@ class JaxbTransformServiceTest {
 
     // then
     Assertions.assertTrue(EqualsBuilder.reflectionEquals(expectedResponse, response, true, null, true));
+  }
+
+  @Test
+  void givenUnexpectedRootElementThenApplicationException() {
+    PaVerifyPaymentNoticeReq expectedResponse = podamFactory.manufacturePojo(PaVerifyPaymentNoticeReq.class);
+    String rootElement = "ns2:paVerifyPaymentNoticeReq";
+    byte[] request = EXPECTED_RESPONSE_TEMPLATE.formatted(rootElement, EXPECTED_NAMESPACE,
+      "\u0000"+expectedResponse.getIdPA(), expectedResponse.getIdBrokerPA(), expectedResponse.getIdStation(),
+      expectedResponse.getQrCode().getFiscalCode(), expectedResponse.getQrCode().getNoticeNumber(),
+      rootElement).getBytes(StandardCharsets.UTF_8);
+
+    // when
+    ApplicationException resultException = Assertions.assertThrows(ApplicationException.class, () -> jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeRes.class));
+
+    // then
+    Assertions.assertEquals("Unexpected root element name: found paVerifyPaymentNoticeReq instead of paVerifyPaymentNoticeRes", resultException.getMessage());
   }
 
   @Test

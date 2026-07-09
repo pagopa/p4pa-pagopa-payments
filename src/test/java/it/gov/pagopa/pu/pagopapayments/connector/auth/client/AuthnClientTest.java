@@ -48,7 +48,7 @@ class AuthnClientTest {
 
         Mockito.when(authApisHolderMock.getAuthnApi(null))
                 .thenReturn(authnApiMock);
-        Mockito.when(authnApiMock.postToken(clientId, grantType, scope, subjectToken, subjectIssuer, subjectTokenType, clientSecret))
+        Mockito.when(authnApiMock.postToken(clientId, grantType, scope, subjectToken, subjectIssuer, subjectTokenType, clientSecret, null))
                 .thenReturn(expectedResult);
 
         // When

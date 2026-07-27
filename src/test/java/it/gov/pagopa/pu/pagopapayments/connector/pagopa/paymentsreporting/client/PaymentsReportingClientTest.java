@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.mapper.PaymentReporting2NodoChiediFlussoRendicontazioneMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
+import it.gov.pagopa.pu.pagopapayments.exception.MissingApiKeyException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
@@ -208,6 +209,27 @@ class PaymentsReportingClientTest {
 
     //then
     Assertions.assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  void givenNoSyncPaymentsReportingKeyWhenFetchIdListThenThrowEx() {
+    BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
+    brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncPaymentsReportingKey(null).build());
+
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    brokerForNodoPaDTO.setOrganization(organization);
+
+    OffsetDateTime latestFlowDate = OffsetDateTime.now();
+
+    MissingApiKeyException exception = Assertions.assertThrows(
+      MissingApiKeyException.class,
+      () -> paymentsReportingClient.fetchIdList(brokerForNodoPaDTO, latestFlowDate)
+    );
+
+    Assertions.assertEquals(
+      "Organization " + organization.getOrganizationId() + " has not SYNC_PAYMENTS_REPORTING apiKey configured!",
+      exception.getMessage()
+    );
   }
 
   private static Stream<PaginatedPaymentsResponse> providePaginatedPaymentsResponseScenarios() {

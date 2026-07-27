@@ -84,7 +84,7 @@ public class PagopaPaymentsExceptionHandler {
     return handleException(ex, request, httpStatus, errorCode);
   }
 
-  @ExceptionHandler({RuntimeException.class})
+  @ExceptionHandler({RuntimeException.class, MissingApiKeyException.class})
   public ResponseEntity<PagoPaPaymentsErrorDTO> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, CategoryEnum.PAGOPA_PAYMENTS_GENERIC_ERROR);
   }

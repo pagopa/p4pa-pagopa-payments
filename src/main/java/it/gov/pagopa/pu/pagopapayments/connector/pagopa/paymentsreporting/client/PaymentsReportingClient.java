@@ -2,14 +2,17 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.clien
 
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config.PaymentsReportingApisHolder;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.mapper.PaymentReporting2NodoChiediFlussoRendicontazioneMapper;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
+import it.gov.pagopa.pu.pagopapayments.exception.MissingApiKeyException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryLogger;
+import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.pagopapayments.util.PageUtils;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryOutcome;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +39,17 @@ public class PaymentsReportingClient {
   }
 
   public List<FlowByPSP> fetchIdList(BrokerForNodoPaDTO brokerForNodoPaDTO, OffsetDateTime latestFlowDate) {
+    String syncPaymentsReportingKey = brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey();
+    Organization organization = brokerForNodoPaDTO.getOrganization();
+
+    if (syncPaymentsReportingKey == null) {
+      throw new MissingApiKeyException(ErrorCodeConstants.ERROR_CODE_MISSING_SYNC_PAYMENTS_REPORTING_API_KEY, "Organization " + organization.getOrganizationId() + " has not SYNC_PAYMENTS_REPORTING apiKey configured!");
+    }
+
     return PageUtils.fetchAllFromPaginatedApi(
-        page -> apisHolder.getOrganizationApi(brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey())
+        page -> apisHolder.getOrganizationApi(syncPaymentsReportingKey)
           .iOrganizationsControllerGetAllPublishedFlows(
-            brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(), latestFlowDate,
+            organization.getOrgFiscalCode(), latestFlowDate,
             (long) page, null, null, null
           ),
         this::isPaginatedFlowsResponseEmpty,

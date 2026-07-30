@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeReq;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeRes;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -126,10 +127,12 @@ class JaxbTransformServiceTest {
       jaxbContextMockedStatic.when(() -> JAXBContext.newInstance(PaVerifyPaymentNoticeReq.class))
         .thenThrow(new JAXBException("JAXBException"));
 
-      Assertions.assertThrows(
+      InvalidValueException resultException = Assertions.assertThrows(
         InvalidValueException.class,
         () -> jaxbTransformService.marshalling(request, PaVerifyPaymentNoticeReq.class)
       );
+
+      Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_XML_MARSHALLING_ERROR, resultException.getCode());
     }
   }
 
@@ -224,10 +227,12 @@ class JaxbTransformServiceTest {
       jaxbContextMockedStatic.when(() -> JAXBContext.newInstance(PaVerifyPaymentNoticeReq.class))
         .thenThrow(new JAXBException("JAXBException"));
 
-      Assertions.assertThrows(
+      InvalidValueException resultException = Assertions.assertThrows(
         InvalidValueException.class,
         () -> jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeReq.class)
       );
+
+      Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_XML_UNMARSHALLING_ERROR, resultException.getCode());
     }
   }
 

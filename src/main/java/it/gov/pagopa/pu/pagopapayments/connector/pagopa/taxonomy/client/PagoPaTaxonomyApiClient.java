@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.dto.PaTaxonomyDTO;
-import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,7 +48,7 @@ public class PagoPaTaxonomyApiClient {
     try {
       return objectMapper.readValue(json, new TypeReference<>() {});
     } catch (JsonProcessingException e) {
-      throw new ApplicationException(ErrorCodeConstants.ERROR_CODE_JSON_DESERIALIZATION_ERROR, "Error deserializing object to JSON:" + e.getMessage());
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_JSON_DESERIALIZATION_ERROR, "Error deserializing object to JSON:" + e.getMessage());
     }
   }
 

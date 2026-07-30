@@ -2,8 +2,9 @@ package it.gov.pagopa.pu.pagopapayments.event.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.pagopapayments.event.producer.dto.RegistryEventDTO;
-import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
+import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
@@ -78,7 +79,7 @@ public class RegistryProducerService {
           .traceId(traceId)
           .registryOrigin(REGISTRY_ORIGIN)
           .registryType(REGISTRY_TYPE)
-          .dateTime(OffsetDateTime.now())
+          .dateTime(OffsetDateTime.now(Constants.ZONEID))
           .brokerStationId(contextData.getBrokerStationId())
           .orgFiscalCode(contextData.getOrgFiscalCode())
           .pspId(contextData.getPspId())
@@ -106,7 +107,7 @@ public class RegistryProducerService {
       return objectMapper.writeValueAsString(object);
     } catch (Exception e) {
       log.error("Error serializing object to JSON", e);
-      throw new ApplicationException(ErrorCodeConstants.ERROR_CODE_JSON_SERIALIZATION_ERROR, "Error serializing object to JSON:" + e.getMessage());
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_JSON_SERIALIZATION_ERROR, "Error serializing object to JSON:" + e.getMessage());
     }
   }
 }

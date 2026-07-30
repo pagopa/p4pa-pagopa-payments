@@ -2,16 +2,22 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeReq;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeRes;
-import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import java.nio.charset.StandardCharsets;
+
+import static org.mockito.Mockito.mockStatic;
 
 @SpringBootTest(
   classes = {
@@ -113,6 +119,23 @@ class JaxbTransformServiceTest {
     Assertions.assertEquals(expectedResponse, response);
   }
 
+  @Test
+  void givenJAXBExceptionWhenMarshallingThenThrowInvalidValueException() {
+    PaVerifyPaymentNoticeReq request = podamFactory.manufacturePojo(PaVerifyPaymentNoticeReq.class);
+
+    try (MockedStatic<JAXBContext> jaxbContextMockedStatic = mockStatic(JAXBContext.class)) {
+      jaxbContextMockedStatic.when(() -> JAXBContext.newInstance(PaVerifyPaymentNoticeReq.class))
+        .thenThrow(new JAXBException("JAXBException"));
+
+      InvalidValueException resultException = Assertions.assertThrows(
+        InvalidValueException.class,
+        () -> jaxbTransformService.marshalling(request, PaVerifyPaymentNoticeReq.class)
+      );
+
+      Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_XML_MARSHALLING_ERROR, resultException.getCode());
+    }
+  }
+
   //endregion
 
   //region Unmarshalling
@@ -179,7 +202,7 @@ class JaxbTransformServiceTest {
       rootElement).getBytes(StandardCharsets.UTF_8);
 
     // when
-    ApplicationException resultException = Assertions.assertThrows(ApplicationException.class, () -> jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeRes.class));
+    InvalidValueException resultException = Assertions.assertThrows(InvalidValueException.class, () -> jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeRes.class));
 
     // then
     Assertions.assertEquals("Unexpected root element name: found paVerifyPaymentNoticeReq instead of paVerifyPaymentNoticeRes", resultException.getMessage());
@@ -194,6 +217,23 @@ class JaxbTransformServiceTest {
 
     // then
     Assertions.assertNull(response);
+  }
+
+  @Test
+  void givenJAXBExceptionWhenUnmarshallingThenThrowInvalidValueException() {
+    byte[] request = "<test>payload</test>".getBytes(StandardCharsets.UTF_8);
+
+    try (MockedStatic<JAXBContext> jaxbContextMockedStatic = mockStatic(JAXBContext.class)) {
+      jaxbContextMockedStatic.when(() -> JAXBContext.newInstance(PaVerifyPaymentNoticeReq.class))
+        .thenThrow(new JAXBException("JAXBException"));
+
+      InvalidValueException resultException = Assertions.assertThrows(
+        InvalidValueException.class,
+        () -> jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeReq.class)
+      );
+
+      Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_XML_UNMARSHALLING_ERROR, resultException.getCode());
+    }
   }
 
   //endregion

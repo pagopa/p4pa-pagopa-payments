@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.taxonomy.dto.PaTaxonomyDTO;
-import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +49,7 @@ class PagoPaTaxonomyApiClientTest {
     doThrow(new JsonProcessingException("Error") {}).when(objectMapperMock).readValue(anyString(), any(TypeReference.class));
 
     // When & Then
-    assertThrows(ApplicationException.class, () -> pagoPaTaxonomyApiClient.getTaxonomies());
+    assertThrows(InvalidValueException.class, () -> pagoPaTaxonomyApiClient.getTaxonomies());
     verify(restTemplateMock, times(1)).getForObject(baseUrl, String.class);
   }
 

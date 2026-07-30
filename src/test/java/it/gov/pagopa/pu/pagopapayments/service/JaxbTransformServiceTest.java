@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeReq;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeRes;
-import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.Assertions;
@@ -179,7 +179,7 @@ class JaxbTransformServiceTest {
       rootElement).getBytes(StandardCharsets.UTF_8);
 
     // when
-    ApplicationException resultException = Assertions.assertThrows(ApplicationException.class, () -> jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeRes.class));
+    InvalidValueException resultException = Assertions.assertThrows(InvalidValueException.class, () -> jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeRes.class));
 
     // then
     Assertions.assertEquals("Unexpected root element name: found paVerifyPaymentNoticeReq instead of paVerifyPaymentNoticeRes", resultException.getMessage());

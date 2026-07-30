@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
-import it.gov.pagopa.pu.pagopapayments.exception.ApplicationException;
+import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import jakarta.xml.bind.*;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -64,7 +64,7 @@ public class JAXBTransformService {
       return outConverterFun.apply(baos);
     } catch ( JAXBException | IOException e ) {
       log.error("marshalling - Error due parsing", e);
-      throw new ApplicationException(ErrorCodeConstants.ERROR_CODE_XML_MARSHALLING_ERROR, e.getMessage());
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_XML_MARSHALLING_ERROR, e.getMessage());
     }
   }
 
@@ -110,7 +110,7 @@ public class JAXBTransformService {
       JAXBElement<T> element = unmarshaller.unmarshal(source, clazz);
       XmlRootElement rootElement = clazz.getAnnotation(XmlRootElement.class);
       if(rootElement != null && !rootElement.name().equals(element.getName().getLocalPart())) {
-        throw new ApplicationException(ErrorCodeConstants.ERROR_CODE_XML_UNMARSHALLING_ERROR, "Unexpected root element name: found " + element.getName().getLocalPart() + " instead of " + rootElement.name());
+        throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_XML_UNMARSHALLING_ERROR, "Unexpected root element name: found " + element.getName().getLocalPart() + " instead of " + rootElement.name());
       }
       return element.getValue();
     } catch (SAXException | IOException | JAXBException e ) {
@@ -122,7 +122,7 @@ public class JAXBTransformService {
         bytes = string.getBytes(StandardCharsets.UTF_8);
         return unmarshalling(bytes, clazz, xsdFile, false);
       }
-      throw new ApplicationException(ErrorCodeConstants.ERROR_CODE_XML_UNMARSHALLING_ERROR, e.getMessage());
+      throw new InvalidValueException(ErrorCodeConstants.ERROR_CODE_XML_UNMARSHALLING_ERROR, e.getMessage());
     }
   }
 

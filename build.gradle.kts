@@ -470,6 +470,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateGPD") {
@@ -505,6 +507,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateACA") {
@@ -543,6 +547,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   )
 
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateNodeFdrOrganization") {
@@ -573,6 +579,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGeneratePrintPaymentNoticeClient") {
@@ -599,6 +607,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateSENDNOTIFICATION") {
@@ -781,6 +791,8 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     )
   )
   library.set("resttemplate")
+
+  workerIsolation.set("process")
 }
 
 jaxb {

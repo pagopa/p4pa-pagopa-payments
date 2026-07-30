@@ -216,6 +216,21 @@ class JaxbTransformServiceTest {
     Assertions.assertNull(response);
   }
 
+  @Test
+  void givenJAXBExceptionWhenUnmarshallingThenThrowInvalidValueException() {
+    byte[] request = "<test>payload</test>".getBytes(StandardCharsets.UTF_8);
+
+    try (MockedStatic<JAXBContext> jaxbContextMockedStatic = mockStatic(JAXBContext.class)) {
+      jaxbContextMockedStatic.when(() -> JAXBContext.newInstance(PaVerifyPaymentNoticeReq.class))
+        .thenThrow(new JAXBException("JAXBException"));
+
+      Assertions.assertThrows(
+        InvalidValueException.class,
+        () -> jaxbTransformService.unmarshalling(request, PaVerifyPaymentNoticeReq.class)
+      );
+    }
+  }
+
   //endregion
 
 }

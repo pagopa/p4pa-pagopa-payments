@@ -4,14 +4,19 @@ import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeReq;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeRes;
 import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import java.nio.charset.StandardCharsets;
+
+import static org.mockito.Mockito.mockStatic;
 
 @SpringBootTest(
   classes = {
@@ -111,6 +116,21 @@ class JaxbTransformServiceTest {
 
     // then
     Assertions.assertEquals(expectedResponse, response);
+  }
+
+  @Test
+  void givenJAXBExceptionWhenMarshallingThenThrowInvalidValueException() {
+    PaVerifyPaymentNoticeReq request = podamFactory.manufacturePojo(PaVerifyPaymentNoticeReq.class);
+
+    try (MockedStatic<JAXBContext> jaxbContextMockedStatic = mockStatic(JAXBContext.class)) {
+      jaxbContextMockedStatic.when(() -> JAXBContext.newInstance(PaVerifyPaymentNoticeReq.class))
+        .thenThrow(new JAXBException("JAXBException"));
+
+      Assertions.assertThrows(
+        InvalidValueException.class,
+        () -> jaxbTransformService.marshalling(request, PaVerifyPaymentNoticeReq.class)
+      );
+    }
   }
 
   //endregion

@@ -1,5 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.performancelogger;
 
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import it.gov.pagopa.pu.pagopapayments.util.MemoryAppender;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,137 +14,142 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 class ApiRequestPerformanceLoggerTest {
-  public static final String APPENDER_NAME = "API_REQUEST";
+    public static final String APPENDER_NAME = "API_REQUEST";
 
-  private ServletRequest httpServletRequestMock;
-  private ServletResponse httpServletResponseMock;
-  @Mock
-  private FilterChain filterChainMock;
+    private ServletRequest httpServletRequestMock;
+    private ServletResponse httpServletResponseMock;
+    @Mock
+    private FilterChain filterChainMock;
+    @Mock
+    private Tracer tracerMock;
 
-  private MemoryAppender memoryAppender;
+    private MemoryAppender memoryAppender;
 
-  private ApiRequestPerformanceLogger filter;
+    private ApiRequestPerformanceLogger filter;
 
-  @BeforeEach
-  void init() {
-    httpServletRequestMock = Mockito.mock(HttpServletRequest.class);
-    httpServletResponseMock = Mockito.mock(HttpServletResponse.class);
-    filter = new ApiRequestPerformanceLogger();
-  }
+    @BeforeEach
+    void init() {
+        httpServletRequestMock = mock(HttpServletRequest.class);
+        httpServletResponseMock = mock(HttpServletResponse.class);
+        filter = new ApiRequestPerformanceLogger(tracerMock);
 
-  @BeforeEach
-  void setupMemoryAppender() {
-    this.memoryAppender = PerformanceLoggerTest.buildPerformanceLoggerMemoryAppender(APPENDER_NAME);
-  }
+        this.memoryAppender = PerformanceLoggerTest.buildPerformanceLoggerMemoryAppender(APPENDER_NAME);
+    }
 
-  @AfterEach
-  void verifyNoMoreInteractions() throws ServletException, IOException {
-    Mockito.verify(filterChainMock)
-      .doFilter(httpServletRequestMock, httpServletResponseMock);
+    @AfterEach
+    void verifyNoMoreInteractions() throws ServletException, IOException {
+        verify(filterChainMock)
+                .doFilter(httpServletRequestMock, httpServletResponseMock);
 
-    Mockito.verifyNoMoreInteractions(
-      httpServletRequestMock,
-      httpServletResponseMock,
-      filterChainMock
-    );
-  }
+        Mockito.verifyNoMoreInteractions(
+                httpServletRequestMock,
+                httpServletResponseMock,
+                filterChainMock,
+                tracerMock
+        );
+    }
 
-  @Test
-  void givenNotHttpServletRequestWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
-    // Given
-    httpServletRequestMock = Mockito.mock(ServletRequest.class);
+    @Test
+    void givenNotHttpServletRequestWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
+        // Given
+        httpServletRequestMock = mock(ServletRequest.class);
 
-    // When
-    filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
+        // When
+        filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
 
-    // Then
-    Assertions.assertEquals(0, memoryAppender.getLoggedEvents().size());
-  }
+        // Then
+        Assertions.assertEquals(0, memoryAppender.getLoggedEvents().size());
+    }
 
-  @Test
-  void givenNotHttpServletResponseWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
-    // Given
-    httpServletResponseMock = Mockito.mock(ServletResponse.class);
+    @Test
+    void givenNotHttpServletResponseWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
+        // Given
+        httpServletResponseMock = mock(ServletResponse.class);
 
-    // When
-    filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
+        // When
+        filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
 
-    // Then
-    Assertions.assertEquals(0, memoryAppender.getLoggedEvents().size());
-  }
+        // Then
+        Assertions.assertEquals(0, memoryAppender.getLoggedEvents().size());
+    }
 
-  @Test
-  void givenNotCoveredPathWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
-    // Given
-    configureRequestPath("/actuator");
+    @Test
+    void givenNotCoveredPathWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
+        // Given
+        configureRequestPath("/actuator");
 
-    // When
-    filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
+        // When
+        filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
 
-    // Then
-    Assertions.assertEquals(0, memoryAppender.getLoggedEvents().size());
-  }
+        // Then
+        Assertions.assertEquals(0, memoryAppender.getLoggedEvents().size());
+    }
 
-  @Test
-  void givenCoveredPathWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
-    // Given
-    configureRequestPath("/api/test");
+    @Test
+    void givenCoveredPathNoRestInvokeHeadersWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
+        // Given
+        configureRequestPath("/api/test");
+        when(((HttpServletRequest)httpServletRequestMock).getHeader(RestInvokePerformanceLogger.REST_INVOKE_HEADER_APP_NAME))
+                .thenReturn(null);
+        when(tracerMock.currentSpan()).thenReturn(null);
 
-    // When
-    filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
+        // When
+        filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
 
-    // Then
-    PerformanceLoggerTest.assertPerformanceLogMessage(APPENDER_NAME, "GET /api/test", "HttpStatus: 200", memoryAppender);
+        // Then
+        PerformanceLoggerTest.assertPerformanceLogMessage(APPENDER_NAME, "GET /api/test", "HttpStatus: 200", memoryAppender);
 
-    Mockito.verify(((HttpServletRequest) httpServletRequestMock), Mockito.times(2))
-      .getRequestURI();
-    Mockito.verify(((HttpServletRequest) httpServletRequestMock))
-      .getMethod();
-    Mockito.verify(((HttpServletRequest) httpServletRequestMock))
-      .getHeader("soapaction");
-    Mockito.verify(((HttpServletResponse) httpServletResponseMock))
-      .getStatus();
-  }
+        verify(((HttpServletRequest)httpServletRequestMock), times(2))
+                .getRequestURI();
+        verify(((HttpServletRequest)httpServletRequestMock), times(1))
+                .getMethod();
+        verify(((HttpServletResponse)httpServletResponseMock))
+                .getStatus();
+    }
 
-  @Test
-  void givenCoveredPathAndSoapActionWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
-    // Given
-    configureRequestPath("/api/test");
+    @Test
+    void givenCoveredPathHeadersWhenDoFilterThenDontPerformanceLog() throws ServletException, IOException {
+        // Given
+        configureRequestPath("/api/test");
 
-    Mockito.when(((HttpServletRequest) httpServletRequestMock).getHeader("soapaction"))
-      .thenReturn("DUMMYACTION");
+        when(((HttpServletRequest)httpServletRequestMock).getHeader(RestInvokePerformanceLogger.REST_INVOKE_HEADER_APP_NAME))
+                .thenReturn("RESTINVOKEAPPNAME");
+        Span spanMock = mock(Span.class,  Answers.RETURNS_DEEP_STUBS);
+        when(tracerMock.currentSpan()).thenReturn(spanMock);
+        when(spanMock.context().parentId()).thenReturn("PARENTSPANID");
 
-    // When
-    filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
+        // When
+        filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
 
-    // Then
-    PerformanceLoggerTest.assertPerformanceLogMessage(APPENDER_NAME, "GET /api/test\\]\\[SOAPACTION DUMMYACTION", "HttpStatus: 200", memoryAppender);
+        // Then
+        PerformanceLoggerTest.assertPerformanceLogMessage(APPENDER_NAME, "GET /api/test]\\[parentApp=RESTINVOKEAPPNAME]\\[parentId=PARENTSPANID", "HttpStatus: 200", memoryAppender);
 
-    Mockito.verify(((HttpServletRequest) httpServletRequestMock), Mockito.times(2))
-      .getRequestURI();
-    Mockito.verify(((HttpServletRequest) httpServletRequestMock))
-      .getMethod();
-    Mockito.verify(((HttpServletRequest) httpServletRequestMock))
-      .getHeader("soapaction");
-    Mockito.verify(((HttpServletResponse) httpServletResponseMock))
-      .getStatus();
-  }
+        verify(((HttpServletRequest)httpServletRequestMock), times(2))
+                .getRequestURI();
+        verify(((HttpServletRequest)httpServletRequestMock), times(1))
+                .getMethod();
+        verify(((HttpServletResponse)httpServletResponseMock))
+                .getStatus();
+    }
 
-  private void configureRequestPath(String path) {
-    Mockito.when(((HttpServletRequest) httpServletRequestMock).getRequestURI())
-      .thenReturn(path);
-    Mockito.lenient().when(((HttpServletRequest) httpServletRequestMock).getMethod())
-      .thenReturn("GET");
-    Mockito.lenient().when(((HttpServletResponse) httpServletResponseMock).getStatus())
-      .thenReturn(200);
-  }
+    private void configureRequestPath(String path) {
+        when(((HttpServletRequest)httpServletRequestMock).getRequestURI())
+                .thenReturn(path);
+        Mockito.lenient().when(((HttpServletRequest) httpServletRequestMock).getMethod())
+                .thenReturn("GET");
+        Mockito.lenient().when(((HttpServletResponse)httpServletResponseMock).getStatus())
+                .thenReturn(200);
+    }
 
 }

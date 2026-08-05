@@ -17,6 +17,10 @@ public class Utilities {
     return MDC.get("traceId");
   }
 
+  public static String getSpanId(){
+    return MDC.get("spanId");
+  }
+
   public static String iuv2Nav(String iuv, String auxDigit) {
     if (iuv == null || iuv.isBlank()) {
       return null;

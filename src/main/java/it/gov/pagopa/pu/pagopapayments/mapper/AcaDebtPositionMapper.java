@@ -4,7 +4,7 @@ import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.Stamp;
 import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.*;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
-import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.pagopapayments.util.Utilities;

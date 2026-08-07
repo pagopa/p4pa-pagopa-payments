@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.exception;
 
 import it.gov.pagopa.pu.pagopapayments.enums.OrgForNodeError;
+import it.gov.pagopa.pu.pagopapayments.exception.common.BaseBusinessException;
 import lombok.Getter;
 
 @Getter

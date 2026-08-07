@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.config.rest;
 
-import it.gov.pagopa.pu.pagopapayments.exception.ConflictException;
-import it.gov.pagopa.pu.pagopapayments.exception.ForbiddenException;
-import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
-import it.gov.pagopa.pu.pagopapayments.exception.NotAuthorizedException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeConflictException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeForbiddenException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeInvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeNotAuthorizedException;
 import it.gov.pagopa.pu.pagopapayments.util.SecurityUtils;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -42,9 +43,31 @@ public class HttpClientErrorJsonBodyHandler<T> extends DefaultResponseErrorHandl
     HttpStatus.TOO_MANY_REQUESTS
   );
 
-  public HttpClientErrorJsonBodyHandler(JsonMapper jsonMapper, String applicationName, boolean bodyPrinterWhenError, Class<T> errorDtoClass, Function<T, String> errorDto2CodeFunction, Function<T, String> errorDto2MessageFunction) {
+  public HttpClientErrorJsonBodyHandler(
+    JsonMapper jsonMapper,
+    String applicationName,
+    boolean bodyPrinterWhenError,
+    Class<T> errorDtoClass,
+    Function<T, String> errorDto2CodeFunction,
+    Function<T, String> errorDto2MessageFunction
+  ) {
+    this(jsonMapper,
+      applicationName,
+      bodyPrinterWhenError,
+      errorDtoClass,
+      buildDefaultHttpClientExceptionTranscoder(applicationName, errorDto2CodeFunction, errorDto2MessageFunction)
+    );
+  }
+
+  public HttpClientErrorJsonBodyHandler(
+    JsonMapper jsonMapper,
+    String applicationName,
+    boolean bodyPrinterWhenError,
+    Class<T> errorDtoClass,
+    Function<T, PuErrorDTO> errorDtoNormalizer
+  ) {
     this(jsonMapper, applicationName, bodyPrinterWhenError, errorDtoClass,
-      buildDefaultHttpClientExceptionTranscoder(applicationName, errorDto2CodeFunction, errorDto2MessageFunction));
+      buildDefaultHttpClientExceptionTranscoder(applicationName, errorDtoNormalizer));
   }
 
   public HttpClientErrorJsonBodyHandler(JsonMapper jsonMapper, String applicationName, boolean bodyPrinterWhenError, Class<T> errorDtoClass, BiFunction<HttpStatusCodeException, T, RuntimeException> httpClientExceptionTranscoder) {
@@ -81,17 +104,33 @@ public class HttpClientErrorJsonBodyHandler<T> extends DefaultResponseErrorHandl
 
   /** A default transcoder required to invoke {@link HttpClientErrorJsonBodyHandler} which will transcode the Http client error into a BaseBusinessException using code and message extracted from the errorDTO */
   public static <T> BiFunction<HttpStatusCodeException, T, RuntimeException> buildDefaultHttpClientExceptionTranscoder(String applicationName, Function<T, String> errorDto2CodeFunction, Function<T, String> errorDto2MessageFunction) {
+    return buildDefaultHttpClientExceptionTranscoder(applicationName, errorDTO -> new PuErrorDTO(
+      null,
+      errorDto2CodeFunction != null ?
+        errorDto2CodeFunction.apply(errorDTO)
+        : null,
+      errorDto2MessageFunction.apply(errorDTO),
+      null
+    ));
+  }
+
+  /** A default transcoder required to invoke {@link HttpClientErrorJsonBodyHandler} which will transcode the Http client error into a BaseBusinessException using the errorDTO normalizer function */
+  public static <T> BiFunction<HttpStatusCodeException, T, RuntimeException> buildDefaultHttpClientExceptionTranscoder(
+    String applicationName,
+    Function<T, PuErrorDTO> errorDtoNormalizer
+  ) {
     return (exception, errorDTO) -> {
-      String code = errorDto2CodeFunction != null
-        ? errorDto2CodeFunction.apply(errorDTO)
-        : applicationName + "_" + ((HttpStatus) exception.getStatusCode()).name();
-      String message = errorDto2MessageFunction.apply(errorDTO);
+      PuErrorDTO puErrorDTO = errorDtoNormalizer.apply(errorDTO);
+
+      String code = Objects.requireNonNullElseGet(
+        puErrorDTO.code(),
+        () -> applicationName + "_" + ((HttpStatus) exception.getStatusCode()).name());
+
       return switch (exception.getStatusCode()) {
-        case HttpStatus.CONFLICT -> new ConflictException(code, message);
-        case HttpStatus.FORBIDDEN -> new ForbiddenException(code, message);
-        case HttpStatus.UNAUTHORIZED ->
-          new NotAuthorizedException(code, message);
-        default -> new InvalidValueException(code, message);
+        case HttpStatus.CONFLICT -> new RestInvokeConflictException(applicationName, puErrorDTO.category(), code, puErrorDTO.message(), puErrorDTO.fields());
+        case HttpStatus.FORBIDDEN -> new RestInvokeForbiddenException(applicationName, puErrorDTO.category(), code, puErrorDTO.message());
+        case HttpStatus.UNAUTHORIZED -> new RestInvokeNotAuthorizedException(applicationName, puErrorDTO.category(), code, puErrorDTO.message());
+        default -> new RestInvokeInvalidValueException(applicationName, puErrorDTO.category(), code, puErrorDTO.message(), puErrorDTO.fields());
       };
     };
   }

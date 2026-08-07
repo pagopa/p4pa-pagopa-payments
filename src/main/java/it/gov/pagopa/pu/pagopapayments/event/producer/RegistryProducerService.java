@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.event.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.pagopapayments.event.producer.dto.RegistryEventDTO;
-import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;

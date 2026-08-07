@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.service;
 
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeReq;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaVerifyPaymentNoticeRes;
-import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import jakarta.xml.bind.JAXBContext;

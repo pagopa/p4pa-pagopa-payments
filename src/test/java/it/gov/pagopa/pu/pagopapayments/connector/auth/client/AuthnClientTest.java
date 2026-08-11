@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.auth.client;
 
-import it.gov.pagopa.pu.auth.controller.generated.AuthnApi;
+import it.gov.pagopa.pu.auth.client.generated.AuthnApi;
 import it.gov.pagopa.pu.auth.dto.generated.AccessToken;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.config.AuthApisHolder;
 import org.junit.jupiter.api.AfterEach;

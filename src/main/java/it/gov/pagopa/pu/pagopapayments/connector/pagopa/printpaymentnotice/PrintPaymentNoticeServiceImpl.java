@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice;
 
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.client.PrintPaymentNoticeClient;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.*;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service;
 
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.pu.aca.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
@@ -21,6 +21,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.jemos.podam.api.PodamFactory;
+
+import java.util.Objects;
 
 @ExtendWith(MockitoExtension.class)
 class AcaFacadeServiceTest {
@@ -174,7 +176,7 @@ class AcaFacadeServiceTest {
     String orgFiscalCode = "11111222223";
     DebtPositionDTO debtPosition = podamFactory.manufacturePojo(DebtPositionDTO.class);
     debtPosition.setDebtPositionOrigin(DebtPositionOrigin.ORDINARY);
-    debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers().getFirst().setFlagOwner(Boolean.TRUE);
+    Objects.requireNonNull(debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers()).getFirst().setFlagOwner(Boolean.TRUE);
     debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers().getFirst().setOrgFiscalCode(orgFiscalCode);
     debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst().getTransfers().getFirst().setOrgName(orgName);
     Organization organization = podamFactory.manufacturePojo(Organization.class);

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.cie.client;
 
-import it.gov.pagopa.pu.cie.controller.generated.DebtPositionCieApi;
+import it.gov.pagopa.pu.cie.client.generated.DebtPositionCieApi;
 import it.gov.pagopa.pu.cie.dto.generated.DebtPositionCieRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.cie.config.CieApisHolder;

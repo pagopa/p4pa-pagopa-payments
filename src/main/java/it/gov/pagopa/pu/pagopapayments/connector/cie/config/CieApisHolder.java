@@ -1,13 +1,15 @@
 package it.gov.pagopa.pu.pagopapayments.connector.cie.config;
 
-import it.gov.pagopa.pu.cie.controller.ApiClient;
-import it.gov.pagopa.pu.cie.controller.BaseApi;
-import it.gov.pagopa.pu.cie.controller.generated.DebtPositionCieApi;
-import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
+import it.gov.pagopa.pu.cie.generated.ApiClient;
+import it.gov.pagopa.pu.cie.generated.BaseApi;
+import it.gov.pagopa.pu.cie.client.generated.DebtPositionCieApi;
+import it.gov.pagopa.pu.cie.dto.generated.ErrorDTO;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class CieApisHolder {
@@ -18,7 +20,8 @@ public class CieApisHolder {
 
   public CieApisHolder(
     CieApiClientConfig clientConfig,
-    RestTemplateBuilder restTemplateBuilder
+    RestTemplateBuilder restTemplateBuilder,
+    JsonMapper jsonMapper
   ) {
     RestTemplate restTemplate = restTemplateBuilder.build();
     ApiClient apiClient = new ApiClient(restTemplate);
@@ -26,9 +29,9 @@ public class CieApisHolder {
     apiClient.setBearerToken(bearerTokenHolder::get);
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
-    if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("CIE"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "CIE", clientConfig.isPrintBodyWhenError(),
+      ErrorDTO.class, ErrorDTO::getCode, ErrorDTO::getMessage)
+    );
 
     this.debtPositionCieApi = new DebtPositionCieApi(apiClient);
   }

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.pu.aca.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.common.InvalidValueException;

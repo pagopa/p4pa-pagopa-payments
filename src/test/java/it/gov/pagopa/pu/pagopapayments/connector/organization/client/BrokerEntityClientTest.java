@@ -1,12 +1,13 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 
-import it.gov.pagopa.pu.organization.controller.generated.BrokerApi;
-import it.gov.pagopa.pu.organization.controller.generated.BrokerEntityControllerApi;
-import it.gov.pagopa.pu.organization.controller.generated.BrokerSearchControllerApi;
+import it.gov.pagopa.pu.organization.client.generated.BrokerApi;
+import it.gov.pagopa.pu.organization.client.generated.BrokerEntityControllerApi;
+import it.gov.pagopa.pu.organization.client.generated.BrokerSearchControllerApi;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeyType;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +17,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerEntityClientTest {
@@ -32,7 +34,7 @@ class BrokerEntityClientTest {
   private BrokerClient brokerClient;
 
   @BeforeEach
-  void setUp() {
+  void init() {
     brokerClient = new BrokerClient(organizationApisHolder);
   }
 
@@ -53,9 +55,9 @@ class BrokerEntityClientTest {
     String accessToken = "ACCESSTOKEN";
     BrokerApiKeys expectedResult = new BrokerApiKeys();
 
-    Mockito.when(organizationApisHolder.getBrokerApi(accessToken))
+    when(organizationApisHolder.getBrokerApi(accessToken))
       .thenReturn(brokerApiMock);
-    Mockito.when(brokerApiMock.getBrokerApiKeys(brokerId))
+    when(brokerApiMock.getBrokerApiKeys(brokerId))
       .thenReturn(expectedResult);
 
     // When
@@ -71,10 +73,10 @@ class BrokerEntityClientTest {
     Long brokerId = 0L;
     String accessToken = "ACCESSTOKEN";
 
-    Mockito.when(organizationApisHolder.getBrokerApi(accessToken))
+    when(organizationApisHolder.getBrokerApi(accessToken))
       .thenReturn(brokerApiMock);
-    Mockito.when(brokerApiMock.getBrokerApiKeys(brokerId))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+    when(brokerApiMock.getBrokerApiKeys(brokerId))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     BrokerApiKeys result = brokerClient.getApiKeyByBrokerId(brokerId, accessToken);
@@ -90,9 +92,9 @@ class BrokerEntityClientTest {
     String accessToken = "ACCESSTOKEN";
     Broker expectedResult = new Broker();
 
-    Mockito.when(organizationApisHolder.getBrokerEntityControllerApi(accessToken))
+    when(organizationApisHolder.getBrokerEntityControllerApi(accessToken))
       .thenReturn(brokerEntityControllerApiMock);
-    Mockito.when(brokerEntityControllerApiMock.crudGetBroker(brokerId.toString()))
+    when(brokerEntityControllerApiMock.crudGetBroker(brokerId.toString()))
       .thenReturn(expectedResult);
 
     // When
@@ -108,10 +110,10 @@ class BrokerEntityClientTest {
     Long brokerId = 0L;
     String accessToken = "ACCESSTOKEN";
 
-    Mockito.when(organizationApisHolder.getBrokerEntityControllerApi(accessToken))
+    when(organizationApisHolder.getBrokerEntityControllerApi(accessToken))
       .thenReturn(brokerEntityControllerApiMock);
-    Mockito.when(brokerEntityControllerApiMock.crudGetBroker(brokerId.toString()))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+    when(brokerEntityControllerApiMock.crudGetBroker(brokerId.toString()))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     Broker result = brokerClient.getBrokerById(brokerId, accessToken);
@@ -127,9 +129,9 @@ class BrokerEntityClientTest {
     String accessToken = "ACCESSTOKEN";
     String expectedResult = "apiKey";
 
-    Mockito.when(organizationApisHolder.getBrokerApi(accessToken))
+    when(organizationApisHolder.getBrokerApi(accessToken))
       .thenReturn(brokerApiMock);
-    Mockito.when(brokerApiMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE))
+    when(brokerApiMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE))
       .thenReturn(expectedResult);
 
     // When
@@ -145,10 +147,10 @@ class BrokerEntityClientTest {
     Long brokerId = 0L;
     String accessToken = "ACCESSTOKEN";
 
-    Mockito.when(organizationApisHolder.getBrokerApi(accessToken))
+    when(organizationApisHolder.getBrokerApi(accessToken))
       .thenReturn(brokerApiMock);
-    Mockito.when(brokerApiMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+    when(brokerApiMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     String result = brokerClient.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
@@ -164,9 +166,9 @@ class BrokerEntityClientTest {
     String accessToken = "ACCESSTOKEN";
     Broker expectedResult = new Broker();
 
-    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
+    when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
       .thenReturn(brokerSearchControllerApiMock);
-    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByBrokerFiscalCode(brokerFiscalCode))
+    when(brokerSearchControllerApiMock.crudBrokersFindByBrokerFiscalCode(brokerFiscalCode))
       .thenReturn(expectedResult);
 
     // When
@@ -182,10 +184,10 @@ class BrokerEntityClientTest {
     String brokerFiscalCode = "brokerFiscalCode";
     String accessToken = "ACCESSTOKEN";
 
-    Mockito.when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
+    when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
       .thenReturn(brokerSearchControllerApiMock);
-    Mockito.when(brokerSearchControllerApiMock.crudBrokersFindByBrokerFiscalCode(brokerFiscalCode))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+    when(brokerSearchControllerApiMock.crudBrokersFindByBrokerFiscalCode(brokerFiscalCode))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     Broker result = brokerClient.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);

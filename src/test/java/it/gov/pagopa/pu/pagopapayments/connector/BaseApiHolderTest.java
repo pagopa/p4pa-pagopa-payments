@@ -1,9 +1,11 @@
 package it.gov.pagopa.pu.pagopapayments.connector;
 
 import it.gov.pagopa.pu.pagopapayments.config.rest.ApiClientConfig;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.core.ParameterizedTypeReference;
@@ -24,6 +26,10 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 @Slf4j
 public abstract class BaseApiHolderTest {
 
@@ -36,6 +42,36 @@ public abstract class BaseApiHolderTest {
   protected RestTemplate restTemplateMock;
   @Mock
   protected Void voidMock;
+
+  protected void verifyHttpClientErrorJsonBodyHandlerConfiguration(Object api) {
+    @SuppressWarnings("rawtypes")
+    ArgumentCaptor<HttpClientErrorJsonBodyHandler> captor = ArgumentCaptor.forClass(HttpClientErrorJsonBodyHandler.class);
+    verify(restTemplateMock)
+      .setErrorHandler(captor.capture());
+
+    HttpClientErrorJsonBodyHandler<?> errorHandler = captor.getValue();
+    String apiPackage = api
+      .getClass().getPackageName()
+      .replace(".client", "")
+      .replace(".generated", "");
+
+    Assertions.assertEquals(
+      apiPackage,
+      errorHandler.getErrorDtoClass().getPackageName()
+        .replace(".dto", "")
+        .replace(".generated", "")
+    );
+
+    Assertions.assertEquals(
+      apiPackage
+        .replaceFirst("it\\.gov\\.pagopa\\.(pu\\.)?", "")
+        .replace(".", ""),
+      errorHandler.getApplicationName()
+        .toLowerCase()
+        .replace("_","")
+        .replace("-", "")
+    );
+  }
 
   protected <T> void assertAuthenticationShouldBeSetInThreadSafeMode(Function<String, T> apiInvoke, ParameterizedTypeReference<T> apiReturnedType, Runnable apiUnloader) throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(apiInvoke, apiReturnedType, apiUnloader, AUTH_TYPE.BEARER, HttpHeaders.AUTHORIZATION);
@@ -56,9 +92,9 @@ public abstract class BaseApiHolderTest {
               : apiReturnedType.getType().getTypeName().startsWith(List.class.getName()) ? (T) List.of()
               : Void.class.equals(apiReturnedType.getType()) ? (T) voidMock
               : "byte[]".equals(apiReturnedType.getType().getTypeName()) ? (T) new byte[0]
-              : (T) Mockito.mock(Class.forName(apiReturnedType.getType().getTypeName()));
+              : (T) mock(Class.forName(apiReturnedType.getType().getTypeName()));
 
-          Mockito.doReturn(ResponseEntity.ok(expectedResult))
+          doReturn(ResponseEntity.ok(expectedResult))
             .when(restTemplateMock)
             .exchange(
               Mockito.argThat(req ->
@@ -98,7 +134,7 @@ public abstract class BaseApiHolderTest {
 
     apiUnloader.run();
 
-    Mockito.verify(restTemplateMock, Mockito.times(useCases.size()))
+    verify(restTemplateMock, times(useCases.size()))
       .exchange(Mockito.any(), Mockito.<ParameterizedTypeReference<?>>any());
   }
 
@@ -138,7 +174,7 @@ public abstract class BaseApiHolderTest {
         Assertions.assertThrows(RuntimeException.class, () -> apiInvoke.apply("accessToken"));
 
         try {
-          Mockito.verify(restTemplateMock, Mockito.times(apiClientConfig.getMaxAttempts()))
+          verify(restTemplateMock, times(apiClientConfig.getMaxAttempts()))
             .exchange(Mockito.any(), Mockito.eq(apiReturnedType));
           Mockito.clearInvocations(restTemplateMock);
         } catch (Throwable e) {

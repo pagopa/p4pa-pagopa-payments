@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.clie
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config.PagopaPrintPaymentNoticeApisHolder;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

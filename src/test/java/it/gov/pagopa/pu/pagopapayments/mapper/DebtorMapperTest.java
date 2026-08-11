@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.PersonDTO;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.DebtorDTO;
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.DebtorDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.co.jemos.podam.api.PodamFactory;

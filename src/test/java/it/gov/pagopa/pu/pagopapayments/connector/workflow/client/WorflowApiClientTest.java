@@ -1,7 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.workflow.client;
 
 import it.gov.pagopa.pu.pagopapayments.connector.workflow.config.WorkflowApisHolder;
-import it.gov.pagopa.pu.workflowhub.controller.generated.WorkflowApi;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeNotFoundException;
+import it.gov.pagopa.pu.workflowhub.client.generated.WorkflowApi;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowStatusDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -12,7 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class WorflowApiClientTest {
@@ -42,8 +44,8 @@ class WorflowApiClientTest {
     String workflowId = "1234";
     String expectedState = "WORFLOW_OK";
 
-    Mockito.when(workflowApisHolderMock.getWorkflowApi(accessToken)).thenReturn(workflowApiMock);
-    Mockito.when(workflowApiMock.waitWorkflowCompletion(workflowId, 1, 1000)).thenReturn(new WorkflowStatusDTO().status(expectedState));
+    when(workflowApisHolderMock.getWorkflowApi(accessToken)).thenReturn(workflowApiMock);
+    when(workflowApiMock.waitWorkflowCompletion(workflowId, 1, 1000)).thenReturn(new WorkflowStatusDTO().status(expectedState));
 
     // When
     String result = workflowApiClient.waitWorkflowCompletion(workflowId, 1, 1000, accessToken);
@@ -58,16 +60,15 @@ class WorflowApiClientTest {
     String accessToken = "ACCESSTOKEN";
     String workflowId = "1234";
 
-    Mockito.when(workflowApisHolderMock.getWorkflowApi(accessToken)).thenReturn(workflowApiMock);
-    HttpClientErrorException expectedException = HttpClientErrorException.create(HttpStatus.NOT_FOUND, "Not found", null, null, null);
-    String expectedState = "WORKFLOW_"+HttpStatus.NOT_FOUND.name();
-    Mockito.when(workflowApiMock.waitWorkflowCompletion(workflowId, 1, 1000)).thenThrow(expectedException);
+    when(workflowApisHolderMock.getWorkflowApi(accessToken)).thenReturn(workflowApiMock);
+    when(workflowApiMock.waitWorkflowCompletion(workflowId, 1, 1000))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     String result = workflowApiClient.waitWorkflowCompletion(workflowId, 1, 1000, accessToken);
 
     // Then
-    Assertions.assertEquals(expectedState, result);
+    Assertions.assertEquals("ERRORCODE", result);
   }
 
 }

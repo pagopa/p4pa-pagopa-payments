@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.fileshare.config;
 
 import it.gov.pagopa.pu.fileshare.dto.generated.FileOrigin;
 import it.gov.pagopa.pu.fileshare.dto.generated.IngestionFlowFileType;
+import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,51 +16,54 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class FileShareApisHolderTest extends BaseApiHolderTest {
-    @Mock
-    private RestTemplateBuilder restTemplateBuilderMock;
+  @Mock
+  private RestTemplateBuilder restTemplateBuilderMock;
 
-    private FileShareApisHolder apisHolder;
-    private FileShareApiClientConfig apiClientConfig;
+  private FileShareApisHolder apisHolder;
+  private FileShareApiClientConfig apiClientConfig;
 
-    @BeforeEach
-    void setUp() {
-        Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-        Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+  @BeforeEach
+  void setUp() {
+    when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
 
-        apiClientConfig = FileShareApiClientConfig.builder()
-          .baseUrl("http://example.com")
-          .maxAttempts(3)
-          .build();
-        apisHolder = new FileShareApisHolder(apiClientConfig, restTemplateBuilderMock);
-    }
+    apiClientConfig = FileShareApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    apisHolder = new FileShareApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
 
-    @AfterEach
-    void verifyNoMoreInteractions() {
-        Mockito.verifyNoMoreInteractions(
-                restTemplateBuilderMock,
-                restTemplateMock
-        );
-    }
+    verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getIngestionFlowFileApi(null));
+  }
 
-    @Test
-    void whenGetIngestionFlowFileApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
-        assertAuthenticationShouldBeSetInThreadSafeMode(
-                accessToken -> apisHolder.getIngestionFlowFileApi(accessToken)
-                        .uploadIngestionFlowFile(1L, IngestionFlowFileType.PAYMENTS_REPORTING, FileOrigin.PORTAL, "FILENAME", null, Mockito.mock(Resource.class), null),
-                new ParameterizedTypeReference<>() {},
-                apisHolder::unload);
-    }
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      restTemplateBuilderMock,
+      restTemplateMock
+    );
+  }
 
   @Test
   void testRetryConfiguration() {
     assertRetry(apiClientConfig,
       accessToken -> apisHolder.getIngestionFlowFileApi(accessToken)
         .uploadIngestionFlowFile(1L, IngestionFlowFileType.PAYMENTS_REPORTING, FileOrigin.PORTAL, "FILENAME", null, Mockito.mock(Resource.class), null),
-      new ParameterizedTypeReference<>() {
-      }
+      new ParameterizedTypeReference<>() {}
     );
+  }
+
+  @Test
+  void whenGetIngestionFlowFileApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      accessToken -> apisHolder.getIngestionFlowFileApi(accessToken)
+        .uploadIngestionFlowFile(1L, IngestionFlowFileType.PAYMENTS_REPORTING, FileOrigin.PORTAL, "FILENAME", null, Mockito.mock(Resource.class), null),
+      new ParameterizedTypeReference<>() {},
+      apisHolder::unload);
   }
 
 }

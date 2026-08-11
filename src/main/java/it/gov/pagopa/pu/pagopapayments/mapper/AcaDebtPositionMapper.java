@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.Stamp;
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.*;
+import it.gov.pagopa.pu.aca.dto.generated.Stamp;
+import it.gov.pagopa.pu.aca.dto.generated.*;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
 import it.gov.pagopa.pu.pagopapayments.exception.common.InvalidValueException;

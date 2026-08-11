@@ -1,8 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config;
 
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.pu.aca.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
-import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,13 +14,15 @@ import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class AcaApisHolderTest extends BaseApiHolderTest {
 
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
-  private AcaApisHolder acaApisHolder;
+  private AcaApisHolder apisHolder;
   private AcaApiClientConfig apiClientConfig;
 
   private static final String ORG_FISCAL_CODE = "12345678901";
@@ -29,17 +30,16 @@ class AcaApisHolderTest extends BaseApiHolderTest {
 
   @BeforeEach
   void setUp() {
-    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+    when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
 
-    apiClientConfig = new AcaApiClientConfig();
-    apiClientConfig.setMaxAttempts(3);
-    apiClientConfig.setBaseUrl("http://example.com");
+    apiClientConfig = AcaApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    apisHolder = new AcaApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
 
-    acaApisHolder = new AcaApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
-
-    Mockito.verify(restTemplateMock)
-      .setErrorHandler(Mockito.any(HttpClientErrorJsonBodyHandler.class));
+    verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getDebtPositionsApi("APIKEY"));
   }
 
   @AfterEach
@@ -51,9 +51,18 @@ class AcaApisHolderTest extends BaseApiHolderTest {
   }
 
   @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      apiKey -> apisHolder.getDebtPositionsApi(apiKey)
+        .createPosition(ORG_FISCAL_CODE, new PaymentPositionModel(), null, true),
+      new ParameterizedTypeReference<>() {}
+    );
+  }
+
+  @Test
   void whenGetOrganizationEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      apiKey -> acaApisHolder.getDebtPositionsApi(apiKey)
+      apiKey -> apisHolder.getDebtPositionsApi(apiKey)
         .createPosition(ORG_FISCAL_CODE, new PaymentPositionModel(), null, true),
       new ParameterizedTypeReference<>() {},
       () -> {},
@@ -62,13 +71,5 @@ class AcaApisHolderTest extends BaseApiHolderTest {
     );
   }
 
-  @Test
-  void testRetryConfiguration() {
-    assertRetry(apiClientConfig,
-      apiKey -> acaApisHolder.getDebtPositionsApi(apiKey)
-        .createPosition(ORG_FISCAL_CODE, new PaymentPositionModel(), null, true),
-      new ParameterizedTypeReference<>() {}
-      );
-  }
 }
 

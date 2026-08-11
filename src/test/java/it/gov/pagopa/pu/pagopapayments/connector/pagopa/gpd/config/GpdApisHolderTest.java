@@ -2,7 +2,6 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config;
 
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
-import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,12 +14,14 @@ import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class GpdApisHolderTest extends BaseApiHolderTest {
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
-  private GpdApisHolder gpdApisHolder;
+  private GpdApisHolder apisHolder;
   private GpdApiClientConfig apiClientConfig;
 
   private static final String ORG_FISCAL_CODE = "1234567890";
@@ -28,17 +29,16 @@ class GpdApisHolderTest extends BaseApiHolderTest {
 
   @BeforeEach
   void setUp() {
-    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+    when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
 
-    apiClientConfig = new GpdApiClientConfig();
-    apiClientConfig.setBaseUrl("http://example.com");
-    apiClientConfig.setMaxAttempts(3);
+    apiClientConfig = GpdApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    apisHolder = new GpdApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
 
-    gpdApisHolder = new GpdApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
-
-    Mockito.verify(restTemplateMock)
-      .setErrorHandler(Mockito.any(HttpClientErrorJsonBodyHandler.class));
+    verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getDebtPositionsApiInstallmentsAndPaymentOptionsManagerApi("APIKEY"));
   }
 
   @AfterEach
@@ -50,10 +50,20 @@ class GpdApisHolderTest extends BaseApiHolderTest {
   }
 
   @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      apiKey ->
+        apisHolder.getDebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(apiKey)
+          .createPosition(ORG_FISCAL_CODE, true, null, new PaymentPositionModelV3()),
+      new ParameterizedTypeReference<>() {}
+    );
+  }
+
+  @Test
   void whenGetOrganizationEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey ->
-        gpdApisHolder.getDebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(apiKey)
+        apisHolder.getDebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(apiKey)
           .createPosition(ORG_FISCAL_CODE, true, null, new PaymentPositionModelV3()),
       new ParameterizedTypeReference<>() {
       },
@@ -61,16 +71,5 @@ class GpdApisHolderTest extends BaseApiHolderTest {
       },
       AUTH_TYPE.API_KEY,
       API_KEY_HEADER);
-  }
-
-  @Test
-  void testRetryConfiguration() {
-    assertRetry(apiClientConfig,
-      apiKey ->
-        gpdApisHolder.getDebtPositionsApiInstallmentsAndPaymentOptionsManagerApi(apiKey)
-          .createPosition(ORG_FISCAL_CODE, true, null, new PaymentPositionModelV3()),
-      new ParameterizedTypeReference<>() {
-      }
-    );
   }
 }

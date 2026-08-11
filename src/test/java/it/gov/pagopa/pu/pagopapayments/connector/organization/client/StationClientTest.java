@@ -1,10 +1,11 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 
-import it.gov.pagopa.pu.organization.controller.generated.StationSearchControllerApi;
+import it.gov.pagopa.pu.organization.client.generated.StationSearchControllerApi;
 import it.gov.pagopa.pu.organization.dto.generated.CollectionModelStation;
 import it.gov.pagopa.pu.organization.dto.generated.PagedModelStationEmbedded;
 import it.gov.pagopa.pu.organization.dto.generated.Station;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,9 +14,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StationClientTest {
@@ -27,7 +30,7 @@ class StationClientTest {
   private StationClient stationClient;
 
   @BeforeEach
-  void setUp() {
+  void init() {
     stationClient = new StationClient(organizationApisHolder);
   }
 
@@ -47,9 +50,9 @@ class StationClientTest {
     String accessToken = "ACCESSTOKEN";
     Station expectedResult = new Station();
 
-    Mockito.when(organizationApisHolder.getStationSearchControllerApi(accessToken))
+    when(organizationApisHolder.getStationSearchControllerApi(accessToken))
       .thenReturn(stationSearchControllerApiMock);
-    Mockito.when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndStationId(brokerId, stationId))
+    when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndStationId(brokerId, stationId))
       .thenReturn(expectedResult);
 
     // When
@@ -66,10 +69,10 @@ class StationClientTest {
     String stationId = "STATIONID";
     String accessToken = "ACCESSTOKEN";
 
-    Mockito.when(organizationApisHolder.getStationSearchControllerApi(accessToken))
+    when(organizationApisHolder.getStationSearchControllerApi(accessToken))
       .thenReturn(stationSearchControllerApiMock);
-    Mockito.when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndStationId(brokerId, stationId))
-      .thenThrow(Mockito.mock(HttpClientErrorException.NotFound.class));
+    when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndStationId(brokerId, stationId))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     Station result = stationClient.getStationByBrokerIdAndStationId(brokerId, stationId, accessToken);
@@ -91,9 +94,9 @@ class StationClientTest {
     CollectionModelStation collectionModelStation = new CollectionModelStation();
     collectionModelStation.setEmbedded(pagedModelStationEmbedded);
 
-    Mockito.when(organizationApisHolder.getStationSearchControllerApi(accessToken))
+    when(organizationApisHolder.getStationSearchControllerApi(accessToken))
       .thenReturn(stationSearchControllerApiMock);
-    Mockito.when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId))
+    when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndBroadcastStationId(brokerId, broadcastStationId))
       .thenReturn(collectionModelStation);
 
     // When

@@ -5,7 +5,7 @@ import it.gov.pagopa.nodo.gpd.dto.generated.PaymentOptionModelV3;
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.enums.Operation;
-import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.util.ConversionUtils;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -174,7 +174,7 @@ class GpdDebtPositionMapperTest {
   @Test
   void givenInstallmentToSyncWithNullSyncStatusWhenMapToPaymentPositionModelThenException() {
     //given
-    InstallmentDTO installment = debtPosition.getPaymentOptions().get(0).getInstallments().get(0);
+    InstallmentDTO installment = debtPosition.getPaymentOptions().getFirst().getInstallments().getFirst();
     installment.setStatus(InstallmentStatus.TO_SYNC);
     installment.setSyncStatus(null);
     String iud = installment.getIud();

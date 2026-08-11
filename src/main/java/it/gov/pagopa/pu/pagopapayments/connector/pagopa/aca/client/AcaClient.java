@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.client;
 
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentOptionModel;
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.pu.aca.dto.generated.PaymentOptionModel;
+import it.gov.pagopa.pu.aca.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config.AcaApisHolder;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;

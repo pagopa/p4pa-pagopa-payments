@@ -4,9 +4,9 @@ import it.gov.pagopa.pu.organization.dto.generated.CollectionModelStation;
 import it.gov.pagopa.pu.organization.dto.generated.PagedModelStationEmbedded;
 import it.gov.pagopa.pu.organization.dto.generated.Station;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +26,7 @@ public class StationClient {
     try {
       return apisHolder.getStationSearchControllerApi(accessToken)
         .crudStationsFindByBrokerIdAndStationId(brokerId, stationId);
-    } catch (HttpClientErrorException.NotFound e){
+    } catch (RestInvokeNotFoundException e){
       log.info("Cannot find Station having brokerId {} and stationId {}", brokerId, stationId);
       return null;
     }

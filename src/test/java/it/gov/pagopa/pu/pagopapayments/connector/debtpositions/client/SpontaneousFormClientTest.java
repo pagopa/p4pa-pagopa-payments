@@ -1,8 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.client;
 
-import it.gov.pagopa.pu.debtpositions.controller.generated.SpontaneousFormEntityControllerApi;
+import it.gov.pagopa.pu.debtpositions.client.generated.SpontaneousFormEntityControllerApi;
 import it.gov.pagopa.pu.debtpositions.dto.generated.SpontaneousForm;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config.DebtPositionsApisHolder;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SpontaneousFormClientTest {
@@ -45,9 +47,9 @@ class SpontaneousFormClientTest {
     Long spontaneousFormId = 1L;
     SpontaneousForm expectedResult = new SpontaneousForm();
 
-    Mockito.when(apisHolderMock.getSpontaneousFormEntityControllerApi(accessToken))
+    when(apisHolderMock.getSpontaneousFormEntityControllerApi(accessToken))
       .thenReturn(spontaneousFormEntityControllerApiMock);
-    Mockito.when(spontaneousFormEntityControllerApiMock.crudGetSpontaneousform(spontaneousFormId+""))
+    when(spontaneousFormEntityControllerApiMock.crudGetSpontaneousform(spontaneousFormId+""))
       .thenReturn(expectedResult);
 
     // When
@@ -63,10 +65,10 @@ class SpontaneousFormClientTest {
     String accessToken = "ACCESSTOKEN";
     Long spontaneousFormId = 1L;
 
-    Mockito.when(apisHolderMock.getSpontaneousFormEntityControllerApi(accessToken))
+    when(apisHolderMock.getSpontaneousFormEntityControllerApi(accessToken))
       .thenReturn(spontaneousFormEntityControllerApiMock);
-    Mockito.when(spontaneousFormEntityControllerApiMock.crudGetSpontaneousform(spontaneousFormId+""))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+    when(spontaneousFormEntityControllerApiMock.crudGetSpontaneousform(spontaneousFormId+""))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     SpontaneousForm result = spontaneousFormClient.getSpontaneousForm(spontaneousFormId, accessToken);

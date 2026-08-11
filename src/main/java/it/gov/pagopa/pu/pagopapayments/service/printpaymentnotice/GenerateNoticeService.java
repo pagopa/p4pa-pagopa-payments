@@ -13,7 +13,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.SignedUrlResultDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.GenerateNoticeTemplates;
 import it.gov.pagopa.pu.pagopapayments.mapper.GeneratedNoticeMassiveFolderMapper;
 import it.gov.pagopa.pu.pagopapayments.mapper.NoticeRequestMapper;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import static it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.GetGenerationRequestStatusResourceDTO.StatusEnum.*;
+import static it.gov.pagopa.nodo.printpaymentnotice.dto.generated.GetGenerationRequestStatusResourceDTO.StatusEnum.*;
 
 @Service
 @Slf4j

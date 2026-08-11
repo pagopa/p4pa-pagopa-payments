@@ -2,7 +2,8 @@ package it.gov.pagopa.pu.pagopapayments.connector.pu_sil.client;
 
 import it.gov.pagopa.pu.pagopapayments.connector.pu_sil.config.PuSilApisHolder;
 import it.gov.pagopa.pu.pagopapayments.exception.NotPayableSilActualizedAmountException;
-import it.gov.pagopa.pu.pusil.controller.generated.ActualizationApi;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeConflictException;
+import it.gov.pagopa.pu.pusil.client.generated.ActualizationApi;
 import it.gov.pagopa.pu.pusil.dto.generated.ActualizationResultDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -13,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.when;
@@ -61,8 +61,7 @@ class PuSilClientTest {
 
     when(puSilApisHolderMock.getActualizationApi(accessToken)).thenReturn(actualizationApiMock);
     when(actualizationApiMock.actualize(orgSilServiceId, nav))
-      .thenThrow(
-        HttpClientErrorException.create(HttpStatus.CONFLICT, "Conflict", null, null, null));
+      .thenThrow(new RestInvokeConflictException("APPNAME", HttpStatus.CONFLICT, "ERROR", "ERRORCODE", "ERRORMESSAGE", null));
 
     // When Then
     Assertions.assertThrows(NotPayableSilActualizedAmountException.class,

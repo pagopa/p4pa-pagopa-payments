@@ -1,8 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.config;
 
-import it.gov.pagopa.nodo.fdrorganization.controller.ApiClient;
-import it.gov.pagopa.nodo.fdrorganization.controller.auth.ApiKeyAuth;
-import it.gov.pagopa.nodo.fdrorganization.controller.generated.OrganizationsApi;
+import it.gov.pagopa.nodo.fdrorganization.generated.ApiClient;
+import it.gov.pagopa.nodo.fdrorganization.generated.auth.ApiKeyAuth;
+import it.gov.pagopa.nodo.fdrorganization.client.generated.OrganizationsApi;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.ErrorMessage;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.ErrorResponse;
 import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
@@ -32,8 +32,8 @@ public class PaymentsReportingApisHolder {
     this.restTemplate = restTemplateBuilder.build();
     this.clientConfig = clientConfig;
 
-    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "PAGOPA_PAYMENTS_REPORTING", clientConfig.isPrintBodyWhenError(),
-      ErrorResponse.class, null,
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "NODO-FDR-ORGANIZATION", clientConfig.isPrintBodyWhenError(),
+      ErrorResponse.class, ErrorResponse::getAppErrorCode,
       errorDTO -> Optional.ofNullable(errorDTO.getErrors())
         .map(e -> e.stream().map(ErrorMessage::getMessage).collect(Collectors.joining(",")))
         .orElse(errorDTO.getHttpStatusDescription())

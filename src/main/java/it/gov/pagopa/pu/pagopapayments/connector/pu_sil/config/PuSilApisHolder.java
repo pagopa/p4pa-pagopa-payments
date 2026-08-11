@@ -1,13 +1,15 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pu_sil.config;
 
-import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
-import it.gov.pagopa.pu.pusil.controller.ApiClient;
-import it.gov.pagopa.pu.pusil.controller.BaseApi;
-import it.gov.pagopa.pu.pusil.controller.generated.ActualizationApi;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.pu.pusil.generated.ApiClient;
+import it.gov.pagopa.pu.pusil.generated.BaseApi;
+import it.gov.pagopa.pu.pusil.client.generated.ActualizationApi;
+import it.gov.pagopa.pu.pusil.dto.generated.PuSilErrorDTO;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class PuSilApisHolder {
@@ -18,7 +20,9 @@ public class PuSilApisHolder {
 
   public PuSilApisHolder(
     PuSilApiClientConfig clientConfig,
-    RestTemplateBuilder restTemplateBuilder) {
+    RestTemplateBuilder restTemplateBuilder,
+    JsonMapper jsonMapper
+  ) {
 
     RestTemplate restTemplate = restTemplateBuilder.build();
     ApiClient apiClient = new ApiClient(restTemplate);
@@ -26,9 +30,9 @@ public class PuSilApisHolder {
     apiClient.setBearerToken(bearerTokenHolder::get);
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
-    if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("PU_SIL"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "PU-SIL", clientConfig.isPrintBodyWhenError(),
+      PuSilErrorDTO.class, PuSilErrorDTO::getCode, PuSilErrorDTO::getMessage)
+    );
 
     this.actualizationApi = new ActualizationApi(apiClient);
   }

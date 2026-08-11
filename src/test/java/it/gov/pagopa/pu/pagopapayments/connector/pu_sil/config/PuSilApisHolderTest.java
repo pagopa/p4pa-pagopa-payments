@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pu_sil.config;
 
+import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,26 +13,29 @@ import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class PuSilApisHolderTest extends BaseApiHolderTest {
 
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
-  private PuSilApisHolder puSilApisHolder;
+  private PuSilApisHolder apisHolder;
   private PuSilApiClientConfig apiClientConfig;
 
   @BeforeEach
   void setUp() {
-    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+    when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
 
     apiClientConfig = PuSilApiClientConfig.builder()
       .baseUrl("http://example.com")
       .maxAttempts(3)
       .build();
+    apisHolder = new PuSilApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
 
-    puSilApisHolder = new PuSilApisHolder(apiClientConfig, restTemplateBuilderMock);
+    verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getActualizationApi(null));
   }
 
   @AfterEach
@@ -43,23 +47,22 @@ class PuSilApisHolderTest extends BaseApiHolderTest {
   }
 
   @Test
-  void whenGetActualizationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
-    assertAuthenticationShouldBeSetInThreadSafeMode(
-      accessToken -> puSilApisHolder.getActualizationApi(accessToken)
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      accessToken -> apisHolder.getActualizationApi(accessToken)
         .actualize(1L, "NAV"),
-      new ParameterizedTypeReference<>() {
-      },
-      puSilApisHolder::unload
+      new ParameterizedTypeReference<>() {}
     );
   }
 
   @Test
-  void testRetryConfiguration() {
-    assertRetry(apiClientConfig,
-      accessToken -> puSilApisHolder.getActualizationApi(accessToken)
+  void whenGetActualizationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      accessToken -> apisHolder.getActualizationApi(accessToken)
         .actualize(1L, "NAV"),
       new ParameterizedTypeReference<>() {
-      }
+      },
+      apisHolder::unload
     );
   }
 }

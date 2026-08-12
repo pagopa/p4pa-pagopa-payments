@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.HttpHostConnectException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -86,6 +87,11 @@ public abstract class CommonExceptionHandlerTest {
   void init() {
     TestUtils.clearDefaultTimezone();
     UtilitiesTest.setTraceId(traceId);
+  }
+
+  @AfterEach
+  void clear() {
+    UtilitiesTest.clearTraceIdContext();
   }
 
   @Data

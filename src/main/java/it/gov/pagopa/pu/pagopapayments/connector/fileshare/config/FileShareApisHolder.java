@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.fileshare.generated.BaseApi;
 import it.gov.pagopa.pu.fileshare.client.generated.IngestionFlowFileApi;
 import it.gov.pagopa.pu.fileshare.dto.generated.FileshareErrorDTO;
 import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.pu.pagopapayments.connector.fileshare.mapper.FileShareErrorDTOMapper;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class FileShareApisHolder {
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
     restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "FILE-SHARE", clientConfig.isPrintBodyWhenError(),
-      FileshareErrorDTO.class, FileshareErrorDTO::getCode, FileshareErrorDTO::getMessage)
+      FileshareErrorDTO.class, FileShareErrorDTOMapper::map)
     );
 
     this.ingestionFlowFileApi = new IngestionFlowFileApi(apiClient);

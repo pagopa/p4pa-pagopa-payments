@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.workflow.config;
 
 import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.pu.pagopapayments.connector.workflow.mapper.WorkflowErrorDTOMapper;
 import it.gov.pagopa.pu.workflowhub.client.generated.WorkflowApi;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowErrorDTO;
 import it.gov.pagopa.pu.workflowhub.generated.ApiClient;
@@ -30,7 +31,7 @@ public class WorkflowApisHolder {
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
     restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "WORKFLOW-HUB", clientConfig.isPrintBodyWhenError(),
-      WorkflowErrorDTO.class, WorkflowErrorDTO::getCode, WorkflowErrorDTO::getMessage)
+      WorkflowErrorDTO.class, WorkflowErrorDTOMapper::map)
     );
 
     this.workflowApi = new WorkflowApi(apiClient);

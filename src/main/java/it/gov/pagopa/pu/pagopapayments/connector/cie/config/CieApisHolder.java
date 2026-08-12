@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.cie.generated.BaseApi;
 import it.gov.pagopa.pu.cie.client.generated.DebtPositionCieApi;
 import it.gov.pagopa.pu.cie.dto.generated.ErrorDTO;
 import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.pu.pagopapayments.connector.cie.mapper.CieErrorDTOMapper;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class CieApisHolder {
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
     restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "CIE", clientConfig.isPrintBodyWhenError(),
-      ErrorDTO.class, ErrorDTO::getCode, ErrorDTO::getMessage)
+      ErrorDTO.class, CieErrorDTOMapper::map)
     );
 
     this.debtPositionCieApi = new DebtPositionCieApi(apiClient);

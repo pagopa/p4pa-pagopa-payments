@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pu_sil.config;
 
 import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.pu.pagopapayments.connector.pu_sil.mapper.PuSilErrorDTOMapper;
 import it.gov.pagopa.pu.pusil.generated.ApiClient;
 import it.gov.pagopa.pu.pusil.generated.BaseApi;
 import it.gov.pagopa.pu.pusil.client.generated.ActualizationApi;
@@ -31,7 +32,7 @@ public class PuSilApisHolder {
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
     restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "PU-SIL", clientConfig.isPrintBodyWhenError(),
-      PuSilErrorDTO.class, PuSilErrorDTO::getCode, PuSilErrorDTO::getMessage)
+      PuSilErrorDTO.class, PuSilErrorDTOMapper::map)
     );
 
     this.actualizationApi = new ActualizationApi(apiClient);

@@ -377,17 +377,17 @@
 </tr>
 <tr>
 <td>org.apache.httpcomponents.client5:httpclient5</td>
-<td>5.6.1</td>
+<td>5.6.4</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td>org.apache.httpcomponents.core5:httpcore5</td>
-<td>5.4.2</td>
+<td>5.4.3</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td>org.apache.httpcomponents.core5:httpcore5-h2</td>
-<td>5.4.2</td>
+<td>5.4.3</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>

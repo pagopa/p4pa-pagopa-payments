@@ -1,9 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config;
 
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.NoticeGenerationRequestItemDTO;
 import it.gov.pagopa.pu.pagopapayments.config.json.JsonConfig;
-import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import it.gov.pagopa.pu.pagopapayments.connector.BaseApiHolderTest;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationRequestItemDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +14,8 @@ import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class PagopaPrintPaymentNoticeApisHolderTest extends BaseApiHolderTest {
   @Mock
@@ -25,17 +26,16 @@ class PagopaPrintPaymentNoticeApisHolderTest extends BaseApiHolderTest {
 
   @BeforeEach
   void setUp() {
-    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+    when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
 
-    apiClientConfig = new PagopaPrintPaymentNoticeApiClientConfig();
-    apiClientConfig.setBaseUrl("http://example.com");
-    apiClientConfig.setMaxAttempts(3);
-
+    apiClientConfig = PagopaPrintPaymentNoticeApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
     apisHolder = new PagopaPrintPaymentNoticeApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
 
-    Mockito.verify(restTemplateMock)
-      .setErrorHandler(Mockito.any(HttpClientErrorJsonBodyHandler.class));
+    verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getNoticeGenerationRequestApi("apiKey"));
   }
 
   @AfterEach
@@ -43,6 +43,15 @@ class PagopaPrintPaymentNoticeApisHolderTest extends BaseApiHolderTest {
     Mockito.verifyNoMoreInteractions(
       restTemplateBuilderMock,
       restTemplateMock
+    );
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      apiKey -> apisHolder.getNoticeGenerationRequestApi(apiKey)
+        .generateNotice(new NoticeGenerationRequestItemDTO(), null, null),
+      new ParameterizedTypeReference<>() {}
     );
   }
 
@@ -57,16 +66,6 @@ class PagopaPrintPaymentNoticeApisHolderTest extends BaseApiHolderTest {
       },
       AUTH_TYPE.API_KEY,
       "Ocp-Apim-Subscription-Key"
-    );
-  }
-
-  @Test
-  void testRetryConfiguration() {
-    assertRetry(apiClientConfig,
-      apiKey -> apisHolder.getNoticeGenerationRequestApi(apiKey)
-        .generateNotice(new NoticeGenerationRequestItemDTO(), null, null),
-      new ParameterizedTypeReference<>() {
-      }
     );
   }
 }

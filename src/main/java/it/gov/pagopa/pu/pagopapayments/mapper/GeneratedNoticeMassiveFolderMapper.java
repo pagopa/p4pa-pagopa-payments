@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeGenerationMassiveResourceDTO;
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.NoticeGenerationMassiveResourceDTO;
 
 public class GeneratedNoticeMassiveFolderMapper {
   private GeneratedNoticeMassiveFolderMapper() {}

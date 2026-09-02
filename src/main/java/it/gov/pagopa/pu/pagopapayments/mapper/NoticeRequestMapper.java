@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.CreditorInstitutionDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeDTO;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.NoticeRequestDataDTO;
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.CreditorInstitutionDTO;
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.NoticeDTO;
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.NoticeRequestDataDTO;
 import org.springframework.stereotype.Component;
 
 import static it.gov.pagopa.pu.pagopapayments.mapper.DebtorMapper.toDebtorDTO;

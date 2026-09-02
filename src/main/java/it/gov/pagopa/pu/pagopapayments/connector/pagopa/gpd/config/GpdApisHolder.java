@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config;
 
-import it.gov.pagopa.nodo.gpd.controller.auth.ApiKeyAuth;
-import it.gov.pagopa.nodo.gpd.controller.ApiClient;
-import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi;
+import it.gov.pagopa.nodo.gpd.client.generated.DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi;
 import it.gov.pagopa.nodo.gpd.dto.generated.ProblemJson;
+import it.gov.pagopa.nodo.gpd.generated.ApiClient;
+import it.gov.pagopa.nodo.gpd.generated.auth.ApiKeyAuth;
 import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
@@ -25,7 +25,7 @@ public class GpdApisHolder {
     this.clientConfig = clientConfig;
     this.restTemplate = restTemplateBuilder.build();
 
-    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "GPD", clientConfig.isPrintBodyWhenError(),
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "NODO-GPD", clientConfig.isPrintBodyWhenError(),
       ProblemJson.class, null, ProblemJson::getDetail));
   }
 

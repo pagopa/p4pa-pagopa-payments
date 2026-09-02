@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca;
 
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.pu.aca.dto.generated.PaymentPositionModel;
 
 public interface AcaService {
   void paCreatePosition(String apiKey, String orgFiscalCode, PaymentPositionModel paymentPositionModel);

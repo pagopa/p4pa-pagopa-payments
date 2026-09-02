@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.clien
 
 import gov.telematici.pagamenti.ws.NodoChiediFlussoRendicontazione;
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
-import it.gov.pagopa.nodo.fdrorganization.controller.generated.OrganizationsApi;
+import it.gov.pagopa.nodo.fdrorganization.client.generated.OrganizationsApi;
 import it.gov.pagopa.nodo.fdrorganization.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.mapper
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.MissingApiKeyException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeInvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
@@ -27,27 +28,31 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentsReportingClientTest {
 
   public static final NodoChiediFlussoRendicontazione NODO_CHIEDI_FLUSSO_RENDICONTAZIONE = new NodoChiediFlussoRendicontazione();
   @Mock
-  private PaymentsReportingApisHolder paymentsReportingApisHolder;
+  private PaymentsReportingApisHolder paymentsReportingApisHolderMock;
   @Mock
-  private OrganizationsApi organizationsApi;
+  private OrganizationsApi organizationsApiMock;
   @Mock
-  private RegistryLogger registryLogger;
+  private RegistryLogger registryLoggerMock;
   @Mock
-  private PaymentsReportingMapper paymentsReportingMapper;
+  private PaymentsReportingMapper paymentsReportingMapperMock;
   @Mock
-  private PaymentReporting2NodoChiediFlussoRendicontazioneMapper paymentReporting2NodoChiediFlussoRendicontazioneMapper;
+  private PaymentReporting2NodoChiediFlussoRendicontazioneMapper paymentReporting2NodoChiediFlussoRendicontazioneMapperMock;
 
   @InjectMocks
   private PaymentsReportingClient paymentsReportingClient;
@@ -63,11 +68,11 @@ class PaymentsReportingClientTest {
   @AfterEach
   void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(
-      paymentsReportingApisHolder,
-      organizationsApi,
-      registryLogger,
-      paymentsReportingMapper,
-      paymentReporting2NodoChiediFlussoRendicontazioneMapper
+      paymentsReportingApisHolderMock,
+      organizationsApiMock,
+      registryLoggerMock,
+      paymentsReportingMapperMock,
+      paymentReporting2NodoChiediFlussoRendicontazioneMapperMock
     );
   }
 
@@ -84,10 +89,10 @@ class PaymentsReportingClientTest {
 
     List<FlowByPSP> expectedResult = paginatedFlowsResponse == null ? new ArrayList<>() : paginatedFlowsResponse.getData();
 
-    Mockito.when(paymentsReportingApisHolder.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
-      .thenReturn(organizationsApi);
-    Mockito.when(
-      organizationsApi.iOrganizationsControllerGetAllPublishedFlows(
+    when(paymentsReportingApisHolderMock.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
+      .thenReturn(organizationsApiMock);
+    when(
+      organizationsApiMock.iOrganizationsControllerGetAllPublishedFlows(
         Mockito.eq(ORGANIZATION_FISCAL_CODE),
         Mockito.eq(latestFlowDate),
         Mockito.anyLong(),
@@ -145,10 +150,10 @@ class PaymentsReportingClientTest {
 
     SingleFlowResponse expectedResponse = new SingleFlowResponse();
 
-    Mockito.when(paymentsReportingApisHolder.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
-      .thenReturn(organizationsApi);
-    Mockito.when(
-      organizationsApi.iOrganizationsControllerGetSinglePublishedFlow(
+    when(paymentsReportingApisHolderMock.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
+      .thenReturn(organizationsApiMock);
+    when(
+      organizationsApiMock.iOrganizationsControllerGetSinglePublishedFlow(
         PAYMENTS_REPORTING_ID,
         ORGANIZATION_FISCAL_CODE,
         PSP_ID,
@@ -176,10 +181,10 @@ class PaymentsReportingClientTest {
 
     List<Payment> expectedResult = paginatedPaymentsResponse == null ? new ArrayList<>() : paginatedPaymentsResponse.getData();
 
-    Mockito.when(paymentsReportingApisHolder.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
-      .thenReturn(organizationsApi);
-    Mockito.when(
-      organizationsApi.iOrganizationsControllerGetPaymentsFromPublishedFlow(
+    when(paymentsReportingApisHolderMock.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
+      .thenReturn(organizationsApiMock);
+    when(
+      organizationsApiMock.iOrganizationsControllerGetPaymentsFromPublishedFlow(
         Mockito.eq(PAYMENTS_REPORTING_ID),
         Mockito.eq(ORGANIZATION_FISCAL_CODE),
         Mockito.eq(PSP_ID),
@@ -188,8 +193,8 @@ class PaymentsReportingClientTest {
         Mockito.isNull()
       )
     ).thenReturn(paginatedPaymentsResponse);
-    Mockito.when(
-      paymentReporting2NodoChiediFlussoRendicontazioneMapper.createFlussoRendicontazioneRequest(
+    when(
+      paymentReporting2NodoChiediFlussoRendicontazioneMapperMock.createFlussoRendicontazioneRequest(
         brokerForNodoPaDTO,
         PAYMENTS_REPORTING_ID
       )
@@ -201,8 +206,8 @@ class PaymentsReportingClientTest {
     PaPaymentReportingDTO paPaymentReportingDTO = new PaPaymentReportingDTO();
     paPaymentReportingDTO.setPaymentReportingBytes(new byte[1]);
 
-    Mockito.when(paymentsReportingMapper.mapPaymentsReporting(singleFlowResponse, expectedResult)).thenReturn(paymentsReporting);
-    Mockito.when(paymentsReportingMapper.mapPaPaymentsReportingDTO(brokerForNodoPaDTO, paymentsReporting)).thenReturn(paPaymentReportingDTO);
+    when(paymentsReportingMapperMock.mapPaymentsReporting(singleFlowResponse, expectedResult)).thenReturn(paymentsReporting);
+    when(paymentsReportingMapperMock.mapPaPaymentsReportingDTO(brokerForNodoPaDTO, paymentsReporting)).thenReturn(paPaymentReportingDTO);
 
     //when
     List<Payment> actualResult = paymentsReportingClient.fetchAllPaymentsForPaymentReportingFlow(brokerForNodoPaDTO, PAYMENTS_REPORTING_ID, REVISION, PSP_ID, singleFlowResponse);
@@ -269,7 +274,89 @@ class PaymentsReportingClientTest {
       .pspId(PSP_ID)
       .eventType(RegistryEventType.NodeForPa_fetchPaymentReporting)
       .build();
-    RegistryLoggerTest.configureRegistryLoggerMock(registryLogger, contextData, NODO_CHIEDI_FLUSSO_RENDICONTAZIONE, false, true);
+    RegistryLoggerTest.configureRegistryLoggerMock(registryLoggerMock, contextData, NODO_CHIEDI_FLUSSO_RENDICONTAZIONE, false, true);
+  }
+
+
+  @ParameterizedTest
+  @MethodSource("provideCaughtErrorResponseScenarios")
+  void givenPaymentsReportingClientThrowsBadRequestWhenFetchPaymentReportingIdListThenReturnEmptyList(ErrorResponse errorResponse) {
+    //given
+    BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
+    brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncPaymentsReportingKey(SYNC_PAYMENTS_REPORTING_API_KEY).build());
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
+    brokerForNodoPaDTO.setOrganization(organization);
+    OffsetDateTime latestFlowDate = OffsetDateTime.now();
+
+    when(paymentsReportingApisHolderMock.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
+      .thenReturn(organizationsApiMock);
+    when(
+      organizationsApiMock.iOrganizationsControllerGetAllPublishedFlows(
+        Mockito.eq(ORGANIZATION_FISCAL_CODE),
+        Mockito.eq(latestFlowDate),
+        Mockito.anyLong(),
+        Mockito.isNull(), Mockito.isNull(), Mockito.isNull()
+      )
+    ).thenThrow(new RestInvokeInvalidValueException("APPNAME", HttpStatus.BAD_REQUEST, "ERROR", errorResponse.getAppErrorCode(), "ERRORMESSAGE", null));
+
+    //when
+    List<FlowByPSP> actualResult = paymentsReportingClient.fetchIdList(brokerForNodoPaDTO, latestFlowDate);
+
+    //then
+    Assertions.assertEquals(Collections.emptyList(), actualResult);
+  }
+
+  private static Stream<ErrorResponse> provideCaughtErrorResponseScenarios() {
+    return Stream.of(
+      ErrorResponse.builder()
+        .appErrorCode("FDR-2008")
+        .build(),
+      ErrorResponse.builder()
+        .appErrorCode("FDR-2008")
+        .errors(
+          List.of(
+            ErrorMessage.builder()
+              .message("Creditor institution with ID [%s] is invalid or unknown.".formatted(ORGANIZATION_FISCAL_CODE))
+              .build()
+          )
+        ).build()
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideNonCaughtErrorResponseScenarios")
+  void givenPaymentsReportingClientThrowsBadRequestWhenFetchPaymentReportingIdListThenThrowException(ErrorResponse errorResponse) {
+    //given
+    BrokerForNodoPaDTO brokerForNodoPaDTO = new BrokerForNodoPaDTO();
+    brokerForNodoPaDTO.setBrokerApiKeys(BrokerApiKeys.builder().syncPaymentsReportingKey(SYNC_PAYMENTS_REPORTING_API_KEY).build());
+    Organization organization = podamFactory.manufacturePojo(Organization.class);
+    organization.setOrgFiscalCode(ORGANIZATION_FISCAL_CODE);
+    brokerForNodoPaDTO.setOrganization(organization);
+    OffsetDateTime latestFlowDate = OffsetDateTime.now();
+
+    when(paymentsReportingApisHolderMock.getOrganizationApi(SYNC_PAYMENTS_REPORTING_API_KEY))
+      .thenReturn(organizationsApiMock);
+    when(
+      organizationsApiMock.iOrganizationsControllerGetAllPublishedFlows(
+        Mockito.eq(ORGANIZATION_FISCAL_CODE),
+        Mockito.eq(latestFlowDate),
+        Mockito.anyLong(),
+        Mockito.isNull(), Mockito.isNull(), Mockito.isNull()
+      )
+    ).thenThrow(new RestInvokeInvalidValueException("APPNAME", HttpStatus.BAD_REQUEST, "ERROR", errorResponse.getAppErrorCode(), "ERRORMESSAGE", null));
+
+    //when
+    Assertions.assertThrows(
+      RestInvokeInvalidValueException.class,
+      () -> paymentsReportingClient.fetchIdList(brokerForNodoPaDTO, latestFlowDate)
+    );
+  }
+
+  private static  Stream<ErrorResponse> provideNonCaughtErrorResponseScenarios() {
+    return Stream.of(
+      ErrorResponse.builder().appErrorCode("COD-0000").build()
+    );
   }
 
 }

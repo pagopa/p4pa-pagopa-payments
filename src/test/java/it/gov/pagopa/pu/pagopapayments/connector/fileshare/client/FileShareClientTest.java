@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.fileshare.client;
 
-import it.gov.pagopa.pu.fileshare.controller.generated.IngestionFlowFileApi;
+import it.gov.pagopa.pu.fileshare.client.generated.IngestionFlowFileApi;
 import it.gov.pagopa.pu.fileshare.dto.generated.FileOrigin;
 import it.gov.pagopa.pu.fileshare.dto.generated.IngestionFlowFileType;
 import it.gov.pagopa.pu.fileshare.dto.generated.UploadIngestionFlowFileResponseDTO;

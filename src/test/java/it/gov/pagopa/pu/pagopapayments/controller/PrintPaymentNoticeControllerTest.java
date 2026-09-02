@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.controller;
 
+import io.micrometer.tracing.Tracer;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.NoticeDataDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.GeneratedNoticeMassiveFolderDTO;
@@ -18,6 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
 import uk.co.jemos.podam.api.PodamFactory;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -35,6 +38,8 @@ class PrintPaymentNoticeControllerTest {
 
   @MockitoBean
   private GenerateNoticeService generateNoticeService;
+  @MockitoBean
+  private Tracer tracerMock;
 
   private static final Long ORG_ID = 1L;
   private static final String NAV = "NAV123";
@@ -55,7 +60,7 @@ class PrintPaymentNoticeControllerTest {
       .fileName("notice.pdf")
         .build();
 
-    Mockito.when(generateNoticeService.generateNotice(
+    when(generateNoticeService.generateNotice(
       Mockito.eq(NAV),
       Mockito.any(DebtPositionDTO.class),
       Mockito.anyString())
@@ -71,7 +76,7 @@ class PrintPaymentNoticeControllerTest {
       .andExpect(status().isOk())
       .andExpect(content().bytes(expectedResult));
 
-    Mockito.verify(generateNoticeService, Mockito.times(1)).generateNotice(
+    verify(generateNoticeService).generateNotice(
       Mockito.eq(NAV), Mockito.any(), Mockito.anyString()
     );
   }
@@ -84,7 +89,7 @@ class PrintPaymentNoticeControllerTest {
       .folderId("folderId")
         .build();
 
-    Mockito.when(generateNoticeService.generateNoticeMassive(
+    when(generateNoticeService.generateNoticeMassive(
         Mockito.any(NoticeRequestMassiveDTO.class),
         Mockito.anyString()))
       .thenReturn(response);
@@ -98,7 +103,7 @@ class PrintPaymentNoticeControllerTest {
       .andExpect(status().isOk())
       .andReturn();
 
-    Mockito.verify(generateNoticeService, Mockito.times(1)).generateNoticeMassive(
+    verify(generateNoticeService).generateNoticeMassive(
       Mockito.any(NoticeRequestMassiveDTO.class), Mockito.anyString()
     );
   }
@@ -110,7 +115,7 @@ class PrintPaymentNoticeControllerTest {
       .signedUrl("url")
         .build();
 
-    Mockito.when(generateNoticeService.getNoticeMassiveZip(
+    when(generateNoticeService.getNoticeMassiveZip(
         Mockito.eq(ORG_ID),
         Mockito.anyString(),
         Mockito.anyString()))
@@ -124,7 +129,7 @@ class PrintPaymentNoticeControllerTest {
       .andExpect(status().isOk())
       .andReturn();
 
-    Mockito.verify(generateNoticeService, Mockito.times(1)).getNoticeMassiveZip(
+    verify(generateNoticeService).getNoticeMassiveZip(
       Mockito.eq(ORG_ID), Mockito.anyString(), Mockito.anyString()
     );
   }
@@ -132,7 +137,7 @@ class PrintPaymentNoticeControllerTest {
   @Test
   void givenValidInputWhenGetSignedUrlThen204() throws Exception {
     // Given
-    Mockito.when(generateNoticeService.getNoticeMassiveZip(
+    when(generateNoticeService.getNoticeMassiveZip(
         Mockito.eq(ORG_ID),
         Mockito.anyString(),
         Mockito.anyString()))
@@ -146,7 +151,7 @@ class PrintPaymentNoticeControllerTest {
       .andExpect(status().isNoContent())
       .andReturn();
 
-    Mockito.verify(generateNoticeService, Mockito.times(1)).getNoticeMassiveZip(
+    verify(generateNoticeService).getNoticeMassiveZip(
       Mockito.eq(ORG_ID), Mockito.anyString(), Mockito.anyString()
     );
   }

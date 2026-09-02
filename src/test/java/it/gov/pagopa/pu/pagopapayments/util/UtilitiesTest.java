@@ -17,6 +17,17 @@ public class UtilitiesTest {
 
   private static final String AUX_DIGIT = "3";
 
+  public static void setTraceId(String traceId) {
+    setTraceId(traceId, null);
+  }
+  public static void setTraceId(String traceId, String spanId) {
+    MDC.put("traceId", traceId);
+    MDC.put("spanId", spanId);
+  }
+  public static void clearTraceIdContext(){
+    MDC.clear();
+  }
+
   @Test
   void testGetTraceId(){
     // Given
@@ -25,6 +36,20 @@ public class UtilitiesTest {
 
     // When
     String result = Utilities.getTraceId();
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+    clearTraceIdContext();
+  }
+
+  @Test
+  void testGetSpanId(){
+    // Given
+    String expectedResult = "SPANID";
+    setTraceId("TRACEID", expectedResult);
+
+    // When
+    String result = Utilities.getSpanId();
 
     // Then
     Assertions.assertSame(expectedResult, result);
@@ -69,13 +94,6 @@ public class UtilitiesTest {
 
     // Then
     Assertions.assertTrue(result.getMessage().startsWith("Invalid NAV format: "));
-  }
-
-  public static void setTraceId(String traceId) {
-    MDC.put("traceId", traceId);
-  }
-  public static void clearTraceIdContext(){
-    MDC.clear();
   }
 
   @Test

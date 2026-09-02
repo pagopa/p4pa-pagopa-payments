@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.service.sync.aca;
 
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.PaymentPositionModel;
+import it.gov.pagopa.pu.aca.dto.generated.PaymentPositionModel;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.AcaService;

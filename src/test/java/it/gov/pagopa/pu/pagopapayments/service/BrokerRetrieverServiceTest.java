@@ -7,7 +7,7 @@ import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
-import it.gov.pagopa.pu.pagopapayments.exception.NotFoundException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.NotFoundException;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,6 +21,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerRetrieverServiceTest {
@@ -59,9 +61,9 @@ class BrokerRetrieverServiceTest {
   void givenValidOrganizationWhenGetBrokerApiKeyAndSegregationCodesByOrganizationIdThenOk() {
     //given
     String accessToken = TestUtils.getFakeAccessToken();
-    Mockito.when(organizationServiceMock.findOrganizationStation(VALID_ORG_ID, null, accessToken))
+    when(organizationServiceMock.findOrganizationStation(VALID_ORG_ID, null, accessToken))
       .thenReturn(Optional.of(VALID_ORG_STATION));
-    Mockito.when(brokerServiceMock.getApiKeyByBrokerId(VALID_BROKER_ID, accessToken)).thenReturn(VALID_API_KEYS);
+    when(brokerServiceMock.getApiKeyByBrokerId(VALID_BROKER_ID, accessToken)).thenReturn(VALID_API_KEYS);
 
     //when
     Pair<BrokerApiKeys, String> response = brokerRetrieverService.getBrokerApiKeyAndSegregationCodesByOrganizationId(VALID_ORG_ID, accessToken);
@@ -76,7 +78,7 @@ class BrokerRetrieverServiceTest {
   void givenNotFoundOrganizationStationWhenGetBrokerApiKeyAndSegregationCodesByOrganizationIdThenException() {
     //given
     String accessToken = TestUtils.getFakeAccessToken();
-    Mockito.when(organizationServiceMock.findOrganizationStation(INVALID_ORG_ID, null, accessToken))
+    when(organizationServiceMock.findOrganizationStation(INVALID_ORG_ID, null, accessToken))
       .thenReturn(Optional.empty());
 
     //when
@@ -91,9 +93,9 @@ class BrokerRetrieverServiceTest {
     String accessToken = TestUtils.getFakeAccessToken();
     Broker broker = new Broker();
 
-    Mockito.when(organizationServiceMock.getOrganizationById(VALID_ORG_ID, accessToken)).thenReturn(VALID_ORG);
-    Mockito.when(brokerServiceMock.getBrokerById(VALID_BROKER_ID, accessToken)).thenReturn(broker);
-    Mockito.when(brokerServiceMock.getApiKeyByBrokerId(VALID_BROKER_ID, accessToken)).thenReturn(VALID_API_KEYS);
+    when(organizationServiceMock.getOrganizationById(VALID_ORG_ID, accessToken)).thenReturn(VALID_ORG);
+    when(brokerServiceMock.getBrokerById(VALID_BROKER_ID, accessToken)).thenReturn(broker);
+    when(brokerServiceMock.getApiKeyByBrokerId(VALID_BROKER_ID, accessToken)).thenReturn(VALID_API_KEYS);
 
     BrokerForNodoPaDTO result = brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(VALID_ORG_ID, accessToken);
 
@@ -108,7 +110,7 @@ class BrokerRetrieverServiceTest {
   void givenNotFoundOrganizationWhenGetBrokerForNodoPaDTOByOrganizationIdThenException() {
     //given
     String accessToken = TestUtils.getFakeAccessToken();
-    Mockito.when(organizationServiceMock.getOrganizationById(INVALID_ORG_ID, accessToken)).thenReturn(null);
+    when(organizationServiceMock.getOrganizationById(INVALID_ORG_ID, accessToken)).thenReturn(null);
     //when
     NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(INVALID_ORG_ID, accessToken));
     //verify

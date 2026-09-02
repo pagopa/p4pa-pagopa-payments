@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.mapper
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.exception.MissingApiKeyException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeInvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryContextData;
 import it.gov.pagopa.pu.pagopapayments.registry.RegistryEventType;
@@ -20,8 +21,12 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static it.gov.pagopa.pu.pagopapayments.util.Constants.INVALID_EC_FISCAL_CODE_ERROR_CODE;
 
 @Slf4j
 @Service
@@ -46,7 +51,8 @@ public class PaymentsReportingClient {
       throw new MissingApiKeyException(ErrorCodeConstants.ERROR_CODE_MISSING_SYNC_PAYMENTS_REPORTING_API_KEY, "Organization " + organization.getOrganizationId() + " has not SYNC_PAYMENTS_REPORTING apiKey configured!");
     }
 
-    return PageUtils.fetchAllFromPaginatedApi(
+    try {
+      return PageUtils.fetchAllFromPaginatedApi(
         page -> apisHolder.getOrganizationApi(syncPaymentsReportingKey)
           .iOrganizationsControllerGetAllPublishedFlows(
             organization.getOrgFiscalCode(), latestFlowDate,
@@ -55,7 +61,18 @@ public class PaymentsReportingClient {
         this::isPaginatedFlowsResponseEmpty,
         this::getTotalPageFromPaginatedFlowsResponse,
         PaginatedFlowsResponse::getData
-    );
+      );
+    } catch (RestInvokeInvalidValueException ex) {
+      if (!INVALID_EC_FISCAL_CODE_ERROR_CODE.equals(ex.getCode())) {
+        throw ex;
+      }
+      String exceptionMessage = Objects.requireNonNullElse(
+        ex.getMessage(),
+        "Creditor institution with ID [%s] is invalid or unknown."
+          .formatted(brokerForNodoPaDTO.getOrganization().getOrgFiscalCode()));
+      log.warn("{} Returning empty list", exceptionMessage);
+      return Collections.emptyList();
+    }
   }
 
   private boolean isPaginatedFlowsResponseEmpty(PaginatedFlowsResponse paginatedFlowsResponse) {
@@ -72,8 +89,8 @@ public class PaymentsReportingClient {
   public SingleFlowResponse fetchPaymentReportingFlow(BrokerForNodoPaDTO brokerForNodoPaDTO, String reportingId, Long revision, String pspId) {
     return apisHolder.getOrganizationApi(brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey())
       .iOrganizationsControllerGetSinglePublishedFlow(
-              reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
-              pspId, revision
+        reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
+        pspId, revision
       );
   }
 
@@ -108,8 +125,8 @@ public class PaymentsReportingClient {
     List<Payment> responseList = PageUtils.fetchAllFromPaginatedApi(
       page -> apisHolder.getOrganizationApi(brokerForNodoPaDTO.getBrokerApiKeys().getSyncPaymentsReportingKey())
         .iOrganizationsControllerGetPaymentsFromPublishedFlow(
-                reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
-                pspId, revision, (long) page, null
+          reportingId, brokerForNodoPaDTO.getOrganization().getOrgFiscalCode(),
+          pspId, revision, (long) page, null
         ),
       this::isPaginatedPaymentsResponseEmpty,
       this::getTotalPageFromPaginatedPaymentsResponse,

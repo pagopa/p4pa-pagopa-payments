@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.exception;
 import it.gov.pagopa.pu.orgfornode.dto.generated.ErrorResponseForNode;
 import it.gov.pagopa.pu.pagopapayments.controller.OrgForNodeRestController;
 import it.gov.pagopa.pu.pagopapayments.enums.OrgForNodeError;
+import it.gov.pagopa.pu.pagopapayments.util.Constants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
@@ -56,7 +57,7 @@ public class OrgForNodeExceptionHandler {
   }
 
   private ErrorResponseForNode buildErrorResponse(OrgForNodeError error) {
-    OffsetDateTime now = OffsetDateTime.now();
+    OffsetDateTime now = OffsetDateTime.now(Constants.ZONEID);
 
     ErrorResponseForNode response = new ErrorResponseForNode();
     response.setHttpStatusCode(error.getHttpStatus().value());
@@ -78,7 +79,7 @@ public class OrgForNodeExceptionHandler {
       .replace('\n', ' ');
   }
 
-  private static void logException(Exception ex, HttpServletRequest request, HttpStatus httpStatus) {
+  public static void logException(Exception ex, HttpServletRequest request, HttpStatus httpStatus) {
     boolean printStackTrace = httpStatus.is5xxServerError();
     Level logLevel = printStackTrace ? Level.ERROR : Level.INFO;
 

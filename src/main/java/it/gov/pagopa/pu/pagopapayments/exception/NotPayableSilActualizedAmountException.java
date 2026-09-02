@@ -1,8 +1,9 @@
 package it.gov.pagopa.pu.pagopapayments.exception;
 
+import it.gov.pagopa.pu.pagopapayments.exception.common.BaseBusinessException;
 import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 
-public class NotPayableSilActualizedAmountException extends BaseBusinessException{
+public class NotPayableSilActualizedAmountException extends BaseBusinessException {
 
   public NotPayableSilActualizedAmountException(String message) {
     this(message, null);

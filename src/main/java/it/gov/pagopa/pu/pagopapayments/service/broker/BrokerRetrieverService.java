@@ -8,7 +8,7 @@ import it.gov.pagopa.pu.pagopapayments.config.CacheConfig;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.BrokerService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
-import it.gov.pagopa.pu.pagopapayments.exception.NotFoundException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.NotFoundException;
 import it.gov.pagopa.pu.pagopapayments.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;

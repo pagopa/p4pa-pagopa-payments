@@ -11,7 +11,7 @@ import it.gov.pagopa.pu.pagopapayments.dto.generated.SignedUrlResultDTO;
 import it.gov.pagopa.pu.pagopapayments.enums.GenerateNoticeTemplates;
 import it.gov.pagopa.pu.pagopapayments.mapper.NoticeRequestMapper;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
-import it.gov.pagopa.pu.printpaymentnotice.connector.printpaymentnotice.generated.dto.*;
+import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

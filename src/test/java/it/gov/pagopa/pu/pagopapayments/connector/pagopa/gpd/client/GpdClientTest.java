@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.client;
 
-import it.gov.pagopa.nodo.gpd.controller.generated.DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi;
+import it.gov.pagopa.nodo.gpd.client.generated.DebtPositionsApiInstallmentsAndPaymentOptionsManagerApi;
 import it.gov.pagopa.nodo.gpd.dto.generated.InstallmentModel;
 import it.gov.pagopa.nodo.gpd.dto.generated.PaymentPositionModelV3;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.gpd.config.GpdApisHolder;

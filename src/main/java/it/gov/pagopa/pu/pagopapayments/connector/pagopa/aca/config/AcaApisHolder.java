@@ -1,8 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.aca.config;
 
-import it.gov.pagopa.pu.aca.gpd.v1.controller.generated.DebtPositionsApiApi;
-import it.gov.pagopa.pu.aca.gpd.v1.dto.generated.ProblemJson;
-import it.gov.pagopa.pu.aca.gpd.v1.generated.ApiClient;
+import it.gov.pagopa.pu.aca.client.generated.DebtPositionsApiApi;
+import it.gov.pagopa.pu.aca.dto.generated.ProblemJson;
+import it.gov.pagopa.pu.aca.generated.ApiClient;
 import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;

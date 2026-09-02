@@ -1,13 +1,16 @@
 package it.gov.pagopa.pu.pagopapayments.connector.debtpositions.config;
 
-import it.gov.pagopa.pu.debtpositions.controller.ApiClient;
-import it.gov.pagopa.pu.debtpositions.controller.BaseApi;
-import it.gov.pagopa.pu.debtpositions.controller.generated.*;
-import it.gov.pagopa.pu.pagopapayments.config.rest.RestTemplateConfig;
+import it.gov.pagopa.pu.debtpositions.generated.ApiClient;
+import it.gov.pagopa.pu.debtpositions.generated.BaseApi;
+import it.gov.pagopa.pu.debtpositions.client.generated.*;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionErrorDTO;
+import it.gov.pagopa.pu.pagopapayments.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.mapper.DebtPositionErrorDTOMapper;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class DebtPositionsApisHolder {
@@ -25,7 +28,8 @@ public class DebtPositionsApisHolder {
 
   public DebtPositionsApisHolder(
     DebtPositionsApiClientConfig clientConfig,
-    RestTemplateBuilder restTemplateBuilder
+    RestTemplateBuilder restTemplateBuilder,
+    JsonMapper jsonMapper
   ) {
     RestTemplate restTemplate = restTemplateBuilder.build();
     ApiClient apiClient = new ApiClient(restTemplate);
@@ -33,9 +37,9 @@ public class DebtPositionsApisHolder {
     apiClient.setBearerToken(bearerTokenHolder::get);
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
-    if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("DEBT-POSITIONS"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "DEBT-POSITIONS", clientConfig.isPrintBodyWhenError(),
+      DebtPositionErrorDTO.class, DebtPositionErrorDTOMapper::map)
+    );
 
     this.debtPositionTypeOrgEntityControllerApi = new DebtPositionTypeOrgEntityControllerApi(apiClient);
     this.installmentApi = new InstallmentApi(apiClient);

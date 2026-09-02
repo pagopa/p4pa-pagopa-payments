@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.pagopapayments.connector.pagopa.paymentsreporting.Paymen
 import it.gov.pagopa.pu.pagopapayments.dto.BrokerForNodoPaDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.PaPaymentReportingDTO;
 import it.gov.pagopa.pu.pagopapayments.dto.generated.PaymentsReportingIdDTO;
-import it.gov.pagopa.pu.pagopapayments.exception.InvalidValueException;
+import it.gov.pagopa.pu.pagopapayments.exception.common.InvalidValueException;
 import it.gov.pagopa.pu.pagopapayments.mapper.PaymentsReportingMapper;
 import it.gov.pagopa.pu.pagopapayments.service.broker.BrokerRetrieverService;
 import org.junit.jupiter.api.AfterEach;
@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentsReportingFacadeServiceImplTest {
@@ -68,14 +69,14 @@ class PaymentsReportingFacadeServiceImplTest {
         .build()
     );
 
-    Mockito.when(
+    when(
       brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(
         organizationId,
         accessToken
       )
     ).thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(
+    when(
       paymentsReportingService.fetchPaymentReportingIdList(
         brokerForNodoPaDTO,
         latestFlowDate
@@ -106,27 +107,27 @@ class PaymentsReportingFacadeServiceImplTest {
     PaPaymentReportingDTO paPaymentReportingDTO = new PaPaymentReportingDTO();
     Long expectedFileBytesNum = 123L;
 
-    Mockito.when(
+    when(
       paymentsReportingMapper.isFilenameInvalid(
         paymentsReportingFileName,
         paymentsReportingId
       )
     ).thenReturn(false);
 
-    Mockito.when(
+    when(
       brokerRetrieverService.getBrokerForNodoPaDTOByOrganizationId(
         organizationId,
         accessToken
       )
     ).thenReturn(brokerForNodoPaDTO);
 
-    Mockito.when(
+    when(
       paymentsReportingService.fetchPaymentReporting(
         brokerForNodoPaDTO, paymentsReportingId, revision, pspId
       )
     ).thenReturn(paPaymentReportingDTO);
 
-    Mockito.when(fileShareService.uploadPaymentReporting(
+    when(fileShareService.uploadPaymentReporting(
       paPaymentReportingDTO, organizationId, paymentsReportingFileName, accessToken
     )).thenReturn(expectedFileBytesNum);
 
@@ -153,7 +154,7 @@ class PaymentsReportingFacadeServiceImplTest {
     String expectedExceptionMessage = "PaymentsReporting file name not valid '%s' to fetch file with id %s"
       .formatted(paymentsReportingFileName, paymentsReportingId);
 
-    Mockito.when(
+    when(
       paymentsReportingMapper.isFilenameInvalid(
         paymentsReportingFileName,
         paymentsReportingId

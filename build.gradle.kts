@@ -72,6 +72,9 @@ val commonsLang3Version = "3.20.0"
 
 val springCloudDepsVersion = "2025.1.3"
 
+// CVE Security dependencies
+val tomcatEmbedCoreVersion = "11.0.25"
+
 dependencyManagement {
   imports {
     mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudDepsVersion")
@@ -107,11 +110,14 @@ dependencies {
   implementation("com.github.danielwegener:logback-kafka-appender:$kafkaAppender") {
     exclude(group = "org.lz4", module = "lz4-java")
   }
-  implementation("io.github.springwolf:springwolf-kafka:${springWolfAsyncApiVersion}") {
+  implementation("io.github.springwolf:springwolf-kafka:$springWolfAsyncApiVersion") {
     exclude(group = "org.lz4", module = "lz4-java")
   }
-  implementation("io.github.springwolf:springwolf-ui:${springWolfUiAsyncApiVersion}")
-  implementation("io.github.springwolf:springwolf-cloud-stream:${springWolfAsyncApiVersion}")
+  implementation("io.github.springwolf:springwolf-ui:$springWolfUiAsyncApiVersion")
+  implementation("io.github.springwolf:springwolf-cloud-stream:$springWolfAsyncApiVersion")
+
+  // CVE Security dependencies
+  implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion")
 
   //webservice soap
   implementation("org.apache.ws.xmlschema:xmlschema-core:$xmlSchemaVersion")

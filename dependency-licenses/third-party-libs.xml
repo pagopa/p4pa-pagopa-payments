@@ -396,8 +396,13 @@
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
-<td><a href='https://tomcat.apache.org/'>org.apache.tomcat.embed:tomcat-embed-core</a></td>
+<td><a href='https://tomcat.apache.org/'>org.apache.tomcat:tomcat-annotations-api</a></td>
 <td>11.0.24</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://tomcat.apache.org/'>org.apache.tomcat.embed:tomcat-embed-core</a></td>
+<td>11.0.25</td>
 <td><a href='https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt'>EPL-2.0</a></td>
 </tr>
 <tr>

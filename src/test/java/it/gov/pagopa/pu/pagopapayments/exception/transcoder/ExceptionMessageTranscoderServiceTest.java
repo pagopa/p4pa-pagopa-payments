@@ -14,6 +14,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.lang.reflect.Field;
 
@@ -25,6 +26,7 @@ class ExceptionMessageTranscoderServiceTest {
 
   @Mock private HttpMessageNotReadableExceptionMessageTranscoder httpMessageNotReadableExceptionMessageTranscoderMock;
   @Mock private MethodArgumentNotValidExceptionMessageTranscoder methodArgumentNotValidExceptionMessageTranscoderMock;
+  @Mock private MethodArgumentTypeMismatchExceptionMessageTranscoder methodArgumentTypeMismatchExceptionMessageTranscoderMock;
   @Mock private ConstraintViolationExceptionMessageTranscoder constraintViolationExceptionMessageTranscoderMock;
   @Mock private MissingServletRequestParameterExceptionMessageTranscoder missingServletRequestParameterExceptionMessageTranscoderMock;
   @Mock private HttpClientTooManyRequestExceptionMessageTranscoder httpClientTooManyRequestExceptionMessageTranscoderMock;
@@ -39,6 +41,7 @@ class ExceptionMessageTranscoderServiceTest {
 
     mockField("httpMessageNotReadableExceptionMessageTranscoder", httpMessageNotReadableExceptionMessageTranscoderMock);
     mockField("methodArgumentNotValidExceptionMessageTranscoder", methodArgumentNotValidExceptionMessageTranscoderMock);
+    mockField("methodArgumentTypeMismatchExceptionMessageTranscoder", methodArgumentTypeMismatchExceptionMessageTranscoderMock);
     mockField("constraintViolationExceptionMessageTranscoder", constraintViolationExceptionMessageTranscoderMock);
     mockField("missingServletRequestParameterExceptionMessageTranscoder", missingServletRequestParameterExceptionMessageTranscoderMock);
     mockField("httpClientTooManyRequestExceptionMessageTranscoder", httpClientTooManyRequestExceptionMessageTranscoderMock);
@@ -57,6 +60,7 @@ class ExceptionMessageTranscoderServiceTest {
     Mockito.verifyNoMoreInteractions(
       httpMessageNotReadableExceptionMessageTranscoderMock,
         methodArgumentNotValidExceptionMessageTranscoderMock,
+        methodArgumentTypeMismatchExceptionMessageTranscoderMock,
         constraintViolationExceptionMessageTranscoderMock,
         missingServletRequestParameterExceptionMessageTranscoderMock,
         httpClientTooManyRequestExceptionMessageTranscoderMock,
@@ -77,6 +81,13 @@ class ExceptionMessageTranscoderServiceTest {
     MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
     service.transcode(exception);
     verify(methodArgumentNotValidExceptionMessageTranscoderMock).transcode(exception);
+  }
+
+  @Test
+  void givenMethodArgumentTypeMismatchExceptionWhenTranscodeThenCallMock(){
+    MethodArgumentTypeMismatchException exception = mock(MethodArgumentTypeMismatchException.class);
+    service.transcode(exception);
+    verify(methodArgumentTypeMismatchExceptionMessageTranscoderMock).transcode(exception);
   }
 
   @Test

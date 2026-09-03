@@ -7,11 +7,13 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 public class ExceptionMessageTranscoderService {
 
   private final HttpMessageNotReadableExceptionMessageTranscoder httpMessageNotReadableExceptionMessageTranscoder = new HttpMessageNotReadableExceptionMessageTranscoder();
   private final MethodArgumentNotValidExceptionMessageTranscoder methodArgumentNotValidExceptionMessageTranscoder = new MethodArgumentNotValidExceptionMessageTranscoder();
+  private final MethodArgumentTypeMismatchExceptionMessageTranscoder methodArgumentTypeMismatchExceptionMessageTranscoder = new MethodArgumentTypeMismatchExceptionMessageTranscoder();
   private final ConstraintViolationExceptionMessageTranscoder constraintViolationExceptionMessageTranscoder = new ConstraintViolationExceptionMessageTranscoder();
   private final MissingServletRequestParameterExceptionMessageTranscoder missingServletRequestParameterExceptionMessageTranscoder = new MissingServletRequestParameterExceptionMessageTranscoder();
   private final HttpClientTooManyRequestExceptionMessageTranscoder httpClientTooManyRequestExceptionMessageTranscoder = new HttpClientTooManyRequestExceptionMessageTranscoder();
@@ -25,6 +27,9 @@ public class ExceptionMessageTranscoderService {
       }
       case MethodArgumentNotValidException methodArgumentNotValidException -> {
         return methodArgumentNotValidExceptionMessageTranscoder.transcode(methodArgumentNotValidException);
+      }
+      case MethodArgumentTypeMismatchException methodArgumentTypeMismatchException -> {
+        return methodArgumentTypeMismatchExceptionMessageTranscoder.transcode(methodArgumentTypeMismatchException);
       }
       case ConstraintViolationException constraintViolationException -> {
         return constraintViolationExceptionMessageTranscoder.transcode(constraintViolationException);

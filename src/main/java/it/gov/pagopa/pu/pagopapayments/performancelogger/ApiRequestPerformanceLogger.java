@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.performancelogger;
 
-import io.micrometer.tracing.Tracer;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,22 +14,17 @@ import java.util.Optional;
  * It will execute {@link PerformanceLogger} on each Api request
  */
 @Service
-@Order(-101) // Set in order to be executed after ServerHttpObservationFilter (which will handle traceId): configured through properties management.observations.http.server.filter.order
+@Order(-101)
+// Set in order to be executed after ServerHttpObservationFilter (which will handle traceId): configured through properties management.observations.http.server.filter.order
 public class ApiRequestPerformanceLogger implements Filter {
 
-  private static final List<String> blackListPathPrefixList = List.of(
+    private static final List<String> blackListPathPrefixList = List.of(
             "/actuator",
             "/favicon.ico",
             "/swagger"
     );
 
-  private final Tracer tracer;
-
-  public ApiRequestPerformanceLogger(Tracer tracer) {
-    this.tracer = tracer;
-  }
-
-  @Override
+    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
         if (servletRequest instanceof HttpServletRequest httpServletRequest &&
                 servletResponse instanceof HttpServletResponse httpServletResponse &&
@@ -57,18 +51,17 @@ public class ApiRequestPerformanceLogger implements Filter {
     }
 
     private String getRequestDetails(HttpServletRequest request) {
-      String parentAppTag = Optional.ofNullable(request.getHeader("X-app-name"))
-        .map(n -> "][parentApp=" + n)
-        .orElse("");
+        String parentAppTag = Optional.ofNullable(request.getHeader(RestInvokePerformanceLogger.REST_INVOKE_HEADER_APP_NAME))
+                .map(n -> "][parentApp=" + n)
+                .orElse("");
 
-      String parentSpanIdTag = Optional.ofNullable(tracer.currentSpan())
-        .map(span -> span.context().parentId())
-        .map(n -> "][parentId=" + n)
-        .orElse("");
+        String parentSpanIdTag = Optional.ofNullable(request.getHeader(RestInvokePerformanceLogger.REST_INVOKE_HEADER_CORRELATION_ID))
+                .map(n -> "][parentId=" + n)
+                .orElse("");
 
-      return "%s %s%s%s".formatted(
-        request.getMethod(), request.getRequestURI(),
-        parentAppTag,
-        parentSpanIdTag);
+        return "%s %s%s%s".formatted(
+                request.getMethod(), request.getRequestURI(),
+                parentAppTag,
+                parentSpanIdTag);
     }
 }

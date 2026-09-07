@@ -82,6 +82,7 @@ class RestInvokePerformanceLoggerTest {
         // Then
         PerformanceLoggerTest.assertPerformanceLogMessage(APPENDER_NAME, "GET /api/test]\\[spanId=" + spanId, "HttpStatus: 200", memoryAppender);
         Assertions.assertEquals("APPNAME", headers.getFirst(RestInvokePerformanceLogger.REST_INVOKE_HEADER_APP_NAME));
+        Assertions.assertEquals(spanId, headers.getFirst(RestInvokePerformanceLogger.REST_INVOKE_HEADER_CORRELATION_ID));
 
         Assertions.assertSame(expectedResult, result);
     }

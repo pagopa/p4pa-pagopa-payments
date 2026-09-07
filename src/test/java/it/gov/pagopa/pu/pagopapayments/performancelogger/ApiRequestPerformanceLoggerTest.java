@@ -1,7 +1,5 @@
 package it.gov.pagopa.pu.pagopapayments.performancelogger;
 
-import io.micrometer.tracing.Span;
-import io.micrometer.tracing.Tracer;
 import it.gov.pagopa.pu.pagopapayments.util.MemoryAppender;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,7 +12,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,8 +28,6 @@ class ApiRequestPerformanceLoggerTest {
     private ServletResponse httpServletResponseMock;
     @Mock
     private FilterChain filterChainMock;
-    @Mock
-    private Tracer tracerMock;
 
     private MemoryAppender memoryAppender;
 
@@ -42,7 +37,7 @@ class ApiRequestPerformanceLoggerTest {
     void init() {
         httpServletRequestMock = mock(HttpServletRequest.class);
         httpServletResponseMock = mock(HttpServletResponse.class);
-        filter = new ApiRequestPerformanceLogger(tracerMock);
+        filter = new ApiRequestPerformanceLogger();
 
         this.memoryAppender = PerformanceLoggerTest.buildPerformanceLoggerMemoryAppender(APPENDER_NAME);
     }
@@ -55,8 +50,7 @@ class ApiRequestPerformanceLoggerTest {
         Mockito.verifyNoMoreInteractions(
                 httpServletRequestMock,
                 httpServletResponseMock,
-                filterChainMock,
-                tracerMock
+                filterChainMock
         );
     }
 
@@ -102,7 +96,8 @@ class ApiRequestPerformanceLoggerTest {
         configureRequestPath("/api/test");
         when(((HttpServletRequest)httpServletRequestMock).getHeader(RestInvokePerformanceLogger.REST_INVOKE_HEADER_APP_NAME))
                 .thenReturn(null);
-        when(tracerMock.currentSpan()).thenReturn(null);
+        when(((HttpServletRequest)httpServletRequestMock).getHeader(RestInvokePerformanceLogger.REST_INVOKE_HEADER_CORRELATION_ID))
+                .thenReturn(null);
 
         // When
         filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);
@@ -125,9 +120,8 @@ class ApiRequestPerformanceLoggerTest {
 
         when(((HttpServletRequest)httpServletRequestMock).getHeader(RestInvokePerformanceLogger.REST_INVOKE_HEADER_APP_NAME))
                 .thenReturn("RESTINVOKEAPPNAME");
-        Span spanMock = mock(Span.class,  Answers.RETURNS_DEEP_STUBS);
-        when(tracerMock.currentSpan()).thenReturn(spanMock);
-        when(spanMock.context().parentId()).thenReturn("PARENTSPANID");
+        when(((HttpServletRequest)httpServletRequestMock).getHeader(RestInvokePerformanceLogger.REST_INVOKE_HEADER_CORRELATION_ID))
+                .thenReturn("PARENTSPANID");
 
         // When
         filter.doFilter(httpServletRequestMock, httpServletResponseMock, filterChainMock);

@@ -33,13 +33,17 @@ env:
   # branch choosed by workflow_dispatch or by push event
   CURRENT_BRANCH: ${{ github.event.inputs.branch || github.ref_name }}
 
+permissions:
+  packages: write
+  contents: read
+
 jobs:
   checkout:
     name: 🔖 Checkout Repository
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
         with:
           ref: ${{ env.CURRENT_BRANCH }}
 
@@ -50,7 +54,7 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event.inputs.docker_build_enabled == 'true' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
         with:
           ref: ${{ env.CURRENT_BRANCH }}
 
@@ -70,8 +74,8 @@ jobs:
       github.event.inputs.azdo_trigger_enabled == 'true'
     steps:
       - name: Trigger Azure DevOps Pipeline
-        # https://github.com/pagopa/github-actions-template/releases/tag/v2.1.0
-        uses: pagopa/github-actions-template/azure-devops-trigger-pipeline@cad30356d9046af6e7b0cee43db4cf919cc408f9
+        # https://github.com/pagopa/github-actions-template/releases/tag/v2.6.1
+        uses: pagopa/github-actions-template/azure-devops-trigger-pipeline@8e05805024deadaacb52fc78c5a52293215841dc
         with:
           enable_azure_devops_step: 'true'
           azure_devops_project_url: 'https://dev.azure.com/pagopaspa/p4pa-projects'

@@ -1,8 +1,6 @@
 package it.gov.pagopa.pu.pagopapayments.connector.organization;
 
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
+import it.gov.pagopa.pu.organization.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.client.OrganizationClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,17 +60,20 @@ class OrganizationServiceTest {
     // Given
     Long organizationId = 1L;
     String accessToken = "accessToken";
-    String apiKey = "apiKey";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+    organizationApiKeys.setKeyType(KeyTypeEnum.SEND);
+
     String subUnitCode = "CODE";
 
     Mockito.when(client.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode, accessToken))
-      .thenReturn(apiKey);
+      .thenReturn(organizationApiKeys);
 
     // When
-    String result = service.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode, accessToken);
+    OrganizationApiKeys result = service.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode, accessToken);
 
     // Then
-    Assertions.assertSame(apiKey, result);
+    Assertions.assertSame(organizationApiKeys, result);
   }
 
   @Test

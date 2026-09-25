@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
 import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeNotFoundException;
@@ -38,8 +39,8 @@ public class OrganizationClient {
     }
   }
 
-  public String getOrganizationApiKey(Long organizationId,
-    OrganizationApiKeyType organizationApiKeyType, String subUnitCode, String accessToken) {
+  public OrganizationApiKeys getOrganizationApiKey(Long organizationId,
+                                                   OrganizationApiKeyType organizationApiKeyType, String subUnitCode, String accessToken) {
     try{
       return apisHolder.getOrganizationApi(accessToken)
         .getOrganizationApiKey(organizationId, organizationApiKeyType, subUnitCode);

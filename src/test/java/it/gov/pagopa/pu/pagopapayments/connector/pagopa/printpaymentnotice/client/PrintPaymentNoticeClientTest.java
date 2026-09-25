@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.client;
 
+import it.gov.pagopa.pu.organization.dto.generated.KeyTypeEnum;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config.PagopaPrintPaymentNoticeApisHolder;
 import it.gov.pagopa.nodo.printpaymentnotice.client.generated.NoticeGenerationRequestApisApi;
@@ -52,12 +54,15 @@ class PrintPaymentNoticeClientTest {
     requestDTO.setTemplateId("TemplateSingleInstalment");
 
     Long organizationId = 1L;
-    String apiKey = "apiKey";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+    organizationApiKeys.setKeyType(KeyTypeEnum.GENERATE_NOTICE);
+
     byte[] response = "PDF-DATA".getBytes();
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, null, VALID_ACCESS_TOKEN))
-      .thenReturn(apiKey);
-    Mockito.when(apisHolder.getNoticeGenerationRequestApi(apiKey))
+      .thenReturn(organizationApiKeys);
+    Mockito.when(apisHolder.getNoticeGenerationRequestApi(organizationApiKeys.getApiKey()))
       .thenReturn(noticeGenerationRequestApisApiMock);
     Mockito.when(noticeGenerationRequestApisApiMock.generateNotice(requestDTO, null, null))
       .thenReturn(response);
@@ -73,15 +78,18 @@ class PrintPaymentNoticeClientTest {
   void givenValidRequestWhenGenerateNoticeMassiveThenVerifyResponse() {
     // Given
     Long organizationId = 1L;
-    String apiKey = "apiKey";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+    organizationApiKeys.setKeyType(KeyTypeEnum.GENERATE_NOTICE);
+
     NoticeGenerationMassiveRequestDTO noticeMassive = new NoticeGenerationMassiveRequestDTO();
     NoticeGenerationMassiveResourceDTO expectedResult = new NoticeGenerationMassiveResourceDTO();
     expectedResult.setFolderId("123");
     String idempotenceKey = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, null, VALID_ACCESS_TOKEN))
-      .thenReturn(apiKey);
-    Mockito.when(apisHolder.getNoticeGenerationRequestApi(apiKey))
+      .thenReturn(organizationApiKeys);
+    Mockito.when(apisHolder.getNoticeGenerationRequestApi(organizationApiKeys.getApiKey()))
       .thenReturn(noticeGenerationRequestApisApiMock);
     Mockito.when(noticeGenerationRequestApisApiMock.generateNoticeMassiveRequest(idempotenceKey, noticeMassive, null))
       .thenReturn(expectedResult);
@@ -97,13 +105,16 @@ class PrintPaymentNoticeClientTest {
   void givenValidRequestWhenGetFolderStatusThenVerifyResponse() {
     // Given
     Long organizationId = 1L;
-    String apiKey = "apiKey";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+    organizationApiKeys.setKeyType(KeyTypeEnum.GENERATE_NOTICE);
+
     GetGenerationRequestStatusResourceDTO expectedResult = new GetGenerationRequestStatusResourceDTO();
     String folderId = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, null, VALID_ACCESS_TOKEN))
-      .thenReturn(apiKey);
-    Mockito.when(apisHolder.getNoticeGenerationRequestApi(apiKey))
+      .thenReturn(organizationApiKeys);
+    Mockito.when(apisHolder.getNoticeGenerationRequestApi(organizationApiKeys.getApiKey()))
       .thenReturn(noticeGenerationRequestApisApiMock);
     Mockito.when(noticeGenerationRequestApisApiMock.getFolderStatus(folderId, null))
       .thenReturn(expectedResult);
@@ -119,13 +130,16 @@ class PrintPaymentNoticeClientTest {
   void givenValidRequestWhenGetFolderSignedUrlResourceThenVerifyResponse() {
     // Given
     Long organizationId = 1L;
-    String apiKey = "apiKey";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+    organizationApiKeys.setKeyType(KeyTypeEnum.SEND);
+
     GetSignedUrlResourceDTO expectedResult = new GetSignedUrlResourceDTO();
     String folderId = "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454";
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, null, VALID_ACCESS_TOKEN))
-      .thenReturn(apiKey);
-    Mockito.when(apisHolder.getNoticeGenerationRequestApi(apiKey))
+      .thenReturn(organizationApiKeys);
+    Mockito.when(apisHolder.getNoticeGenerationRequestApi(organizationApiKeys.getApiKey()))
       .thenReturn(noticeGenerationRequestApisApiMock);
     Mockito.when(noticeGenerationRequestApisApiMock.getFolderSignedUrlResource(folderId, null))
       .thenReturn(expectedResult);

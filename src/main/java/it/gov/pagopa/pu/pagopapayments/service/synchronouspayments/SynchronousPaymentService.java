@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.*;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
@@ -141,13 +142,13 @@ public class SynchronousPaymentService {
   }
 
   private ActualizeAmountRequestDTO retrieveNotificationFeeCentsFromSend(Long organizationId, String nav, String accessToken) {
-    String sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null, accessToken);
+    OrganizationApiKeys sendAPIKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null, accessToken);
     ActualizeAmountRequestDTO amountRequest = new ActualizeAmountRequestDTO();
     amountRequest.setOrganizationId(organizationId);
     amountRequest.setNav(nav);
     amountRequest.setActualizedFromPuSil(false);
     amountRequest.setNewFeeCents(0L);
-    if(sendAPIKey!=null && !sendAPIKey.isEmpty()){
+    if(sendAPIKey!=null && Boolean.TRUE.equals(sendAPIKey.getServiceEnabled())){
       try{
         NotificationPriceResponseV23DTO notificationPrice = sendNotificationService.retrieveNotificationPrice(organizationId, nav, accessToken);
         log.debug("Retrieve notification price from SEND by organizationId {} and nav {} with result: {}", organizationId, nav, notificationPrice);

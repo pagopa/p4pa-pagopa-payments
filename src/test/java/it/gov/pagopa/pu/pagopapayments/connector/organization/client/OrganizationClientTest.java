@@ -3,9 +3,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.organization.client;
 import it.gov.pagopa.pu.organization.client.generated.OrganizationApi;
 import it.gov.pagopa.pu.organization.client.generated.OrganizationEntityControllerApi;
 import it.gov.pagopa.pu.organization.client.generated.OrganizationSearchControllerApi;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
+import it.gov.pagopa.pu.organization.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.config.OrganizationApisHolder;
 import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeNotFoundException;
 import org.junit.jupiter.api.AfterEach;
@@ -129,19 +127,21 @@ class OrganizationClientTest {
     // Given
     Long organizationId = 1L;
     String accessToken = "ACCESSTOKEN";
-    String apiKey = "apiKey";
     String subUnitCode = "CODE";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+    organizationApiKeys.setKeyType(KeyTypeEnum.SEND);
 
     when(organizationApisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
     when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode))
-      .thenReturn(apiKey);
+      .thenReturn(organizationApiKeys);
 
     // When
-    String result = organizationClient.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode, accessToken);
+    OrganizationApiKeys result = organizationClient.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode, accessToken);
 
     // Then
-    assertSame(apiKey, result);
+    assertSame(organizationApiKeys, result);
   }
 
   @Test
@@ -157,7 +157,7 @@ class OrganizationClientTest {
       .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
-    String result = organizationClient.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode, accessToken);
+    OrganizationApiKeys result = organizationClient.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode, accessToken);
 
     // Then
     assertNull(result);

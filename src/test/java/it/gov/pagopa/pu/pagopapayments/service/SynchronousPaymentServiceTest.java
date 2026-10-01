@@ -4,9 +4,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.ActualizeAmountRequestDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionTypeOrg;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.TransferDTO;
-import it.gov.pagopa.pu.organization.dto.generated.Broker;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.*;
 import it.gov.pagopa.pu.pagopapayments.connector.auth.AuthnService;
 import it.gov.pagopa.pu.pagopapayments.connector.debtpositions.DebtPositionService;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
@@ -123,7 +121,10 @@ class SynchronousPaymentServiceTest {
     int notificationFeeCents = 100;
     NotificationPriceResponseV23DTO notificationPriceResponse = new NotificationPriceResponseV23DTO();
     notificationPriceResponse.setTotalPrice(notificationFeeCents);
-    String apiKey = "API_KEY";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+    organizationApiKeys.setKeyType(KeyTypeEnum.SEND);
+    organizationApiKeys.serviceEnabled(true);
 
     ActualizeAmountRequestDTO request = ActualizeAmountRequestDTO.builder()
       .organizationId(organization.getOrganizationId())
@@ -136,7 +137,7 @@ class SynchronousPaymentServiceTest {
     Mockito.when(paForNodeRequestValidatorServiceMock.paForNodeRequestValidate(retrievePaymentDTO, VALID_ACCEESS_TOKEN))
       .thenReturn(Pair.of(broker, organization));
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organization.getOrganizationId(), OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN))
-      .thenReturn(apiKey);
+      .thenReturn(organizationApiKeys);
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(
         organization.getOrganizationId(),
         retrievePaymentDTO.getNoticeNumber(),
@@ -371,7 +372,10 @@ class SynchronousPaymentServiceTest {
   void givenApiKeyIsPresentWhenRetrieveNotificationFeeThenReturnNotificationPrice() {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
-    String apiKey = "API-KEY";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+    organizationApiKeys.setKeyType(KeyTypeEnum.SEND);
+    organizationApiKeys.serviceEnabled(true);
     Long orgId = organization.getOrganizationId();
 
     ActualizeAmountRequestDTO expectedRequest = ActualizeAmountRequestDTO.builder()
@@ -383,7 +387,7 @@ class SynchronousPaymentServiceTest {
 
     NotificationPriceResponseV23DTO mockResponse = Mockito.mock(NotificationPriceResponseV23DTO.class);
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN)).thenReturn(organizationApiKeys);
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(orgId, nav, VALID_ACCEESS_TOKEN)).thenReturn(mockResponse);
     Mockito.when(mockResponse.getTotalPrice()).thenReturn(Math.toIntExact(expectedRequest.getNewFeeCents()));
 
@@ -397,7 +401,6 @@ class SynchronousPaymentServiceTest {
   void givenApiKeyAbsentWhenRetrieveNotificationFeeThenReturnNotificationPrice() {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
-    String emptyApiKey = "";
     Long orgId = organization.getOrganizationId();
 
     ActualizeAmountRequestDTO expectedResult = ActualizeAmountRequestDTO.builder()
@@ -407,7 +410,7 @@ class SynchronousPaymentServiceTest {
       .actualizedFromPuSil(false)
       .build();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN)).thenReturn(emptyApiKey);
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN)).thenReturn(null);
 
     ActualizeAmountRequestDTO result = synchronousPaymentService.retrieveNotificationFeeCents(organization, nav, VALID_ACCEESS_TOKEN);
 
@@ -418,7 +421,10 @@ class SynchronousPaymentServiceTest {
   void givenApiKeyIsPresentWhenRetrieveNotificationPriceThrowsExceptionThenReturnZero() {
     Organization organization = podamFactory.manufacturePojo(Organization.class);
     String nav = "NAV";
-    String apiKey = "API-KEY";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+    organizationApiKeys.setKeyType(KeyTypeEnum.SEND);
+    organizationApiKeys.serviceEnabled(true);
     Long orgId = organization.getOrganizationId();
 
     ActualizeAmountRequestDTO expectedResult= ActualizeAmountRequestDTO.builder()
@@ -428,7 +434,7 @@ class SynchronousPaymentServiceTest {
       .actualizedFromPuSil(false)
       .build();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN)).thenReturn(apiKey);
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(orgId, OrganizationApiKeyType.SEND, null, VALID_ACCEESS_TOKEN)).thenReturn(organizationApiKeys);
     Mockito.when(sendNotificationServiceMock.retrieveNotificationPrice(orgId, nav, VALID_ACCEESS_TOKEN))
       .thenThrow(new RuntimeException("Not Found"));
 

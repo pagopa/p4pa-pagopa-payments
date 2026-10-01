@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.pagopapayments.connector.organization;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.client.OrganizationClient;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class OrganizationServiceImpl implements OrganizationService {
   }
 
   @Override
-  public String getOrganizationApiKey(Long organizationId, OrganizationApiKeyType organizationApiKeyType, String subUnitCode, String accessToken) {
+  public OrganizationApiKeys getOrganizationApiKey(Long organizationId, OrganizationApiKeyType organizationApiKeyType, String subUnitCode, String accessToken) {
     return organizationClient.getOrganizationApiKey(organizationId, organizationApiKeyType, subUnitCode, accessToken);
   }
 

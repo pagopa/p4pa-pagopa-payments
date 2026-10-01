@@ -12,7 +12,7 @@
 </tr>
 <tr>
 <td><a href='https://github.com/yawkat/lz4-java'>at.yawk.lz4:lz4-java</a></td>
-<td>1.11.2</td>
+<td>1.12.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -32,7 +32,7 @@
 </tr>
 <tr>
 <td><a href='https://github.com/FasterXML/jackson-bom'>com.fasterxml.jackson:jackson-bom</a></td>
-<td>2.21.5</td>
+<td>2.22.3</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -47,7 +47,7 @@
 </tr>
 <tr>
 <td><a href='https://github.com/FasterXML/jackson'>com.fasterxml.jackson.core:jackson-databind</a></td>
-<td>2.21.5</td>
+<td>2.22.3</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -62,7 +62,7 @@
 </tr>
 <tr>
 <td><a href='https://github.com/ben-manes/caffeine'>com.github.ben-manes.caffeine:caffeine</a></td>
-<td>3.2.4</td>
+<td>3.3.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -77,7 +77,7 @@
 </tr>
 <tr>
 <td><a href='https://errorprone.info/error_prone_annotations'>com.google.errorprone:error_prone_annotations</a></td>
-<td>2.49.0</td>
+<td>2.50.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -312,17 +312,17 @@
 </tr>
 <tr>
 <td><a href='https://github.com/swagger-api/swagger-core/modules/swagger-annotations'>io.swagger.core.v3:swagger-annotations-jakarta</a></td>
-<td>2.2.52</td>
+<td>2.2.55</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td><a href='https://github.com/swagger-api/swagger-core/modules/swagger-core'>io.swagger.core.v3:swagger-core-jakarta</a></td>
-<td>2.2.52</td>
+<td>2.2.55</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td><a href='https://github.com/swagger-api/swagger-core/modules/swagger-models'>io.swagger.core.v3:swagger-models-jakarta</a></td>
-<td>2.2.52</td>
+<td>2.2.55</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -372,12 +372,12 @@
 </tr>
 <tr>
 <td>org.apache.httpcomponents.core5:httpcore5</td>
-<td>5.4.3</td>
+<td>5.4.4</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td>org.apache.httpcomponents.core5:httpcore5-h2</td>
-<td>5.4.3</td>
+<td>5.4.4</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -402,7 +402,7 @@
 </tr>
 <tr>
 <td><a href='https://tomcat.apache.org/'>org.apache.tomcat.embed:tomcat-embed-core</a></td>
-<td>11.0.25</td>
+<td>11.0.26</td>
 <td><a href='https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt'>EPL-2.0</a></td>
 </tr>
 <tr>
@@ -422,7 +422,7 @@
 </tr>
 <tr>
 <td><a href='https://www.bouncycastle.org/download/bouncy-castle-java/'>org.bouncycastle:bcprov-jdk18on</a></td>
-<td>1.85.2</td>
+<td>1.86</td>
 <td><a href='https://www.bouncycastle.org/licence.html'>MIT</a></td>
 </tr>
 <tr>
@@ -517,17 +517,17 @@
 </tr>
 <tr>
 <td>org.springdoc:springdoc-openapi-starter-common</td>
-<td>3.1.0</td>
+<td>3.1.1</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td>org.springdoc:springdoc-openapi-starter-webmvc-api</td>
-<td>3.1.0</td>
+<td>3.1.1</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td>org.springdoc:springdoc-openapi-starter-webmvc-ui</td>
-<td>3.1.0</td>
+<td>3.1.1</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -902,7 +902,7 @@
 </tr>
 <tr>
 <td><a href='https://www.webjars.org'>org.webjars:swagger-ui</a></td>
-<td>5.32.11</td>
+<td>5.32.14</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -922,7 +922,7 @@
 </tr>
 <tr>
 <td><a href='https://github.com/FasterXML/jackson-bom'>tools.jackson:jackson-bom</a></td>
-<td>3.1.5</td>
+<td>3.1.7</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -932,7 +932,7 @@
 </tr>
 <tr>
 <td><a href='https://github.com/FasterXML/jackson'>tools.jackson.core:jackson-databind</a></td>
-<td>3.1.5</td>
+<td>3.1.7</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>

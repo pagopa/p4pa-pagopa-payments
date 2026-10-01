@@ -1,11 +1,11 @@
 package it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.pagopapayments.connector.organization.OrganizationService;
 import it.gov.pagopa.pu.pagopapayments.connector.pagopa.printpaymentnotice.config.PagopaPrintPaymentNoticeApisHolder;
 import it.gov.pagopa.nodo.printpaymentnotice.dto.generated.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 @Service
 public class PrintPaymentNoticeClient {
@@ -19,11 +19,11 @@ public class PrintPaymentNoticeClient {
   }
 
   private String getApiKeyFromOrganizationOrBroker(Long organizationId, String accessToken) {
-    String orgOrBrokerApiKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, null, accessToken);
-    if(!StringUtils.hasText(orgOrBrokerApiKey)){
+    OrganizationApiKeys orgOrBrokerApiKey = organizationService.getOrganizationApiKey(organizationId, OrganizationApiKeyType.GENERATE_NOTICE, null, accessToken);
+    if(orgOrBrokerApiKey==null || Boolean.FALSE.equals(orgOrBrokerApiKey.getServiceEnabled())){
       throw new IllegalStateException("Organization " + organizationId + " has not GENERATE_NOTICE apiKey configured!");
     }
-    return orgOrBrokerApiKey;
+    return orgOrBrokerApiKey.getApiKey();
   }
 
   public byte[] generateNotice(Long organizationId, NoticeGenerationRequestItemDTO noticeGenerationRequestItemDTO, String accessToken) {

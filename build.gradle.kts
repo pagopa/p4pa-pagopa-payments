@@ -57,6 +57,8 @@ val micrometerVersion = "1.7.1"
 val bouncycastleVersion = "1.86"
 val jaxbVersion = "4.0.9"
 val jaxbApiVersion = "4.0.5"
+val jaxbPluginAnnotateVersion = "3.0.2"
+val slf4jSimpleVersion = "2.0.16"
 val activationVersion = "2.1.4"
 val xmlSchemaVersion = "2.3.2"
 val podamVersion = "8.0.2.RELEASE"
@@ -132,8 +134,8 @@ dependencies {
   jaxb("com.sun.xml.bind:jaxb-core:$jaxbVersion")
   jaxb("jakarta.xml.bind:jakarta.xml.bind-api:$jaxbApiVersion")
   jaxb("jakarta.activation:jakarta.activation-api:$activationVersion")
-  jaxbext("org.jvnet.jaxb:jaxb-plugin-annotate:3.0.2")
-  jaxbext("org.slf4j:slf4j-simple:2.0.16") // see https://github.com/IntershopCommunicationsAG/jaxb-gradle-plugin/issues/37
+  jaxbext("org.jvnet.jaxb:jaxb-plugin-annotate:$jaxbPluginAnnotateVersion")
+  jaxbext("org.slf4j:slf4j-simple:$slf4jSimpleVersion") // see https://github.com/IntershopCommunicationsAG/jaxb-gradle-plugin/issues/37
 
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")

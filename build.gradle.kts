@@ -9,11 +9,11 @@ plugins {
   id("org.springframework.boot") version "4.1.1"
   id("io.spring.dependency-management") version "1.1.7"
   jacoco
-  id("org.sonarqube") version "7.4.0.8496"
-  id("org.openapi.generator") version "7.25.0"
-  id("org.ajoberstar.grgit") version "5.3.2"
+  id("org.sonarqube") version "7.5.0.8588"
+  id("org.openapi.generator") version "7.26.0"
+  id("org.ajoberstar.grgit") version "5.3.3"
   //code generation for soap webservices classes (via jaxb)
-  id("com.intershop.gradle.jaxb") version "8.0.1"
+  id("com.intershop.gradle.jaxb") version "9.0.0"
   id("com.gorylenko.gradle-git-properties") version "4.0.1"
   id("com.github.jk1.dependency-license-report") version "3.1.4"
 }
@@ -52,31 +52,32 @@ repositories {
 }
 
 val springDocOpenApiVersion = "3.1.1"
-val openApiToolsVersion = "0.2.11"
+val openApiToolsVersion = "0.2.12"
 val micrometerVersion = "1.7.1"
 val bouncycastleVersion = "1.86"
 val jaxbVersion = "4.0.9"
 val jaxbApiVersion = "4.0.5"
-val jaxbPluginAnnotateVersion = "3.0.2"
-val slf4jSimpleVersion = "2.0.16"
+val jaxbPluginAnnotateVersion = "4.0.16"
+val slf4jSimpleVersion = "2.0.20"
 val activationVersion = "2.1.4"
-val xmlSchemaVersion = "2.3.2"
+val xmlSchemaVersion = "2.3.3"
 val podamVersion = "8.0.2.RELEASE"
-val caffeineVersion = "3.3.0"
-val httpClientVersion = "5.6.4"
+val caffeineVersion = "3.3.1"
+val httpClientVersion = "5.6.5"
 val httpCoreVersion = "5.4.4"
 val kafkaAppender = "0.2.0-RC2"
 val lz4JavaVersion = "1.12.0"
-val springWolfAsyncApiVersion = "1.21.0"
-val springWolfUiAsyncApiVersion = "1.21.0"
-val commonsLang3Version = "3.20.0"
+val springWolfAsyncApiVersion = "2.8.0"
+val springWolfUiAsyncApiVersion = "2.8.0"
+val commonsLang3Version = "3.21.0"
 
 val springCloudDepsVersion = "2025.1.3"
 
 // CVE Security dependencies
 val tomcatEmbedCoreVersion = "11.0.26"
-val jackson2DatabindVersion = "2.22.3"
-val jackson3DatabindVersion = "3.1.7"
+val jackson2BomVersion = "2.22.3"
+val jackson2AnnotationsVersion = "2.22"
+val jackson3BomVersion = "3.2.3"
 
 dependencyManagement {
   imports {
@@ -102,6 +103,7 @@ dependencies {
   implementation("io.micrometer:micrometer-registry-prometheus")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion") {
     exclude(group = "org.apache.commons", module = "commons-lang3")
+      exclude(group = "tools.jackson.core", module = "jackson-core")
   }
   implementation("org.apache.commons:commons-lang3:$commonsLang3Version")
   implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
@@ -121,8 +123,6 @@ dependencies {
 
   // CVE Security dependencies
   implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion")
-  implementation("com.fasterxml.jackson.core:jackson-databind:$jackson2DatabindVersion")
-  implementation("tools.jackson.core:jackson-databind:$jackson3DatabindVersion")
 
   //webservice soap
   implementation("org.apache.ws.xmlschema:xmlschema-core:$xmlSchemaVersion")
@@ -136,6 +136,13 @@ dependencies {
   jaxb("jakarta.activation:jakarta.activation-api:$activationVersion")
   jaxbext("org.jvnet.jaxb:jaxb-plugin-annotate:$jaxbPluginAnnotateVersion")
   jaxbext("org.slf4j:slf4j-simple:$slf4jSimpleVersion") // see https://github.com/IntershopCommunicationsAG/jaxb-gradle-plugin/issues/37
+  implementation(platform("com.fasterxml.jackson:jackson-bom:$jackson2BomVersion"))
+  implementation("com.fasterxml.jackson.core:jackson-core:$jackson2BomVersion")
+  implementation("com.fasterxml.jackson.core:jackson-databind:$jackson2BomVersion")
+  implementation("com.fasterxml.jackson.core:jackson-annotations:$jackson2AnnotationsVersion")
+  implementation(platform("tools.jackson:jackson-bom:$jackson3BomVersion"))
+  implementation("tools.jackson.core:jackson-core:$jackson3BomVersion")
+  implementation("tools.jackson.core:jackson-databind:$jackson3BomVersion")
 
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")

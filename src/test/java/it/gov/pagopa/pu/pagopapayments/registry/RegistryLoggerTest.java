@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaSendRTV2Request;
 import it.gov.pagopa.pagopa_api.pa.pafornode.PaSendRTV2Response;
 import it.gov.pagopa.pu.pagopapayments.event.producer.RegistryProducerService;
+import it.gov.pagopa.pu.pagopapayments.exception.common.RestInvokeForbiddenException;
 import it.gov.pagopa.pu.pagopapayments.service.JAXBTransformService;
 import it.gov.pagopa.pu.pagopapayments.util.TestUtils;
 import it.gov.pagopa.pu.registries.dto.generated.RegistryEventCategory;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestClientResponseException;
 import uk.co.jemos.podam.api.PodamFactory;
 
@@ -768,6 +770,51 @@ public class RegistryLoggerTest {
         "status", 500,
         "body", body
         ));
+  }
+
+  @Test
+  void testExecuteWithException_noExceptionHandler_RestInvokeException() throws JsonProcessingException {
+    // Given
+    RegistryContextData contextData = buildRegistryContextData(RegistryEventType.PaForNode_paSendRTV2);
+
+    String requestPayload = "REQUESTPAYLOAD";
+    Object request = new Object();
+
+    when(objectMapperMock.writeValueAsString(same(request))).thenReturn(requestPayload);
+
+    String body = "BODY";
+    RestInvokeForbiddenException expectedException = new RestInvokeForbiddenException("APPNAME", HttpStatus.FORBIDDEN, null, null, null, body);
+    // When
+    RestInvokeForbiddenException exception = Assertions.assertThrows(RestInvokeForbiddenException.class, () -> registryLogger.execute(
+      contextData, request,
+      () -> {
+        throw expectedException;
+      },
+      null));
+
+    // Then
+    assertSame(expectedException, exception);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.REQ,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.NODE_ID,
+      RegistryLogger.PU_ID,
+      RegistryOutcome.OK,
+      requestPayload);
+
+    verify(registryProducerServiceMock).notifyPagoPaEvent(
+      contextData,
+      RegistryEventSubType.RESP,
+      RegistryEventCategory.INTERFACCIA,
+      RegistryLogger.PU_ID,
+      RegistryLogger.NODE_ID,
+      RegistryOutcome.KO,
+      Map.of(
+        "status", 403,
+        "body", body
+      ));
   }
 
   @Test

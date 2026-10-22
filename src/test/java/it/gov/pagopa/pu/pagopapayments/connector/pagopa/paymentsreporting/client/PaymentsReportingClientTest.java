@@ -298,7 +298,7 @@ class PaymentsReportingClientTest {
         Mockito.anyLong(),
         Mockito.isNull(), Mockito.isNull(), Mockito.isNull()
       )
-    ).thenThrow(new RestInvokeInvalidValueException("APPNAME", HttpStatus.BAD_REQUEST, "ERROR", errorResponse.getAppErrorCode(), "ERRORMESSAGE", null));
+    ).thenThrow(new RestInvokeInvalidValueException("APPNAME", HttpStatus.BAD_REQUEST, "ERROR", errorResponse.getAppErrorCode(), "ERRORMESSAGE", null, "BODY"));
 
     //when
     List<FlowByPSP> actualResult = paymentsReportingClient.fetchIdList(brokerForNodoPaDTO, latestFlowDate);
@@ -344,7 +344,7 @@ class PaymentsReportingClientTest {
         Mockito.anyLong(),
         Mockito.isNull(), Mockito.isNull(), Mockito.isNull()
       )
-    ).thenThrow(new RestInvokeInvalidValueException("APPNAME", HttpStatus.BAD_REQUEST, "ERROR", errorResponse.getAppErrorCode(), "ERRORMESSAGE", null));
+    ).thenThrow(new RestInvokeInvalidValueException("APPNAME", HttpStatus.BAD_REQUEST, "ERROR", errorResponse.getAppErrorCode(), "ERRORMESSAGE", null, "BODY"));
 
     //when
     Assertions.assertThrows(

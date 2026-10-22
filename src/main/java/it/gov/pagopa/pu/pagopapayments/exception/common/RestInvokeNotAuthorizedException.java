@@ -10,11 +10,13 @@ public class RestInvokeNotAuthorizedException extends NotAuthorizedException imp
   private final String applicationName;
   private final HttpStatus httpStatus;
   private final String category;
+  private final String body;
 
-  public RestInvokeNotAuthorizedException(String applicationName, HttpStatus httpStatus, String category, String code, String message) {
+  public RestInvokeNotAuthorizedException(String applicationName, HttpStatus httpStatus, String category, String code, String message, String body) {
     super(code, message);
     this.applicationName = applicationName;
     this.httpStatus = httpStatus;
     this.category = category;
+    this.body = body;
   }
 }

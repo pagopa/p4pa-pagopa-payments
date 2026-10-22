@@ -13,11 +13,13 @@ public class RestInvokeInvalidValueException extends InvalidValueException imple
   private final String applicationName;
   private final HttpStatus httpStatus;
   private final String category;
+  private final String body;
 
-  public RestInvokeInvalidValueException(String applicationName, HttpStatus httpStatus, String category, String code, String message, List<ErrorFieldDTO> fields) {
+  public RestInvokeInvalidValueException(String applicationName, HttpStatus httpStatus, String category, String code, String message, List<ErrorFieldDTO> fields, String body) {
     super(code, message, fields);
     this.applicationName = applicationName;
     this.httpStatus = httpStatus;
     this.category = category;
+    this.body = body;
   }
 }

@@ -76,7 +76,7 @@ class BrokerEntityClientTest {
     when(organizationApisHolder.getBrokerApi(accessToken))
       .thenReturn(brokerApiMock);
     when(brokerApiMock.getBrokerApiKeys(brokerId))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     BrokerApiKeys result = brokerClient.getApiKeyByBrokerId(brokerId, accessToken);
@@ -113,7 +113,7 @@ class BrokerEntityClientTest {
     when(organizationApisHolder.getBrokerEntityControllerApi(accessToken))
       .thenReturn(brokerEntityControllerApiMock);
     when(brokerEntityControllerApiMock.crudGetBroker(brokerId.toString()))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     Broker result = brokerClient.getBrokerById(brokerId, accessToken);
@@ -150,7 +150,7 @@ class BrokerEntityClientTest {
     when(organizationApisHolder.getBrokerApi(accessToken))
       .thenReturn(brokerApiMock);
     when(brokerApiMock.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     String result = brokerClient.getBrokerApiKey(brokerId, BrokerApiKeyType.GENERATE_NOTICE, accessToken);
@@ -187,7 +187,7 @@ class BrokerEntityClientTest {
     when(organizationApisHolder.getBrokerSearchControllerApi(accessToken))
       .thenReturn(brokerSearchControllerApiMock);
     when(brokerSearchControllerApiMock.crudBrokersFindByBrokerFiscalCode(brokerFiscalCode))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     Broker result = brokerClient.getBrokerByBrokerFiscalCode(brokerFiscalCode, accessToken);

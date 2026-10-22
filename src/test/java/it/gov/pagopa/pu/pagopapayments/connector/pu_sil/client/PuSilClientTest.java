@@ -61,7 +61,7 @@ class PuSilClientTest {
 
     when(puSilApisHolderMock.getActualizationApi(accessToken)).thenReturn(actualizationApiMock);
     when(actualizationApiMock.actualize(orgSilServiceId, nav))
-      .thenThrow(new RestInvokeConflictException("APPNAME", HttpStatus.CONFLICT, "ERROR", "ERRORCODE", "ERRORMESSAGE", null));
+      .thenThrow(new RestInvokeConflictException("APPNAME", HttpStatus.CONFLICT, "ERROR", "ERRORCODE", "ERRORMESSAGE", null, "BODY"));
 
     // When Then
     Assertions.assertThrows(NotPayableSilActualizedAmountException.class,

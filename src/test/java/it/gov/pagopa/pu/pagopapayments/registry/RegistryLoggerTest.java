@@ -32,6 +32,7 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class RegistryLoggerTest {
@@ -678,7 +679,7 @@ public class RegistryLoggerTest {
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
       RegistryOutcome.KO,
-      Map.of("exceptionMessage", exceptionMessage));
+      Map.of("exceptionMessage", exceptionMessage, "exceptionClass", expectedException.getClass().getName()));
   }
 
   @Test
@@ -720,7 +721,7 @@ public class RegistryLoggerTest {
       RegistryLogger.PU_ID,
       RegistryLogger.NODE_ID,
       RegistryOutcome.KO,
-      Map.of("exceptionMessage", exceptionMessage));
+      Map.of("exceptionMessage", exceptionMessage, "exceptionClass", expectedException.getClass().getName()));
   }
 
   @Test
@@ -865,7 +866,7 @@ public class RegistryLoggerTest {
           : isNull()
       )).thenAnswer(answer);
     } else {
-      Mockito.when(registryLoggerMock.execute(
+      when(registryLoggerMock.execute(
         Mockito.eq(contextData),
         Mockito.same(request),
         Mockito.argThat(requestHandler),

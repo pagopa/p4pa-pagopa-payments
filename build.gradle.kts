@@ -119,6 +119,7 @@ dependencies {
   }
   implementation("io.github.springwolf:springwolf-ui:$springWolfUiAsyncApiVersion")
   implementation("io.github.springwolf:springwolf-cloud-stream:$springWolfAsyncApiVersion")
+  implementation("org.apache.ws.xmlschema:xmlschema-core:${xmlSchemaVersion}")
 
   // CVE Security dependencies
   implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion")
@@ -126,7 +127,6 @@ dependencies {
   implementation("tools.jackson.core:jackson-databind:$jackson3DatabindVersion")
 
   //webservice soap
-  implementation("org.apache.ws.xmlschema:xmlschema-core:$xmlSchemaVersion")
   runtimeOnly("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
   //jaxb
   jaxb("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")

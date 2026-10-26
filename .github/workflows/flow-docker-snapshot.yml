@@ -1,15 +1,16 @@
 name: 📦 Flow Snapshot Docker
 
 on:
-  push:
-    branches-ignore:
-      - 'develop'
-      - 'uat'
-      - 'main'
-    paths-ignore:
-      - 'CODEOWNERS'
-      - '**.md'
-      - '.**'
+  # no more interested in push event, we want to trigger the workflow only manually
+  #push:
+  #  branches-ignore:
+  #    - 'develop'
+  #    - 'uat'
+  #    - 'main'
+  #  paths-ignore:
+  #    - 'CODEOWNERS'
+  #    - '**.md'
+  #    - '.**'
   workflow_dispatch:
     inputs:
       docker_build_enabled:
@@ -25,7 +26,7 @@ on:
           required: false
           default: 'main'
       postman_branch:
-        description: postman branch name'
+        description: 'postman branch name'
         required: false
         default: 'develop'
 

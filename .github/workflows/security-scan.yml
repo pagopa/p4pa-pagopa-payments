@@ -16,58 +16,36 @@ on:
       - 'gradle.lockfile'
       - 'Dockerfile'
   workflow_dispatch:
-  schedule:
-    - cron: '00 07 * * *'
 
 permissions:
-  contents: read
+  packages: read
+  contents: read # for actions/checkout to fetch code
+  security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+  actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
 
 jobs:
   BuildAndScan:
-    permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     runs-on: ubuntu-latest
-    outputs:
-      CVE_CRITICAL: ${{env.CVE_CRITICAL}}
-      CVE_HIGH: ${{env.CVE_HIGH}}
-      CVE_MEDIUM: ${{env.CVE_MEDIUM}}
     steps:
       - name: Checkout the code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - name: 🛃 Log in to the Github Container registry
+        # https://github.com/docker/login-action/releases/tag/v3.6.0
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag localbuild/testimage:latest
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          tags: localbuild/testimage:latest
+          platforms: linux/amd64
+          build-args: |
+            IMAGE=ghcr.io/pagopa/p4pa-automation/eclipse-temurin
       - name: Run the Trivy scan action itself with GitHub Advanced Security code scanning integration enabled
         id: scan
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
+        uses: ./.github/actions/containerScan
         with:
-          trivy-config: 'config/trivy.yaml'
-          image-ref: "localbuild/testimage:latest"
-          format: 'sarif'
-          output: 'results.sarif'
-      - name: Upload Anchore Scan Report
-        uses: github/codeql-action/upload-sarif@486fec2a3ea2626afcd8c7e9208b4f515078dd7e #CodeQL Bundle v2.26.4
-        with:
-          sarif_file: 'results.sarif'
-      - name: CVE Description escaped extraction and print
-        run: |
-          SCAN_RESULTS=$(jq -r 'try .runs[0].tool.driver.rules | try map(.help.text) | join("\\n\\n********************\\n\\n")' results.sarif)
-          echo "CVE_CRITICAL=$(echo $SCAN_RESULTS | grep -o CRITICAL | wc -l)" >> $GITHUB_ENV
-          echo "CVE_HIGH=$(echo $SCAN_RESULTS | grep -o HIGH | wc -l)" >> $GITHUB_ENV
-          echo "CVE_MEDIUM=$(echo $SCAN_RESULTS | grep -o MEDIUM | wc -l)" >> $GITHUB_ENV
-
-          printf '%b\n' "$SCAN_RESULTS"
-      - name: Fails if CVE HIGH or CRITICAL are detected
-        id: cve-threshold
-        if: env.CVE_HIGH > 0 || env.CVE_CRITICAL > 0
-        run: exit 1
-  SendSlackNotification:
-    needs: BuildAndScan
-    uses: ./.github/workflows/send-notification.yml
-    if: always() && (needs.BuildAndScan.outputs.CVE_HIGH > 0 || needs.BuildAndScan.outputs.CVE_CRITICAL > 0)
-    with:
-      CVE_CRITICAL: ${{needs.BuildAndScan.outputs.CVE_CRITICAL}}
-      CVE_HIGH: ${{needs.BuildAndScan.outputs.CVE_HIGH}}
-      CVE_MEDIUM: ${{needs.BuildAndScan.outputs.CVE_MEDIUM}}
-    secrets: inherit
+          image-ref: localbuild/testimage:latest

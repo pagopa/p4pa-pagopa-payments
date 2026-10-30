@@ -1,16 +1,29 @@
-name: p4pa-pagopa-payments - Code Review
+name: Code Review
 
 on:
+  # Running on push in order to update SonarCloud with the latest coverage report
   push:
     branches:
       - main
       - uat
       - develop
+    paths:
+      - 'src/**'
+      - 'gradle.lockfile'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle/**'
   pull_request:
     types:
       - opened
       - edited
       - synchronize
+    paths:
+      - 'src/**'
+      - 'gradle.lockfile'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle/**'
 
 permissions:
   contents: read
@@ -36,6 +49,8 @@ jobs:
       - name: Build with Gradle
         working-directory: ./
         run: ./gradlew clean build jacocoTestReport -DtargetBranch=${{ github.event.pull_request.base.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sonar Scan
         working-directory: ./

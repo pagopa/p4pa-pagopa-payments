@@ -127,6 +127,7 @@ public class HttpClientErrorJsonBodyHandler<T> extends DefaultResponseErrorHandl
       String code = applicationName + "_" + ((HttpStatus) exception.getStatusCode()).name();
       String category = null;
       String message = exception.getMessage();
+      String body = exception.getResponseBodyAsString();
       List<ErrorFieldDTO> fields = null;
 
       if(errorDTO != null) {
@@ -142,11 +143,11 @@ public class HttpClientErrorJsonBodyHandler<T> extends DefaultResponseErrorHandl
       }
 
       return switch (exception.getStatusCode()) {
-        case HttpStatus.CONFLICT -> new RestInvokeConflictException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message, fields);
-        case HttpStatus.FORBIDDEN -> new RestInvokeForbiddenException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message);
-        case HttpStatus.UNAUTHORIZED -> new RestInvokeNotAuthorizedException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message);
-        case HttpStatus.NOT_FOUND -> new RestInvokeNotFoundException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message);
-        default -> new RestInvokeInvalidValueException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message, fields);
+        case HttpStatus.CONFLICT -> new RestInvokeConflictException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message, fields, body);
+        case HttpStatus.FORBIDDEN -> new RestInvokeForbiddenException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message, body);
+        case HttpStatus.UNAUTHORIZED -> new RestInvokeNotAuthorizedException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message, body);
+        case HttpStatus.NOT_FOUND -> new RestInvokeNotFoundException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message, body);
+        default -> new RestInvokeInvalidValueException(applicationName, (HttpStatus) exception.getStatusCode(), category, code, message, fields, body);
       };
     };
   }

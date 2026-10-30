@@ -13,11 +13,13 @@ public class RestInvokeConflictException extends ConflictException implements Re
   private final String applicationName;
   private final HttpStatus  httpStatus;
   private final String category;
+  private final String body;
 
-  public RestInvokeConflictException(String applicationName, HttpStatus  httpStatus, String category, String code, String message, List<ErrorFieldDTO> fields) {
+  public RestInvokeConflictException(String applicationName, HttpStatus  httpStatus, String category, String code, String message, List<ErrorFieldDTO> fields, String body) {
     super(code, message, fields);
     this.applicationName = applicationName;
     this.httpStatus = httpStatus;
     this.category = category;
+    this.body = body;
   }
 }

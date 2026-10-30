@@ -6,4 +6,6 @@ public interface RestInvokeException {
   String getApplicationName();
   HttpStatus getHttpStatus();
   String getCategory();
+  String getMessage();
+  String getBody();
 }

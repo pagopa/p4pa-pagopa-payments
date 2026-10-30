@@ -12,6 +12,9 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "develop", "uat", "main" ]
+    paths:
+      - 'gradle.lockfile'
+      - 'Dockerfile'
   workflow_dispatch:
   schedule:
     - cron: '00 07 * * *'

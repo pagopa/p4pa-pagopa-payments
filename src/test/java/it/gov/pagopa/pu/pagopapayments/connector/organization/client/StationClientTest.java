@@ -72,7 +72,7 @@ class StationClientTest {
     when(organizationApisHolder.getStationSearchControllerApi(accessToken))
       .thenReturn(stationSearchControllerApiMock);
     when(stationSearchControllerApiMock.crudStationsFindByBrokerIdAndStationId(brokerId, stationId))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     Station result = stationClient.getStationByBrokerIdAndStationId(brokerId, stationId, accessToken);

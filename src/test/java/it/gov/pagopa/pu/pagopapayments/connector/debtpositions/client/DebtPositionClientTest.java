@@ -91,7 +91,7 @@ class DebtPositionClientTest {
     when(apisHolderMock.getDebtPositionTypeOrgEntityControllerApi(accessToken))
       .thenReturn(debtPositionTypeOrgEntityControllerApiMock);
     when(debtPositionTypeOrgEntityControllerApiMock.crudGetDebtpositiontypeorg(debtPositionTypeOrgId+""))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     DebtPositionTypeOrg result = client.getDebtPositionTypeOrgById(debtPositionTypeOrgId, accessToken);
@@ -153,13 +153,13 @@ class DebtPositionClientTest {
   private Exception createException(String type) {
     return switch (type) {
       case "NotFoundException" ->
-        new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE");
+        new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY");
       case "ConflictException" ->
-        new RestInvokeConflictException("APPNAME", HttpStatus.CONFLICT, "ERROR", "ERRORCODE", "ERRORMESSAGE", null);
+        new RestInvokeConflictException("APPNAME", HttpStatus.CONFLICT, "ERROR", "ERRORCODE", "ERRORMESSAGE", null, "BODY");
       case "PreconditionFailedException" ->
-        new RestInvokeInvalidValueException("APPNAME", HttpStatus.PRECONDITION_FAILED, "ERROR", "ERRORCODE", "ERRORMESSAGE", null);
+        new RestInvokeInvalidValueException("APPNAME", HttpStatus.PRECONDITION_FAILED, "ERROR", "ERRORCODE", "ERRORMESSAGE", null, "BODY");
       case "HttpClientErrorExceptionNotHandled" ->
-        new RestInvokeInvalidValueException("APPNAME", HttpStatus.BAD_REQUEST, "ERROR", "ERRORCODE", "ERRORMESSAGE", null);
+        new RestInvokeInvalidValueException("APPNAME", HttpStatus.BAD_REQUEST, "ERROR", "ERRORCODE", "ERRORMESSAGE", null, "BODY");
       default ->
         throw new IllegalArgumentException("Unknown exception type: " + type);
     };
@@ -236,7 +236,7 @@ class DebtPositionClientTest {
 
     when(debtPositionTypeOrgSearchControllerApiMock
         .crudDebtPositionTypeOrgsFindDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     DebtPositionTypeOrg result = client.findDebtPositionTypeOrgByOrgIdAndNavAndOrigins(organizationId, nav, debtPositionOriginList, accessToken);
@@ -297,7 +297,7 @@ class DebtPositionClientTest {
 
     when(debtPositionTypeOrgSearchControllerApiMock
       .crudDebtPositionTypeOrgsFindByOrganizationIdAndCode(organizationId, code))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     DebtPositionTypeOrg result = client.findDebtPositionTypeOrgByOrgIdAndCode(organizationId, code, accessToken);

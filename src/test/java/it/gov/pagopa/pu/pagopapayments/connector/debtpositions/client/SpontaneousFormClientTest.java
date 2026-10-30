@@ -68,7 +68,7 @@ class SpontaneousFormClientTest {
     when(apisHolderMock.getSpontaneousFormEntityControllerApi(accessToken))
       .thenReturn(spontaneousFormEntityControllerApiMock);
     when(spontaneousFormEntityControllerApiMock.crudGetSpontaneousform(spontaneousFormId+""))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     SpontaneousForm result = spontaneousFormClient.getSpontaneousForm(spontaneousFormId, accessToken);

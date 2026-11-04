@@ -5,8 +5,8 @@
 #
 ARG IMAGE="public.ecr.aws/docker/library/eclipse-temurin"
 ARG IMAGE_VERSION="21-alpine-3.24"
-ARG IMAGE_SHA="6ea5548706b60ac0a602eaf48af74792cbab012d90e811ca8db6184b16b5c3d6"
-ARG APPINSIGHTS_VERSION="3.7.9"
+ARG IMAGE_SHA="b78a1d385da875588e21207f07dddf9a1418849971ae857fb24c8f3a7d441a72"
+ARG APPINSIGHTS_VERSION="3.7.10"
 
 # 🌍 Timezone Configuration
 ARG TZ="Europe/Rome"

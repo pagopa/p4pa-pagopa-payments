@@ -1,0 +1,54 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# This workflow checks out code, builds an image, performs a container image
+# vulnerability scan with Trivy tool, and integrates the results with GitHub Advanced Security
+# code scanning feature.
+name: Container Scheduled Scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '00 07 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  ScanLatest:
+    permissions:
+      packages: read
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-latest
+    outputs:
+      CVE_CRITICAL: ${{env.CVE_CRITICAL}}
+      CVE_HIGH: ${{env.CVE_HIGH}}
+      CVE_MEDIUM: ${{env.CVE_MEDIUM}}
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - name: 🛃 Log in to the Github Container registry
+        # https://github.com/docker/login-action/releases/tag/v3.6.0
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Run the Trivy scan action itself with GitHub Advanced Security code scanning integration enabled
+        id: scan
+        uses: ./.github/actions/containerScan
+        with:
+          image-ref: ghcr.io/pagopa/${{ github.event.repository.name }}:latest
+  SendSlackNotification:
+    needs: ScanLatest
+    uses: ./.github/workflows/send-notification.yml
+    if: always() && (needs.ScanLatest.outputs.CVE_HIGH > 0 || needs.ScanLatest.outputs.CVE_CRITICAL > 0)
+    with:
+      CVE_CRITICAL: ${{needs.ScanLatest.outputs.CVE_CRITICAL}}
+      CVE_HIGH: ${{needs.ScanLatest.outputs.CVE_HIGH}}
+      CVE_MEDIUM: ${{needs.ScanLatest.outputs.CVE_MEDIUM}}
+    secrets: inherit

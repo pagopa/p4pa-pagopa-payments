@@ -1,0 +1,38 @@
+name: Container Scan
+description: It will perform a container vulnerability scan using Trivy
+
+inputs:
+  image-ref:
+    description: 'The Docker image reference to scan'
+    required: true
+    default: 'localbuild/testimage:latest'
+
+runs:
+  using: composite
+  steps:
+    - name: Run the Trivy scan action itself with GitHub Advanced Security code scanning integration enabled
+      id: scan
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
+      with:
+        trivy-config: 'config/trivy.yaml'
+        image-ref: "${{ inputs.image-ref }}"
+        format: 'sarif'
+        output: 'results.sarif'
+    - name: Upload Vulnerability Scan Report
+      uses: github/codeql-action/upload-sarif@486fec2a3ea2626afcd8c7e9208b4f515078dd7e #CodeQL Bundle v2.26.4
+      with:
+        sarif_file: 'results.sarif'
+    - name: CVE Description escaped extraction and print
+      shell: bash
+      run: |
+        SCAN_RESULTS=$(jq -r 'try .runs[0].tool.driver.rules | try map(.help.text) | join("\\n\\n********************\\n\\n")' results.sarif)
+        echo "CVE_CRITICAL=$(echo $SCAN_RESULTS | grep -o CRITICAL | wc -l)" >> $GITHUB_ENV
+        echo "CVE_HIGH=$(echo $SCAN_RESULTS | grep -o HIGH | wc -l)" >> $GITHUB_ENV
+        echo "CVE_MEDIUM=$(echo $SCAN_RESULTS | grep -o MEDIUM | wc -l)" >> $GITHUB_ENV
+
+        printf '%b\n' "$SCAN_RESULTS"
+    - name: Fails if CVE HIGH or CRITICAL are detected
+      id: cve-threshold
+      if: env.CVE_HIGH > 0 || env.CVE_CRITICAL > 0
+      shell: bash
+      run: exit 1

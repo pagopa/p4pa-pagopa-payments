@@ -60,8 +60,8 @@ jobs:
           ref: ${{ env.CURRENT_BRANCH }}
 
       - name: Run Snapshot Docker Build/Push
-        # https://github.com/pagopa/github-actions-template/releases/tag/v2.8.1
-        uses: pagopa/github-actions-template/payments-flow-docker-snapshot@5e788a4717069100914e66149997ecfd4c48b746
+        # https://github.com/pagopa/github-actions-template/releases/tag/v2.8.3
+        uses: pagopa/github-actions-template/payments-flow-docker-snapshot@3289a075b9a681b5e0873088554ae77ae3fffe1b
         with:
           current_branch: ${{ env.CURRENT_BRANCH }}
           extra_build_args: |
@@ -77,8 +77,8 @@ jobs:
       github.event.inputs.azdo_trigger_enabled == 'true'
     steps:
       - name: Trigger Azure DevOps Pipeline
-        # https://github.com/pagopa/github-actions-template/releases/tag/v2.8.1
-        uses: pagopa/github-actions-template/azure-devops-trigger-pipeline@5e788a4717069100914e66149997ecfd4c48b746
+        # https://github.com/pagopa/github-actions-template/releases/tag/v2.8.3
+        uses: pagopa/github-actions-template/azure-devops-trigger-pipeline@3289a075b9a681b5e0873088554ae77ae3fffe1b
         with:
           enable_azure_devops_step: 'true'
           azure_devops_project_url: 'https://dev.azure.com/pagopaspa/p4pa-projects'
